@@ -1,0 +1,408 @@
+/* ==================================================================
+   MAIN CSS — Entry Point
+   Imports all CSS files in the correct order
+   ================================================================== */
+
+/* ── Base ── */
+@import 'base/variables.css';
+@import 'base/reset.css';
+@import 'base/typography.css';
+
+/* ── Layouts ── */
+@import 'layouts/grid.css';
+@import 'layouts/spacing.css';
+@import 'layouts/positioning.css';
+
+/* ── Components ── */
+@import 'components/buttons.css';
+@import 'components/cards.css';
+@import 'components/tables.css';
+@import 'components/forms.css';
+@import 'components/modals.css';
+@import 'components/badges.css';
+@import 'components/dropdown.css';
+@import 'components/tabs.css';
+@import 'components/pagination.css';
+@import 'components/alerts.css';
+@import 'components/toast.css';
+@import 'components/loaders.css';
+@import 'components/skeleton.css';
+@import 'components/sidebar.css';
+@import 'components/topbar.css';
+
+/* ── Modules ── */
+@import 'modules/login.css';
+@import 'modules/dashboard.css';
+@import 'modules/marks.css';
+@import 'modules/attendance.css';
+@import 'modules/finance.css';
+@import 'modules/reports.css';
+@import 'modules/timetable.css';
+@import 'modules/settings.css';
+@import 'modules/analytics.css';
+
+/* ── Themes ── */
+@import 'themes/light.css';
+@import 'themes/dark.css';
+
+/* ============================================================
+   GLOBAL OVERRIDES & FINE-TUNING
+   ============================================================ */
+
+/* ── Body Default ── */
+body {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background var(--transition), color var(--transition);
+}
+
+/* ── Main Content Area ── */
+.main-content {
+    margin-left: var(--sidebar-w);
+    min-height: 100vh;
+    transition: margin var(--transition);
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+    }
+}
+
+@media (min-width: 1025px) {
+    .sidebar.collapsed~.main-content {
+        margin-left: var(--sidebar-w-collapsed);
+    }
+}
+
+/* ── Focus Visible ── */
+:focus-visible {
+    outline: 2px solid var(--role-primary);
+    outline-offset: 2px;
+    border-radius: var(--r-sm);
+}
+
+/* ── Utility: Full Width ── */
+.w-full {
+    width: 100%;
+}
+
+/* ── Utility: Max Width Container ── */
+.max-w-screen-xl {
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+/* ── Utility: Text Center ── */
+.text-center {
+    text-align: center;
+}
+
+/* ── Utility: Flex Center ── */
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── Utility: Gap ── */
+.gap-md {
+    gap: var(--md);
+}
+
+/* ── Utility: Scroll Margin ── */
+.scroll-mt {
+    scroll-margin-top: var(--topbar-h);
+}
+
+@media (max-width: 768px) {
+    .scroll-mt {
+        scroll-margin-top: var(--topbar-h-mobile);
+    }
+}
+
+/* ── Empty State ── */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--xxl) var(--lg);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--r-lg);
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: var(--md);
+    opacity: 0.6;
+}
+
+.empty-state-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--sm);
+}
+
+.empty-state-message {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-bottom: var(--lg);
+    max-width: 400px;
+}
+
+/* ── Loading Container ── */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--xxl);
+    gap: var(--md);
+    text-align: center;
+    min-height: 200px;
+}
+
+.loading-container .spinner {
+    margin-bottom: var(--sm);
+}
+
+.loading-container p {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+/* ── Print Optimizations ── */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+        padding: 0 !important;
+    }
+
+    #dynamic-content {
+        padding: 0 !important;
+    }
+
+    .page-break-before {
+        page-break-before: always;
+    }
+
+    .page-break-after {
+        page-break-after: always;
+    }
+
+    .page-break-inside-avoid {
+        page-break-inside: avoid;
+    }
+}
+
+/* ── Back to Top Button ── */
+#back-to-top {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--role-primary);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-lg);
+    transition: all var(--transition);
+    z-index: var(--z-medium);
+}
+
+#back-to-top:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+}
+
+@media (max-width: 768px) {
+    #back-to-top {
+        bottom: 80px;
+        left: 16px;
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+}
+
+/* ── Offline Badge ── */
+#offline-badge {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: var(--warning);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 1000;
+    cursor: pointer;
+    display: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+#offline-badge:hover {
+    opacity: 0.9;
+}
+
+/* ── Connection Status ── */
+#connection-status {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: .5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+#connection-status.online {
+    background: var(--success);
+    color: white;
+}
+
+#connection-status.offline {
+    background: var(--danger);
+    color: white;
+}
+
+/* ── Responsive Tweaks ── */
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: var(--sm);
+    }
+
+    .two-col {
+        grid-template-columns: 1fr;
+        gap: var(--md);
+    }
+
+    .three-col {
+        grid-template-columns: 1fr;
+        gap: var(--md);
+    }
+
+    .quick-actions {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--sm);
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: var(--sm);
+    }
+
+    .btn-group {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .btn {
+        flex: 1 1 auto;
+        min-width: 0;
+        font-size: 0.72rem;
+        padding: 6px 10px;
+        white-space: nowrap;
+    }
+
+    .modal-footer {
+        flex-wrap: wrap;
+    }
+
+    .modal-footer .btn {
+        flex: 1;
+    }
+}
+
+/* ── Animation Keyframes ── */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-25%);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}

@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>ECOLE LA FONTAINE — Complete School Management System</title>
+
+    <!-- ============================================================ -->
+    <!-- MANIFEST & PWA                                               -->
+    <!-- ============================================================ -->
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#1a3a5c">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="EcoleFontaine">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+
+    <!-- ============================================================ -->
+    <!-- GOOGLE FONTS                                                 -->
+    <!-- ============================================================ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- ============================================================ -->
+    <!-- EXTERNAL LIBRARIES                                           -->
+    <!-- ============================================================ -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+    <!-- ============================================================ -->
+    <!-- CSS — BASE FIRST (variables, reset, typography)             -->
+    <!-- ============================================================ -->
+    <link rel="stylesheet" href="css/base/variables.css">
+    <link rel="stylesheet" href="css/base/reset.css">
+    <link rel="stylesheet" href="css/base/typography.css">
+
+    <!-- ============================================================ -->
+    <!-- CSS — LAYOUT (grid, spacing, positioning)                   -->
+    <!-- ============================================================ -->
+    <link rel="stylesheet" href="css/layouts/grid.css">
+    <link rel="stylesheet" href="css/layouts/spacing.css">
+    <link rel="stylesheet" href="css/layouts/positioning.css">
+
+    <!-- ============================================================ -->
+    <!-- CSS — COMPONENTS                                             -->
+    <!-- ============================================================ -->
+    <link rel="stylesheet" href="css/components/buttons.css">
+    <link rel="stylesheet" href="css/components/cards.css">
+    <link rel="stylesheet" href="css/components/tables.css">
+    <link rel="stylesheet" href="css/components/forms.css">
+    <link rel="stylesheet" href="css/components/modals.css">
+    <link rel="stylesheet" href="css/components/badges.css">
+    <link rel="stylesheet" href="css/components/dropdown.css">
+    <link rel="stylesheet" href="css/components/tabs.css">
+    <link rel="stylesheet" href="css/components/pagination.css">
+    <link rel="stylesheet" href="css/components/alerts.css">
+    <link rel="stylesheet" href="css/components/toast.css">
+    <link rel="stylesheet" href="css/components/loaders.css">
+    <link rel="stylesheet" href="css/components/skeleton.css">
+    <link rel="stylesheet" href="css/components/sidebar.css">
+    <link rel="stylesheet" href="css/components/topbar.css">
+
+    <!-- ============================================================ -->
+    <!-- CSS — MODULES                                                -->
+    <!-- ============================================================ -->
+    <link rel="stylesheet" href="css/modules/login.css">
+    <link rel="stylesheet" href="css/modules/dashboard.css">
+    <link rel="stylesheet" href="css/modules/marks.css">
+    <link rel="stylesheet" href="css/modules/attendance.css">
+    <link rel="stylesheet" href="css/modules/finance.css">
+    <link rel="stylesheet" href="css/modules/reports.css">
+    <link rel="stylesheet" href="css/modules/timetable.css">
+    <link rel="stylesheet" href="css/modules/settings.css">
+    <link rel="stylesheet" href="css/modules/analytics.css">
+
+    <!-- ============================================================ -->
+    <!-- CSS — THEMES                                                 -->
+    <!-- ============================================================ -->
+    <link rel="stylesheet" href="css/themes/light.css">
+    <link rel="stylesheet" href="css/themes/dark.css">
+
+    <!-- ============================================================ -->
+    <!-- CSS — MAIN ENTRY (overrides, fine-tuning)                   -->
+    <!-- ============================================================ -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT — CONFIG FIRST (type="module")                   -->
+    <!-- ============================================================ -->
+    <script type="module" src="js/config/constants.js"></script>
+    <script type="module" src="js/config/supabase-config.js"></script>
+    <script type="module" src="js/config/navigation.js"></script>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT — CORE (type="module")                           -->
+    <!-- ============================================================ -->
+    <script type="module" src="js/core/state.js"></script>
+    <script type="module" src="js/core/utils.js"></script>
+    <script type="module" src="js/core/api.js"></script>
+    <script type="module" src="js/core/formulas.js"></script>
+    <script type="module" src="js/core/fees.js"></script>
+    <script type="module" src="js/core/auth.js"></script>
+    <script type="module" src="js/core/boot.js"></script>
+    <script type="module" src="js/core/router.js"></script>
+    <script type="module" src="js/core/permissions.js"></script>
+    <script type="module" src="js/core/offline.js"></script>
+    <script type="module" src="js/core/notifications.js"></script>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT — UI (type="module")                             -->
+    <!-- ============================================================ -->
+    <script type="module" src="js/ui/sidebar.js"></script>
+    <script type="module" src="js/ui/topbar.js"></script>
+    <script type="module" src="js/ui/theme.js"></script>
+    <script type="module" src="js/ui/modals.js"></script>
+    <script type="module" src="js/ui/toast.js"></script>
+    <script type="module" src="js/ui/charts.js"></script>
+    <script type="module" src="js/ui/shell.js"></script>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT — MODULES — DASHBOARD (type="module")           -->
+    <!-- ============================================================ -->
+    <script type="module" src="js/modules/dashboard/admin-dashboard.js"></script>
+    <script type="module" src="js/modules/dashboard/teacher-dashboard.js"></script>
+    <script type="module" src="js/modules/dashboard/accountant-dashboard.js"></script>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT — MODULES — ACADEMICS (type="module")           -->
+    <!-- ============================================================ -->
+    <script type="module" src="js/modules/academics/marks-entry.js"></script>
+    <script type="module" src="js/modules/academics/marks-database.js"></script>
+    <script type="module" src="js/modules/academics/marks-analysis.js"></script>
+    <script type="module" src="js/modules/academics/marks-import-export.js"></script>
+    <script type="module" src="js/modules/academics/class-register.js"></script>
+    <script type="module" src="js/modules/academics/report-cards.js"></script>
+    <script type="module" src="js/modules/academics/transcripts.js"></script>
+    <script type="module" src="js/modules/academics/assessments.js"></script>
+    <script type="module" src="js/modules/academics/assessment-locking.js"></script>
+    <script type="module" src="js/modules/academics/annual-register.js"></script>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT — MODULES — STUDENTS (type="module")            -->
+    <!-- ============================================================ -->
+    <script type="module" src="js/modules/students/student-list.js"></script>
+    <script type="module" src="js/modules/students/student-details.js"></script>
+    <script type="module" src="js/modules/students/enroll-student.js"></script>
+    <script type="module" src="js/modules/students/student-promotion.js"></script>
+    <script type="module" src="js/modules/students/student-archive.js"></script>
+    <script type="module" src="js/modules/students/family-management.js"></script>
+    <script type="module" src="js/modules/students/sibling-linking.js"></script>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT — MODULES — ATTENDANCE (type="module")          -->
+    <!-- ============================================================ -->
+    <script type="module" src="js/modules/attendance/attendance-entry.js"></script>
+    <script type="module" src="js/modules/attendance/attendance-reports.js"></script>
+    <script type="module" src="js/modules/attendance/attendance-summary.js"></script>
+    <script type="module" src="js/modules/attendance/attendance-analytics.js"></script>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT — MODULES — FINANCE (type="module")             -->
+    <!-- ============================================================ -->
+    <script type="module" src="js/modules/finance/fee-structure.js"></script>
+    <script type="module" src="js/modules/finance/record-payment.js"></script>
+    <script type="module" src="js/modules/finance/payment-history.js"></script>
+    <script type="module" src="js/modules/finance/receipts.js"></script>
+    <script type="module" src="js/modules/finance/overdue-payments.js"></script>
+    <script type="module" src="js/modules/finance/fee-waivers.js"></script>
+    <script type="module" src="js/modules/finance/balances.js"></script>
+    <script type="module" src="js/modules/finance/payment-reversals.js"></script>
+    <script type="module" src="js/modules/finance/financial-reports.js"></script>
+    <script type="module" src="js/modules/finance/carry-forward.js"></script>
+    <script type="module" src="js/modules/finance/credit-balances.js"></script>
+    <script type="module" src="js/modules/finance/discounts.js"></script>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT — MODULES — STAFF (type="module")               -->
+    <!-- ============================================================ -->
+    <script type="module" src="js/modules/staff/user-management.js"></script>
+    <script type="module" src="js/modules/staff/subjects.js"></script>
+    <script type="module" src="js/modules/staff/teacher-assignments.js"></script>
+    <script type="module" src="js/modules/staff/teacher-performance.js"></script>
+    <script type="module" src="js/modules/staff/timetable.js"></script>
+    <script type="module" src="js/modules/staff/timetable-conflicts.js"></script>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT — MODULES — SETTINGS (type="module")            -->
+    <!-- ============================================================ -->
+    <script type="module" src="js/modules/settings/school-settings.js"></script>
+    <script type="module" src="js/modules/settings/academic-calendar.js"></script>
+    <script type="module" src="js/modules/settings/academic-years.js"></script>
+    <script type="module" src="js/modules/settings/class-management.js"></script>
+    <script type="module" src="js/modules/settings/grading-scale.js"></script>
+    <script type="module" src="js/modules/settings/backup-restore.js"></script>
+    <script type="module" src="js/modules/settings/system-logs.js"></script>
+    <script type="module" src="js/modules/settings/api-settings.js"></script>
+    <script type="module" src="js/modules/settings/settings.js"></script>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT — MODULES — COMMUNICATION (type="module")       -->
+    <!-- ============================================================ -->
+    <script type="module" src="js/modules/communication/notifications.js"></script>
+    <script type="module" src="js/modules/communication/announcement-center.js"></script>
+    <script type="module" src="js/modules/communication/announcements.js"></script>
+    <script type="module" src="js/modules/communication/reminders.js"></script>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT — MODULES — BULK (type="module")                -->
+    <!-- ============================================================ -->
+    <script type="module" src="js/modules/bulk/bulk-import.js"></script>
+    <script type="module" src="js/modules/bulk/bulk-export.js"></script>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT — MODULES — ANALYTICS (type="module")           -->
+    <!-- ============================================================ -->
+    <script type="module" src="js/modules/analytics/analytics.js"></script>
+    <script type="module" src="js/modules/analytics/analytics-settings.js"></script>
+    <script type="module" src="js/modules/analytics/system-health.js"></script>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT — PATCHES (type="module")                       -->
+    <!-- ============================================================ -->
+    <script type="module" src="js/patches/missing-functions.js"></script>
+    <script type="module" src="js/patches/qr-code.js"></script>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT — MAIN ENTRY (type="module")                    -->
+    <!-- ============================================================ -->
+    <script type="module" src="js/main.js"></script>
+
+</head>
+
+<body>
+
+    <!-- ============================================================ -->
+    <!-- TOAST & MODAL CONTAINERS                                     -->
+    <!-- ============================================================ -->
+    <div id="toast-container"></div>
+    <div id="modals-container"></div>
+
+    <!-- ============================================================ -->
+    <!-- LOGIN PAGE                                                   -->
+    <!-- ============================================================ -->
+    <div id="login-page">
+        <div class="particles-bg" id="particles-bg"></div>
+        <div class="login-scene">
+            <div class="card-wrap" id="card-wrap">
+                <div class="neon-border"></div>
+                <div class="login-card">
+                    <div class="fold-cover" id="fold-cover"
+                        onclick="document.getElementById('card-wrap').classList.add('open')">
+                        <div class="cover-title">
+                            <span class="cover-emoji">🏫</span>
+                            ECOLE LA FONTAINE
+                        </div>
+                    </div>
+                    <div class="login-content">
+                        <div class="logo-box" id="login-logo-box"><span>🏫</span></div>
+                        <div class="school-name">ECOLE LA FONTAINE</div>
+                        <div class="login-subtitle">Complete School Management System</div>
+                        <div class="login-form">
+                            <div class="login-field">
+                                <select id="login-role" onchange="window.onRoleChange()">
+                                    <option value="admin">👨‍💼 Administrator</option>
+                                    <option value="accountant">💰 Accountant</option>
+                                    <option value="teacher">👩‍🏫 Teacher</option>
+                                </select>
+                            </div>
+                            <div class="login-field" id="username-field" style="display:none">
+                                <input type="text" id="login-username" placeholder="Username" autocomplete="username">
+                            </div>
+                            <div class="login-field pw-wrap">
+                                <input type="password" id="login-password" placeholder="Password"
+                                    autocomplete="current-password"
+                                    onkeydown="if(event.key==='Enter') window.doLogin()">
+                                <button class="pw-toggle" type="button" onclick="window.toggleLoginPw()"
+                                    title="Show/hide password">👁️</button>
+                            </div>
+                            <div id="biometric-btn-wrap" style="display:none; margin-top:8px">
+                                <button class="login-btn" id="biometric-btn" onclick="window.doBiometricLogin()"
+                                    style="background:linear-gradient(135deg,#1a3a5c,#2563eb); display:flex; align-items:center; justify-content:center; gap:8px">
+                                    <span>🔑</span> Sign In with Biometrics
+                                </button>
+                            </div>
+                            <div class="login-alert" id="login-alert" style="display:none"></div>
+                            <button class="login-btn" id="login-btn" onclick="window.doLogin()">Sign In →</button>
+                            <div style="text-align:center; margin-top:8px; font-size:.75rem">
+                                <a href="#" onclick="window.setupBiometricLogin(); return false;"
+                                    style="color:rgba(255,255,255,.5)">⚙️ Set up biometric login</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- APP PAGE (hidden until login)                               -->
+    <!-- ============================================================ -->
+    <div id="app-page" style="display:none">
+
+        <!-- ========================================================== -->
+        <!-- SIDEBAR                                                     -->
+        <!-- ========================================================== -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo" id="sidebar-logo">🏫</div>
+                <div class="sidebar-school-name">
+                    ECOLE LA FONTAINE<br>
+                    <small id="sidebar-school-subtitle">School Management</small>
+                </div>
+            </div>
+            <nav class="sidebar-nav" id="sidebar-nav"></nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-user-avatar" id="sidebar-avatar">👤</div>
+                <div class="sidebar-user-info">
+                    <div class="sidebar-user-name" id="sidebar-username">User</div>
+                    <div class="sidebar-user-role" id="sidebar-userrole">Role</div>
+                </div>
+                <button class="sidebar-logout" title="Logout" onclick="window.logout()">🚪</button>
+            </div>
+        </aside>
+
+        <!-- ========================================================== -->
+        <!-- MAIN CONTENT                                               -->
+        <!-- ========================================================== -->
+        <div class="main-content">
+
+            <!-- TOPBAR -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="menu-toggle" id="menu-toggle" onclick="window.toggleSidebar()"
+                        title="Toggle Sidebar Menu">☰</button>
+                    <span class="page-title" id="page-title">Dashboard</span>
+                </div>
+                <div class="topbar-center"></div>
+                <div class="topbar-right">
+                    <span id="phase-indicator-compact" class="phase-badge-compact"></span>
+                    <button id="pwa-install-btn" class="btn btn-sm btn-outline" onclick="window.installPWA()"
+                        title="Install App" style="display:none">📲 Install</button>
+                    <span class="notif-bell" onclick="window.navigateTo('notification-center')" title="Notifications">
+                        🔔
+                        <span class="notif-dot" id="notif-dot" style="display:none;"></span>
+                    </span>
+                    <div class="user-menu" onclick="window.toggleUserDropdown()">
+                        <div class="user-avatar" id="topbar-avatar">👤</div>
+                        <span class="user-name" id="topbar-username">User</span>
+                        <span class="user-dropdown-arrow">▾</span>
+                    </div>
+                </div>
+                <div class="user-dropdown" id="user-dropdown">
+                    <div class="dropdown-item dropdown-user-info">
+                        <div class="dropdown-avatar">👤</div>
+                        <div>
+                            <div class="dropdown-user-name" id="dropdown-username">Administrator</div>
+                            <div class="dropdown-user-role" id="dropdown-userrole">Admin</div>
+                        </div>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="window.showProfileModal()"><span>👤</span> My Profile</div>
+                    <div class="dropdown-item" onclick="window.showChangePasswordModal()"><span>🔒</span> Change
+                        Password</div>
+                    <div class="dropdown-item" onclick="window.setupBiometricLogin()"><span>🔑</span> Biometric Login
+                    </div>
+                    <div class="dropdown-item" onclick="window.toggleTheme()" id="dropdown-theme-item">
+                        <span id="dropdown-theme-icon">🌙</span>
+                        <span id="dropdown-theme-text">Dark Mode</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item danger" onclick="window.logout()"><span>🚪</span> Logout</div>
+                </div>
+            </header>
+
+            <!-- TERM PROGRESS BAR -->
+            <div class="term-progress-bar" id="term-progress-bar">
+                <span class="progress-label">
+                    📅 <strong id="prog-term-name">Term 3</strong>
+                    <span id="prog-acad-year" style="font-size:.7rem">2025-2026</span>
+                </span>
+                <div class="progress-bar-wrap">
+                    <div class="progress-track">
+                        <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+                    </div>
+                    <div class="progress-text" id="prog-text"
+                        style="font-size:.68rem;color:var(--text-muted);margin-top:2px"></div>
+                </div>
+                <span class="progress-days" id="prog-days-wrap"
+                    style="font-size:.75rem;white-space:nowrap;color:var(--text-muted)">
+                    <strong id="prog-days">—</strong> days left
+                </span>
+            </div>
+
+            <!-- DYNAMIC CONTENT -->
+            <div id="dynamic-content">
+                <div class="loading-container">
+                    <div class="spinner"></div>
+                    <p>Initializing application...</p>
+                </div>
+            </div>
+
+        </div>
+        <!-- END MAIN CONTENT -->
+
+    </div>
+    <!-- END APP PAGE -->
+
+    <!-- ============================================================ -->
+    <!-- MAIN ENTRY SCRIPT (type="module")                            -->
+    <!-- ============================================================ -->
+    <script type="module">
+        // ── Wait for DOM ready ──
+        (function init() {
+
+            // Initialize particles
+            if (typeof initParticles === 'function') initParticles();
+
+            // Initialize theme
+            if (typeof initTheme === 'function') initTheme();
+
+            // Initialize PWA
+            if (typeof initPWA === 'function') initPWA();
+
+            // Initialize offline support
+            if (typeof initOfflineSupport === 'function') initOfflineSupport();
+
+            // Boot the app
+            if (typeof initApp === 'function') initApp();
+
+            // Back-to-top button
+            window.addEventListener('scroll', function () {
+                const btn = document.getElementById('back-to-top');
+                if (btn) btn.style.display = window.scrollY > 300 ? 'flex' : 'none';
+            }, { passive: true });
+
+            // Close sidebar on outside click
+            document.addEventListener('click', function (e) {
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar?.classList.contains('mobile-open') &&
+                    !e.target.closest('.sidebar') &&
+                    !e.target.closest('#menu-toggle')) {
+                    sidebar.classList.remove('mobile-open');
+                }
+            });
+
+            // Close user dropdown on outside click
+            document.addEventListener('click', function (e) {
+                const dd = document.getElementById('user-dropdown');
+                if (dd && !e.target.closest('.user-menu') && !e.target.closest('.user-dropdown')) {
+                    dd.classList.remove('open');
+                }
+            });
+
+            // Close modal on backdrop click
+            document.getElementById('modals-container')?.addEventListener('click', function (e) {
+                if (e.target.classList.contains('modal-overlay')) {
+                    if (typeof closeModal === 'function') closeModal();
+                }
+            });
+
+            console.log('✅ ECOLE LA FONTAINE v9.0 — All systems initialised');
+
+        })();
+    </script>
+
+</body>
+
+</html>

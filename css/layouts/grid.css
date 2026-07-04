@@ -1,0 +1,392 @@
+/* ==================================================================
+   GRID SYSTEM — Complete Layout Grid
+   ================================================================== */
+
+/* ── Container ── */
+.container {
+    width: 100%;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--md);
+}
+
+.container-fluid {
+    width: 100%;
+    padding: 0 var(--md);
+}
+
+.container-sm {
+    max-width: 640px;
+}
+
+.container-md {
+    max-width: 768px;
+}
+
+.container-lg {
+    max-width: 1024px;
+}
+
+.container-xl {
+    max-width: 1280px;
+}
+
+.container-2xl {
+    max-width: 1536px;
+}
+
+/* ── Grid Core ── */
+.grid {
+    display: grid;
+    gap: var(--md);
+}
+
+/* Fixed Column Grids */
+.grid-cols-1 {
+    grid-template-columns: repeat(1, 1fr);
+}
+
+.grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.grid-cols-5 {
+    grid-template-columns: repeat(5, 1fr);
+}
+
+.grid-cols-6 {
+    grid-template-columns: repeat(6, 1fr);
+}
+
+.grid-cols-7 {
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.grid-cols-8 {
+    grid-template-columns: repeat(8, 1fr);
+}
+
+.grid-cols-9 {
+    grid-template-columns: repeat(9, 1fr);
+}
+
+.grid-cols-10 {
+    grid-template-columns: repeat(10, 1fr);
+}
+
+.grid-cols-11 {
+    grid-template-columns: repeat(11, 1fr);
+}
+
+.grid-cols-12 {
+    grid-template-columns: repeat(12, 1fr);
+}
+
+/* Auto-fit Grids (Responsive) */
+.grid-cols-auto {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.grid-cols-auto-fill {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+.grid-cols-auto-200 {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.grid-cols-auto-300 {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.grid-cols-auto-350 {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+}
+
+/* ── Responsive Grid Breakpoints ── */
+@media (max-width: 1280px) {
+
+    .grid-cols-8,
+    .grid-cols-9,
+    .grid-cols-10,
+    .grid-cols-11,
+    .grid-cols-12 {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+@media (max-width: 1024px) {
+
+    .grid-cols-5,
+    .grid-cols-6,
+    .grid-cols-7,
+    .grid-cols-8,
+    .grid-cols-9,
+    .grid-cols-10,
+    .grid-cols-11,
+    .grid-cols-12 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+
+    .grid-cols-3,
+    .grid-cols-4,
+    .grid-cols-5,
+    .grid-cols-6,
+    .grid-cols-7,
+    .grid-cols-8,
+    .grid-cols-9,
+    .grid-cols-10,
+    .grid-cols-11,
+    .grid-cols-12 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+
+    .grid-cols-2,
+    .grid-cols-3,
+    .grid-cols-4,
+    .grid-cols-5,
+    .grid-cols-6,
+    .grid-cols-7,
+    .grid-cols-8,
+    .grid-cols-9,
+    .grid-cols-10,
+    .grid-cols-11,
+    .grid-cols-12 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Grid Gap Utilities ── */
+.gap-0 {
+    gap: 0;
+}
+
+.gap-xs {
+    gap: var(--xs);
+}
+
+.gap-sm {
+    gap: var(--sm);
+}
+
+.gap-md {
+    gap: var(--md);
+}
+
+.gap-lg {
+    gap: var(--lg);
+}
+
+.gap-xl {
+    gap: var(--xl);
+}
+
+.gap-2xl {
+    gap: var(--xxl);
+}
+
+.gap-3xl {
+    gap: var(--xxxl);
+}
+
+.gap-x-0 {
+    column-gap: 0;
+}
+
+.gap-x-xs {
+    column-gap: var(--xs);
+}
+
+.gap-x-sm {
+    column-gap: var(--sm);
+}
+
+.gap-x-md {
+    column-gap: var(--md);
+}
+
+.gap-x-lg {
+    column-gap: var(--lg);
+}
+
+.gap-x-xl {
+    column-gap: var(--xl);
+}
+
+.gap-y-0 {
+    row-gap: 0;
+}
+
+.gap-y-xs {
+    row-gap: var(--xs);
+}
+
+.gap-y-sm {
+    row-gap: var(--sm);
+}
+
+.gap-y-md {
+    row-gap: var(--md);
+}
+
+.gap-y-lg {
+    row-gap: var(--lg);
+}
+
+.gap-y-xl {
+    row-gap: var(--xl);
+}
+
+/* ── Flex Utilities ── */
+.flex {
+    display: flex;
+}
+
+.inline-flex {
+    display: inline-flex;
+}
+
+.flex-row {
+    flex-direction: row;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.flex-row-reverse {
+    flex-direction: row-reverse;
+}
+
+.flex-col-reverse {
+    flex-direction: column-reverse;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+.flex-nowrap {
+    flex-wrap: nowrap;
+}
+
+.flex-wrap-reverse {
+    flex-wrap: wrap-reverse;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.flex-auto {
+    flex: auto;
+}
+
+.flex-none {
+    flex: none;
+}
+
+.flex-initial {
+    flex: 0 1 auto;
+}
+
+.flex-grow {
+    flex-grow: 1;
+}
+
+.flex-grow-0 {
+    flex-grow: 0;
+}
+
+.flex-shrink {
+    flex-shrink: 1;
+}
+
+.flex-shrink-0 {
+    flex-shrink: 0;
+}
+
+/* ── Flex Alignment (Cross Axis) ── */
+.items-start {
+    align-items: flex-start;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.items-end {
+    align-items: flex-end;
+}
+
+.items-stretch {
+    align-items: stretch;
+}
+
+.items-baseline {
+    align-items: baseline;
+}
+
+/* ── Flex Justification (Main Axis) ── */
+.justify-start {
+    justify-content: flex-start;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.justify-end {
+    justify-content: flex-end;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.justify-around {
+    justify-content: space-around;
+}
+
+.justify-evenly {
+    justify-content: space-evenly;
+}
+
+/* ── Flex Content (Multi-line) ── */
+.content-start {
+    align-content: flex-start;
+}
+
+.content-center {
+    align-content: center;
+}
+
+.content-end {
+    align-content: flex-end;
+}
+
+.content-between {
+    align-content: space-between;
+}
+
+.content-around {
+    align-content: space-around;
+}
+
+.content-stretch {
+    align-content: stretch;
+}

@@ -1,0 +1,98 @@
+<!--
+    ECOLE LA FONTAINE — Topbar Partial
+    This is the HTML structure for the topbar.
+-->
+
+<header class="topbar" id="topbar">
+    <!-- Left Section -->
+    <div class="topbar-left">
+        <button class="menu-toggle" id="menu-toggle" onclick="window.toggleSidebar()" title="Toggle Sidebar Menu">
+            ☰
+        </button>
+        <span class="page-title" id="page-title">Dashboard</span>
+    </div>
+
+    <!-- Center Section -->
+    <div class="topbar-center">
+        <!-- Search or other center content -->
+    </div>
+
+    <!-- Right Section -->
+    <div class="topbar-right">
+        <!-- Phase Indicator -->
+        <span id="phase-indicator-compact" class="phase-badge-compact"></span>
+
+        <!-- PWA Install Button -->
+        <button id="pwa-install-btn" class="btn btn-sm btn-outline" onclick="window.installPWA()" title="Install App" style="display:none">
+            📲 Install
+        </button>
+
+        <!-- Notifications Bell -->
+        <span class="notif-bell" onclick="window.navigateTo('notification-center')" title="Notifications">
+            🔔
+            <span class="notif-dot" id="notif-dot" style="display:none;"></span>
+        </span>
+
+        <!-- User Menu -->
+        <div class="user-menu" onclick="window.toggleUserDropdown()">
+            <div class="user-avatar" id="topbar-avatar">👤</div>
+            <span class="user-name" id="topbar-username">User</span>
+            <span class="user-dropdown-arrow">▾</span>
+        </div>
+    </div>
+
+    <!-- User Dropdown -->
+    <div class="user-dropdown" id="user-dropdown">
+        <div class="dropdown-item dropdown-user-info">
+            <div class="dropdown-avatar">👤</div>
+            <div>
+                <div class="dropdown-user-name" id="dropdown-username">Administrator</div>
+                <div class="dropdown-user-role" id="dropdown-userrole">Admin</div>
+            </div>
+        </div>
+
+        <div class="dropdown-divider"></div>
+
+        <div class="dropdown-item" onclick="window.showProfileModal()">
+            <span>👤</span> My Profile
+        </div>
+
+        <div class="dropdown-item" onclick="window.showChangePasswordModal()">
+            <span>🔒</span> Change Password
+        </div>
+
+        <div class="dropdown-item" onclick="window.setupBiometricLogin()">
+            <span>🔑</span> Biometric Login
+        </div>
+
+        <div class="dropdown-item" onclick="window.toggleTheme()" id="dropdown-theme-item">
+            <span id="dropdown-theme-icon">🌙</span>
+            <span id="dropdown-theme-text">Dark Mode</span>
+        </div>
+
+        <div class="dropdown-divider"></div>
+
+        <div class="dropdown-item danger" onclick="window.logout()">
+            <span>🚪</span> Logout
+        </div>
+    </div>
+</header>
+
+<!-- Term Progress Bar -->
+<div class="term-progress-bar" id="term-progress-bar">
+    <span class="progress-label">
+        📅 <strong id="prog-term-name">Term 3</strong>
+        <span id="prog-acad-year" style="font-size:.7rem">2025-2026</span>
+    </span>
+
+    <div class="progress-bar-wrap">
+        <div class="progress-track">
+            <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+        </div>
+        <div class="progress-text" id="prog-text" style="font-size:.68rem;color:var(--text-muted);margin-top:2px"></div>
+    </div>
+
+    <span class="progress-days" id="prog-days-wrap" style="font-size:.75rem;white-space:nowrap;color:var(--text-muted)">
+        <strong id="prog-days">—</strong> days left
+    </span>
+</div>

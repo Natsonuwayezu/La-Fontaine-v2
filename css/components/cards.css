@@ -1,0 +1,204 @@
+/* ==================================================================
+   CARDS — Dashboards & Stats
+   ================================================================== */
+
+/* ── Stats Grid ── */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--md);
+    margin-bottom: var(--lg);
+}
+
+.stat-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--r-lg);
+    padding: var(--lg);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition);
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--role-primary);
+    opacity: 0;
+    transition: opacity var(--transition);
+}
+
+.stat-card:hover::before {
+    opacity: 1;
+}
+
+.stat-icon {
+    font-size: 2rem;
+    margin-bottom: var(--sm);
+    display: inline-block;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    margin-bottom: 4px;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-trend {
+    font-size: 0.72rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+}
+
+.stat-trend.up {
+    color: var(--success);
+}
+
+.stat-trend.down {
+    color: var(--danger);
+}
+
+.stat-trend.neutral {
+    color: var(--text-muted);
+}
+
+/* ── Dashboard Card ── */
+.dash-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    margin-bottom: var(--lg);
+    transition: all var(--transition);
+}
+
+.dash-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.dash-card-header {
+    padding: var(--md) var(--lg);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sm);
+    flex-wrap: wrap;
+    background: var(--bg-tertiary);
+}
+
+.dash-card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: var(--sm);
+    margin: 0;
+    font-family: 'Syne', sans-serif;
+    color: var(--text-primary);
+}
+
+.dash-card-body {
+    padding: var(--lg);
+}
+
+/* ── Two Column Layout ── */
+.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--lg);
+    margin-bottom: var(--lg);
+}
+
+@media (max-width: 900px) {
+    .two-col {
+        grid-template-columns: 1fr;
+        gap: var(--md);
+    }
+}
+
+/* ── Three Column Layout ── */
+.three-col {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--lg);
+    margin-bottom: var(--lg);
+}
+
+@media (max-width: 1024px) {
+    .three-col {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .three-col {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Quick Actions ── */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--md);
+}
+
+.quick-btn {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--r-lg);
+    padding: var(--lg) var(--md);
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.quick-btn:hover {
+    background: var(--role-light);
+    border-color: var(--role-primary);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.quick-btn .qb-icon {
+    font-size: 2rem;
+    margin-bottom: var(--sm);
+}
+
+.quick-btn .qb-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.quick-btn .qb-sub {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}

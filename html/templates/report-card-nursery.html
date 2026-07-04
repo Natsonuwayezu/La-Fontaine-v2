@@ -1,0 +1,108 @@
+<!-- ============================================================ -->
+<!-- NURSERY REPORT CARD TEMPLATE (French)                        -->
+<!-- Used by js/modules/academics/report-cards.js                -->
+<!-- ============================================================ -->
+
+<div class="report-card" id="report-card">
+    <div class="report-header">
+        <div class="report-logo" id="report-logo">🏫</div>
+        <div class="report-header-text">
+            <h2 id="report-school-name">ECOLE LA FONTAINE</h2>
+            <p id="report-address">Rubavu, Rwanda</p>
+            <h3 id="report-title">RÉSULTATS DE FIN DE TRIMESTRE</h3>
+            <p id="report-term">Terme 3 · 2025-2026</p>
+        </div>
+    </div>
+
+    <div class="report-info">
+        <div class="report-info-item"><strong>ÉLÈVE</strong><span id="report-student-name">—</span></div>
+        <div class="report-info-item"><strong>CODE</strong><span id="report-student-code">—</span></div>
+        <div class="report-info-item"><strong>CLASSE</strong><span id="report-class">—</span></div>
+        <div class="report-info-item"><strong>GENRE</strong><span id="report-gender">—</span></div>
+        <div class="report-info-item"><strong>DATE DE NAISSANCE</strong><span id="report-dob">—</span></div>
+        <div class="report-info-item"><strong>DATE D'IMPRESSION</strong><span id="report-date">—</span></div>
+    </div>
+
+    <table class="report-subjects">
+        <thead>
+            <tr>
+                <th>MATIÈRES</th>
+                <th style="text-align:center">MG<br><small>/50</small></th>
+                <th style="text-align:center">EX<br><small>/50</small></th>
+                <th style="text-align:center">TOTAL<br><small>/100</small></th>
+                <th style="text-align:center">%</th>
+                <th style="text-align:center">COTE</th>
+            </tr>
+        </thead>
+        <tbody id="report-subject-rows">
+            <!-- Dynamically populated -->
+            <tr>
+                <td>Pré-Calculé</td>
+                <td style="text-align:center">45</td>
+                <td style="text-align:center">48</td>
+                <td style="text-align:center;font-weight:700">93</td>
+                <td style="text-align:center">93%</td>
+                <td style="text-align:center"><span class="badge grade-Ap">A+</span></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="report-summary">
+        <div>
+            <div class="summary-label">TOTAL GÉNÉRAL</div>
+            <div class="summary-value" id="report-total">—</div>
+        </div>
+        <div>
+            <div class="summary-label">MOYENNE</div>
+            <div class="summary-value" id="report-average">—</div>
+        </div>
+        <div>
+            <div class="summary-label">COTE</div>
+            <div class="summary-value" id="report-grade">—</div>
+        </div>
+        <div>
+            <div class="summary-label">RANG</div>
+            <div class="summary-value" id="report-rank">—</div>
+        </div>
+    </div>
+
+    <div class="report-footer">
+        <div id="report-decision" class="decision-banner pass">
+            ✅ FÉLICITATIONS! L'élève est PROMU(E) en classe supérieure.
+        </div>
+        <div style="margin-top:8px;font-size:0.8rem;font-style:normal;" id="report-comment">
+            Commentaire de l'enseignant: Excellente performance ce trimestre. Continuez!
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;text-align:center;margin-top:12px">
+            <div>
+                <strong>Signature de l'enseignant(e)</strong><br>
+                <div style="margin-top:24px;border-top:1px solid #ccc;padding-top:4px">________________________</div>
+            </div>
+            <div>
+                <strong>Cachet de l'école</strong><br>
+                <div style="margin-top:40px"></div>
+            </div>
+            <div>
+                <strong>Signature du directeur</strong><br>
+                <div style="margin-top:24px;border-top:1px solid #ccc;padding-top:4px">UWAYO GANZA Eugene</div>
+            </div>
+        </div>
+        <div style="margin-top:12px;font-style:italic;font-size:0.75rem;">
+            Fait à ECOLE LA FONTAINE, Le <span id="report-footer-date">—</span>
+        </div>
+    </div>
+
+    <!-- QR Code Block -->
+    <div class="report-qr-block" id="report-qr-block">
+        <div style="font-size:9px;color:#64748b;line-height:1.6;text-align:left">
+            <div><strong id="qr-student-name">—</strong></div>
+            <div>Code: <span id="qr-student-code">—</span></div>
+            <div id="qr-class">—</div>
+            <div style="margin-top:3px;font-style:italic">📱 Scanner pour vérifier</div>
+        </div>
+        <div>
+            <img id="report-qr-image" src="" alt="QR Code"
+                style="width:80px;height:80px;border:1px solid #e2e8f0;border-radius:4px;display:block">
+        </div>
+    </div>
+</div>

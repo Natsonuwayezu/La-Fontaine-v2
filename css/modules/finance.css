@@ -1,0 +1,131 @@
+/* ==================================================================
+   FINANCE — Complete Styles
+   ================================================================== */
+
+/* ── Fee Summary Cards ── */
+.fee-summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--md);
+    margin-bottom: var(--lg);
+}
+
+.fee-card {
+    text-align: center;
+    padding: var(--md);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--r-lg);
+}
+
+.fee-card-amount {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--role-primary);
+    margin-bottom: var(--xs);
+}
+
+.fee-card-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ── Fee Breakdown ── */
+.fee-breakdown-table td {
+    vertical-align: middle;
+}
+
+.amount-positive {
+    color: var(--success);
+    font-weight: 600;
+}
+
+.amount-negative {
+    color: var(--danger);
+    font-weight: 600;
+}
+
+/* ── Payment Form ── */
+.payment-form {
+    background: var(--bg-tertiary);
+    border-radius: var(--r-lg);
+    padding: var(--lg);
+    margin-bottom: var(--lg);
+}
+
+.payment-category-select {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--sm);
+    margin-bottom: var(--lg);
+}
+
+.payment-category-item {
+    display: flex;
+    align-items: center;
+    gap: var(--sm);
+    padding: var(--sm);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--r-md);
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.payment-category-item.selected {
+    border-color: var(--role-primary);
+    background: var(--role-light);
+}
+
+.payment-category-name {
+    flex: 1;
+    font-size: 0.85rem;
+}
+
+.payment-category-amount {
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* ── Receipt Preview ── */
+.receipt-preview {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--r-md);
+    padding: var(--md);
+    font-family: monospace;
+    font-size: 0.75rem;
+    max-width: 300px;
+    margin-top: var(--md);
+}
+
+/* ── Overdue Severity ── */
+.overdue-critical {
+    color: var(--danger);
+    font-weight: 600;
+}
+
+.overdue-warning {
+    color: #f97316;
+    font-weight: 600;
+}
+
+.overdue-mild {
+    color: var(--warning);
+    font-weight: 600;
+}
+
+/* ── Balance Colors ── */
+.balance-positive {
+    color: var(--success);
+}
+
+.balance-negative {
+    color: var(--danger);
+}
+
+.balance-zero {
+    color: var(--text-muted);
+}

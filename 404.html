@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Page Not Found — ECOLE LA FONTAINE</title>
+    <style>
+        /* ── Reset ── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0f172a;
+            background-image:
+                radial-gradient(ellipse at 30% 40%, rgba(26, 58, 92, 0.3) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 60%, rgba(201, 168, 76, 0.1) 0%, transparent 50%);
+            color: #f1f5f9;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        /* ── Floating Particles ── */
+        .particles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .particles .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.08);
+            animation: floatParticle linear infinite;
+        }
+
+        .particles .particle:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            left: 5%;
+            top: 10%;
+            animation-duration: 25s;
+        }
+
+        .particles .particle:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            right: 8%;
+            top: 20%;
+            animation-duration: 30s;
+            animation-delay: 3s;
+        }
+
+        .particles .particle:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            left: 15%;
+            bottom: 15%;
+            animation-duration: 20s;
+            animation-delay: 5s;
+        }
+
+        .particles .particle:nth-child(4) {
+            width: 100px;
+            height: 100px;
+            right: 20%;
+            bottom: 10%;
+            animation-duration: 28s;
+            animation-delay: 7s;
+        }
+
+        .particles .particle:nth-child(5) {
+            width: 40px;
+            height: 40px;
+            left: 50%;
+            top: 5%;
+            animation-duration: 18s;
+            animation-delay: 2s;
+        }
+
+        .particles .particle:nth-child(6) {
+            width: 90px;
+            height: 90px;
+            right: 40%;
+            bottom: 30%;
+            animation-duration: 22s;
+            animation-delay: 4s;
+        }
+
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(0) rotate(0deg) scale(0.8);
+                opacity: 0.2;
+            }
+
+            50% {
+                opacity: 0.6;
+                transform: translateY(-30vh) rotate(180deg) scale(1.2);
+            }
+
+            100% {
+                transform: translateY(0) rotate(360deg) scale(0.8);
+                opacity: 0.2;
+            }
+        }
+
+        /* ── Main Container ── */
+        .error-container {
+            position: relative;
+            z-index: 1;
+            max-width: 560px;
+            width: 100%;
+            text-align: center;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        /* ── 404 Number ── */
+        .error-number {
+            font-family: 'Syne', sans-serif;
+            font-size: 8rem;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 4px;
+            background: linear-gradient(135deg, #3b82f6, #c9a84c, #00b4d8);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradientShift 4s ease-in-out infinite;
+            letter-spacing: -0.05em;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* ── Sub-number text ── */
+        .error-sub {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            margin-top: -8px;
+            margin-bottom: 20px;
+            letter-spacing: 4px;
+            font-weight: 300;
+        }
+
+        /* ── Title ── */
+        .title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #f1f5f9;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            color: #94a3b8;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        /* ── Search Box ── */
+        .search-box {
+            display: flex;
+            gap: 8px;
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 24px;
+            transition: border-color 0.3s;
+        }
+
+        .search-box:focus-within {
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 12px 16px;
+            color: #f1f5f9;
+            font-size: 0.9rem;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .search-box input::placeholder {
+            color: #64748b;
+        }
+
+        .search-box button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(135deg, #1a3a5c, #3b82f6);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        .search-box button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(26, 58, 92, 0.4);
+        }
+
+        /* ── Quick Links ── */
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .quick-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(51, 65, 85, 0.3);
+            border-radius: 10px;
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .quick-link:hover {
+            background: rgba(30, 41, 59, 0.7);
+            border-color: rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+            color: #f1f5f9;
+        }
+
+        .quick-link .icon {
+            font-size: 1.2rem;
+        }
+
+        /* ── Actions ── */
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1a3a5c, #3b82f6);
+            color: white;
+            box-shadow: 0 4px 20px rgba(26, 58, 92, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(26, 58, 92, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(51, 65, 85, 0.4);
+            color: #f1f5f9;
+            border: 1px solid rgba(51, 65, 85, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(51, 65, 85, 0.6);
+            transform: translateY(-2px);
+        }
+
+        /* ── Footer ── */
+        .footer {
+            font-size: 0.75rem;
+            color: #475569;
+            margin-top: 24px;
+            letter-spacing: 0.3px;
+        }
+
+        .footer a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer a:hover {
+            color: #c9a84c;
+        }
+
+        /* ── Animations ── */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 480px) {
+            .error-number {
+                font-size: 5rem;
+            }
+
+            .error-sub {
+                font-size: 0.9rem;
+                letter-spacing: 2px;
+            }
+
+            .title {
+                font-size: 1.4rem;
+            }
+
+            .subtitle {
+                font-size: 0.85rem;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .search-box button {
+                padding: 10px;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .quick-links {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .quick-link {
+                padding: 10px 12px;
+                font-size: 0.78rem;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                justify-content: center;
+                width: 100%;
+            }
+        }
+
+        /* ── Light Theme ── */
+        @media (prefers-color-scheme: light) {
+            body {
+                background: #eef2f5;
+                background-image:
+                    radial-gradient(ellipse at 30% 40%, rgba(26, 58, 92, 0.06) 0%, transparent 60%),
+                    radial-gradient(ellipse at 70% 60%, rgba(201, 168, 76, 0.04) 0%, transparent 50%);
+                color: #1e293b;
+            }
+
+            .particles .particle {
+                background: rgba(59, 130, 246, 0.05);
+            }
+
+            .error-number {
+                background: linear-gradient(135deg, #1a3a5c, #3b82f6, #c9a84c);
+                background-size: 300% 300%;
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+            }
+
+            .title {
+                color: #1e293b;
+            }
+
+            .subtitle {
+                color: #64748b;
+            }
+
+            .search-box {
+                background: rgba(255, 255, 255, 0.8);
+                border-color: rgba(226, 232, 240, 0.5);
+            }
+
+            .search-box input {
+                color: #1e293b;
+            }
+
+            .search-box input::placeholder {
+                color: #94a3b8;
+            }
+
+            .quick-link {
+                background: rgba(255, 255, 255, 0.6);
+                border-color: rgba(226, 232, 240, 0.3);
+                color: #475569;
+            }
+
+            .quick-link:hover {
+                background: rgba(255, 255, 255, 0.9);
+                border-color: rgba(59, 130, 246, 0.3);
+                color: #1e293b;
+            }
+
+            .btn-secondary {
+                background: rgba(241, 245, 249, 0.8);
+                color: #1e293b;
+                border-color: rgba(226, 232, 240, 0.5);
+            }
+
+            .btn-secondary:hover {
+                background: rgba(241, 245, 249, 1);
+            }
+
+            .footer {
+                color: #94a3b8;
+            }
+
+            .footer a {
+                color: #64748b;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ── Floating Particles ── -->
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <!-- ── Main Container ── -->
+    <div class="error-container">
+
+        <!-- 404 Number -->
+        <div class="error-number">404</div>
+        <div class="error-sub">PAGE NOT FOUND</div>
+
+        <!-- Title -->
+        <h1 class="title">Oops! You've wandered off</h1>
+        <p class="subtitle">
+            The page you're looking for doesn't exist, has been moved,<br>
+            or is temporarily unavailable.
+        </p>
+
+        <!-- Search Box -->
+        <form class="search-box" onsubmit="handleSearch(event)">
+            <input type="text" id="search-input" placeholder="Search for students, classes, payments..." autofocus>
+            <button type="submit">🔍 Search</button>
+        </form>
+
+        <!-- Quick Links -->
+        <div class="quick-links">
+            <a href="/" class="quick-link">
+                <span class="icon">🏠</span> Dashboard
+            </a>
+            <a href="/#student-list" class="quick-link">
+                <span class="icon">👥</span> Students
+            </a>
+            <a href="/#marks-entry" class="quick-link">
+                <span class="icon">✏️</span> Marks Entry
+            </a>
+            <a href="/#record-payment" class="quick-link">
+                <span class="icon">💰</span> Record Payment
+            </a>
+            <a href="/#fee-structure" class="quick-link">
+                <span class="icon">🏷️</span> Fee Structure
+            </a>
+            <a href="/#reports" class="quick-link">
+                <span class="icon">📊</span> Reports
+            </a>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+            <button class="btn btn-primary" onclick="goBack()">
+                ⬅️ Go Back
+            </button>
+            <a href="/" class="btn btn-secondary">
+                🏠 Homepage
+            </a>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>ECOLE LA FONTAINE — School Management System</p>
+            <a href="/" style="font-size: 0.7rem;">v9.0.0</a>
+        </div>
+
+    </div>
+
+    <script>
+        // ── Handle Search ──
+        function handleSearch(e) {
+            e.preventDefault();
+            const query = document.getElementById('search-input').value.trim();
+            if (!query) {
+                showToast('🔍 Please enter a search term');
+                return;
+            }
+            // Navigate to search (if search module exists) or fallback
+            const searchUrl = '/#search?q=' + encodeURIComponent(query);
+            window.location.href = searchUrl;
+        }
+
+        // ── Go Back ──
+        function goBack() {
+            if (document.referrer) {
+                window.history.back();
+            } else {
+                window.location.href = '/';
+            }
+        }
+
+        // ── Toast Notification ──
+        function showToast(message) {
+            const existing = document.querySelector('.toast-msg');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.className = 'toast-msg';
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 24px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(15, 23, 42, 0.92);
+                backdrop-filter: blur(12px);
+                border: 1px solid rgba(51, 65, 85, 0.5);
+                border-radius: 12px;
+                padding: 12px 20px;
+                font-size: 0.85rem;
+                color: #f1f5f9;
+                max-width: 400px;
+                width: 90%;
+                z-index: 9999;
+                text-align: center;
+                animation: fadeInUp 0.3s ease;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
+
+        // ── Track 404 in console ──
+        console.log('⚠️ 404 Page — ECOLE LA FONTAINE v9.0');
+        console.log('📍 Requested path:', window.location.pathname);
+        console.log('🔄 Redirecting? Check your router configuration.');
+
+        // ── Keyboard shortcut: Escape to go back ──
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                goBack();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                document.getElementById('search-input').focus();
+            }
+        });
+
+        // ── Focus search on load ──
+        setTimeout(() => {
+            document.getElementById('search-input').focus();
+        }, 400);
+
+        // ── Light/Dark theme toggle detection ──
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+        prefersDark.addEventListener('change', () => {
+            // Theme automatically handled by CSS media queries
+            console.log('🎨 Theme preference changed');
+        });
+    </script>
+
+</body>
+
+</html>

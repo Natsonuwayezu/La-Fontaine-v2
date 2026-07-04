@@ -1,0 +1,108 @@
+/* ==================================================================
+   ANALYTICS — Complete Styles
+   ================================================================== */
+
+/* ── Analytics Filters ── */
+.analytics-filters {
+    display: flex;
+    gap: var(--md);
+    flex-wrap: wrap;
+    margin-bottom: var(--lg);
+    padding: var(--md);
+    background: var(--bg-tertiary);
+    border-radius: var(--r-lg);
+}
+
+/* ── Analytics Chart Container ── */
+.analytics-chart-container {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--r-lg);
+    padding: var(--lg);
+    margin-bottom: var(--lg);
+}
+
+.analytics-chart-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: var(--md);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--sm);
+}
+
+/* ── Grade Distribution Bars ── */
+.grade-distribution {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sm);
+}
+
+.grade-bar-item {
+    display: flex;
+    align-items: center;
+    gap: var(--md);
+}
+
+.grade-label {
+    width: 40px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.grade-bar-track {
+    flex: 1;
+    height: 24px;
+    background: var(--bg-tertiary);
+    border-radius: var(--r-sm);
+    overflow: hidden;
+}
+
+.grade-bar-fill {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.grade-percentage {
+    min-width: 50px;
+    text-align: right;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* ── Subject Performance Table ── */
+.subject-performance-table td {
+    vertical-align: middle;
+}
+
+.trend-up {
+    color: var(--success);
+}
+
+.trend-down {
+    color: var(--danger);
+}
+
+.trend-stable {
+    color: var(--text-muted);
+}
+
+/* ── Comparison Cells ── */
+.comparison-cell {
+    text-align: center;
+    padding: 4px 8px;
+    border-radius: var(--r-sm);
+}
+
+.comparison-cell.highlight {
+    background: var(--role-light);
+    font-weight: 600;
+}

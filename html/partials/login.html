@@ -1,0 +1,88 @@
+<!--
+    ECOLE LA FONTAINE — Login Page Partial
+    This is the HTML structure for the login page.
+-->
+
+<div id="login-page">
+    <!-- Particles Background -->
+    <div class="particles-bg" id="particles-bg"></div>
+
+    <!-- Login Scene -->
+    <div class="login-scene">
+        <div class="card-wrap" id="card-wrap">
+            <!-- Neon Border -->
+            <div class="neon-border"></div>
+
+            <!-- Login Card -->
+            <div class="login-card">
+                <!-- Fold Cover -->
+                <div class="fold-cover" id="fold-cover"
+                    onclick="document.getElementById('card-wrap').classList.add('open')">
+                    <div class="cover-title">
+                        <span class="cover-emoji">🏫</span>
+                        ECOLE LA FONTAINE
+                    </div>
+                </div>
+
+                <!-- Login Content -->
+                <div class="login-content">
+                    <!-- Logo -->
+                    <div class="logo-box" id="login-logo-box">
+                        <span>🏫</span>
+                    </div>
+
+                    <!-- School Name -->
+                    <div class="school-name">ECOLE LA FONTAINE</div>
+                    <div class="login-subtitle">Complete School Management System</div>
+
+                    <!-- Login Form -->
+                    <div class="login-form">
+                        <!-- Role Selector -->
+                        <div class="login-field">
+                            <select id="login-role" onchange="window.onRoleChange()">
+                                <option value="admin">👨‍💼 Administrator</option>
+                                <option value="accountant">💰 Accountant</option>
+                                <option value="teacher">👩‍🏫 Teacher</option>
+                            </select>
+                        </div>
+
+                        <!-- Username Field (hidden for admin) -->
+                        <div class="login-field" id="username-field" style="display:none">
+                            <input type="text" id="login-username" placeholder="Username" autocomplete="username">
+                        </div>
+
+                        <!-- Password Field -->
+                        <div class="login-field pw-wrap">
+                            <input type="password" id="login-password" placeholder="Password"
+                                autocomplete="current-password" onkeydown="if(event.key==='Enter') window.doLogin()">
+                            <button class="pw-toggle" type="button" onclick="window.toggleLoginPw()"
+                                title="Show/hide password">👁️</button>
+                        </div>
+
+                        <!-- Biometric Login -->
+                        <div id="biometric-btn-wrap" style="display:none; margin-top:8px">
+                            <button class="login-btn" id="biometric-btn" onclick="window.doBiometricLogin()"
+                                style="background:linear-gradient(135deg,#1a3a5c,#2563eb); display:flex; align-items:center; justify-content:center; gap:8px">
+                                <span>🔑</span> Sign In with Biometrics
+                            </button>
+                        </div>
+
+                        <!-- Error Alert -->
+                        <div class="login-alert" id="login-alert" style="display:none"></div>
+
+                        <!-- Submit Button -->
+                        <button class="login-btn" id="login-btn" onclick="window.doLogin()">Sign In →</button>
+
+                        <!-- Biometric Setup Link -->
+                        <div style="text-align:center; margin-top:8px; font-size:.75rem">
+                            <a href="#" onclick="window.setupBiometricLogin(); return false;"
+                                style="color:rgba(255,255,255,.5)">
+                                ⚙️ Set up biometric login
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

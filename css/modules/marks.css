@@ -1,0 +1,149 @@
+/* ==================================================================
+   MARKS ENTRY — Complete Styles
+   ================================================================== */
+
+.marks-input {
+    width: 80px;
+    padding: 6px 8px;
+    text-align: center;
+    border: 1px solid var(--border-medium);
+    border-radius: var(--r-sm);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    transition: all var(--transition);
+}
+
+.marks-input:focus {
+    border-color: var(--role-primary);
+    outline: none;
+    box-shadow: var(--shadow-focus);
+}
+
+.marks-input:disabled {
+    background: var(--bg-tertiary);
+    color: var(--text-muted);
+    cursor: not-allowed;
+}
+
+.marks-input.invalid {
+    border-color: var(--danger);
+    background: var(--danger-bg);
+}
+
+.marks-input.valid {
+    border-color: var(--success);
+    background: var(--success-bg);
+}
+
+/* ── Marks Entry Table ── */
+.marks-entry-table {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.marks-entry-table .student-name {
+    font-weight: 600;
+}
+
+.marks-entry-table .status-badge {
+    font-size: 0.65rem;
+    padding: 2px 8px;
+    border-radius: var(--r-full);
+}
+
+.marks-entry-table .status-badge.saved {
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+.marks-entry-table .status-badge.pending {
+    background: var(--warning-bg);
+    color: var(--warning);
+}
+
+.marks-entry-table .status-badge.error {
+    background: var(--danger-bg);
+    color: var(--danger);
+}
+
+/* ── Assessment Selector ── */
+.assessment-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: var(--md);
+    margin-bottom: var(--lg);
+    padding: var(--md);
+    background: var(--bg-tertiary);
+    border-radius: var(--r-lg);
+}
+
+/* ── Marks Summary Bar ── */
+.marks-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--sm) var(--md);
+    background: var(--bg-tertiary);
+    border-radius: var(--r-md);
+    margin-top: var(--md);
+    flex-wrap: wrap;
+    gap: var(--sm);
+}
+
+.marks-summary-stats {
+    display: flex;
+    gap: var(--lg);
+    flex-wrap: wrap;
+}
+
+.marks-summary-stat {
+    font-size: 0.8rem;
+}
+
+.marks-summary-stat strong {
+    color: var(--role-primary);
+}
+
+/* ── Validation Popup ── */
+.mark-validation-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-xl);
+    padding: var(--lg);
+    max-width: 420px;
+    width: 90%;
+    z-index: var(--z-modal-content);
+}
+
+.mark-validation-popup .popup-title {
+    font-weight: 700;
+    margin-bottom: var(--sm);
+}
+
+.mark-validation-popup .popup-actions {
+    display: flex;
+    gap: var(--sm);
+    margin-top: var(--md);
+    flex-wrap: wrap;
+}
+
+.mark-validation-popup .popup-actions .btn {
+    flex: 1;
+    min-width: 80px;
+}
+
+/* ── Offline Notice ── */
+#me-offline-notice {
+    display: none;
+    padding: 10px 16px;
+    background: var(--warning-bg);
+    border-top: 1px solid var(--border-light);
+    font-size: 0.85rem;
+    color: var(--warning);
+}

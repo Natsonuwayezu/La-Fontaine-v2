@@ -1,0 +1,173 @@
+/* ==================================================================
+   FORMS — Complete Form Styles
+   ================================================================== */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--md);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 2px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 10px 14px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--border-medium);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    transition: all var(--transition);
+    width: 100%;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--role-primary);
+    outline: none;
+    box-shadow: var(--shadow-focus);
+}
+
+.form-group input:disabled,
+.form-group select:disabled,
+.form-group textarea:disabled {
+    background: var(--bg-disabled);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+/* ── Validation States ── */
+.form-group .is-invalid {
+    border-color: var(--danger);
+}
+
+.form-group .is-invalid:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.invalid-feedback {
+    color: var(--danger);
+    font-size: 0.75rem;
+    margin-top: 4px;
+}
+
+.form-group .is-valid {
+    border-color: var(--success);
+}
+
+.form-group .is-valid:focus {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.valid-feedback {
+    color: var(--success);
+    font-size: 0.75rem;
+    margin-top: 4px;
+}
+
+.field-hint {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* ── Password Field ── */
+.pw-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.pw-field input {
+    flex: 1;
+    padding-right: 40px;
+}
+
+.pw-field .toggle-pw {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--text-muted);
+    padding: 4px;
+}
+
+.pw-field .toggle-pw:hover {
+    color: var(--text-primary);
+}
+
+/* ── Filters Bar ── */
+.filters-bar {
+    display: flex;
+    gap: var(--md);
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: var(--lg);
+    padding: var(--md);
+    background: var(--bg-tertiary);
+    border-radius: var(--r-lg);
+}
+
+.filters-bar select,
+.filters-bar input {
+    padding: 8px 14px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--border-medium);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    min-width: 120px;
+}
+
+.filters-bar .flex-1 {
+    flex: 1;
+    min-width: 200px;
+}
+
+.result-count {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .filters-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filters-bar .flex-1 {
+        width: 100%;
+    }
+
+    .result-count {
+        margin-left: 0;
+        text-align: center;
+    }
+}

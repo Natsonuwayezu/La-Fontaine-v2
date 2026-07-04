@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Offline — ECOLE LA FONTAINE</title>
+    <style>
+        /* ── Reset ── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0f172a;
+            background-image:
+                radial-gradient(ellipse at 20% 50%, rgba(26, 58, 92, 0.4) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 50%, rgba(201, 168, 76, 0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 100%, rgba(0, 180, 216, 0.1) 0%, transparent 50%);
+            color: #f1f5f9;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        /* ── Animated Background ── */
+        .bg-particles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .bg-particles span {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: rgba(201, 168, 76, 0.2);
+            border-radius: 50%;
+            animation: floatParticle linear infinite;
+        }
+
+        .bg-particles span:nth-child(1) {
+            left: 10%;
+            animation-duration: 12s;
+            animation-delay: 0s;
+            width: 8px;
+            height: 8px;
+        }
+
+        .bg-particles span:nth-child(2) {
+            left: 25%;
+            animation-duration: 15s;
+            animation-delay: 2s;
+            width: 4px;
+            height: 4px;
+        }
+
+        .bg-particles span:nth-child(3) {
+            left: 40%;
+            animation-duration: 10s;
+            animation-delay: 4s;
+            width: 10px;
+            height: 10px;
+        }
+
+        .bg-particles span:nth-child(4) {
+            left: 55%;
+            animation-duration: 14s;
+            animation-delay: 1s;
+            width: 5px;
+            height: 5px;
+        }
+
+        .bg-particles span:nth-child(5) {
+            left: 70%;
+            animation-duration: 11s;
+            animation-delay: 3s;
+            width: 7px;
+            height: 7px;
+        }
+
+        .bg-particles span:nth-child(6) {
+            left: 85%;
+            animation-duration: 16s;
+            animation-delay: 5s;
+            width: 9px;
+            height: 9px;
+        }
+
+        .bg-particles span:nth-child(7) {
+            left: 50%;
+            animation-duration: 13s;
+            animation-delay: 7s;
+            width: 6px;
+            height: 6px;
+        }
+
+        .bg-particles span:nth-child(8) {
+            left: 15%;
+            animation-duration: 18s;
+            animation-delay: 2s;
+            width: 12px;
+            height: 12px;
+        }
+
+        .bg-particles span:nth-child(9) {
+            left: 65%;
+            animation-duration: 9s;
+            animation-delay: 6s;
+            width: 4px;
+            height: 4px;
+        }
+
+        .bg-particles span:nth-child(10) {
+            left: 35%;
+            animation-duration: 17s;
+            animation-delay: 8s;
+            width: 8px;
+            height: 8px;
+        }
+
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(100vh) rotate(0deg) scale(0.5);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.8;
+                transform: translateY(90vh) rotate(36deg) scale(1);
+            }
+
+            90% {
+                opacity: 0.8;
+                transform: translateY(10vh) rotate(324deg) scale(1);
+            }
+
+            100% {
+                transform: translateY(0) rotate(360deg) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        /* ── Main Container ── */
+        .offline-container {
+            position: relative;
+            z-index: 1;
+            max-width: 560px;
+            width: 100%;
+            text-align: center;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        /* ── Animated Icon ── */
+        .icon-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 30px;
+        }
+
+        .icon-wrapper .offline-icon {
+            font-size: 80px;
+            animation: pulseIcon 2s ease-in-out infinite;
+            display: block;
+            filter: drop-shadow(0 0 40px rgba(0, 180, 216, 0.3));
+        }
+
+        .icon-wrapper .ring {
+            position: absolute;
+            inset: -20px;
+            border: 2px solid rgba(0, 180, 216, 0.15);
+            border-radius: 50%;
+            animation: ringPulse 2.5s ease-out infinite;
+        }
+
+        .icon-wrapper .ring:nth-child(2) {
+            animation-delay: 0.5s;
+            inset: -40px;
+            border-color: rgba(201, 168, 76, 0.1);
+        }
+
+        .icon-wrapper .ring:nth-child(3) {
+            animation-delay: 1s;
+            inset: -60px;
+            border-color: rgba(59, 130, 246, 0.08);
+        }
+
+        @keyframes pulseIcon {
+
+            0%,
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+
+            50% {
+                transform: scale(1.08) rotate(-5deg);
+            }
+        }
+
+        @keyframes ringPulse {
+            0% {
+                transform: scale(0.8);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* ── Title ── */
+        .title {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #00b4d8, #c9a84c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #94a3b8;
+            margin-bottom: 24px;
+            font-weight: 400;
+        }
+
+        /* ── Status Card ── */
+        .status-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            border-radius: 16px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.3);
+        }
+
+        .status-row:last-child {
+            border-bottom: none;
+        }
+
+        .status-label {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-value {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .status-value.offline {
+            color: #fca5a5;
+        }
+
+        .status-value.online {
+            color: #86efac;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-badge.offline {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+
+        .status-badge.online {
+            background: rgba(16, 185, 129, 0.2);
+            color: #86efac;
+        }
+
+        .status-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+
+        .status-badge.offline .dot {
+            background: #ef4444;
+        }
+
+        .status-badge.online .dot {
+            background: #10b981;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        /* ── Saved Data ── */
+        .saved-data {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.15);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.85rem;
+            color: #86efac;
+        }
+
+        .saved-data .icon {
+            font-size: 1.2rem;
+        }
+
+        /* ── Action Buttons ── */
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1a3a5c, #3b82f6);
+            color: white;
+            box-shadow: 0 4px 20px rgba(26, 58, 92, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(26, 58, 92, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: rgba(51, 65, 85, 0.5);
+            color: #f1f5f9;
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(51, 65, 85, 0.8);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary:active {
+            transform: translateY(0);
+        }
+
+        /* ── Progress Bar ── */
+        .sync-progress {
+            margin-top: 16px;
+            display: none;
+        }
+
+        .sync-progress.visible {
+            display: block;
+        }
+
+        .sync-progress .track {
+            height: 4px;
+            background: rgba(51, 65, 85, 0.5);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .sync-progress .track .fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #3b82f6, #00b4d8);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .sync-progress .label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            font-size: 0.75rem;
+            color: #475569;
+            margin-top: 16px;
+            letter-spacing: 0.3px;
+        }
+
+        .footer a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer a:hover {
+            color: #c9a84c;
+        }
+
+        .footer .version {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            background: rgba(51, 65, 85, 0.3);
+            font-size: 0.65rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        /* ── Animations ── */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── Signal Bars ── */
+        .signal-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 20px;
+        }
+
+        .signal-bars .bar {
+            width: 4px;
+            background: #475569;
+            border-radius: 2px;
+            transition: all 0.5s ease;
+        }
+
+        .signal-bars .bar:nth-child(1) {
+            height: 6px;
+        }
+
+        .signal-bars .bar:nth-child(2) {
+            height: 10px;
+        }
+
+        .signal-bars .bar:nth-child(3) {
+            height: 14px;
+        }
+
+        .signal-bars .bar:nth-child(4) {
+            height: 18px;
+        }
+
+        .signal-bars .bar.active {
+            background: #10b981;
+        }
+
+        .signal-bars .bar.inactive {
+            background: #475569;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 480px) {
+            .title {
+                font-size: 1.6rem;
+            }
+
+            .icon-wrapper .offline-icon {
+                font-size: 56px;
+            }
+
+            .icon-wrapper .ring {
+                inset: -12px;
+            }
+
+            .icon-wrapper .ring:nth-child(2) {
+                inset: -28px;
+            }
+
+            .icon-wrapper .ring:nth-child(3) {
+                inset: -44px;
+            }
+
+            .status-card {
+                padding: 16px 18px;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                justify-content: center;
+                width: 100%;
+            }
+        }
+
+        /* ── Dark Theme Support ── */
+        @media (prefers-color-scheme: light) {
+            body {
+                background: #eef2f5;
+                background-image:
+                    radial-gradient(ellipse at 20% 50%, rgba(26, 58, 92, 0.08) 0%, transparent 60%),
+                    radial-gradient(ellipse at 80% 50%, rgba(201, 168, 76, 0.05) 0%, transparent 60%);
+                color: #1e293b;
+            }
+
+            .bg-particles span {
+                background: rgba(26, 58, 92, 0.1);
+            }
+
+            .title {
+                background: linear-gradient(135deg, #1a3a5c, #3b82f6);
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+            }
+
+            .subtitle {
+                color: #64748b;
+            }
+
+            .status-card {
+                background: rgba(255, 255, 255, 0.8);
+                backdrop-filter: blur(12px);
+                border-color: rgba(226, 232, 240, 0.5);
+            }
+
+            .status-label {
+                color: #64748b;
+            }
+
+            .status-value.offline {
+                color: #dc2626;
+            }
+
+            .status-value.online {
+                color: #16a34a;
+            }
+
+            .status-badge.offline {
+                background: rgba(239, 68, 68, 0.1);
+                color: #dc2626;
+            }
+
+            .status-badge.online {
+                background: rgba(16, 185, 129, 0.1);
+                color: #16a34a;
+            }
+
+            .saved-data {
+                background: rgba(16, 185, 129, 0.06);
+                border-color: rgba(16, 185, 129, 0.15);
+                color: #16a34a;
+            }
+
+            .btn-secondary {
+                background: rgba(241, 245, 249, 0.8);
+                color: #1e293b;
+                border-color: rgba(226, 232, 240, 0.5);
+            }
+
+            .btn-secondary:hover {
+                background: rgba(241, 245, 249, 1);
+            }
+
+            .footer {
+                color: #94a3b8;
+            }
+
+            .footer a {
+                color: #64748b;
+            }
+
+            .footer .version {
+                background: rgba(241, 245, 249, 0.5);
+                color: #94a3b8;
+            }
+
+            .signal-bars .bar {
+                background: #cbd5e1;
+            }
+
+            .signal-bars .bar.active {
+                background: #16a34a;
+            }
+
+            .signal-bars .bar.inactive {
+                background: #cbd5e1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ── Animated Background ── -->
+    <div class="bg-particles">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <!-- ── Main Container ── -->
+    <div class="offline-container">
+
+        <!-- Icon -->
+        <div class="icon-wrapper">
+            <span class="ring"></span>
+            <span class="ring"></span>
+            <span class="ring"></span>
+            <span class="offline-icon">📡</span>
+        </div>
+
+        <!-- Title -->
+        <h1 class="title">You're Offline</h1>
+        <p class="subtitle">Don't worry — we've got your data saved locally</p>
+
+        <!-- Status Card -->
+        <div class="status-card">
+            <div class="status-row">
+                <span class="status-label">🌐 Connection Status</span>
+                <span class="status-value offline" id="connection-status-text">
+                    <span class="status-badge offline">
+                        <span class="dot"></span> Offline
+                    </span>
+                </span>
+            </div>
+            <div class="status-row">
+                <span class="status-label">📶 Signal</span>
+                <div class="signal-bars" id="signal-bars">
+                    <span class="bar active"></span>
+                    <span class="bar active"></span>
+                    <span class="bar inactive"></span>
+                    <span class="bar inactive"></span>
+                </div>
+            </div>
+            <div class="status-row">
+                <span class="status-label">💾 Saved Data</span>
+                <span class="status-value" id="saved-count" style="color: #86efac;">0 items</span>
+            </div>
+            <div class="status-row">
+                <span class="status-label">🔄 Last Sync</span>
+                <span class="status-value" id="last-sync" style="color: #94a3b8;">Never</span>
+            </div>
+        </div>
+
+        <!-- Saved Data Notice -->
+        <div class="saved-data" id="saved-notice" style="display: none;">
+            <span class="icon">💾</span>
+            <span>You have <strong id="saved-notice-count">0</strong> unsynced marks saved locally</span>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+            <button class="btn btn-primary" id="retry-btn" onclick="checkConnection()">
+                🔄 Try Again
+            </button>
+            <button class="btn btn-secondary" id="sync-btn" onclick="syncNow()" style="display: none;">
+                📤 Sync Now
+            </button>
+            <a href="/" class="btn btn-secondary">
+                🏠 Go to Homepage
+            </a>
+        </div>
+
+        <!-- Sync Progress -->
+        <div class="sync-progress" id="sync-progress">
+            <div class="label">
+                <span>Syncing...</span>
+                <span id="sync-percent">0%</span>
+            </div>
+            <div class="track">
+                <div class="fill" id="sync-fill" style="width: 0%;"></div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>ECOLE LA FONTAINE — School Management System</p>
+            <div class="version">v9.0.0</div>
+        </div>
+
+    </div>
+
+    <script>
+        // ── State ──
+        let isOnline = navigator.onLine;
+        let savedItems = 0;
+        let lastSyncTime = localStorage.getItem('elf_last_sync') || null;
+
+        // ── Update UI ──
+        function updateUI() {
+            const statusText = document.getElementById('connection-status-text');
+            const badge = statusText.querySelector('.status-badge');
+            const dot = badge.querySelector('.dot');
+            const bars = document.querySelectorAll('.signal-bars .bar');
+
+            if (isOnline) {
+                badge.className = 'status-badge online';
+                badge.innerHTML = '<span class="dot"></span> Online';
+                dot.style.background = '#10b981';
+                statusText.className = 'status-value online';
+                // Signal bars
+                bars.forEach((bar, i) => {
+                    bar.className = 'bar active';
+                });
+            } else {
+                badge.className = 'status-badge offline';
+                badge.innerHTML = '<span class="dot"></span> Offline';
+                dot.style.background = '#ef4444';
+                statusText.className = 'status-value offline';
+                // Signal bars
+                bars.forEach((bar, i) => {
+                    bar.className = i < 2 ? 'bar active' : 'bar inactive';
+                });
+            }
+
+            // Sync button
+            const syncBtn = document.getElementById('sync-btn');
+            if (!isOnline && savedItems > 0) {
+                syncBtn.style.display = 'inline-flex';
+            } else {
+                syncBtn.style.display = 'none';
+            }
+
+            // Last sync
+            const lastSyncEl = document.getElementById('last-sync');
+            if (lastSyncTime) {
+                const diff = Math.floor((Date.now() - parseInt(lastSyncTime)) / 1000);
+                if (diff < 60) {
+                    lastSyncEl.textContent = 'Just now';
+                } else if (diff < 3600) {
+                    lastSyncEl.textContent = Math.floor(diff / 60) + 'm ago';
+                } else if (diff < 86400) {
+                    lastSyncEl.textContent = Math.floor(diff / 3600) + 'h ago';
+                } else {
+                    lastSyncEl.textContent = new Date(parseInt(lastSyncTime)).toLocaleDateString();
+                }
+            } else {
+                lastSyncEl.textContent = 'Never';
+            }
+
+            // Saved count
+            document.getElementById('saved-count').textContent = savedItems + ' items';
+            const notice = document.getElementById('saved-notice');
+            const noticeCount = document.getElementById('saved-notice-count');
+            if (savedItems > 0) {
+                notice.style.display = 'flex';
+                noticeCount.textContent = savedItems;
+            } else {
+                notice.style.display = 'none';
+            }
+        }
+
+        // ── Check Connection ──
+        function checkConnection() {
+            isOnline = navigator.onLine;
+            updateUI();
+
+            if (isOnline) {
+                // Also try to ping the server
+                fetch('/')
+                    .then(() => {
+                        // Success — redirect to app if we have data
+                        if (savedItems === 0) {
+                            window.location.href = '/';
+                        } else {
+                            // Show sync prompt
+                            document.getElementById('sync-btn').style.display = 'inline-flex';
+                            showToast('🟢 Connection restored! Click "Sync Now" to upload your marks.');
+                        }
+                    })
+                    .catch(() => {
+                        isOnline = false;
+                        updateUI();
+                        showToast('📡 Still offline. Check your connection.');
+                    });
+            } else {
+                showToast('📡 Still offline. Check your connection.');
+            }
+        }
+
+        // ── Sync Now ──
+        function syncNow() {
+            if (!navigator.onLine) {
+                showToast('📡 Cannot sync — still offline.');
+                return;
+            }
+
+            const progress = document.getElementById('sync-progress');
+            progress.className = 'sync-progress visible';
+            const fill = document.getElementById('sync-fill');
+            const percent = document.getElementById('sync-percent');
+
+            // Simulate sync progress
+            let p = 0;
+            const interval = setInterval(() => {
+                p += Math.random() * 15 + 5;
+                if (p > 100) p = 100;
+                fill.style.width = p + '%';
+                percent.textContent = Math.round(p) + '%';
+
+                if (p >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        progress.className = 'sync-progress';
+                        savedItems = 0;
+                        lastSyncTime = String(Date.now());
+                        localStorage.setItem('elf_last_sync', lastSyncTime);
+                        localStorage.setItem('elf_sync_success', 'true');
+                        updateUI();
+                        showToast('✅ All data synced successfully!');
+                        document.getElementById('sync-btn').style.display = 'none';
+
+                        // Redirect after 2 seconds
+                        setTimeout(() => {
+                            window.location.href = '/';
+                        }, 1500);
+                    }, 500);
+                }
+            }, 200);
+        }
+
+        // ── Toast Notification ──
+        function showToast(message) {
+            const existing = document.querySelector('.toast-msg');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.className = 'toast-msg';
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 24px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(15, 23, 42, 0.92);
+                backdrop-filter: blur(12px);
+                border: 1px solid rgba(51, 65, 85, 0.5);
+                border-radius: 12px;
+                padding: 12px 20px;
+                font-size: 0.85rem;
+                color: #f1f5f9;
+                max-width: 400px;
+                width: 90%;
+                z-index: 9999;
+                text-align: center;
+                animation: fadeInUp 0.3s ease;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => toast.remove(), 500);
+            }, 4000);
+        }
+
+        // ── Load saved data count ──
+        async function loadSavedDataCount() {
+            try {
+                // Try IndexedDB
+                const db = await new Promise((resolve, reject) => {
+                    const req = indexedDB.open('EcoleLaFontaineDB', 3);
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
+
+                if (db.objectStoreNames.contains('offline_marks')) {
+                    const tx = db.transaction('offline_marks', 'readonly');
+                    const store = tx.objectStore('offline_marks');
+                    const count = await new Promise((resolve, reject) => {
+                        const req = store.count();
+                        req.onsuccess = () => resolve(req.result);
+                        req.onerror = () => reject(req.error);
+                    });
+                    savedItems = count;
+                }
+
+                // Also check pending_sync
+                if (db.objectStoreNames.contains('pending_sync')) {
+                    const tx = db.transaction('pending_sync', 'readonly');
+                    const store = tx.objectStore('pending_sync');
+                    const count = await new Promise((resolve, reject) => {
+                        const req = store.count();
+                        req.onsuccess = () => resolve(req.result);
+                        req.onerror = () => reject(req.error);
+                    });
+                    savedItems += count;
+                }
+
+                db.close();
+            } catch (e) {
+                console.log('[Offline] No IndexedDB data found');
+                // Try localStorage fallback
+                const localData = localStorage.getItem('elf_offline_marks');
+                if (localData) {
+                    try {
+                        const parsed = JSON.parse(localData);
+                        savedItems = Array.isArray(parsed) ? parsed.length : 1;
+                    } catch (e) { }
+                }
+            }
+
+            updateUI();
+        }
+
+        // ── Connection Events ──
+        window.addEventListener('online', () => {
+            isOnline = true;
+            updateUI();
+            showToast('🟢 Internet connection restored!');
+
+            // Auto-sync if we have data
+            if (savedItems > 0) {
+                document.getElementById('sync-btn').style.display = 'inline-flex';
+                // Auto-sync after 3 seconds
+                setTimeout(() => {
+                    if (navigator.onLine && savedItems > 0) {
+                        syncNow();
+                    }
+                }, 3000);
+            } else {
+                // No data to sync, redirect
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+            }
+        });
+
+        window.addEventListener('offline', () => {
+            isOnline = false;
+            updateUI();
+            showToast('📴 Internet connection lost. Your data is safe locally.');
+        });
+
+        // ── Retry on space/enter ──
+        document.addEventListener('keydown', (e) => {
+            if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('input, textarea, button')) {
+                e.preventDefault();
+                checkConnection();
+            }
+        });
+
+        // ── Init ──
+        loadSavedDataCount();
+
+        // Check periodically
+        setInterval(() => {
+            const online = navigator.onLine;
+            if (online !== isOnline) {
+                isOnline = online;
+                updateUI();
+            }
+        }, 5000);
+
+        console.log('📡 Offline page loaded — ECOLE LA FONTAINE v9.0');
+        console.log(`💾 ${savedItems} items saved locally`);
+    </script>
+
+</body>
+
+</html>

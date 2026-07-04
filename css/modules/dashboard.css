@@ -1,0 +1,156 @@
+/* ==================================================================
+   DASHBOARD — Admin, Teacher, Accountant
+   ================================================================== */
+
+/* ── Dashboard Greeting ── */
+.dashboard-greeting {
+    padding: var(--md) var(--lg);
+    background: var(--role-light);
+    border-radius: var(--r-lg);
+    border-left: 4px solid var(--role-primary);
+    margin-bottom: var(--lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--sm);
+}
+
+.dashboard-greeting h2 {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.dashboard-greeting .greeting-sub {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.dashboard-greeting .greeting-badge {
+    display: flex;
+    gap: var(--sm);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* ── Quick Stats Row ── */
+.quick-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--md);
+    margin-bottom: var(--lg);
+}
+
+.quick-stat {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--r-md);
+    padding: var(--md);
+    text-align: center;
+}
+
+.quick-stat .qs-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+}
+
+.quick-stat .qs-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.quick-stat .qs-trend {
+    font-size: 0.65rem;
+    margin-top: 4px;
+}
+
+.quick-stat .qs-trend.up {
+    color: var(--success);
+}
+
+.quick-stat .qs-trend.down {
+    color: var(--danger);
+}
+
+.quick-stat .qs-trend.neutral {
+    color: var(--text-muted);
+}
+
+/* ── Dashboard Widgets ── */
+.widget-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--lg);
+    margin-bottom: var(--lg);
+}
+
+@media (max-width: 900px) {
+    .widget-container {
+        grid-template-columns: 1fr;
+        gap: var(--md);
+    }
+}
+
+/* ── ASCII Chart Container ── */
+.ascii-chart {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--r-md);
+    padding: var(--md);
+    overflow-x: auto;
+}
+
+.ascii-chart pre {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--text-primary);
+    margin: 0;
+    white-space: pre;
+}
+
+.ascii-chart .chart-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: var(--sm);
+    display: flex;
+    justify-content: space-between;
+}
+
+/* ── Alert Banners ── */
+.dashboard-alert {
+    padding: var(--sm) var(--md);
+    border-radius: var(--r-md);
+    margin-bottom: var(--sm);
+    display: flex;
+    align-items: center;
+    gap: var(--sm);
+    font-size: 0.85rem;
+}
+
+.dashboard-alert.critical {
+    background: var(--danger-bg);
+    color: var(--danger);
+    border-left: 4px solid var(--danger);
+}
+
+.dashboard-alert.warning {
+    background: var(--warning-bg);
+    color: var(--warning);
+    border-left: 4px solid var(--warning);
+}
+
+.dashboard-alert.info {
+    background: var(--info-bg);
+    color: var(--info);
+    border-left: 4px solid var(--info);
+}
+
+.dashboard-alert.success {
+    background: var(--success-bg);
+    color: var(--success);
+    border-left: 4px solid var(--success);
+}

@@ -1,0 +1,30 @@
+<!--
+    ECOLE LA FONTAINE — Footer Partial
+    This is the HTML structure for the page footer.
+-->
+
+<footer class="app-footer" id="app-footer" style="
+    padding: 12px 24px;
+    border-top: 1px solid var(--border-light);
+    background: var(--bg-secondary);
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: auto;
+">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; max-width:var(--max-width); margin:0 auto;">
+        <span>
+            © 2026 <strong>ECOLE LA FONTAINE</strong> — All rights reserved
+        </span>
+        <span>
+            Version <span id="footer-version">9.0.0</span>
+            <span class="dot" style="margin:0 8px;">·</span>
+            <span id="footer-status">🟢 Online</span>
+        </span>
+        <span>
+            <a href="#" onclick="window.navigateTo('system-health')" style="color:var(--text-muted);text-decoration:none;">🩺 Health</a>
+            <span class="dot" style="margin:0 8px;">·</span>
+            <a href="#" onclick="window.navigateTo('settings')" style="color:var(--text-muted);text-decoration:none;">⚙️ Settings</a>
+        </span>
+    </div>
+</footer>

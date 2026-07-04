@@ -1,0 +1,913 @@
+╔══════════════════════════════════════════════════════════════════════════════════════╗
+║  ECOLE LA FONTAINE — BUILD PROGRESS TRACKER                                        ║
+║  Status: [ ] todo  [~] in progress  [x] done  [!] blocked  [?] needs verification ║
+║  Last updated: 2026-06-28  |  Working file: index.html (split-file SPA)            ║
+╚══════════════════════════════════════════════════════════════════════════════════════╝
+
+HOW TO USE
+──────────
+· When you start a task → [~] + your name + date
+· When done           → [x] + date
+· When blocked        → [!] + why
+· After any update    → git commit progress.txt: "progress: <task>"
+· Read AGENT_PROMPT.md before starting any session
+
+REPO: https://github.com/Natsonuwayezu/La-Fontaine
+WORKING FILE: index.html in repo root
+KEY REFS: frontend.txt (wireframes) · backend.txt (formulas+schema) · AGENT_PROMPT.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CURRENT STATE SUMMARY (as of 2026-06-28)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ARCHITECTURE:
+  · Split-file SPA: index.html (shell) + css/ (40+ files) + js/ (185 files) + html/ (partials)
+  · NO functions in index.html — all logic is in js/ files
+  · CSS: ALL files have content (no empties)
+  · JS modules: ALL 185 files have content (no empties)
+  · HTML partials: filled but not used (index.html uses inline JS rendering)
+  · Router: js/core/router.js uses ES module import/export — requires server (not file://)
+  · CRITICAL: js/core/router.js has `import` statements from ES modules but most js/ files
+    do NOT use export — this will cause "not a module" errors at runtime
+
+WHAT ACTUALLY WORKS IN THE BROWSER TODAY:
+  · index.html loads all CSS files (40+ files, all have content)
+  · index.html loads all JS files via <script src="..."> tags (not type="module")
+  · Login page: renders, card animation works, role switching works
+  · Sidebar: builds dynamically from NAV_CONFIG in js/ui/sidebar.js
+  · Topbar: renders with bell, user menu, theme toggle
+  · Module routing: navigateTo() calls render functions by name
+  · All 185 JS module files have stub/partial implementations
+
+WHAT DOES NOT WORK YET:
+  · Admin username should show headteacher name (UWAYO GANZA Eugene), not "Administrator"
+  · Bell (🔔) must navigate to notification-center, NOT open a modal
+  · Sidebar outside-click / hamburger must work on ALL devices (not just mobile)
+  · Many render functions are stubs that render placeholder content
+  · Several module IDs in sidebar NAV_CONFIG have no matching router entry
+  · Several router entries have no matching js/modules/ file
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 0 — FOUNDATION & INFRASTRUCTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[x] P0-01  Deploy working index.html to GitHub repo                    2026-06-28
+[x] P0-02  Fix calculateGrade() → delegate to getGrade()              2026-06-28
+[x] P0-03  Fix all hardcoded >= 50 pass mark comparisons               2026-06-28
+[x] P0-04  Fix decision banner full text (EN + FR)                     2026-06-28
+[x] P0-05  Fix toggleSidebar overlay .active bug (mobile)              2026-06-28
+[x] P0-06  Convert CRLF to LF                                          2026-06-28
+[x] P0-07  Write frontend.txt wireframes to repo root                  2026-06-28
+[x] P0-08  Write backend.txt specification to repo                2026-06-28
+[x] P0-09  Write progress.txt tracker to repo root                     2026-06-28
+[x] P0-10  Write AGENT_PROMPT.md universal agent guide                 2026-06-28
+[x] P0-11  Add admin dashboard wireframe to frontend.txt               2026-06-28
+
+[ ] P0-12  Fix Supabase URL to new project (ovmymtdrugdljnttiltd)
+           File: js/config/supabase-config.js line ~3
+           Change SUPABASE_URL from hejdppzparottbcnycjo to ovmymtdrugdljnttiltd
+           Also check js/core/supabase-client.js
+
+[ ] P0-13  Verify ES module / non-module consistency
+           PROBLEM: js/core/router.js uses import/export (ES module)
+           But index.html loads files as plain <script src>, not type="module"
+           Either: convert all to plain globals, OR add type="module" to index.html
+           Check js/core/auth.js, js/core/boot.js, js/core/state.js for import statements
+           This is the #1 blocker to the app running correctly
+
+[ ] P0-14  Verify all CSS files are actually linked in index.html
+           Count: 40+ CSS files in css/ folder — are all listed in <head>?
+           If any are missing, add them in the correct order (variables first)
+
+[ ] P0-15  Verify all JS files are actually linked in index.html
+           Count: 185 JS files — are all loaded via <script src>?
+           Load order matters: config → core → ui → modules → patches
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 1 — LOGIN PAGE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SPEC: frontend.txt line 1–140 (Sidebar section has login references)
+FILE: html/partials/login.html + js/core/auth.js
+
+[x] P1-01  Login card 3D flip animation (fold cover → open)           2026-06-28
+[x] P1-02  Particle background animation                               2026-06-28
+[x] P1-03  Role selector (Admin / Accountant / Teacher)                2026-06-28
+[x] P1-04  Username field hidden for admin, shown for others           2026-06-28
+[x] P1-05  Password field with show/hide toggle                        2026-06-28
+[x] P1-06  Biometric login button (shown if device supports WebAuthn)  2026-06-28
+[x] P1-07  Enter key submits login                                     2026-06-28
+
+[ ] P1-08  Admin login shows headteacher name, NOT "Administrator"
+           SPEC: When role=admin is selected, subtitle should read:
+           "Head Teacher — UWAYO GANZA Eugene" (read from school_settings.head_teacher)
+           File: js/core/auth.js function login() line ~117
+           Current: hardcoded { name: 'Administrator', username: 'admin' }
+           Fix: after admin login, fetch school_settings.head_teacher and use as display name
+           Also update: sidebar footer avatar shows headteacher name, not "Administrator"
+
+[ ] P1-09  Login error: clear password field on failure, keep username
+           Current behaviour: unclear — verify and fix
+
+[ ] P1-10  Login lockout after 5 failed attempts (15-minute lockout)
+           SPEC: backend.txt Section 2 (Authentication)
+           Track failed_attempts in localStorage per role+username
+           Show countdown timer in the login alert area
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 2 — TOPBAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SPEC: frontend.txt line 1–140 (Sidebar section includes topbar)
+FILE: css/components/topbar.css + js/ui/topbar.js + html/partials/topbar.html
+
+[x] P2-01  Hamburger button renders                                    2026-06-28
+[x] P2-02  Page title updates on navigation                            2026-06-28
+[x] P2-03  User avatar + name + role shown right side                  2026-06-28
+[x] P2-04  Theme toggle (light/dark) in user dropdown                  2026-06-28
+[x] P2-05  Term progress bar below topbar                              2026-06-28
+[x] P2-06  Phase indicator badge (Pre/Post Midterm)                    2026-06-28
+
+[ ] P2-07  Bell (🔔) MUST navigate to notification-center module
+           NEVER open a modal — always call navigateTo('notification-center')
+           File: js/ui/topbar.js — check the bell onclick handler
+           File: html/partials/topbar.html — check onclick attribute on bell button
+           Check: js/ui/shell.js for any bell handler overrides
+
+[ ] P2-08  Bell badge shows unread notification count
+           File: js/ui/topbar.js function updateBellCount(n)
+           Must: poll notifications table every 60s, filter by current user role
+           Show red dot with count if n > 0, hide dot if n === 0
+
+[ ] P2-09  Hamburger toggles sidebar on ALL devices (not just mobile)
+           SPEC: sidebar collapses to 72px icon-only on desktop when hamburger clicked
+           On mobile: sidebar slides in/out as overlay drawer
+           File: js/ui/sidebar.js function toggleSidebar()
+           Current: only handles mobile-open class, no desktop collapse
+
+[ ] P2-10  User dropdown: Profile, Change Password, Biometric, Logout
+           File: js/ui/topbar.js
+           Verify all 4 items are present and functional
+           Profile → showProfileModal()
+           Change Password → showChangePasswordModal()
+           Biometric → setupBiometricLogin()
+           Logout → logout()
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 3 — SIDEBAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SPEC: frontend.txt line 1–513 (full sidebar wireframe + breakdown)
+FILE: css/components/sidebar.css + js/ui/sidebar.js + html/partials/sidebar.html
+
+[x] P3-01  Sidebar header: logo + school name + subtitle               2026-06-28
+[x] P3-02  NAV_CONFIG defined per role (admin/teacher/accountant)      2026-06-28
+[x] P3-03  Nav sections with collapse arrows                           2026-06-28
+[x] P3-04  Active nav item highlighted with role colour                2026-06-28
+[x] P3-05  Sidebar footer: avatar + username + role + logout           2026-06-28
+[x] P3-06  Section collapse state saved to localStorage               2026-06-28
+
+[ ] P3-07  Sidebar outside-click closes on ALL devices
+           SPEC: "fold and unfold sidebar for all devices" — not just mobile
+           On desktop: outside click collapses to 72px icon mode
+           On mobile: outside click removes overlay + slides out
+           File: js/ui/sidebar.js — overlay click handler + document click handler
+
+[ ] P3-08  Sidebar collapsed state (72px icons-only) on desktop
+           SPEC: frontend.txt sidebar breakdown mentions collapsed state
+           When collapsed: only icons visible, labels hidden
+           data-label attribute on each nav item → CSS tooltip on hover
+           File: js/ui/sidebar.js function toggleSidebar() for desktop path
+           File: css/components/sidebar.css .sidebar.collapsed styles
+
+[ ] P3-09  ESC key closes sidebar on mobile
+           File: js/ui/sidebar.js — keydown event listener
+
+[ ] P3-10  Resize from mobile to desktop cleans up mobile-open state
+           File: js/ui/sidebar.js — window resize listener
+
+[ ] P3-11  Verify all sidebar nav IDs have matching router entries
+           MISMATCHES FOUND (sidebar has these IDs but router may not):
+           · 'user-management' → sidebar shows it, router has 'user-management'
+             but js/modules/ has 'users.js' and 'user-management.js' — which is right?
+           · 'teachers-list' → sidebar does NOT have this, but router has it
+             Sidebar has 'user-management' for staff — verify this is correct
+           · 'sibling-linking' → in router but NOT in sidebar NAV_CONFIG
+           · 'analytics' → in sidebar for admin, check router has it
+           · 'finance-dashboard' → in sidebar, check router has it
+           · 'marks-analysis' → in router but NOT in sidebar
+           · 'rankings' → in router but NOT in sidebar
+           ACTION: audit every sidebar ID against MODULE_MAP in router.js
+
+[ ] P3-12  Accountant sidebar — add missing finance nav items
+           Accountant NAV_CONFIG currently has:
+             attendance (x4), student-list, student-details, student-fees,
+             finance modules (accountant-dashboard, fee-structure, record-payment,
+             payment-history, receipt-printing, overdue-payments, fee-waivers,
+             balances, payment-reversals, financial-reports, fee-term-status,
+             carry-forward, family-fee-summary, finance-dashboard)
+           MISSING from accountant sidebar:
+             · discounts
+             · credit-balances
+             · manual-adjustments
+           Verify against frontend.txt accountant dashboard section
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 4 — ADMIN DASHBOARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SPEC: frontend.txt line 14358–14580 (Admin Dashboard Option 2 - Comprehensive)
+FILE: js/modules/dashboard.js function renderAdminDashboard()
+
+WIDGETS REQUIRED (18 total from spec):
+  A1  School Performance Overview + 6 Key Metric stat cards
+  A2  Student Growth Trend (ASCII dot plot ● per year)
+  A3  Class Performance Ranking table + ASCII horizontal bars
+  A5  Grade Distribution (ASCII horizontal bars A+/A/B/C/D/F)
+  A6  Attendance Overview (weekly ASCII bars + school rate)
+  A8  Financial Summary (expected/collected/outstanding/monthly)
+  A9  Fee Collection by Class (ASCII horizontal bars with 🟢🟡🟠🔴)
+  B3  Class Utilization (ASCII bars per class, 🔴 if over capacity)
+  B4  Gender Distribution (ASCII bars male/female %)
+  B6  Top 5 Students (rank + name + class + % + grade)
+  B7  At-Risk Students (failing or near-failing, action buttons)
+  C1  Term Comparison (T1/T2/T3 ASCII bars)
+  C2  Subject Performance Heatmap (class × subject table, colour emoji)
+  D2  Monthly Revenue Trend (ASCII vertical bars ▓▓)
+  D3  Payment Methods breakdown (Cash/MTN/Bank/Cheque ASCII bars)
+  E1  System Alerts (backup, class avg, overdue, capacity, term end)
+  7   Recent Activity log (last 10 from activity_logs table)
+  9   Quick Actions (10 buttons: Enroll, Fee Structure, Reports, Promote,
+      Backup, Settings, Register, Record Payment, Analytics, Students)
+
+CURRENT STATE: renderAdminDashboard() has ~30% of spec
+  [x] Fee Collection by Class (bar chart) — EXISTS but uses Chart.js, needs ASCII
+  [x] Recent Activity Log — EXISTS, shows last 10
+  [x] Quick Actions — EXISTS but incomplete (6 buttons, not 10)
+  [ ] All other widgets — MISSING
+
+[ ] P4-01  Convert fee chart from Chart.js to ASCII bars
+           Current: creates a Chart.js canvas with setTimeout(100)
+           Required: ASCII horizontal bars matching spec A9 format
+           Colour coding: 🟢100%, 🟡70-89%, 🟠50-69%, 🔴<50%
+           No Chart.js on dashboards — only ASCII
+
+[ ] P4-02  Add greeting banner
+           "Good morning/afternoon/evening, [headteacher name]!"
+           Show: term name · date · term % complete · system alert count
+
+[ ] P4-03  Add 6 Key Metric stat cards (A1)
+           Students (total + active + trend)
+           Teachers (total)
+           School Average % (calculated from all marks this term)
+           Pass Rate % (students above pass_mark / total with marks)
+           Total Fees Expected vs Collected %
+           At-Risk student count
+
+[ ] P4-04  Add Student Growth Trend (A2)
+           ASCII dot plot: ● per academic year
+           Show last 5 years of student counts from academic_years data
+
+[ ] P4-05  Add Class Performance Ranking table + ASCII bars (A3)
+           Table: Rank | Class | Avg% | Grade
+           ASCII bars below table, sorted by avg% descending
+           Colour-coded: 🟢≥80 🟡70-79 🟠60-69 🔴<60
+
+[ ] P4-06  Add Grade Distribution (A5)
+           ASCII horizontal bars per grade band
+           A+ / A / B / C / D / F with % of students in each
+
+[ ] P4-07  Add Attendance Overview (A6)
+           ASCII bars per week (last 4 weeks)
+           School-wide attendance rate + trend vs previous week
+           Flag classes below 80% threshold
+
+[ ] P4-08  Add Subject Performance Heatmap (C2)
+           Table: Class rows × Subject columns
+           Each cell: pct% with colour emoji 🟢🟡🟠🔴
+           Read from state.marks + state.assessments + state.subjects
+
+[ ] P4-09  Add Term Comparison bars (C1)
+           T1 / T2 / T3 ASCII horizontal bars
+           Show school average per term
+
+[ ] P4-10  Add Financial Summary cards (A8)
+           Total Expected, Collected (+ rate %), Outstanding, This Month vs target
+
+[ ] P4-11  Add Monthly Revenue Trend (D2)
+           ASCII vertical bars (▓▓) last 6 months
+           Highlight current month differently
+
+[ ] P4-12  Add Payment Methods breakdown (D3)
+           Cash / MTN Mobile Money / Bank Transfer / Cheque
+           ASCII horizontal bars with %
+
+[ ] P4-13  Add Class Utilization (B3)
+           ASCII bars per class showing enrolled/capacity %
+           🔴 if > 100%, 🟡 if > 90%, 🟢 if ≤ 90%
+
+[ ] P4-14  Add Gender Distribution (B4)
+           Male % and Female % ASCII bars
+           Total counts + ratio
+
+[ ] P4-15  Add Top 5 Students (B6)
+           Ranked by term average %
+           Show: 🥇🥈🥉 medals for top 3, rank number for 4–5
+           Name, class, %, grade badge
+
+[ ] P4-16  Add At-Risk Students (B7)
+           Students below pass_mark (< state.schoolSettings.pass_mark || 50)
+           Sorted by % ascending (worst first)
+           Action buttons: Contact Parents, View Report
+
+[ ] P4-17  Add System Alerts (E1)
+           Compute at render time from state:
+           · Backup not run in > 2 days (check localStorage last_backup)
+           · Any class average < 60%
+           · Students overdue > 30 days count
+           · Any class over capacity
+           · Days until term ends (< 30 days → show info)
+           · "System healthy" if no alerts
+
+[ ] P4-18  Expand Quick Actions to 10 buttons (9)
+           Enroll Student, Fee Structure, Reports, Promote Students,
+           Backup, Settings, Class Register, Record Payment, Analytics, Students
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 5 — TEACHER DASHBOARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SPEC: frontend.txt line 515–960 (Teacher Dashboard - Selected Features)
+FILE: js/modules/dashboard.js function renderTeacherDashboard()
+
+[x] P5-01  Corrected completion rate formula                           2026-06-28
+           marks_entered / (students × assessments) — not students_with_any_mark
+
+[x] P5-02  ASCII horizontal bars: per-class completion                 2026-06-28
+[x] P5-03  ASCII horizontal bars: per-assessment completion            2026-06-28
+[x] P5-04  Next 3 periods widget (NOW/NEXT/LATER badges)               2026-06-28
+[x] P5-05  Students without marks section                              2026-06-28
+[x] P5-06  Attendance reminder banner for class teacher                2026-06-28
+[x] P5-07  Live notifications feed with unread dots                    2026-06-28
+
+[ ] P5-08  Verify A1 (completion rate) reads from ACTUAL state data
+           Not mock data — must use state.assessments, state.marks, state.students
+           Locked assessments count as 100% complete
+
+[ ] P5-09  Verify G1 (My Timetable) widget reads from state.timetable
+           Currently may show empty if timetable not loaded
+           Show "No timetable assigned" if no slots for today
+
+[ ] P5-10  Add B2 Grade Distribution ASCII bars for teacher's classes
+           SPEC: frontend.txt line 605 (B2 - Grade Distribution)
+           Show A+/A/B/C/D/F distribution for teacher's current-term marks
+
+[ ] P5-11  Add F3 Assessment Quality section
+           SPEC: frontend.txt line 740 (F3 - Assessment Quality)
+           Show: avg score, std deviation, highest/lowest per assessment
+           Flag assessments where > 50% of students failed
+
+[ ] P5-12  Add D3 Assessment Lock Notification
+           SPEC: frontend.txt line 715 (D3 - Assessment Lock Notification)
+           Banner when an assessment is locked by admin
+           Navigate to marks-database to view
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 6 — ACCOUNTANT DASHBOARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SPEC: frontend.txt line 1282–1649 (Accountant Dashboard - Selected Features)
+FILE: js/modules/dashboard.js function renderAccountantDashboard()
+
+[x] P6-01  Today's activity banner                                     2026-06-28
+[x] P6-02  ASCII collection-by-class horizontal bars                   2026-06-28
+[x] P6-03  Live notification feed (payments by Admin)                  2026-06-28
+[x] P6-04  Overdue severity ASCII bars (Critical/High/Medium/Recent)   2026-06-28
+[x] P6-05  Monthly trend ASCII vertical bars                           2026-06-28
+[x] P6-06  Recent payments with "Recorded By" column                   2026-06-28
+
+[ ] P6-07  Verify A1 (Live Payment Feed) reads real notifications table
+           Not mock — must filter notifications WHERE type='payment' AND recipient_role='accountant'
+
+[ ] P6-08  Add A2 (Payment Alert Badge) in topbar
+           Badge on bell showing count of unread payment notifications specifically
+           Separate from general notification count
+
+[ ] P6-09  Add A3 (Click-to-Receipt deep link)
+           Each notification in feed has "🧾 View Receipt R-XXXX" button
+           Clicking navigates to receipt-printing module with that receipt pre-loaded
+
+[ ] P6-10  Add B4 (Class Collection Ranking)
+           SPEC: frontend.txt line 1468 (B4)
+           Ranked list of classes by collection rate, with trend vs last term
+
+[ ] P6-11  Add B5 (Daily Collection: Today vs Yesterday)
+           SPEC: frontend.txt line 1497 (B5)
+           Side-by-side comparison of today's collections vs yesterday
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 7 — MARKS SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SPEC: frontend.txt line 4869–5191 (Marks Database) + backend.txt Section 7.1
+FILE: js/modules/marks.js + js/modules/marks-database.js
+
+[x] P7-01  Inline popup validation (no silent Math.min/max clamping)   2026-06-28
+           Popup for: above max, below zero, non-numeric
+           3 choices: auto-correct | manual fix | clear
+
+[x] P7-02  Save gate: block if popup open OR any student missing score 2026-06-28
+[x] P7-03  Summary screen before final save                            2026-06-28
+[x] P7-04  Save dispatches notification to admin (marks_saved)         2026-06-28
+
+[ ] P7-05  Marks database: edit triggers notification to teacher + admin
+           SPEC: When admin edits a mark → notify the teacher who entered it
+           AND notify admin (for audit trail)
+           File: js/modules/marks-database.js
+           After PATCH to marks table → call notifyAction('marks_edited', ...)
+
+[ ] P7-06  Marks database: lock/unlock assessment
+           SPEC: frontend.txt line 4632 (Assessment Locking)
+           Locked assessment: all inputs become read-only, lock icon shown
+           Locked = counts as 100% complete in dashboard completion rate
+           Unlock: admin only, requires confirmation
+           After lock → notify all relevant teachers
+
+[ ] P7-07  Offline marks queue
+           SPEC: backend.txt Section 8 (Offline)
+           When no internet: save marks to IndexedDB
+           Show "X marks pending sync" banner
+           Auto-sync when back online + "Sync Now" button
+
+[ ] P7-08  Marks import from Excel
+           SPEC: frontend.txt line 4682 (Marks Import/Export)
+           File: js/modules/marks-import-export.js
+           Column mapping: student name/code → score
+           Preview before import, validate scores against max_marks
+
+[ ] P7-09  Marks export to Excel + PDF
+           Export current assessment marks with student names, scores, grades
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 8 — TEACHER ASSIGNMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SPEC: frontend.txt line 11627–11772 (Teacher Assignments)
+FILE: js/modules/teacher-assignments.js
+
+[x] P8-01  Tab 1: Subject assignments table with load indicator        2026-06-28
+[x] P8-02  Edit modal: subject grid (class × subject checkboxes)       2026-06-28
+[x] P8-03  Class teacher dropdown in edit modal + access preview       2026-06-28
+[x] P8-04  Tab 2: Class teachers per class (assign/change)             2026-06-28
+[x] P8-05  Tab 3: Overview matrix (teacher × class × subject)         2026-06-28
+[x] P8-06  Access control: class teacher unlocks modules               2026-06-28
+
+[ ] P8-07  Verify classes.class_teacher_id column exists in Supabase
+           Run: ALTER TABLE classes ADD COLUMN class_teacher_id INTEGER REFERENCES teachers(id);
+           If column doesn't exist the teacher assignments save will fail silently
+
+[ ] P8-08  Verify access control in router for class-teacher modules
+           File: js/core/router.js or js/core/permissions.js
+           Check: attendance, class-register, class-timetable modules
+           Must check classes.class_teacher_id === currentUser.id before rendering
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 9 — NOTIFICATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SPEC: frontend.txt line 1979–2338 (Notifications Center)
+FILE: js/modules/notification-center.js + js/modules/notifications.js
+
+[x] P9-01  notifyAction() enhanced with recipient_role, recorded_by    2026-06-28
+[x] P9-02  Payment recorded → notify opposite role                     2026-06-28
+[x] P9-03  Marks saved → notify admin                                  2026-06-28
+
+[ ] P9-04  Notification center full page (renderNotificationCenter)
+           SPEC: frontend.txt line 1979
+           Tabs: All | Unread | Payments | Marks | System | Announcements
+           Per notification: icon, title, message, by, time, read/unread dot
+           Actions: Mark read, Mark all read, Click to go to resource
+           Deep link: payment notification → receipt-printing with receipt_id
+           Deep link: marks notification → marks-database with assessment_id
+
+[ ] P9-05  Marks edited → notify teacher + admin
+           When admin edits a mark → look up who entered it (marks.entered_by)
+           Notify that teacher + log in activity_logs
+
+[ ] P9-06  Attendance not recorded reminder
+           Daily check on login: if class teacher hasn't recorded attendance today
+           Show banner on teacher dashboard + create notification
+           Only trigger if it's a school day (not holiday)
+
+[ ] P9-07  Notification polling every 60 seconds
+           File: js/ui/topbar.js or js/core/boot.js
+           setInterval(fetchUnreadNotifications, 60000)
+           Update bell badge count without refreshing the page
+
+[ ] P9-08  Mark notification as read on click
+           PATCH notifications SET is_read=true WHERE id=X
+           Remove unread dot, update bell count
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 10 — ATTENDANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SPEC: frontend.txt line 2801–3244 (Attendance Module)
+FILE: js/modules/attendance.js + js/modules/attendance-reports.js +
+      js/modules/attendance-summary.js + js/modules/attendance-analytics.js
+
+[ ] P10-01 Record attendance (renderAttendanceEntry)
+           SPEC: frontend.txt line 2801
+           Class teacher only (check classes.class_teacher_id)
+           Per-student buttons: Present / Absent / Late / Excused
+           Bulk actions: Mark All Present, Clear All
+           UPSERT on (student_id, date) — safe to re-submit
+           Holiday dates greyed out in date picker
+           After save → notify if done late (after 10am)
+
+[ ] P10-02 Attendance Reports (renderAttendanceReports)
+           SPEC: frontend.txt line 2884
+           Filter by class, date range, status
+           Table: student | present | absent | late | excused | rate%
+           Export to Excel, PDF
+
+[ ] P10-03 Attendance Summary (renderAttendanceSummary)
+           SPEC: frontend.txt line 2964
+           Per-student attendance rate card view
+           Rate calculation: (present + late×0.5) / school_days × 100
+           school_days EXCLUDES holidays (backend.txt 3.12b)
+           Flag at-risk: rate < 75% → 🔴, 75-85% → 🟡, ≥85% → 🟢
+
+[ ] P10-04 Attendance Analytics (renderAttendanceAnalytics)
+           SPEC: frontend.txt line 3053
+           Weekly trend chart (ASCII bars)
+           By-class comparison ASCII bars
+           Day-of-week breakdown
+
+[ ] P10-05 Attendance reminder notification for class teachers
+           Daily check at boot: if today is school day AND class teacher
+           has not recorded attendance → send notification + show dashboard banner
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 11 — STUDENT MANAGEMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SPEC: frontend.txt line 3245–3708 (Student Management)
+FILE: js/modules/students.js + js/modules/student-registration.js +
+      js/modules/student-profile.js + js/modules/student-promotion.js +
+      js/modules/student-archive.js
+
+[ ] P11-01 Student list (renderStudentList)
+           SPEC: frontend.txt line 3245
+           Searchable/filterable table: name, class, status, balance
+           Click row → navigate to student-details
+           Filters: class, status, balance (overdue/credit/clear)
+
+[ ] P11-02 Enroll student (renderEnrollStudent)
+           SPEC: frontend.txt line 3320
+           Required: first_name, last_name, class_id
+           student_code auto-generated: 'LF' + year + 4-digit seq (e.g. LF20250001)
+           On save: generate student_fees for all active fee categories
+           Apply sibling discount if family_id is set
+           Log to activity_logs
+
+[ ] P11-03 Student details view (renderStudentDetails)
+           SPEC: frontend.txt line 3585
+           Tabs: Profile | Academic | Finance | Attendance | Documents
+           Profile: photo, name, DOB, gender, guardian, address
+           Academic: marks per term, report card link
+           Finance: balance, payment history, waiver history
+           Attendance: rate, calendar view
+
+[ ] P11-04 Student promotion (renderStudentPromotion)
+           SPEC: frontend.txt line 3421
+           Show active students with their annual result
+           Promote/repeat decision per student
+           Batch promote all passing students
+           P6 → Graduated (status='Graduated', class_id=NULL)
+           Rollback available same session
+
+[ ] P11-05 Student archive (renderStudentArchive)
+           SPEC: frontend.txt line 3510
+           Show is_archived=true students
+           Restore: set is_archived=false
+           Permanent delete: removes all related records (confirm required)
+
+[ ] P11-06 Family management (renderFamilyManagement)
+           SPEC: frontend.txt line 3709
+           Create/edit family groups
+           Link students to families
+           Sibling discount auto-applied when family_id set
+           Auto-detect families by guardian_phone match
+
+[ ] P11-07 Bulk import students from Excel
+           SPEC: frontend.txt line 12790
+           Template download, column mapping, preview, validate, import
+           Max 500 rows per import
+
+[ ] P11-08 Bulk export students to Excel/PDF
+           SPEC: frontend.txt line 13337
+           Filter by class/status/year before export
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 12 — ACADEMICS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SPEC: frontend.txt line 4287–5817 (Academics Module)
+FILE: js/modules/class-register.js + js/modules/report-cards.js +
+      js/modules/statistics.js + js/modules/assessments.js + js/modules/transcripts.js
+
+[ ] P12-01 Class register — 6 formats
+           SPEC: frontend.txt line 5194 (CLASS REGISTER - 6 FORMATS)
+           Nursery Pre-Midterm, Nursery Post-Midterm, Nursery Annual
+           Primary Pre-Midterm, Primary Post-Midterm, Primary Annual
+           Each has different columns (see backend.txt Part 4 for exact formulas)
+           Export: PDF (landscape), Excel
+           appears_only_post_midterm subjects: Reading, Creative Arts, Sports,
+             Expression Orale, Développement Social → hidden in pre-midterm
+
+[ ] P12-02 Report cards — 6 formats
+           SPEC: frontend.txt line 5495 (REPORT CARDS - 6 FORMATS)
+           Nursery Pre/Post/Annual, Primary Pre/Post/Annual
+           Bilingual layout: French column headers for Nursery
+           Decision banner: 3-tier for primary (Promoted/Remedial/Repeat)
+           QR code on every report card
+           Batch print all students in a class
+
+[ ] P12-03 QR code generation + verification
+           SPEC: frontend.txt line 6375
+           Generate: qrcodejs library, JSON payload (backend.txt §7.4)
+           Scan verification modal: decode JSON, show all academic data
+           Pass/fail status block in scan modal
+
+[ ] P12-04 Transcripts (renderTranscripts)
+           SPEC: frontend.txt line 6887
+           Full-year transcript using calcSubjectAnnual()
+           Shows all 3 terms' data + annual totals
+           Print-ready layout
+
+[ ] P12-05 Statistics module (renderStatistics)
+           SPEC: frontend.txt line 4499 + 7197
+           School-wide academic analytics
+           Class averages, subject performance, grade distribution
+           ASCII charts — no Chart.js
+
+[ ] P12-06 Assessment management (renderAssessments)
+           SPEC: frontend.txt line 4585
+           List all assessments with filter by class/subject/term/phase
+           Create new assessment, edit, delete (if no marks entered)
+           Lock/unlock (admin only)
+
+[ ] P12-07 Annual register (renderAnnualRegister)
+           SPEC: frontend.txt line 5178
+           Shows all 3 terms combined for a class
+           Annual totals, final grade, rank
+
+[ ] P12-08 Academic reports (renderAcademicReports)
+           SPEC: frontend.txt line 7619
+           Different from Statistics (see frontend.txt line 7374 for comparison)
+           Formal PDF reports suitable for printing and distribution
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 13 — FINANCE MODULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SPEC: frontend.txt line 8136–11430 (Finance Dashboard through Student Balances)
+FILE: js/modules/finance*.js + js/modules/payment*.js + js/modules/fee*.js
+
+[ ] P13-01 Finance dashboard (renderFinanceDashboard)
+           SPEC: frontend.txt line 8136
+           Summary: expected/collected/outstanding/overdue
+           ASCII bars by class, monthly trend, recent payments
+
+[ ] P13-02 Fee structure (renderFeeStructure)
+           SPEC: frontend.txt line 8948
+           Manage fee categories (name, frequency, default amount)
+           Fee amounts per class per academic year
+           CRUD for categories + amounts
+
+[ ] P13-03 Record payment (renderRecordPayment)
+           SPEC: frontend.txt line 8948
+           Search student → show balance
+           FIFO allocation to oldest fees first
+           Generate receipt (RCP-YYYYMMDD-NNN format)
+           Notify opposite role (admin↔accountant)
+
+[ ] P13-04 Payment history (renderPaymentHistory)
+           SPEC: frontend.txt line 8948
+           All payments: search, date range, class filter
+           "Recorded By" column (Admin vs Self)
+           Click row → view receipt
+
+[ ] P13-05 Receipts (renderReceiptPrinting)
+           SPEC: frontend.txt line 9405 (All 8 receipt formats)
+           Standard, Thermal 80mm, Compact 58mm, Detailed, With QR,
+           With Guardian Details, With Barcode
+           Print button per receipt
+
+[ ] P13-06 Overdue payments (renderOverduePayments)
+           SPEC: frontend.txt line 9984
+           Severity bands: Critical >44d, High 30-44d, Medium 14-29d, Recent 7-13d
+           Bulk payment modal
+           Send reminder modal (contact parents)
+           Grace period from school_settings.payment_grace_days
+
+[ ] P13-07 Fee waivers (renderFeeWaivers)
+           SPEC: frontend.txt line 10601
+           Types: full / percentage / custom RWF amount
+           Recurring waivers for sibling/scholarship
+           History table
+
+[ ] P13-08 Student balances (renderBalances)
+           SPEC: frontend.txt line 10766
+           Per-student: total due, paid, balance, credit
+           Balance calculation: backend.txt Section 3.1
+
+[ ] P13-09 Payment reversals (renderPaymentReversals)
+           SPEC: frontend.txt line 10173
+           Reverse a payment: de-allocate, restore fee balances
+           Notify admin + accountant
+           Reversal history
+
+[ ] P13-10 Financial reports (renderFinanceReports)
+           SPEC: frontend.txt line 11012
+           Revenue by class, collection rates, monthly trend
+           Export to Excel, PDF
+
+[ ] P13-11 Fee reset automation (auto-runs on boot)
+           SPEC: backend.txt Section 3.2
+           Monthly: 1st of each month
+           Termly: day after term start
+           Annual: day after academic year start
+           Check before applying: fee record for this period already exists?
+
+[ ] P13-12 Credit balance system
+           SPEC: backend.txt Section 3.1 + student_credit_balance table
+           Overpayment → credit record (is_credit=true in student_fees)
+           Credit automatically applied to next fee
+           renderCreditBalances module
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 14 — STAFF MANAGEMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SPEC: frontend.txt line 11431–12143 (Staff Management Modules)
+FILE: js/modules/teachers.js + js/modules/subjects.js +
+      js/modules/teacher-assignments.js + js/modules/teacher-performance.js +
+      js/modules/timetable.js
+
+[ ] P14-01 Staff management (renderTeachers / renderUserManagement)
+           SPEC: frontend.txt line 11435
+           CRUD for teacher/accountant accounts
+           Fields: name, email, phone, username, password, role, dept, active
+           Password reset by admin
+           Toggle active/inactive
+
+[ ] P14-02 Subjects (renderSubjects)
+           SPEC: frontend.txt line 11563
+           CRUD for subjects with sort_order, code, mg_max, ex_max
+           appears_only_post_midterm flag
+           Assign to classes (many-to-many)
+
+[ ] P14-03 Teacher performance (renderTeacherPerformance)
+           SPEC: frontend.txt line 11774
+           Marks entered count vs expected
+           On-time submission rate
+           Locked assessment count
+           Class average per teacher
+
+[ ] P14-04 Master timetable (renderTimetable)
+           SPEC: frontend.txt line 11862
+           Grid: rows = time slots, cols = Monday–Friday
+           Break slots merged/greyed
+           Constraints: backend.txt Section 7.9
+           Import from Excel, export Excel/PDF
+           Conflict detection: same teacher double-booked
+
+[ ] P14-05 Timetable conflicts (renderTimetableConflicts)
+           SPEC: frontend.txt line 12044
+           List all detected conflicts
+           Suggested resolutions
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 15 — SETTINGS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SPEC: frontend.txt line 12144–12789 (Settings Modules)
+FILE: js/modules/school-settings.js + js/modules/academic-calendar.js +
+      js/modules/academic-years.js + js/modules/class-management.js +
+      js/modules/grading-system.js + js/modules/backup-restore.js +
+      js/modules/system-logs.js + js/modules/api-settings.js + js/modules/settings.js
+
+[ ] P15-01 School settings (renderSchoolSettings)
+           Name, address, phone, email, head teacher, pass mark, logo upload
+           Logo stored as base64 in school_settings table
+           Changes apply immediately to all UI elements
+
+[ ] P15-02 Academic calendar (renderAcademicCalendar)
+           Manage academic years and terms (start/end/midterm dates)
+           Add/edit/delete holidays
+           Holiday dates show in attendance date picker as greyed out
+
+[ ] P15-03 Academic years (renderAcademicYears)
+           Create new academic year, set as active
+           Only ONE can be active at a time
+
+[ ] P15-04 Class management (renderClassManagement)
+           Add/edit/reorder classes
+           Set capacity per class
+           Class teacher assignment links here too
+
+[ ] P15-05 Grading scale (renderGradingScale / renderGradingSystem)
+           Edit grade bands (letter, min%, max%, description, colour)
+           Changes apply to all getGrade() calls immediately
+
+[ ] P15-06 Backup & restore (renderBackupRestore)
+           Manual backup: JSON of all state → download
+           Auto-backup every 6 hours (APP_CONFIG.autoBackupInterval)
+           Restore: upload JSON → re-insert all records
+           Max 5 backups retained
+
+[ ] P15-07 System logs (renderSystemLogs)
+           Paginated view of activity_logs table
+           Filter by user, action, date range
+           20 items per page
+
+[ ] P15-08 API settings (renderApiSettings)
+           Change Supabase URL + API key
+           Test connection button
+           Reset to defaults button
+
+[ ] P15-09 System settings (renderSettings)
+           SPEC: frontend.txt line 12680 (System Settings)
+           Session timeout, idle warning, max login attempts
+           Date format, language, notification preferences
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 16 — ANALYTICS & REPORTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SPEC: frontend.txt line 1650–1978 (Analytics Dashboard)
+FILE: js/modules/analytics.js
+
+[ ] P16-01 Analytics dashboard (renderAnalytics)
+           SPEC: frontend.txt line 1650–1978
+           Different from admin dashboard: deeper drill-down
+           Multi-year trend analysis
+           Subject trend analysis (term by term per subject)
+           Teacher impact scores
+           Student risk indicators (predictive)
+           Export: PDF, Excel
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 17 — SECURITY & PERFORMANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[ ] P17-01 Password hashing (bcrypt or similar)
+           Currently plain text in teachers.password and school_settings.admin_password
+           Upgrade before any external/public deployment
+
+[ ] P17-02 RLS (Row Level Security) on Supabase
+           Currently disabled on all tables (BUG-008)
+           Enable RLS + add policies per table
+           Acceptable for school intranet — do not block on this
+
+[ ] P17-03 State cache with TTL invalidation
+           Map-based cache for studentBalances, classStats, ranks
+           invalidateCache() called on updateState()
+           5-minute TTL (APP_CONFIG.cacheTTL)
+
+[ ] P17-04 Max login attempts lockout (5 → 15-minute lockout)
+           Track in localStorage, reset after lockout period
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WHAT TO START IN NEXT SESSION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Priority order (fix foundations before building features):
+
+1. P0-13  Fix ES module / non-module consistency (CRITICAL — app may not run)
+2. P0-12  Update Supabase URL to new project
+3. P2-07  Bell navigates to notification-center (not modal)
+4. P2-09  Hamburger works on all devices
+5. P3-07  Sidebar outside-click closes on all devices
+6. P1-08  Admin shows headteacher name
+7. P3-11  Audit sidebar IDs vs router MODULE_MAP (find all mismatches)
+8. P4-01  Admin dashboard: convert Chart.js to ASCII bars
+9. P4-02–P4-18  Admin dashboard: build all 18 missing widgets
+
+MODULES CONFIRMED NEEDING FULL BUILD (have stub, need real content):
+  renderAttendanceEntry, renderAttendanceReports, renderAttendanceSummary,
+  renderStudentList, renderEnrollStudent, renderStudentDetails,
+  renderStudentPromotion, renderStudentArchive, renderFamilyManagement,
+  renderClassRegister (6 formats), renderReportCards (6 formats),
+  renderTranscripts, renderStatistics, renderAssessments,
+  renderFeeStructure, renderRecordPayment, renderPaymentHistory,
+  renderReceiptPrinting, renderOverduePayments, renderFeeWaivers,
+  renderBalances, renderPaymentReversals, renderFinanceReports,
+  renderTeachers, renderSubjects, renderTeacherPerformance,
+  renderTimetable, renderTimetableConflicts,
+  renderSchoolSettings, renderAcademicCalendar, renderAcademicYears,
+  renderClassManagement, renderGradingScale, renderBackupRestore,
+  renderSystemLogs, renderApiSettings, renderSettings, renderAnalytics,
+  renderNotificationCenter

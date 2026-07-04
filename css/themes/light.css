@@ -1,0 +1,239 @@
+/* ==================================================================
+   LIGHT THEME — Default Light Mode Overrides
+   ================================================================== */
+
+[data-theme="light"] {
+    /* ── Backgrounds ── */
+    --bg-primary: #eef2f5;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f4f7fa;
+    --bg-hover: #f8fafc;
+    --bg-active: #e2e8f0;
+    --bg-disabled: #f1f5f9;
+
+    /* ── Text ── */
+    --text-primary: #1e293b;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --text-disabled: #cbd5e1;
+    --text-inverse: #ffffff;
+
+    /* ── Borders ── */
+    --border-light: #e2e8f0;
+    --border-medium: #cbd5e1;
+    --border-dark: #94a3b8;
+    --border-focus: #3b82f6;
+
+    /* ── Shadows ── */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, .1), 0 2px 4px -1px rgba(0, 0, 0, .06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, .1), 0 10px 10px -5px rgba(0, 0, 0, .04);
+    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, .25);
+
+    /* ── Cards ── */
+    .stat-card,
+    .dash-card {
+        background: #ffffff;
+        border-color: #e2e8f0;
+    }
+
+    .stat-card::before {
+        background: var(--role-primary);
+    }
+
+    /* ── Tables ── */
+    .data-table thead tr {
+        background: #f1f5f9;
+    }
+
+    .data-table th {
+        color: #475569;
+        border-bottom-color: #e2e8f0;
+    }
+
+    .data-table td {
+        border-bottom-color: #e2e8f0;
+    }
+
+    .data-table tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    /* ── Forms ── */
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        background: #ffffff;
+        border-color: #cbd5e1;
+        color: #1e293b;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: var(--role-primary);
+        box-shadow: var(--shadow-focus);
+    }
+
+    /* ── Modals ── */
+    .modal-overlay {
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal {
+        background: #ffffff;
+        border-color: #e2e8f0;
+    }
+
+    .modal-header {
+        border-bottom-color: #e2e8f0;
+    }
+
+    .modal-footer {
+        border-top-color: #e2e8f0;
+    }
+
+    /* ── Dropdowns ── */
+    .dropdown-menu {
+        background: #ffffff;
+        border-color: #e2e8f0;
+    }
+
+    .dropdown-item:hover {
+        background: #f8fafc;
+    }
+
+    /* ── Toasts ── */
+    .toast {
+        background: #ffffff;
+        border-color: #e2e8f0;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+        background: #ffffff;
+        border-right-color: #e2e8f0;
+    }
+
+    .sidebar-header {
+        border-bottom-color: #e2e8f0;
+    }
+
+    .sidebar-footer {
+        border-top-color: #e2e8f0;
+    }
+
+    .nav-item:hover {
+        background: #f8fafc;
+    }
+
+    .nav-item.active {
+        background: var(--role-light);
+        color: var(--role-primary);
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+        background: #ffffff;
+        border-bottom-color: #e2e8f0;
+    }
+
+    .user-dropdown {
+        background: #ffffff;
+        border-color: #e2e8f0;
+    }
+
+    /* ── Login ── */
+    .login-card {
+        background: rgba(255, 255, 255, 0.88);
+        border-color: rgba(200, 212, 220, 0.5);
+    }
+
+    .login-field input,
+    .login-field select {
+        background: rgba(255, 255, 255, 0.7);
+        border-color: rgba(200, 212, 220, 0.5);
+        color: #1e293b;
+    }
+
+    /* ── Badges ── */
+    .badge-neutral {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .badge-light {
+        background: #ffffff;
+        color: #1e293b;
+        border-color: #e2e8f0;
+    }
+
+    /* ── Alerts ── */
+    .alert-info {
+        background: #dbeafe;
+        border-color: #3b82f6;
+        color: #1e40af;
+    }
+
+    .alert-success {
+        background: #d1fae5;
+        border-color: #10b981;
+        color: #065f46;
+    }
+
+    .alert-warning {
+        background: #fef3c7;
+        border-color: #f59e0b;
+        color: #92400e;
+    }
+
+    .alert-danger {
+        background: #fee2e2;
+        border-color: #ef4444;
+        color: #991b1b;
+    }
+
+    /* ── Skeleton ── */
+    .skeleton {
+        background: linear-gradient(90deg, #f1f5f9 25%, #ffffff 50%, #f1f5f9 75%);
+        background-size: 200% 100%;
+    }
+
+    .skeleton-line {
+        background: #f1f5f9;
+    }
+
+    .skeleton-avatar {
+        background: #f1f5f9;
+    }
+
+    .skeleton-card {
+        background: #ffffff;
+        border-color: #e2e8f0;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    /* ── Selection ── */
+    ::selection {
+        background: var(--role-primary);
+        color: white;
+    }
+
+    ::-moz-selection {
+        background: var(--role-primary);
+        color: white;
+    }
+}

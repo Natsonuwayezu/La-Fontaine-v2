@@ -1052,6 +1052,27 @@ window._onClassChange = onClassChange;
 window._onFamilyChange = onFamilyChange;
 window._onStudentChange = onStudentChange;
 window._toggleBatchMode = toggleBatchMode;
+
+// ──────────────────────────────────────────────────────────────────────
+// FAMILY STUDENTS LOADER
+// ──────────────────────────────────────────────────────────────────────
+
+async function loadFamilyStudents() {
+    const familyId = document.getElementById('family-select')?.value;
+    if (!familyId) return;
+    const { state } = await import('../../core/state.js');
+    const students = (state.students || []).filter(s => s.family_id == familyId && !s.is_deleted);
+    const list = document.getElementById('family-students-list');
+    if (!list) return;
+    if (!students.length) { list.innerHTML = '<p class="empty">No students in this family</p>'; return; }
+    list.innerHTML = students.map(s => `
+        <div class="family-student-row">
+            <span>${s.first_name} ${s.last_name}</span>
+            <button class="btn btn-sm btn-primary" onclick="window._selectStudent(${s.id})">Select</button>
+        </div>
+    `).join('');
+}
+
 window._loadFamilyStudents = loadFamilyStudents;
 window._selectAllStudents = selectAllStudents;
 window._deselectAllStudents = deselectAllStudents;

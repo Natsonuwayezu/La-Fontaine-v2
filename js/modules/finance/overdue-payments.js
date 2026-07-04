@@ -353,7 +353,7 @@ async function bulkPayOverdue() {
 // SEND BULK REMINDERS
 // ──────────────────────────────────────────────────────────────────────
 
-function sendBulkReminders() {
+async function sendBulkReminders() {
     const count = document.querySelectorAll('#overdue-container tbody tr').length;
     if (!count) {
         showToast('No overdue students to remind', 'warning');

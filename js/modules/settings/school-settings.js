@@ -443,9 +443,9 @@ async function updateWhere(table, filter, data) {
     return updateWhere(table, filter, data);
 }
 
-async function update(table, id, data) {
+async function _localUpdate(table, id, data) {
     const { update } = await import('../../core/api.js');
-    return update(table, id, data);
+    return _localUpdate(table, id, data);
 }
 
 // Export functions to window

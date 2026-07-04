@@ -27,7 +27,6 @@ import { esc, fmtDate } from '../../core/utils.js';
 import { insert, update, getAll, remove } from '../../core/api.js';
 import { notifyAction } from '../../core/notifications.js';
 import { exportToExcel } from '../../core/utils.js';
-import { isHoliday } from '../../core/formulas.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // STATE

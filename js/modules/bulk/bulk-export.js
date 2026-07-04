@@ -762,16 +762,6 @@ function resetBulkExport() {
 // HELPER FUNCTIONS
 // ──────────────────────────────────────────────────────────────────────
 
-function showToast(message, type = 'info', duration = 3500) {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
-    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.innerHTML = `<span class="toast-icon">${icons[type] || 'ℹ️'}</span><span class="toast-message">${esc(message)}</span>`;
-    container.appendChild(toast);
-    setTimeout(() => { toast.classList.add('hiding'); setTimeout(() => toast.remove(), 300); }, duration);
-}
 
 async function ensureStateLoaded() {
     if (!state.classes.length) {

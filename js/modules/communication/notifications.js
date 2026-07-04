@@ -284,10 +284,6 @@ function filterNotifications() {
 // MARK NOTIFICATION READ
 // ──────────────────────────────────────────────────────────────────────
 
-async function markNotificationRead(id) {
-    await markNotificationRead(id);
-    renderNotifications(document.getElementById('dynamic-content'));
-}
 
 // ──────────────────────────────────────────────────────────────────────
 // REFRESH NOTIFICATIONS

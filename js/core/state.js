@@ -587,3 +587,12 @@ export function initState() {
     }
     state.filters.include_archived = false;
 }
+// ──────────────────────────────────────────────────────────────────────
+// COMPATIBILITY EXPORTS (modules import these)
+// ──────────────────────────────────────────────────────────────────────
+
+/** Returns true if the current academic year is still active (not archived) */
+export function isCurrentYearEditable() {
+    const year = getCurrentAcademicYear();
+    return year?.is_active === true;
+}

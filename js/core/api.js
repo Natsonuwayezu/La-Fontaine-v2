@@ -556,3 +556,35 @@ export async function logActivity(userId, userRole, action, entityType = null, e
         console.warn('Failed to log activity:', e);
     }
 }
+// ──────────────────────────────────────────────────────────────────────
+// COMPATIBILITY ALIASES (modules import these names)
+// ──────────────────────────────────────────────────────────────────────
+
+/** Alias for getAllRecords — used by most modules */
+export const getAll = getAllRecords;
+
+/** Re-fetch a table and update state — modules call this after mutations */
+export async function refreshTable(tableName) {
+    const { state } = await import('./state.js');
+    const { loadInitialData } = await import('./boot.js');
+    try {
+        const data = await getAll(tableName);
+        const keyMap = {
+            marks: 'marks', assessments: 'assessments', students: 'students',
+            teachers: 'teachers', classes: 'classes', subjects: 'subjects',
+            terms: 'terms', academic_years: 'academicYears', payments: 'payments',
+            student_fees: 'studentFees', fee_categories: 'feeCategories',
+            fee_amounts: 'feeAmounts', families: 'families', attendance: 'attendance',
+            teacher_assignments: 'teacherAssignments', grading_scale: 'gradingScale',
+            school_settings: 'schoolSettings', notifications: 'notifications',
+            reminders: 'reminders', holidays: 'holidays', discounts: 'discounts',
+            announcements: 'announcements', activity_logs: 'activityLogs',
+        };
+        const stateKey = keyMap[tableName] || tableName;
+        if (stateKey in state) state[stateKey] = data;
+        return data;
+    } catch (e) {
+        console.warn('[refreshTable] failed for', tableName, e);
+        return [];
+    }
+}

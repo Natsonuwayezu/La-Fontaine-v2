@@ -20,6 +20,8 @@
 // APPLICATION STATE
 // ──────────────────────────────────────────────────────────────────────
 
+import { initOfflineSupport } from './core/offline.js';
+
 let appInitialized = false;
 let bootTime = Date.now();
 

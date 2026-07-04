@@ -583,3 +583,32 @@ export function removeStorage(key) {
         console.warn('[Storage] Remove failed:', e);
     }
 }
+// ──────────────────────────────────────────────────────────────────────
+// RECEIPT PDF DOWNLOAD
+// ──────────────────────────────────────────────────────────────────────
+
+/**
+ * Download a receipt as PDF using html2pdf
+ * @param {string} htmlContent - HTML string of the receipt
+ * @param {string} filename - output filename
+ */
+export async function downloadReceiptPDF(htmlContent, filename = 'receipt.pdf') {
+    if (typeof html2pdf === 'undefined') {
+        showToast('PDF library not loaded', 'error');
+        return;
+    }
+    const container = document.createElement('div');
+    container.innerHTML = htmlContent;
+    container.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:-1;background:white;padding:20px;width:800px;';
+    document.body.appendChild(container);
+    try {
+        await html2pdf().set({
+            margin: 10,
+            filename,
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        }).from(container).save();
+    } finally {
+        document.body.removeChild(container);
+    }
+}

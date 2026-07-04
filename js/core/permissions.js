@@ -125,3 +125,20 @@ export function canManageSettings() {
 export function canManageSystem() {
     return isAdmin();
 }
+// ──────────────────────────────────────────────────────────────────────
+// YEAR EDIT GUARD
+// ──────────────────────────────────────────────────────────────────────
+
+/**
+ * Returns true if given academic year is the active (current) year
+ * @param {number} yearId
+ * @returns {boolean}
+ */
+export function isActiveYear(yearId) {
+    const { state } = { state: window._state };
+    try {
+        const s = window.__appState || {};
+        const activeYear = (s.academicYears || []).find(y => y.is_active);
+        return activeYear?.id === yearId;
+    } catch (e) { return true; }
+}

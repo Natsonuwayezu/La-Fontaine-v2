@@ -77,3 +77,24 @@ function updateThemeUI(theme) {
 
 window.toggleTheme = toggleTheme;
 window.initTheme = initTheme;
+// ──────────────────────────────────────────────────────────────────────
+// SCHOOL LOGO
+// ──────────────────────────────────────────────────────────────────────
+
+/**
+ * Apply school logo from base64 or URL to all logo elements
+ * @param {string} logoData - base64 string or URL
+ */
+export function applySchoolLogo(logoData) {
+    if (!logoData) return;
+    const targets = document.querySelectorAll('.school-logo, #school-logo, #login-logo-img');
+    targets.forEach(el => {
+        if (el.tagName === 'IMG') {
+            el.src = logoData;
+        } else {
+            el.style.backgroundImage = `url(${logoData})`;
+        }
+    });
+}
+
+window.applySchoolLogo = applySchoolLogo;

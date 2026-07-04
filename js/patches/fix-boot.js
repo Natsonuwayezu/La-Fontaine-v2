@@ -1,52 +1,38 @@
 /**
  * ECOLE LA FONTAINE — Boot Fix
- * Ensures initApp and bootApp are available
+ * Ensures initApp and bootApp are always available
  * Last updated: 2026-07-04
+ * NOTE: Plain script (NOT a module) — runs in global scope
  */
 
 (function () {
     console.log('[BootFix] Checking exports...');
 
+    // initApp fallback — if boot.js module hasn't exported yet
     if (typeof window.initApp !== 'function') {
-        console.warn('[BootFix] initApp missing — applying emergency fix');
+        console.warn('[BootFix] initApp missing — applying fallback');
         window.initApp = async function () {
             console.log('[BootFix] initApp fallback called');
-            try {
-                const module = await import('../core/boot.js');
-                if (module.initApp) {
-                    window.initApp = module.initApp;
-                    return await module.initApp();
-                }
-            } catch (e) {
-                console.error('[BootFix] Failed to load boot module:', e);
-            }
-            document.getElementById('login-page').style.display = 'flex';
-            document.getElementById('app-page').style.display = 'none';
+            // Show login page as safe default
+            const loginPage = document.getElementById('login-page');
+            const appPage   = document.getElementById('app-page');
+            if (loginPage) loginPage.style.display = 'flex';
+            if (appPage)   appPage.style.display   = 'none';
         };
     }
 
+    // bootApp fallback
     if (typeof window.bootApp !== 'function') {
-        console.warn('[BootFix] bootApp missing — applying emergency fix');
+        console.warn('[BootFix] bootApp missing — applying fallback');
         window.bootApp = async function (user) {
-            console.log('[BootFix] bootApp fallback called for:', user);
-            try {
-                const module = await import('../core/boot.js');
-                if (module.bootApp) {
-                    window.bootApp = module.bootApp;
-                    return await module.bootApp(user);
-                }
-            } catch (e) {
-                console.error('[BootFix] Failed to load boot module:', e);
-            }
-            document.getElementById('login-page').style.display = 'none';
-            document.getElementById('app-page').style.display = 'block';
+            console.log('[BootFix] bootApp fallback — showing app for:', user?.name);
+            const loginPage = document.getElementById('login-page');
+            const appPage   = document.getElementById('app-page');
+            if (loginPage) loginPage.style.display = 'none';
+            if (appPage)   appPage.style.display   = 'block';
         };
     }
 
-    console.log('[BootFix] Final status:');
-    console.log('  initApp:', typeof window.initApp);
-    console.log('  bootApp:', typeof window.bootApp);
-
-    // ✅ DO NOT call initApp here — let main.js handle it
-    console.log('[BootFix] Waiting for main.js to initialize');
+    console.log('[BootFix] initApp:', typeof window.initApp);
+    console.log('[BootFix] bootApp:', typeof window.bootApp);
 })();

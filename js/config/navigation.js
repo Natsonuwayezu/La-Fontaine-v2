@@ -9,7 +9,7 @@
 // ──────────────────────────────────────────────────────────────────────
 
 // Teachers cannot access finance modules
-export const TEACHER_BLOCKED_MODULES = new Set([
+const TEACHER_BLOCKED_MODULES = new Set([
     // ── Finance (All) ──
     'fee-structure', 'payment-history', 'record-payment', 'financial-reports',
     'overdue-payments', 'fee-waivers', 'receipts', 'carry-forward',
@@ -45,7 +45,7 @@ export const TEACHER_BLOCKED_MODULES = new Set([
 ]);
 
 // Accountants cannot access academic modules
-export const ACCOUNTANT_BLOCKED_MODULES = new Set([
+const ACCOUNTANT_BLOCKED_MODULES = new Set([
     // ── Academics (All) ──
     'marks-entry', 'marks-database', 'class-register',
     'annual-register', 'assessments', 'report-cards',
@@ -79,7 +79,7 @@ export const ACCOUNTANT_BLOCKED_MODULES = new Set([
 // NAV_CONFIG — Full Menu Structure
 // ──────────────────────────────────────────────────────────────────────
 
-export const NAV_CONFIG = {
+const NAV_CONFIG = {
     // ── ADMIN: Full Access ──────────────────────────────────────────
     admin: [
         {
@@ -281,7 +281,7 @@ export const NAV_CONFIG = {
  * @param {string} role - 'admin' | 'teacher' | 'accountant'
  * @returns {Array} Filtered navigation sections
  */
-export function getNavConfig(role) {
+function getNavConfig(role) {
     const config = NAV_CONFIG[role] || [];
     return config.map(section => ({
         ...section,
@@ -299,7 +299,7 @@ export function getNavConfig(role) {
  * @param {string} role - User role
  * @returns {string} Display label
  */
-export function findNavLabel(id, role) {
+function findNavLabel(id, role) {
     const config = getNavConfig(role);
     for (const section of config) {
         for (const item of section.items) {
@@ -314,7 +314,7 @@ export function findNavLabel(id, role) {
  * @param {string} role - 'admin' | 'teacher' | 'accountant'
  * @returns {string} Module ID
  */
-export function getDefaultModule(role) {
+function getDefaultModule(role) {
     const map = {
         admin: 'admin-dashboard',
         accountant: 'accountant-dashboard',
@@ -322,3 +322,10 @@ export function getDefaultModule(role) {
     };
     return map[role] || 'admin-dashboard';
 }
+// ── GLOBAL EXPORTS ──────────────────────────────────────────────────
+window.NAV_CONFIG                  = NAV_CONFIG;
+window.TEACHER_BLOCKED_MODULES     = TEACHER_BLOCKED_MODULES;
+window.ACCOUNTANT_BLOCKED_MODULES  = ACCOUNTANT_BLOCKED_MODULES;
+window.getNavConfig                = getNavConfig;
+window.findNavLabel                = findNavLabel;
+window.getDefaultModule            = getDefaultModule;

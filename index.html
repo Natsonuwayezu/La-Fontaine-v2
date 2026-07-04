@@ -114,7 +114,6 @@
     <script type="module" src="js/core/formulas.js"></script>
     <script type="module" src="js/core/fees.js"></script>
     <script type="module" src="js/core/boot.js"></script>
-    <script type="module" src="js/patches/fix-boot.js"></script>
     <script type="module" src="js/core/router.js"></script>
     <script type="module" src="js/core/permissions.js"></script>
     <script type="module" src="js/core/offline.js"></script>
@@ -243,27 +242,6 @@
     <script type="module" src="js/main.js"></script>
 
     <!-- ============================================================ -->
-    <!-- INLINE INIT (regular script, NOT module)                    -->
-    <!-- ============================================================ -->
-    <script>
-        // This runs in the global scope
-        document.addEventListener('DOMContentLoaded', function () {
-            console.log('[Index] DOM ready — initializing...');
-
-            // Check if login functions are available
-            console.log('[Index] doLogin:', typeof window.doLogin);
-            console.log('[Index] toggleLoginPw:', typeof window.toggleLoginPw);
-
-            // Initialize everything
-            if (typeof initParticles === 'function') initParticles();
-            if (typeof initTheme === 'function') initTheme();
-            if (typeof initPWA === 'function') initPWA();
-            if (typeof initOfflineSupport === 'function') initOfflineSupport();
-            if (typeof initApp === 'function') initApp();
-
-            console.log('✅ ECOLE LA FONTAINE v9.0 — All systems initialised');
-        });
-    </script>
 
 </head>
 
@@ -443,61 +421,55 @@
     <!-- END APP PAGE -->
 
     <!-- ============================================================ -->
-    <!-- MAIN ENTRY SCRIPT (type="module")                            -->
-    <!-- ============================================================ -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- BOOT — fires after ALL modules are parsed and executed  -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <script src="js/patches/fix-boot.js"></script>
     <script type="module">
-        // ── Wait for DOM ready ──
-        (function init() {
+        // ES modules all resolved by this point
+        import { initApp } from './js/core/boot.js';
+        import { initTheme } from './js/ui/theme.js';
+        import { initPWA }   from './js/ui/shell.js';
+        import { initOfflineSupport } from './js/core/offline.js';
 
-            // Initialize particles
-            if (typeof initParticles === 'function') initParticles();
+        // Expose to window (in case inline scripts need them)
+        window.initApp  = initApp;
+        window.initTheme = initTheme;
+        window.initPWA  = initPWA;
+        window.initOfflineSupport = initOfflineSupport;
 
-            // Initialize theme
-            if (typeof initTheme === 'function') initTheme();
+        // Boot sequence
+        if (typeof initTheme === 'function') initTheme();
+        if (typeof initPWA   === 'function') initPWA();
+        if (typeof initOfflineSupport === 'function') initOfflineSupport();
+        if (typeof initApp   === 'function') await initApp();
 
-            // Initialize PWA
-            if (typeof initPWA === 'function') initPWA();
+        // UI event listeners
+        window.addEventListener('scroll', function () {
+            const btn = document.getElementById('back-to-top');
+            if (btn) btn.style.display = window.scrollY > 300 ? 'flex' : 'none';
+        }, { passive: true });
 
-            // Initialize offline support
-            if (typeof initOfflineSupport === 'function') initOfflineSupport();
+        document.addEventListener('click', function (e) {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar?.classList.contains('mobile-open') &&
+                !e.target.closest('.sidebar') &&
+                !e.target.closest('#menu-toggle')) {
+                sidebar.classList.remove('mobile-open');
+            }
+            const dd = document.getElementById('user-dropdown');
+            if (dd && !e.target.closest('.user-menu') && !e.target.closest('.user-dropdown')) {
+                dd.classList.remove('open');
+            }
+        });
 
-            // Boot the app
-            if (typeof initApp === 'function') initApp();
+        document.getElementById('modals-container')?.addEventListener('click', function (e) {
+            if (e.target.classList.contains('modal-overlay')) {
+                if (typeof window.closeModal === 'function') window.closeModal();
+            }
+        });
 
-            // Back-to-top button
-            window.addEventListener('scroll', function () {
-                const btn = document.getElementById('back-to-top');
-                if (btn) btn.style.display = window.scrollY > 300 ? 'flex' : 'none';
-            }, { passive: true });
-
-            // Close sidebar on outside click
-            document.addEventListener('click', function (e) {
-                const sidebar = document.getElementById('sidebar');
-                if (sidebar?.classList.contains('mobile-open') &&
-                    !e.target.closest('.sidebar') &&
-                    !e.target.closest('#menu-toggle')) {
-                    sidebar.classList.remove('mobile-open');
-                }
-            });
-
-            // Close user dropdown on outside click
-            document.addEventListener('click', function (e) {
-                const dd = document.getElementById('user-dropdown');
-                if (dd && !e.target.closest('.user-menu') && !e.target.closest('.user-dropdown')) {
-                    dd.classList.remove('open');
-                }
-            });
-
-            // Close modal on backdrop click
-            document.getElementById('modals-container')?.addEventListener('click', function (e) {
-                if (e.target.classList.contains('modal-overlay')) {
-                    if (typeof closeModal === 'function') closeModal();
-                }
-            });
-
-            console.log('✅ ECOLE LA FONTAINE v9.0 — All systems initialised');
-
-        })();
+        console.log('✅ ECOLE LA FONTAINE v9.0 — All systems initialised');
     </script>
 
 </body>

@@ -8,7 +8,7 @@
 // APP CONFIGURATION
 // ──────────────────────────────────────────────────────────────────────
 
-export const APP_CONFIG = {
+const APP_CONFIG = {
     name: 'ECOLE LA FONTAINE',
     version: '9.0.0',
     sessionDuration: 60 * 60 * 1000,          // 1 hour
@@ -30,7 +30,7 @@ export const APP_CONFIG = {
 // CURRENCY SETTINGS
 // ──────────────────────────────────────────────────────────────────────
 
-export const CURRENCY = {
+const CURRENCY = {
     code: 'RWF',
     symbol: 'RWF',
     locale: 'en-RW',
@@ -41,7 +41,7 @@ export const CURRENCY = {
 // ACADEMIC CONSTANTS
 // ──────────────────────────────────────────────────────────────────────
 
-export const DEFAULT_GRADES = [
+const DEFAULT_GRADES = [
     { grade: 'A+', min: 90, max: 100, desc: 'Excellent', color: '#10b981', sort_order: 1 },
     { grade: 'A', min: 80, max: 89, desc: 'Very Good', color: '#34d399', sort_order: 2 },
     { grade: 'B', min: 70, max: 79, desc: 'Good', color: '#60a5fa', sort_order: 3 },
@@ -50,7 +50,7 @@ export const DEFAULT_GRADES = [
     { grade: 'F', min: 0, max: 49, desc: 'Fail', color: '#ef4444', sort_order: 6 },
 ];
 
-export const PROMOTION_RULES = [
+const PROMOTION_RULES = [
     { from: 'NURSERY 1', to: 'NURSERY 2' },
     { from: 'NURSERY 2', to: 'NURSERY 3' },
     { from: 'NURSERY 3', to: 'PRIMARY 1' },
@@ -62,7 +62,7 @@ export const PROMOTION_RULES = [
     { from: 'PRIMARY 6', to: 'GRADUATED' },
 ];
 
-export const PROMOTION_MAP = Object.fromEntries(
+const PROMOTION_MAP = Object.fromEntries(
     PROMOTION_RULES.map(r => [r.from, r.to])
 );
 
@@ -70,9 +70,9 @@ export const PROMOTION_MAP = Object.fromEntries(
 // TIMETABLE CONSTANTS
 // ──────────────────────────────────────────────────────────────────────
 
-export const TIMETABLE_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+const TIMETABLE_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
-export const TIMETABLE_TIME_SLOTS = [
+const TIMETABLE_TIME_SLOTS = [
     '08:20-09:00',
     '09:00-09:40',
     '09:40-10:20',
@@ -88,13 +88,13 @@ export const TIMETABLE_TIME_SLOTS = [
     '16:00-16:40',
 ];
 
-export const BREAK_SLOTS = new Set(['10:20-10:40', '12:00-13:00', '15:00-15:20']);
+const BREAK_SLOTS = new Set(['10:20-10:40', '12:00-13:00', '15:00-15:20']);
 
-export function isBreakSlot(timeSlot) {
+function isBreakSlot(timeSlot) {
     return BREAK_SLOTS.has(timeSlot);
 }
 
-export function getBreakIcon(timeSlot) {
+function getBreakIcon(timeSlot) {
     if (timeSlot === '10:20-10:40') return '☕';
     if (timeSlot === '12:00-13:00') return '🍽️';
     if (timeSlot === '15:00-15:20') return '☕';
@@ -105,37 +105,37 @@ export function getBreakIcon(timeSlot) {
 // ASSESSMENT CONSTANTS
 // ──────────────────────────────────────────────────────────────────────
 
-export const ASSESSMENT_TYPES = ['Quiz', 'Assignment', 'Mid-term', 'Exam', 'Final Exam'];
+const ASSESSMENT_TYPES = ['Quiz', 'Assignment', 'Mid-term', 'Exam', 'Final Exam'];
 
-export const PRE_MIDTERM_TYPES = ['Quiz', 'Assignment', 'Mid-term'];
+const PRE_MIDTERM_TYPES = ['Quiz', 'Assignment', 'Mid-term'];
 
-export const POST_MIDTERM_TYPES = ['Quiz', 'Assignment', 'Mid-term', 'Exam', 'Final Exam'];
+const POST_MIDTERM_TYPES = ['Quiz', 'Assignment', 'Mid-term', 'Exam', 'Final Exam'];
 
 // ──────────────────────────────────────────────────────────────────────
 // FINANCE CONSTANTS
 // ──────────────────────────────────────────────────────────────────────
 
-export const PAYMENT_METHODS = ['Cash', 'Mobile-Money', 'Bank Transfer', 'Cheque'];
+const PAYMENT_METHODS = ['Cash', 'Mobile-Money', 'Bank Transfer', 'Cheque'];
 
-export const FEE_FREQUENCIES = ['monthly', 'termly', 'annual', 'one_time'];
+const FEE_FREQUENCIES = ['monthly', 'termly', 'annual', 'one_time'];
 
-export const FEE_TYPES = ['standard', 'transport', 'activity', 'one-time'];
+const FEE_TYPES = ['standard', 'transport', 'activity', 'one-time'];
 
 // ──────────────────────────────────────────────────────────────────────
 // STUDENT CONSTANTS
 // ──────────────────────────────────────────────────────────────────────
 
-export const STUDENT_STATUSES = ['Active', 'Inactive', 'Transferred', 'Graduated'];
+const STUDENT_STATUSES = ['Active', 'Inactive', 'Transferred', 'Graduated'];
 
-export const GENDER_OPTIONS = ['Male', 'Female'];
+const GENDER_OPTIONS = ['Male', 'Female'];
 
 // ──────────────────────────────────────────────────────────────────────
 // USER CONSTANTS
 // ──────────────────────────────────────────────────────────────────────
 
-export const USER_ROLES = ['admin', 'accountant', 'teacher'];
+const USER_ROLES = ['admin', 'accountant', 'teacher'];
 
-export const USER_ROLE_LABELS = {
+const USER_ROLE_LABELS = {
     admin: 'Administrator',
     accountant: 'Accountant',
     teacher: 'Teacher',
@@ -145,7 +145,7 @@ export const USER_ROLE_LABELS = {
 // NOTIFICATION TYPES
 // ──────────────────────────────────────────────────────────────────────
 
-export const NOTIFICATION_TYPES = {
+const NOTIFICATION_TYPES = {
     PAYMENT: 'payment',
     MARKS: 'marks',
     ATTENDANCE: 'attendance',
@@ -159,7 +159,7 @@ export const NOTIFICATION_TYPES = {
     INFO: 'info',
 };
 
-export const NOTIFICATION_PRIORITY = {
+const NOTIFICATION_PRIORITY = {
     CRITICAL: 'critical',
     HIGH: 'high',
     MEDIUM: 'medium',
@@ -170,14 +170,14 @@ export const NOTIFICATION_PRIORITY = {
 // ERROR CONSTANTS
 // ──────────────────────────────────────────────────────────────────────
 
-export const ERROR_SEVERITY = {
+const ERROR_SEVERITY = {
     LOW: 'low',
     MEDIUM: 'medium',
     HIGH: 'high',
     CRITICAL: 'critical',
 };
 
-export const ERROR_CATEGORIES = {
+const ERROR_CATEGORIES = {
     NETWORK: 'network',
     DATABASE: 'database',
     AUTH: 'auth',
@@ -190,7 +190,7 @@ export const ERROR_CATEGORIES = {
 // Z-INDEX LAYERS
 // ──────────────────────────────────────────────────────────────────────
 
-export const Z_INDEX = {
+const Z_INDEX = {
     NEGATIVE: -1,
     LOW: 10,
     MEDIUM: 100,
@@ -207,7 +207,7 @@ export const Z_INDEX = {
 // STORAGE KEYS
 // ──────────────────────────────────────────────────────────────────────
 
-export const STORAGE_KEYS = {
+const STORAGE_KEYS = {
     USER: 'elf_user',
     EXPIRY: 'elf_expiry',
     THEME: 'elf_theme',
@@ -244,3 +244,11 @@ export const STORAGE_KEYS = {
     ANALYTICS_CACHE_TIME: 'analytics_cache_time',
     PWA_PROMPT_SHOWN: 'pwa_prompt_shown',
 };
+// ── GLOBAL EXPORTS ──────────────────────────────────────────────────
+window.APP_CONFIG    = APP_CONFIG;
+window.STORAGE_KEYS  = STORAGE_KEYS;
+window.SUPABASE_URL  = typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : window.SUPABASE_URL;
+window.USER_ROLES    = USER_ROLES;
+window.USER_ROLE_LABELS = USER_ROLE_LABELS;
+window.GRADE_COLORS  = typeof GRADE_COLORS !== 'undefined' ? GRADE_COLORS : {};
+window.ASSESSMENT_TYPES = typeof ASSESSMENT_TYPES !== 'undefined' ? ASSESSMENT_TYPES : [];

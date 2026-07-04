@@ -205,3 +205,5 @@ window.confirmDialog = confirmDialog;
 window.showProfileModal = showProfileModal;
 window.showChangePasswordModal = showChangePasswordModal;
 window.submitChangePassword = submitChangePassword;
+
+console.log('[Modals] showProfileModal exported:', typeof window.showProfileModal);

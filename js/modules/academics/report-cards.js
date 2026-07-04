@@ -1004,19 +1004,10 @@ async function ensureStateLoaded() {
  * @param {number} termId - optional, defaults to current term
  * @returns {Promise<object>} report data
  */
-export async function generateSingleReport(studentId, termId = null) {
-    const { state } = await import('../../core/state.js');
-    const student = state.students?.find(s => s.id === studentId);
-    if (!student) throw new Error('Student not found');
 
-    const term = termId
-        ? state.terms?.find(t => t.id === termId)
-        : state.terms?.find(t => t.is_active);
+// ──────────────────────────────────────────────────────────────────────
+// ─── EXPORTS ─────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────
 
-    const studentMarks = state.marks?.filter(m => {
-        const assessment = state.assessments?.find(a => a.id === m.assessment_id);
-        return assessment?.term_id === (term?.id) && m.student_id === studentId;
-    }) || [];
+export { generateSingleReport };
 
-    return { student, term, marks: studentMarks };
-}

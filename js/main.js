@@ -1,83 +1,62 @@
 /**
  * ECOLE LA FONTAINE — Main Entry Point
- * Initializes the entire application, loads all modules, and starts the app
- * Last updated: 2026-07-03
- * 
- * CHANGES:
- * - Added academic year initialization on boot
- * - Loads year-specific data after login
- * - Sets up year filter from saved preference
- * - Handles year switching at app level
- * - Initializes term progress with selected year
+ * Last updated: 2026-07-04
  */
 
-// ──────────────────────────────────────────────────────────────────────
-// IMPORTS — All core modules are loaded via script tags in index.html
-// This file serves as the application orchestrator
-// ──────────────────────────────────────────────────────────────────────
-
-// ──────────────────────────────────────────────────────────────────────
-// APPLICATION STATE
-// ──────────────────────────────────────────────────────────────────────
-
+import { initApp, bootApp } from './core/boot.js';
+import { state, getCurrentAcademicYear } from './core/state.js';
+import { checkAuth, logout } from './core/auth.js';
+import { initTheme } from './ui/theme.js';
+import { initSidebar, closeSidebarMobile } from './ui/sidebar.js';
+import { initPWA } from './ui/shell.js';
 import { initOfflineSupport } from './core/offline.js';
+import { initUserDropdown, initNotifications } from './ui/topbar.js';
+import { showToast } from './ui/toast.js';
+import { closeModal } from './ui/modals.js';
 
 let appInitialized = false;
 let bootTime = Date.now();
 
-// ──────────────────────────────────────────────────────────────────────
-// MAIN INITIALIZATION
-// ──────────────────────────────────────────────────────────────────────
-
-/**
- * Main application entry point
- * Called from DOMContentLoaded event in index.html
- */
 async function initApplication() {
+    // ✅ Guard against double initialization
     if (appInitialized) {
-        console.warn('[Main] App already initialized');
+        console.warn('[Main] App already initialized — skipping');
         return;
     }
 
     console.log('🚀 ECOLE LA FONTAINE v9.0 — Initializing...');
 
     try {
-        // ── 1. Initialize core systems ──
         initParticles();
         initTheme();
         initOfflineSupport();
         initPWA();
         initBackToTop();
 
-        // ── 2. Initialize UI components ──
         initSidebar();
         initUserDropdown();
         initNotifications();
 
-        // ── 3. Check for existing session ──
         const storedUser = checkAuth();
 
         if (storedUser) {
-            // ── 4. User is logged in — boot the app ──
             state.currentUser = storedUser;
-
-            // ── 5. Restore saved year preference ──
             const savedYearId = localStorage.getItem('elf_selected_year');
             if (savedYearId) {
                 state.filters = state.filters || {};
                 state.filters.academic_year_id = parseInt(savedYearId);
             }
-
-            await bootApp(storedUser);
+            // ✅ Only boot if not already booted
+            if (!window._booted) {
+                window._booted = true;
+                await bootApp(storedUser);
+            }
         } else {
-            // ── 6. Show login page ──
             showLoginPage();
         }
 
-        // ── 7. Setup global event listeners ──
         setupGlobalEventListeners();
 
-        // ── 8. Mark as initialized ──
         appInitialized = true;
         bootTime = Date.now();
 

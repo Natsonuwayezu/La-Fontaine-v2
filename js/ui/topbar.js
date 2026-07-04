@@ -22,6 +22,8 @@ import {
 import { updateNotificationBadge, fetchUnreadNotifications } from '../core/notifications.js';
 import { navigateTo } from '../core/router.js';
 import { logout } from '../core/auth.js';
+import { showProfileModal, showChangePasswordModal } from './modals.js';
+import { toggleTheme } from './theme.js';
 import { getCurrentPhase, termProgress } from '../core/formulas.js';
 import { esc } from '../core/utils.js';
 
@@ -312,7 +314,7 @@ export function initNotifications() {
             navigateTo('notification-center');
         });
     }
-}
+} 
 
 // ──────────────────────────────────────────────────────────────────────
 // THEME TOGGLE (in dropdown)

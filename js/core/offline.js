@@ -364,6 +364,7 @@ export async function updatePendingBadge() {
 
 export function initOfflineSupport() {
     openDatabase().catch(console.error);
+    console.log('[Offline] Initialized');
 
     window.addEventListener('online', () => {
         updateConnectionStatus();

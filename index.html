@@ -93,29 +93,35 @@
     <link rel="stylesheet" href="css/main.css">
 
     <!-- ============================================================ -->
-    <!-- JAVASCRIPT — CONFIG FIRST (type="module")                   -->
+    <!-- JAVASCRIPT — CONFIG (regular scripts, NOT modules)           -->
     <!-- ============================================================ -->
-    <script type="module" src="js/config/constants.js"></script>
-    <script type="module" src="js/config/supabase-config.js"></script>
-    <script type="module" src="js/config/navigation.js"></script>
+    <script src="js/config/constants.js"></script>
+    <script src="js/config/supabase-config.js"></script>
+    <script src="js/config/navigation.js"></script>
 
     <!-- ============================================================ -->
-    <!-- JAVASCRIPT — CORE (type="module")                           -->
+    <!-- JAVASCRIPT — EMERGENCY FIX (REGULAR SCRIPT — MUST BE FIRST) -->
+    <!-- ============================================================ -->
+    <script src="js/patches/emergency-fix.js"></script>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT — CORE (modules)                                  -->
     <!-- ============================================================ -->
     <script type="module" src="js/core/state.js"></script>
     <script type="module" src="js/core/utils.js"></script>
     <script type="module" src="js/core/api.js"></script>
+    <script type="module" src="js/core/auth.js"></script>
     <script type="module" src="js/core/formulas.js"></script>
     <script type="module" src="js/core/fees.js"></script>
-    <script type="module" src="js/core/auth.js"></script>
     <script type="module" src="js/core/boot.js"></script>
+    <script type="module" src="js/patches/fix-boot.js"></script>
     <script type="module" src="js/core/router.js"></script>
     <script type="module" src="js/core/permissions.js"></script>
     <script type="module" src="js/core/offline.js"></script>
     <script type="module" src="js/core/notifications.js"></script>
 
     <!-- ============================================================ -->
-    <!-- JAVASCRIPT — UI (type="module")                             -->
+    <!-- JAVASCRIPT — UI (modules)                                    -->
     <!-- ============================================================ -->
     <script type="module" src="js/ui/sidebar.js"></script>
     <script type="module" src="js/ui/topbar.js"></script>
@@ -225,16 +231,39 @@
     <script type="module" src="js/modules/analytics/analytics-settings.js"></script>
     <script type="module" src="js/modules/analytics/system-health.js"></script>
 
+    <!--============================================================-->
+    <!-- JAVASCRIPT — PATCHES (regular scripts, NOT modules)         -->
     <!-- ============================================================ -->
-    <!-- JAVASCRIPT — PATCHES (type="module")                       -->
-    <!-- ============================================================ -->
-    <script type="module" src="js/patches/missing-functions.js"></script>
-    <script type="module" src="js/patches/qr-code.js"></script>
+    <script src="js/patches/missing-functions.js"></script>
+    <script src="js/patches/qr-code.js"></script>
 
     <!-- ============================================================ -->
-    <!-- JAVASCRIPT — MAIN ENTRY (type="module")                    -->
+    <!-- JAVASCRIPT — MAIN ENTRY (module)                            -->
     <!-- ============================================================ -->
     <script type="module" src="js/main.js"></script>
+
+    <!-- ============================================================ -->
+    <!-- INLINE INIT (regular script, NOT module)                    -->
+    <!-- ============================================================ -->
+    <script>
+        // This runs in the global scope
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('[Index] DOM ready — initializing...');
+
+            // Check if login functions are available
+            console.log('[Index] doLogin:', typeof window.doLogin);
+            console.log('[Index] toggleLoginPw:', typeof window.toggleLoginPw);
+
+            // Initialize everything
+            if (typeof initParticles === 'function') initParticles();
+            if (typeof initTheme === 'function') initTheme();
+            if (typeof initPWA === 'function') initPWA();
+            if (typeof initOfflineSupport === 'function') initOfflineSupport();
+            if (typeof initApp === 'function') initApp();
+
+            console.log('✅ ECOLE LA FONTAINE v9.0 — All systems initialised');
+        });
+    </script>
 
 </head>
 

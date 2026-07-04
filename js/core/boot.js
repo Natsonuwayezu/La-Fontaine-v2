@@ -297,7 +297,11 @@ export async function loadHistoricalYearData(yearId) {
  * @param {object} user - User object
  */
 export async function bootApp(user) {
-    if (isBooted) return;
+    if (isBooted) {
+        console.warn('[Boot] Already booted — skipping');
+        return;
+    }
+    console.log('[Boot] bootApp called for:', user?.name);
 
     // Swap login → app
     const loginPage = document.getElementById('login-page');
@@ -492,6 +496,11 @@ function resetIdleTimer() {
 // ──────────────────────────────────────────────────────────────────────
 
 export async function initApp() {
+    if (isBooted) {
+        console.warn('[Boot] App already booted — skipping');
+        return;
+    }
+    console.log('[Boot] initApp called');
     const storedUser = checkAuth();
     if (storedUser) {
         state.currentUser = storedUser;
@@ -503,3 +512,13 @@ export async function initApp() {
         document.getElementById('login-password').value = '';
     }
 }
+
+// ──────────────────────────────────────────────────────────────────────
+// ─── EXPOSE FUNCTIONS ────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────
+
+window.initApp = initApp;
+window.bootApp = bootApp;
+
+console.log('[Boot] initApp exported:', typeof initApp);
+console.log('[Boot] bootApp exported:', typeof bootApp);

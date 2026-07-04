@@ -383,6 +383,7 @@ window.openLoginCard = function () {
  * Called from login page "Sign In" button and Enter key
  */
 window.doLogin = async function () {
+    console.log('[Auth] doLogin called');
     const role = document.getElementById('login-role')?.value || 'admin';
     const username = document.getElementById('login-username')?.value?.trim();
     const password = document.getElementById('login-password')?.value?.trim();
@@ -444,6 +445,7 @@ window.doLogin = async function () {
         }
     }
 };
+console.log('[Auth] window.doLogin set:', typeof window.doLogin);
 
 /**
  * Handle biometric login button click

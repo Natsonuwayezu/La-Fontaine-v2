@@ -20,6 +20,7 @@ let deferredPrompt = null;
 export function initPWA() {
     // Service worker registration
     registerServiceWorker();
+    console.log('[PWA] Initialized');
 
     // Install prompt
     window.addEventListener('beforeinstallprompt', (e) => {

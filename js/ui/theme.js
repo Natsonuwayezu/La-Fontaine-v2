@@ -40,6 +40,7 @@ export function applyTheme(theme) {
  * Initialize theme on page load
  */
 export function initTheme() {
+    console.log('[Theme] Initialized');
     const savedTheme = getSavedTheme();
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const theme = savedTheme || (prefersDark ? THEMES.DARK : THEMES.LIGHT);

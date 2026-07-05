@@ -329,3 +329,9 @@ window.ACCOUNTANT_BLOCKED_MODULES  = ACCOUNTANT_BLOCKED_MODULES;
 window.getNavConfig                = getNavConfig;
 window.findNavLabel                = findNavLabel;
 window.getDefaultModule            = getDefaultModule;
+
+// ── ES MODULE EXPORTS ─────────────────────────────────────────────────────────
+export {
+    NAV_CONFIG, TEACHER_BLOCKED_MODULES, ACCOUNTANT_BLOCKED_MODULES,
+    getNavConfig, findNavLabel, getDefaultModule,
+};

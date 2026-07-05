@@ -14,6 +14,10 @@
  * - Full balance tracking with year/term context
  */
 
+
+
+const state = window.state || {}; // global state alias
+const ensureStateLoaded = window.ensureStateLoaded || (async () => {}); // global from boot.js
 import {
     state,
     getCurrentUser,

@@ -12,6 +12,8 @@
  * - Archived announcements can be viewed
  */
 
+
+const state = window.state || {}; // global state alias
 import { state, getCurrentUser, getCurrentAcademicYear, getCurrentTerm, getTermsByYear } from '../../core/state.js';
 import { esc, fmtDate, fmtDateTime, fmtAgo } from '../../core/utils.js';
 import { update, getAll, insert, remove, logActivity, get } from '../../core/api.js';
@@ -664,7 +666,7 @@ function closeModal(modalId) {
 
 async function ensureStateLoaded() {
     if (!state.classes.length) {
-        const { loadInitialData } = await import('../../core/boot.js');
+        const loadInitialData = window.loadInitialData || (async () => {});
         await loadInitialData(false);
     }
 }

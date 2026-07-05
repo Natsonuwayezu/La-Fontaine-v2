@@ -12,6 +12,8 @@
  * - Auto-generates student code with year
  */
 
+
+const state = window.state || {}; // global state alias
 import {
     state,
     getClassById,
@@ -386,7 +388,7 @@ function showToast(message, type = 'info', duration = 3500) {
 
 async function ensureStateLoaded() {
     if (!state.classes.length) {
-        const { loadInitialData } = await import('../../core/boot.js');
+        const loadInitialData = window.loadInitialData || (async () => {});
         await loadInitialData(false);
     }
 }

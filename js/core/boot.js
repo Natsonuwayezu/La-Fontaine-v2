@@ -12,6 +12,8 @@
  * - Boot now loads marks_archive, student_promotions, etc.
  */
 
+
+const state = window.state || {}; // global state alias
 import { state, updateState, invalidateCache, resetFilters, initState } from './state.js';
 import { checkAuth, saveSession, clearSession, logout, resetSessionExpiry } from './auth.js';
 import { get, getSchoolSettings, getAllRecords, getYearData } from './api.js';
@@ -519,6 +521,17 @@ export async function initApp() {
 
 window.initApp = initApp;
 window.bootApp = bootApp;
+// ── ensureStateLoaded — shared global used by all modules ─────────────────────
+async function ensureStateLoaded(forceRefresh = false) {
+    if (!state.classes || !state.classes.length) {
+        console.log('[Boot] State empty — loading initial data...');
+        await loadInitialData(forceRefresh);
+    }
+}
+
+window.ensureStateLoaded = ensureStateLoaded;
+window.loadInitialData   = loadInitialData;
+
 
 console.log('[Boot] initApp exported:', typeof initApp);
 console.log('[Boot] bootApp exported:', typeof bootApp);

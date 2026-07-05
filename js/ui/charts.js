@@ -10,6 +10,8 @@
  * - Added functions for year-specific chart data
  */
 
+
+const state = window.state || {}; // global state alias
 import {
     state,
     getCurrentAcademicYear,

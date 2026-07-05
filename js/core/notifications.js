@@ -4,6 +4,8 @@
  * Last updated: 2026-06-28
  */
 
+
+const state = window.state || {}; // global state alias
 import { state, getCurrentUser } from './state.js';
 import { insert, get, update } from './api.js';
 import { NOTIFICATION_TYPES, NOTIFICATION_PRIORITY } from '../config/constants.js';

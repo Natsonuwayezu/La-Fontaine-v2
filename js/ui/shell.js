@@ -4,6 +4,8 @@
  * Last updated: 2026-06-28
  */
 
+
+const state = window.state || {}; // global state alias
 import { state } from '../core/state.js';
 import { showToast } from './toast.js';
 import { applySchoolLogo } from './theme.js';

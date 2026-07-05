@@ -11,6 +11,8 @@
  * - Year indicator in QR display modal
  */
 
+
+const state = window.state || {}; // global state alias
 import {
     state,
     getCurrentAcademicYear,

@@ -11,6 +11,8 @@
  * - Phase indicator (Pre/Post Midterm) based on selected year
  */
 
+
+const state = window.state || {}; // global state alias
 import {
     state,
     getCurrentUser,

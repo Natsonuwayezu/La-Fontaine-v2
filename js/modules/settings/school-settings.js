@@ -11,6 +11,8 @@
  * - Prevents changes to inactive years where appropriate
  */
 
+
+const state = window.state || {}; // global state alias
 import {
     state,
     getCurrentUser,
@@ -424,9 +426,9 @@ function logout() {
 }
 
 async function ensureStateLoaded() {
-    if (!state.classes.length) {
-        const { loadInitialData } = await import('../../core/boot.js');
-        await loadInitialData(false);
+    if (!state.classes || !state.classes.length) {
+        const fn = window.loadInitialData || (async () => {});
+        await fn(false);
     }
 }
 
@@ -439,12 +441,12 @@ function navigateTo(module) {
 }
 
 async function updateWhere(table, filter, data) {
-    const { updateWhere } = await import('../../core/api.js');
+    const updateWhere = window.updateWhere || window.update || (async () => {});
     return updateWhere(table, filter, data);
 }
 
 async function _localUpdate(table, id, data) {
-    const { update } = await import('../../core/api.js');
+    const update = window.update || (async () => {});
     return _localUpdate(table, id, data);
 }
 

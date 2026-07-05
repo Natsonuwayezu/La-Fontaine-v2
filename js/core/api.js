@@ -565,8 +565,8 @@ export const getAll = getAllRecords;
 
 /** Re-fetch a table and update state — modules call this after mutations */
 export async function refreshTable(tableName) {
-    const { state } = await import('./state.js');
-    const { loadInitialData } = await import('./boot.js');
+    const state = window.state || {};
+    const loadInitialData = window.loadInitialData || (async () => {});
     try {
         const data = await getAll(tableName);
         const keyMap = {

@@ -12,6 +12,8 @@
  * - Added year status indicators
  */
 
+
+const state = window.state || {}; // global state alias
 import {
     state,
     getCurrentUser,
@@ -985,7 +987,7 @@ function closeModal(modalId) {
 }
 
 async function refreshTable(table) {
-    const { getAll } = await import('../../core/api.js');
+    const getAll = window.getAll || (async () => []);
     if (table === 'terms') {
         state.terms = await getAll('terms');
     } else if (table === 'academic_years') {
@@ -996,9 +998,9 @@ async function refreshTable(table) {
 }
 
 async function ensureStateLoaded() {
-    if (!state.classes.length) {
-        const { loadInitialData } = await import('../../core/boot.js');
-        await loadInitialData(false);
+    if (!state.classes || !state.classes.length) {
+        const fn = window.loadInitialData || (async () => {});
+        await fn(false);
     }
 }
 

@@ -12,6 +12,10 @@
  * - Batch transcripts filtered by year
  */
 
+
+
+const state = window.state || {}; // global state alias
+const ensureStateLoaded = window.ensureStateLoaded || (async () => {}); // global from boot.js
 import {
     state,
     getClassById,

@@ -4,6 +4,10 @@
  * Last updated: 2026-06-29
  */
 
+
+
+const state = window.state || {}; // global state alias
+const ensureStateLoaded = window.ensureStateLoaded || (async () => {}); // global from boot.js
 import { state, getClassById, getCurrentUser, isAdmin } from '../../core/state.js';
 import { esc, fmtDate, fmtCurrency } from '../../core/utils.js';
 import { getFullStudentBalance } from '../../core/fees.js';

@@ -4,6 +4,8 @@
  * Last updated: 2026-06-29
  */
 
+
+const state = window.state || {}; // global state alias
 import { state, getCurrentUser } from '../../core/state.js';
 import { esc, fmtDate, fmtDateTime } from '../../core/utils.js';
 import { get, getCount } from '../../core/api.js';

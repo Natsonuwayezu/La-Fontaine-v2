@@ -12,6 +12,8 @@
  * - Download individual receipts or consolidated family receipt
  */
 
+
+const state = window.state || {}; // global state alias
 import {
     state,
     getClassById,
@@ -1030,14 +1032,14 @@ function showToast(message, type = 'info', duration = 3500) {
 }
 
 async function ensureStateLoaded() {
-    if (!state.classes.length) {
-        const { loadInitialData } = await import('../../core/boot.js');
-        await loadInitialData(false);
+    if (!state.classes || !state.classes.length) {
+        const fn = window.loadInitialData || (async () => {});
+        await fn(false);
     }
 }
 
 async function refreshTable(table) {
-    const { getAll } = await import('../../core/api.js');
+    const getAll = window.getAll || (async () => []);
     if (table === 'payments') {
         state.payments = await getAll('payments');
     } else if (table === 'student_fees') {
@@ -1060,7 +1062,7 @@ window._toggleBatchMode = toggleBatchMode;
 async function loadFamilyStudents() {
     const familyId = document.getElementById('family-select')?.value;
     if (!familyId) return;
-    const { state } = await import('../../core/state.js');
+    const state = window.state || {};
     const students = (state.students || []).filter(s => s.family_id == familyId && !s.is_deleted);
     const list = document.getElementById('family-students-list');
     if (!list) return;

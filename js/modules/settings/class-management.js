@@ -11,6 +11,8 @@
  * - Class list shows which students are in the current year
  */
 
+
+const state = window.state || {}; // global state alias
 import {
     state,
     getCurrentUser,
@@ -662,7 +664,7 @@ function exportToExcel(data, filename) {
 
 async function ensureStateLoaded() {
     if (!state.classes.length) {
-        const { loadInitialData } = await import('../../core/boot.js');
+        const loadInitialData = window.loadInitialData || (async () => {});
         await loadInitialData(false);
     }
 }

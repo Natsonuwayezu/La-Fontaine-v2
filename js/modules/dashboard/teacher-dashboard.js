@@ -11,6 +11,10 @@
  * - Shows year/term info in the dashboard
  */
 
+
+
+const state = window.state || {}; // global state alias
+const ensureStateLoaded = window.ensureStateLoaded || (async () => {}); // global from boot.js
 import {
     state,
     getCurrentUser,

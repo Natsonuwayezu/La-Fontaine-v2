@@ -11,6 +11,8 @@
  * - Cache includes year information
  */
 
+
+const state = window.state || {}; // global state alias
 import {
     state,
     getCurrentUser,
@@ -492,7 +494,7 @@ function closeModal(modalId) {
 
 async function ensureStateLoaded() {
     if (!state.classes.length) {
-        const { loadInitialData } = await import('../../core/boot.js');
+        const loadInitialData = window.loadInitialData || (async () => {});
         await loadInitialData(false);
     }
 }

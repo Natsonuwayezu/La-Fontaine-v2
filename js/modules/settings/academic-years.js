@@ -12,6 +12,8 @@
  * - Updates topbar when year status changes
  */
 
+
+const state = window.state || {}; // global state alias
 import {
     state,
     getCurrentUser,
@@ -743,9 +745,9 @@ function exportToExcel(data, filename) {
 }
 
 async function ensureStateLoaded() {
-    if (!state.classes.length) {
-        const { loadInitialData } = await import('../../core/boot.js');
-        await loadInitialData(false);
+    if (!state.classes || !state.classes.length) {
+        const fn = window.loadInitialData || (async () => {});
+        await fn(false);
     }
 }
 

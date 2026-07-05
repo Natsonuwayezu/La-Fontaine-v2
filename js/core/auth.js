@@ -10,6 +10,8 @@
  * - Added login form helpers
  */
 
+
+const state = window.state || {}; // global state alias
 import { state, updateState } from './state.js';
 import { logActivity, getSchoolSettings, updateSchoolSetting, get, getById } from './api.js';
 import { APP_CONFIG, STORAGE_KEYS } from '../config/constants.js';

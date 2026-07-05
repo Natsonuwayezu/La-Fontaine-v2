@@ -15,6 +15,8 @@
  * - Added getStudentClassHistory() helper
  */
 
+
+const state = window.state || {}; // global state alias
 // ──────────────────────────────────────────────────────────────────────
 // STATE OBJECT
 // ──────────────────────────────────────────────────────────────────────

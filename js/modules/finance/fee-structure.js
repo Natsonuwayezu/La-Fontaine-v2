@@ -12,6 +12,8 @@
  * - Academic year filtering
  */
 
+
+const state = window.state || {}; // global state alias
 import {
     state,
     getClassById,
@@ -298,14 +300,14 @@ function closeModal(modalId) {
 }
 
 async function ensureStateLoaded() {
-    if (!state.classes.length) {
-        const { loadInitialData } = await import('../../core/boot.js');
-        await loadInitialData(false);
+    if (!state.classes || !state.classes.length) {
+        const fn = window.loadInitialData || (async () => {});
+        await fn(false);
     }
 }
 
 async function refreshTable(table) {
-    const { getAll } = await import('../../core/api.js');
+    const getAll = window.getAll || (async () => []);
     if (table === 'fee_categories') {
         state.feeCategories = await getAll('fee_categories');
     } else if (table === 'fee_amounts') {

@@ -13,6 +13,8 @@
  * - QR codes contain year/term context
  */
 
+
+const state = window.state || {}; // global state alias
 import {
     state,
     getClassById,
@@ -976,7 +978,7 @@ function showToast(message, type = 'info', duration = 3500) {
 async function ensureStateLoaded() {
     if (!state.classes.length) {
         try {
-            const { getAll } = await import('../../core/api.js');
+            const getAll = window.getAll || (async () => []);
             state.classes = await getAll('classes');
             state.subjects = await getAll('subjects');
             state.terms = await getAll('terms');

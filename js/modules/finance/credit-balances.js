@@ -11,6 +11,8 @@
  * - Read-only mode for inactive years
  */
 
+
+const state = window.state || {}; // global state alias
 import {
     state,
     getClassById,
@@ -471,9 +473,9 @@ function showToast(message, type = 'info', duration = 3500) {
 }
 
 async function ensureStateLoaded() {
-    if (!state.classes.length) {
-        const { loadInitialData } = await import('../../core/boot.js');
-        await loadInitialData(false);
+    if (!state.classes || !state.classes.length) {
+        const fn = window.loadInitialData || (async () => {});
+        await fn(false);
     }
 }
 

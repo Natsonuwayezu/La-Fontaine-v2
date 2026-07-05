@@ -4,6 +4,8 @@
  * Last updated: 2026-07-03
  */
 
+
+const state = window.state || {}; // global state alias
 import { state } from './state.js';
 import { isAdmin, isTeacher, isAccountant } from './state.js';
 import {

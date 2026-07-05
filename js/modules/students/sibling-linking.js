@@ -4,6 +4,10 @@
  * Last updated: 2026-06-29
  */
 
+
+
+const state = window.state || {}; // global state alias
+const ensureStateLoaded = window.ensureStateLoaded || (async () => {}); // global from boot.js
 import { state, getClassById, getCurrentUser } from '../../core/state.js';
 import { esc } from '../../core/utils.js';
 import { update, insert } from '../../core/api.js';

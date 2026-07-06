@@ -5,7 +5,6 @@
  */
 
 
-const state = window.state || {}; // global state alias
 import { state, getClassById, getStudentById, getCurrentUser } from '../../core/state.js';
 import { esc, fmtDate, fmtCurrency } from '../../core/utils.js';
 import { getGrade, getGradeClass } from '../../core/formulas.js';

@@ -234,7 +234,7 @@
     <!-- JAVASCRIPT — PATCHES (regular scripts, NOT modules)         -->
     <!-- ============================================================ -->
     <script src="js/patches/missing-functions.js"></script>
-    <script src="js/patches/qr-code.js"></script>
+    <script type="module" src="js/patches/qr-code.js"></script>
 
     <!-- ============================================================ -->
     <!-- JAVASCRIPT — MAIN ENTRY (module)                            -->
@@ -425,52 +425,6 @@
     <!-- BOOT — fires after ALL modules are parsed and executed  -->
     <!-- ════════════════════════════════════════════════════════ -->
     <script src="js/patches/fix-boot.js"></script>
-    <script type="module">
-        // ES modules all resolved by this point
-        import { initApp } from './js/core/boot.js';
-        import { initTheme } from './js/ui/theme.js';
-        import { initPWA }   from './js/ui/shell.js';
-        import { initOfflineSupport } from './js/core/offline.js';
-
-        // Expose to window (in case inline scripts need them)
-        window.initApp  = initApp;
-        window.initTheme = initTheme;
-        window.initPWA  = initPWA;
-        window.initOfflineSupport = initOfflineSupport;
-
-        // Boot sequence
-        if (typeof initTheme === 'function') initTheme();
-        if (typeof initPWA   === 'function') initPWA();
-        if (typeof initOfflineSupport === 'function') initOfflineSupport();
-        if (typeof initApp   === 'function') await initApp();
-
-        // UI event listeners
-        window.addEventListener('scroll', function () {
-            const btn = document.getElementById('back-to-top');
-            if (btn) btn.style.display = window.scrollY > 300 ? 'flex' : 'none';
-        }, { passive: true });
-
-        document.addEventListener('click', function (e) {
-            const sidebar = document.getElementById('sidebar');
-            if (sidebar?.classList.contains('mobile-open') &&
-                !e.target.closest('.sidebar') &&
-                !e.target.closest('#menu-toggle')) {
-                sidebar.classList.remove('mobile-open');
-            }
-            const dd = document.getElementById('user-dropdown');
-            if (dd && !e.target.closest('.user-menu') && !e.target.closest('.user-dropdown')) {
-                dd.classList.remove('open');
-            }
-        });
-
-        document.getElementById('modals-container')?.addEventListener('click', function (e) {
-            if (e.target.classList.contains('modal-overlay')) {
-                if (typeof window.closeModal === 'function') window.closeModal();
-            }
-        });
-
-        console.log('✅ ECOLE LA FONTAINE v9.0 — All systems initialised');
-    </script>
 
 </body>
 

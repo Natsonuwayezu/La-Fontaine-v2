@@ -11,7 +11,6 @@
  */
 
 
-const state = window.state || {}; // global state alias
 import { getNavConfig, findNavLabel } from '../config/navigation.js';
 import { STORAGE_KEYS } from '../config/constants.js';
 import { state, setYearFilter, getCurrentAcademicYear, getActiveAcademicYearId } from '../core/state.js';

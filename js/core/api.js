@@ -60,6 +60,14 @@ export async function apiRequest(path, method = 'GET', body = null, returnHeader
         if (!res.ok) {
             const msg = data?.message || data?.hint || `HTTP ${res.status}`;
             console.error('[API]', method, path, 'failed:', msg);
+
+            // Fallback for missing term_number column in terms table
+            if (method === 'GET' && path.includes('order=term_number') && msg.includes('term_number')) {
+                const fallbackPath = path.replace(/order=term_number\.(asc|desc)/, 'order=name.$1');
+                console.warn('[API] Falling back from term_number ordering to name ordering:', fallbackPath);
+                return apiRequest(fallbackPath, method, body, returnHeaders, extraHeaders);
+            }
+
             return { success: false, error: msg, data: [] };
         }
 
@@ -155,7 +163,22 @@ export async function get(table, filters = {}) {
     }
 
     const result = await apiRequest(`${table}?${q}`, 'GET');
-    return result.success ? result.data : [];
+    let data = result.success ? result.data : [];
+
+    // Normalize terms: if `term_number` column is missing in the live schema,
+    // derive it from the `name` (e.g. "Term 1") or fallback to the array index.
+    if (table === 'terms' && Array.isArray(data)) {
+        data = data.map((r, idx) => {
+            if (r.term_number === undefined || r.term_number === null) {
+                const m = (r.name || '').match(/(\d+)/);
+                const inferred = m ? parseInt(m[1], 10) : (idx + 1);
+                return { ...r, term_number: inferred };
+            }
+            return r;
+        });
+    }
+
+    return data;
 }
 
 /**
@@ -200,7 +223,14 @@ export async function getCount(table, filters = '') {
  * @returns {Promise<object|null>} Created record
  */
 export async function insert(table, data) {
-    const result = await apiRequest(table, 'POST', data);
+    let result = await apiRequest(table, 'POST', data);
+    if (!result.success && typeof result.error === 'string' && result.error.includes('null value in column "id"')) {
+        console.warn('[API] Insert failed with null id; retrying with explicit id for table:', table);
+        const existing = await get(table, 'select=id&order=id.desc&limit=1').catch(() => []);
+        const nextId = (existing[0]?.id || 0) + 1;
+        const retryData = { id: nextId, ...data };
+        result = await apiRequest(table, 'POST', retryData);
+    }
     return result.success ? (Array.isArray(result.data) ? result.data[0] : result.data) : null;
 }
 
@@ -506,13 +536,11 @@ export async function updateSchoolSetting(key, value) {
     if (existing.length > 0) {
         result = await updateWhere('school_settings', `key=eq.${key}`, {
             value: String(value),
-            updated_at: new Date().toISOString(),
         });
     } else {
         result = await insert('school_settings', {
             key: key,
             value: String(value),
-            created_at: new Date().toISOString(),
         });
     }
     invalidateSettingsCache();
@@ -566,7 +594,7 @@ export const getAll = getAllRecords;
 /** Re-fetch a table and update state — modules call this after mutations */
 export async function refreshTable(tableName) {
     const state = window.state || {};
-    const loadInitialData = window.loadInitialData || (async () => {});
+    const loadInitialData = window.loadInitialData || (async () => { });
     try {
         const data = await getAll(tableName);
         const keyMap = {

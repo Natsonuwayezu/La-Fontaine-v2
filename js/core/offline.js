@@ -5,7 +5,6 @@
  */
 
 
-const state = window.state || {}; // global state alias
 import { state } from './state.js';
 import { insert, update } from './api.js';
 

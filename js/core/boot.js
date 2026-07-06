@@ -13,7 +13,6 @@
  */
 
 
-const state = window.state || {}; // global state alias
 import { state, updateState, invalidateCache, resetFilters, initState } from './state.js';
 import { checkAuth, saveSession, clearSession, logout, resetSessionExpiry } from './auth.js';
 import { get, getSchoolSettings, getAllRecords, getYearData } from './api.js';

@@ -5,7 +5,6 @@
  */
 
 
-const state = window.state || {}; // global state alias
 import { state, getClassById, getCurrentTerm } from './state.js';
 import { DEFAULT_GRADES } from '../config/constants.js';
 

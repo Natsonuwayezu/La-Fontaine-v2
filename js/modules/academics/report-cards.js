@@ -14,7 +14,6 @@
  */
 
 
-const state = window.state || {}; // global state alias
 import {
     state,
     getClassById,

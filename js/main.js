@@ -4,7 +4,6 @@
  */
 
 
-const state = window.state || {}; // global state alias
 import { initApp, bootApp } from './core/boot.js';
 import { state, getCurrentAcademicYear } from './core/state.js';
 import { checkAuth, logout } from './core/auth.js';

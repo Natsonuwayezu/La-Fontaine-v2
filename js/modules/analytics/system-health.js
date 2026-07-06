@@ -5,7 +5,6 @@
  */
 
 
-const state = window.state || {}; // global state alias
 import { state, getCurrentUser } from '../../core/state.js';
 import { esc, fmtDate, fmtDateTime } from '../../core/utils.js';
 import { get, getCount } from '../../core/api.js';

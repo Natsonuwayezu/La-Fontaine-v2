@@ -6,7 +6,6 @@
 
 
 
-const state = window.state || {}; // global state alias
 const ensureStateLoaded = window.ensureStateLoaded || (async () => {}); // global from boot.js
 import { state, getClassById, getCurrentUser } from '../../core/state.js';
 import { esc, fmtDate } from '../../core/utils.js';

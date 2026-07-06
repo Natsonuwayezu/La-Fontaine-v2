@@ -5,7 +5,6 @@
  */
 
 
-const state = window.state || {}; // global state alias
 import { state, getCurrentUser } from '../../core/state.js';
 import { esc } from '../../core/utils.js';
 import { SUPABASE_URL, SUPABASE_KEY, SUPABASE_DEFAULT_URL, SUPABASE_DEFAULT_KEY, setSupabaseCredentials, resetSupabaseCredentials } from '../../config/supabase-config.js';

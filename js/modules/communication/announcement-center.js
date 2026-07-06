@@ -13,7 +13,6 @@
  */
 
 
-const state = window.state || {}; // global state alias
 import { state, getCurrentUser, getCurrentAcademicYear, getCurrentTerm, getTermsByYear } from '../../core/state.js';
 import { esc, fmtDate, fmtDateTime, fmtAgo } from '../../core/utils.js';
 import { update, getAll, insert, remove, logActivity, get } from '../../core/api.js';

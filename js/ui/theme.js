@@ -1,7 +1,7 @@
 /**
  * ECOLE LA FONTAINE — Theme Management
  * Dark/light mode toggle, theme persistence
- * Last updated: 2026-06-28
+ * Last updated: 2026-07-07
  */
 
 // ──────────────────────────────────────────────────────────────────────
@@ -17,6 +17,14 @@ const THEMES = {
 // ──────────────────────────────────────────────────────────────────────
 // CORE FUNCTIONS
 // ──────────────────────────────────────────────────────────────────────
+
+/**
+ * Get the current theme from the document
+ * @returns {string} 'light' or 'dark'
+ */
+export function getCurrentTheme() {
+    return document.documentElement.getAttribute('data-theme') || THEMES.LIGHT;
+}
 
 /**
  * Get the saved theme from localStorage
@@ -51,10 +59,10 @@ export function initTheme() {
  * Toggle between light and dark mode
  */
 export function toggleTheme() {
-    const current = document.documentElement.getAttribute('data-theme') || THEMES.LIGHT;
+    const current = getCurrentTheme();
     const next = current === THEMES.DARK ? THEMES.LIGHT : THEMES.DARK;
     applyTheme(next);
-    showToast(next === THEMES.DARK ? '🌙 Dark mode' : '☀️ Light mode', 'info', 1500);
+    // Toast will be shown by the caller
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -72,12 +80,6 @@ function updateThemeUI(theme) {
     if (text) text.textContent = theme === THEMES.DARK ? 'Light Mode' : 'Dark Mode';
 }
 
-// ──────────────────────────────────────────────────────────────────────
-// EXPOSE GLOBALLY (for onclick handlers)
-// ──────────────────────────────────────────────────────────────────────
-
-window.toggleTheme = toggleTheme;
-window.initTheme = initTheme;
 // ──────────────────────────────────────────────────────────────────────
 // SCHOOL LOGO
 // ──────────────────────────────────────────────────────────────────────
@@ -98,4 +100,11 @@ export function applySchoolLogo(logoData) {
     });
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// EXPOSE GLOBALLY (for onclick handlers)
+// ──────────────────────────────────────────────────────────────────────
+
+window.toggleTheme = toggleTheme;
+window.initTheme = initTheme;
 window.applySchoolLogo = applySchoolLogo;
+window.getCurrentTheme = getCurrentTheme;

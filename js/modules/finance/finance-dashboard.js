@@ -1,3 +1,5 @@
+
+import { ensureStateLoaded } from '../../core/boot.js';const state = window.state || {}; // state alias — resolves to global state
 // js/modules/finance-dashboard.js
 // Finance Dashboard Module - Overview of all financial metrics
 
@@ -247,5 +249,3 @@ async function renderFinanceDashboard(container) {
         exportToExcel(classData, 'Class_Collection_Summary');
     };
 }
-
-export { renderFinanceDashboard };

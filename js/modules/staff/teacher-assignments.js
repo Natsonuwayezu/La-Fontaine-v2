@@ -29,6 +29,7 @@ import {
 import { esc } from '../../core/utils.js';
 import { insert, remove, getAll, refreshTable, logActivity, update, updateWhere } from '../../core/api.js';
 import { isActiveYear } from '../../core/permissions.js';
+import { ensureStateLoaded } from '../../core/boot.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // STATE

@@ -34,6 +34,15 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <!-- Tabler Icons (SVG) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/tabler-icons.min.css" />
+
+    <!-- Font Awesome (Icon Font) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- Lucide Icons (via CDN) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 
     <!-- ============================================================ -->
     <!-- CSS — BASE FIRST (variables, reset, typography)             -->
@@ -75,6 +84,7 @@
     <link rel="stylesheet" href="css/modules/dashboard.css">
     <link rel="stylesheet" href="css/modules/marks.css">
     <link rel="stylesheet" href="css/modules/attendance.css">
+    <link rel="stylesheet" href="css/modules/help-center.css">
     <link rel="stylesheet" href="css/modules/finance.css">
     <link rel="stylesheet" href="css/modules/reports.css">
     <link rel="stylesheet" href="css/modules/timetable.css">
@@ -248,10 +258,14 @@
 <body>
 
     <!-- ============================================================ -->
-    <!-- TOAST & MODAL CONTAINERS                                     -->
+    <!-- TOAST CONTAINER                                              -->
     <!-- ============================================================ -->
     <div id="toast-container"></div>
-    <div id="modals-container"></div>
+
+    <!-- ============================================================ -->
+    <!-- SIDEBAR OVERLAY (mobile)                                     -->
+    <!-- ============================================================ -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <!-- ============================================================ -->
     <!-- LOGIN PAGE                                                   -->
@@ -311,30 +325,95 @@
     </div>
 
     <!-- ============================================================ -->
-    <!-- APP PAGE (hidden until login)                               -->
+    <!-- APP PAGE (hidden until login)                                -->
     <!-- ============================================================ -->
     <div id="app-page" style="display:none">
 
         <!-- ========================================================== -->
-        <!-- SIDEBAR                                                     -->
+        <!-- SIDEBAR                                                    -->
         <!-- ========================================================== -->
         <aside class="sidebar" id="sidebar">
+
+            <!-- Header -->
             <div class="sidebar-header">
-                <div class="sidebar-logo" id="sidebar-logo">🏫</div>
-                <div class="sidebar-school-name">
-                    ECOLE LA FONTAINE<br>
-                    <small id="sidebar-school-subtitle">School Management</small>
+                <div class="school-brand">
+                    <div class="logo-box" id="logoBox">🏫</div>
+                    <div class="brand-text">
+                        <div class="brand-name">ECOLE LA FONTAINE</div>
+                        <div class="brand-sub">School Management System</div>
+                    </div>
+                </div>
+
+                <!-- Badge row: Year + Term -->
+                <div class="badge-row">
+                    <span class="badge-pill" id="yearBadge" onclick="window.toggleBadgeDropdown('yearDropdown')">
+                        <span class="dot green" id="yearDot"></span>
+                        <strong id="currentYearLabel">2025 – 2026</strong>
+                        <i class="fa-solid fa-chevron-down" style="font-size:12px;opacity:0.6;"></i>
+                    </span>
+                    <div class="badge-dropdown" id="yearDropdown">
+                        <div class="badge-dropdown-item active" data-value="2025-2026" data-locked="false"
+                            onclick="window.selectYear(this, '2025-2026', false)">
+                            <span class="check">✓</span> 2025 – 2026
+                        </div>
+                        <div class="badge-dropdown-item" data-value="2026-2027" data-locked="true"
+                            onclick="window.selectYear(this, '2026-2027', true)">
+                            <span class="check">✓</span> 2026 – 2027 <span
+                                style="font-size:9px;color:#f59e0b;">🔒</span>
+                        </div>
+                        <div class="badge-dropdown-item" data-value="2027-2028" data-locked="true"
+                            onclick="window.selectYear(this, '2027-2028', true)">
+                            <span class="check">✓</span> 2027 – 2028 <span
+                                style="font-size:9px;color:#f59e0b;">🔒</span>
+                        </div>
+                    </div>
+
+                    <span class="badge-pill" id="termBadge" onclick="window.toggleBadgeDropdown('termDropdown')">
+                        <span class="dot blue" id="termDot"></span>
+                        <strong id="currentTermLabel">Term 3</strong>
+                        <i class="fa-solid fa-chevron-down" style="font-size:12px;opacity:0.6;"></i>
+                    </span>
+                    <div class="badge-dropdown" id="termDropdown">
+                        <div class="badge-dropdown-item" data-value="Term 1"
+                            onclick="window.selectTerm(this, 'Term 1')">
+                            <span class="check">✓</span> <span class="term-label">Term 1</span>
+                        </div>
+                        <div class="badge-dropdown-item" data-value="Term 2"
+                            onclick="window.selectTerm(this, 'Term 2')">
+                            <span class="check">✓</span> <span class="term-label">Term 2</span>
+                        </div>
+                        <div class="badge-dropdown-item active" data-value="Term 3"
+                            onclick="window.selectTerm(this, 'Term 3')">
+                            <span class="check">✓</span> <span class="term-label">Term 3</span>
+                        </div>
+                    </div>
+
+                    <!-- FAQ / Help Button -->
+                    <button class="faq-button" onclick="window.openHelpCenter()">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+                            <path
+                                d="M80 160c0-35.3 28.7-64 64-64h32c35.3 0 64 28.7 64 64v3.6c0 21.8-11.1 42.1-29.4 53.8l-42.2 27.1c-25.2 16.2-40.4 44.1-40.4 74V320c0 17.7 14.3 32 32 32s32-14.3 32-32v-1.4c0-8.2 4.2-15.8 11-20.2l42.2-27.1c36.6-23.6 58.8-64.1 58.8-107.7V160c0-70.7-57.3-128-128-128H144C73.3 32 16 89.3 16 160c0 17.7 14.3 32 32 32s32-14.3 32-32zm80 320a40 40 0 1 0 0-80 40 40 0 1 0 0 80z" />
+                        </svg>
+                        <span class="tooltip">HELP</span>
+                    </button>
                 </div>
             </div>
-            <nav class="sidebar-nav" id="sidebar-nav"></nav>
-            <div class="sidebar-footer">
-                <div class="sidebar-user-avatar" id="sidebar-avatar">👤</div>
-                <div class="sidebar-user-info">
-                    <div class="sidebar-user-name" id="sidebar-username">User</div>
-                    <div class="sidebar-user-role" id="sidebar-userrole">Role</div>
+
+            <!-- Navigation -->
+            <nav class="sidebar-nav" id="sidebarNav"></nav>
+
+            <!-- User Profile -->
+            <div class="user-profile">
+                <div class="user-avatar" id="sidebarUserAvatar">UG</div>
+                <div class="user-info">
+                    <div class="user-name" id="sidebarUserName">UWAYO GANZA Eugene</div>
+                    <div class="user-role" id="sidebarUserRole">Administrator</div>
                 </div>
-                <button class="sidebar-logout" title="Logout" onclick="window.logout()">🚪</button>
+                <div class="logout-btn" title="Logout" onclick="window.logout()">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </div>
             </div>
+
         </aside>
 
         <!-- ========================================================== -->
@@ -343,52 +422,148 @@
         <div class="main-content">
 
             <!-- TOPBAR -->
-            <header class="topbar">
-                <div class="topbar-left">
-                    <button class="menu-toggle" id="menu-toggle" onclick="window.toggleSidebar()"
-                        title="Toggle Sidebar Menu">☰</button>
-                    <span class="page-title" id="page-title">Dashboard</span>
-                </div>
-                <div class="topbar-center"></div>
-                <div class="topbar-right">
-                    <span id="phase-indicator-compact" class="phase-badge-compact"></span>
-                    <button id="pwa-install-btn" class="btn btn-sm btn-outline" onclick="window.installPWA()"
-                        title="Install App" style="display:none">📲 Install</button>
-                    <span class="notif-bell" onclick="window.navigateTo('notification-center')" title="Notifications">
-                        🔔
-                        <span class="notif-dot" id="notif-dot" style="display:none;"></span>
-                    </span>
-                    <div class="user-menu" onclick="window.toggleUserDropdown()">
-                        <div class="user-avatar" id="topbar-avatar">👤</div>
-                        <span class="user-name" id="topbar-username">User</span>
-                        <span class="user-dropdown-arrow">▾</span>
-                    </div>
-                </div>
-                <div class="user-dropdown" id="user-dropdown">
-                    <div class="dropdown-item dropdown-user-info">
-                        <div class="dropdown-avatar">👤</div>
-                        <div>
-                            <div class="dropdown-user-name" id="dropdown-username">Administrator</div>
-                            <div class="dropdown-user-role" id="dropdown-userrole">Admin</div>
+            <header class="topbar" id="topbar">
+
+                <!-- ROW 1 -->
+                <div class="topbar-row1">
+
+                    <!-- Left -->
+                    <div class="topbar-left">
+                        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar"
+                            onclick="window.toggleSidebar()">
+                            <i class="fa-solid fa-bars"></i>
+                        </button>
+                        <div class="page-title-group">
+                            <div class="page-title" id="pageTitle">
+                                <span class="highlight">Dashboard</span>
+                            </div>
+                            <div class="page-subtitle" id="pageSubtitle">School Management System</div>
                         </div>
                     </div>
-                    <div class="dropdown-divider"></div>
-                    <div class="dropdown-item" onclick="window.showProfileModal()"><span>👤</span> My Profile</div>
-                    <div class="dropdown-item" onclick="window.showChangePasswordModal()"><span>🔒</span> Change
-                        Password</div>
-                    <div class="dropdown-item" onclick="window.setupBiometricLogin()"><span>🔑</span> Biometric Login
+
+                    <!-- Center -->
+                    <div class="topbar-center">
+                        <div class="date-display">
+                            <span class="date-icon"><i class="fa-regular fa-calendar"></i></span>
+                            <span class="date-text">
+                                <span class="day" id="currentDay">23</span>
+                                <span id="currentMonth">Sep</span>
+                                <span class="year" id="currentYear">2026</span>
+                            </span>
+                            <span class="divider"></span>
+                            <span class="time-text" id="currentTime">14:30</span>
+                        </div>
                     </div>
-                    <div class="dropdown-item" onclick="window.toggleTheme()" id="dropdown-theme-item">
-                        <span id="dropdown-theme-icon">🌙</span>
-                        <span id="dropdown-theme-text">Dark Mode</span>
+
+                    <!-- Right -->
+                    <div class="topbar-right">
+
+                        <!-- Install Button -->
+                        <button class="install-btn" id="installBtn" onclick="window.installApp()">
+                            <i class="fa-solid fa-download"></i>
+                            Install
+                        </button>
+
+                        <!-- Notification Bell -->
+                        <button class="icon-btn" id="notifBtn" onclick="window.navigateTo('notification-center')"
+                            title="Notifications">
+                            <i class="fa-solid fa-bell"></i>
+                            <span class="notif-count" id="notifCount">3</span>
+                        </button>
+
+                        <!-- User Menu -->
+                        <div class="user-menu" id="userMenu" onclick="window.toggleUserDropdown()">
+                            <div class="user-avatar" id="topbarUserAvatar">UG</div>
+                            <div class="user-info">
+                                <span class="name" id="topbarUserName">UWAYO GANZA</span>
+                                <span class="role" id="topbarUserRole">Admin</span>
+                            </div>
+                            <span class="chevron"><i class="fa-solid fa-chevron-down"></i></span>
+
+                            <!-- Dropdown -->
+                            <div class="dropdown" id="userDropdown">
+                                <div class="dropdown-header">
+                                    <div class="user-avatar" id="dropdownUserAvatar">UG</div>
+                                    <div class="user-info">
+                                        <span class="name" id="dropdownUserName">UWAYO GANZA Eugene</span>
+                                        <span class="role" id="dropdownUserRole">Administrator</span>
+                                    </div>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                <button class="dropdown-item" onclick="window.showProfileModal()">
+                                    <span class="icon"><i class="fa-solid fa-user"></i></span>
+                                    <span class="label">My Profile</span>
+                                </button>
+                                <button class="dropdown-item" onclick="window.showChangePasswordModal()">
+                                    <span class="icon"><i class="fa-solid fa-key"></i></span>
+                                    <span class="label">Change Password</span>
+                                </button>
+                                <button class="dropdown-item" onclick="window.handleThemeToggle()">
+                                    <span class="icon"><i class="fa-solid fa-moon" id="dropdownThemeIcon"></i></span>
+                                    <span class="label" id="dropdownThemeLabel">Dark Mode</span>
+                                </button>
+                                <div class="dropdown-divider"></div>
+                                <button class="dropdown-item" onclick="window.setupBiometricLogin()">
+                                    <span class="icon"><i class="fa-solid fa-fingerprint"></i></span>
+                                    <span class="label">Biometrics</span>
+                                </button>
+                                <button class="dropdown-item" onclick="window.navigateTo('settings')">
+                                    <span class="icon"><i class="fa-solid fa-gear"></i></span>
+                                    <span class="label">Settings</span>
+                                </button>
+                                <button class="dropdown-item" onclick="window.openHelpCenter()">
+                                    <span class="icon"><i class="fa-solid fa-circle-question"></i></span>
+                                    <span class="label">Help Center</span>
+                                </button>
+                                <div class="dropdown-divider"></div>
+                                <button class="dropdown-item danger" onclick="window.logout()">
+                                    <span class="icon"><i class="fa-solid fa-right-from-bracket"></i></span>
+                                    <span class="label">Sign Out</span>
+                                </button>
+                            </div>
+                        </div>
+
                     </div>
-                    <div class="dropdown-divider"></div>
-                    <div class="dropdown-item danger" onclick="window.logout()"><span>🚪</span> Logout</div>
                 </div>
+
+                <!-- ROW 2 -->
+                <div class="topbar-row2">
+
+                    <!-- Academic Year -->
+                    <div class="year-badge">
+                        <span class="status-dot active" id="yearStatus"></span>
+                        <span>Year:</span>
+                        <strong id="academicYear">2025 – 2026</strong>
+                    </div>
+
+                    <!-- Term -->
+                    <div class="term-badge">
+                        <strong id="termDisplay">Term 3</strong>
+                    </div>
+
+                    <!-- Progress -->
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill" style="width: 68%;"></div>
+                        </div>
+                        <span class="progress-text" id="progressText">68%</span>
+                    </div>
+
+                    <!-- Phase -->
+                    <span class="phase-badge pre" id="phaseBadge">Pre-Midterm</span>
+
+                    <!-- Days Remaining -->
+                    <span class="days-remaining">
+                        <i class="fa-regular fa-clock" style="opacity:0.5;"></i>
+                        <strong id="daysLeft">24</strong> days left
+                    </span>
+
+                </div>
+
             </header>
 
-            <!-- TERM PROGRESS BAR -->
-            <div class="term-progress-bar" id="term-progress-bar">
+            <!-- TERM PROGRESS BAR (Legacy — keep for compatibility) -->
+            <div class="term-progress-bar" id="term-progress-bar" style="display:none;">
                 <span class="progress-label">
                     📅 <strong id="prog-term-name">Term 3</strong>
                     <span id="prog-acad-year" style="font-size:.7rem">2025-2026</span>
@@ -421,9 +596,294 @@
     <!-- END APP PAGE -->
 
     <!-- ============================================================ -->
-    <!-- ════════════════════════════════════════════════════════ -->
-    <!-- BOOT — fires after ALL modules are parsed and executed  -->
-    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- HUB OVERLAY                                                  -->
+    <!-- ============================================================ -->
+    <div class="hub-overlay" id="hubOverlay">
+        <div class="hub-panel" id="hubPanel">
+            <div class="hub-header">
+                <div class="hub-header-icon" id="hubHeaderIcon"></div>
+                <div style="flex:1;min-width:0;">
+                    <h2 id="hubTitle">Section</h2>
+                    <div class="hub-header-sub" id="hubSub">Select a module below</div>
+                </div>
+                <button class="hub-close" id="hubClose" onclick="window.closeHub()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="hub-body">
+                <div class="hub-grid" id="hubGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- BOOT — fires after ALL modules are parsed                   -->
+    <!-- ============================================================ -->
+    <script>
+        // ─── Badge Dropdown Toggle ──────────────────────────────────────
+        window.toggleBadgeDropdown = function (id) {
+            const dropdown = document.getElementById(id);
+            if (!dropdown) return;
+            document.querySelectorAll('.badge-dropdown.open').forEach(d => {
+                if (d.id !== id) d.classList.remove('open');
+            });
+            dropdown.classList.toggle('open');
+            const pillId = id === 'yearDropdown' ? 'yearBadge' : 'termBadge';
+            const pill = document.getElementById(pillId);
+            if (pill) pill.classList.toggle('open');
+        };
+
+        // ─── Select Year ────────────────────────────────────────────────
+        window.selectYear = function (el, year, locked) {
+            document.getElementById('currentYearLabel').textContent = year.replace('-', '–');
+            const dot = document.getElementById('yearDot');
+            if (locked) {
+                dot.className = 'dot locked';
+                dot.textContent = '🔒';
+                dot.style.fontSize = '8px';
+                dot.style.display = 'inline-flex';
+                dot.style.alignItems = 'center';
+                dot.style.justifyContent = 'center';
+            } else {
+                dot.className = 'dot green';
+                dot.textContent = '';
+                dot.style.fontSize = '';
+                dot.style.display = '';
+            }
+            const parent = el.closest('.badge-dropdown');
+            parent.querySelectorAll('.badge-dropdown-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            parent.classList.remove('open');
+
+            // Update term dropdown based on year
+            const termData = {
+                '2025-2026': { lockedTerms: ['Term 1', 'Term 2'], activeTerm: 'Term 3' },
+                '2026-2027': { lockedTerms: ['Term 1', 'Term 2', 'Term 3'], activeTerm: null },
+                '2027-2028': { lockedTerms: ['Term 1', 'Term 2', 'Term 3'], activeTerm: null }
+            };
+            const data = termData[year];
+            if (data) {
+                const termItems = document.querySelectorAll('#termDropdown .badge-dropdown-item');
+                termItems.forEach(item => {
+                    const termName = item.dataset.value;
+                    const isLocked = data.lockedTerms.includes(termName);
+                    const isActive = data.activeTerm === termName;
+                    item.dataset.locked = isLocked ? 'true' : 'false';
+                    const labelSpan = item.querySelector('.term-label');
+                    if (isLocked) {
+                        labelSpan.innerHTML = termName + ' <span style="font-size:9px;color:#f59e0b;margin-left:4px;">🔒</span>';
+                        item.style.opacity = '0.6';
+                    } else {
+                        labelSpan.textContent = termName;
+                        item.style.opacity = '1';
+                    }
+                    if (isActive) {
+                        item.classList.add('active');
+                        document.getElementById('currentTermLabel').textContent = termName;
+                        const termDot = document.getElementById('termDot');
+                        termDot.className = 'dot blue';
+                        termDot.textContent = '';
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+
+            // Sync topbar
+            const currentTerm = document.getElementById('currentTermLabel').textContent || 'Term 3';
+            let progress = locked ? 0 : 68;
+            let daysLeft = locked ? 180 : 24;
+            let isActive = !locked && year === '2025-2026';
+
+            if (year === '2026-2027') { progress = 0; daysLeft = 180; isActive = false; }
+            if (year === '2027-2028') { progress = 0; daysLeft = 365; isActive = false; }
+
+            window._updateTopbarFromSidebar(year, currentTerm, progress, daysLeft, locked, isActive);
+            window.showToast('Academic year changed to ' + year + (locked ? ' (🔒 locked)' : ''), 'info');
+        };
+
+        // ─── Select Term ────────────────────────────────────────────────
+        window.selectTerm = function (el, term) {
+            const isLocked = el.dataset.locked === 'true';
+            document.getElementById('currentTermLabel').textContent = term;
+            const dot = document.getElementById('termDot');
+            if (isLocked) {
+                dot.className = 'dot locked';
+                dot.textContent = '🔒';
+                dot.style.fontSize = '8px';
+                dot.style.display = 'inline-flex';
+                dot.style.alignItems = 'center';
+                dot.style.justifyContent = 'center';
+            } else {
+                dot.className = 'dot blue';
+                dot.textContent = '';
+                dot.style.fontSize = '';
+                dot.style.display = '';
+            }
+            const parent = el.closest('.badge-dropdown');
+            parent.querySelectorAll('.badge-dropdown-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            parent.classList.remove('open');
+
+            // Sync topbar
+            const year = document.getElementById('currentYearLabel').textContent || '2025 – 2026';
+            const yearLocked = document.querySelector('#yearDropdown .badge-dropdown-item.active')?.dataset?.locked === 'true';
+            let progress = 68, daysLeft = 24, termIsLocked = isLocked || yearLocked;
+
+            if (term === 'Term 1') { progress = termIsLocked ? 0 : 25; daysLeft = termIsLocked ? 180 : 60; }
+            if (term === 'Term 2') { progress = termIsLocked ? 0 : 50; daysLeft = termIsLocked ? 180 : 40; }
+            if (term === 'Term 3') { progress = termIsLocked ? 0 : 68; daysLeft = termIsLocked ? 180 : 24; }
+
+            window._updateTopbarFromSidebar(year, term, progress, daysLeft, termIsLocked, !termIsLocked);
+            window.showToast('Term changed to ' + term + (termIsLocked ? ' (🔒 locked)' : ''), 'info');
+        };
+
+        // ─── Update Topbar from Sidebar ────────────────────────────────
+        window._updateTopbarFromSidebar = function (year, term, progress, daysLeft, isLocked, isActive) {
+            const yearEl = document.getElementById('academicYear');
+            if (yearEl) yearEl.textContent = year || '2025 – 2026';
+
+            const termEl = document.getElementById('termDisplay');
+            if (termEl) termEl.textContent = term || 'Term 3';
+
+            const statusDot = document.getElementById('yearStatus');
+            if (statusDot) {
+                if (isLocked) {
+                    statusDot.className = 'status-dot locked';
+                    statusDot.textContent = '🔒';
+                    statusDot.style.fontSize = '10px';
+                    statusDot.style.display = 'inline-flex';
+                    statusDot.style.alignItems = 'center';
+                    statusDot.style.justifyContent = 'center';
+                    statusDot.style.width = '14px';
+                    statusDot.style.height = '14px';
+                    statusDot.style.borderRadius = '50%';
+                    statusDot.style.background = 'var(--warning)';
+                    statusDot.style.color = '#0a1628';
+                } else if (isActive) {
+                    statusDot.className = 'status-dot active';
+                    statusDot.textContent = '';
+                    statusDot.style.fontSize = '';
+                    statusDot.style.display = '';
+                    statusDot.style.width = '6px';
+                    statusDot.style.height = '6px';
+                    statusDot.style.borderRadius = '50%';
+                    statusDot.style.background = 'var(--success)';
+                } else {
+                    statusDot.className = 'status-dot locked';
+                    statusDot.textContent = '🔒';
+                    statusDot.style.fontSize = '10px';
+                    statusDot.style.display = 'inline-flex';
+                    statusDot.style.alignItems = 'center';
+                    statusDot.style.justifyCenter = 'center';
+                    statusDot.style.width = '14px';
+                    statusDot.style.height = '14px';
+                    statusDot.style.borderRadius = '50%';
+                    statusDot.style.background = 'var(--warning)';
+                    statusDot.style.color = '#0a1628';
+                }
+            }
+
+            const fillEl = document.getElementById('progressFill');
+            const textEl = document.getElementById('progressText');
+            if (fillEl && textEl) {
+                const pct = Math.min(100, progress);
+                fillEl.style.width = pct + '%';
+                textEl.textContent = pct + '%';
+                if (isLocked || pct >= 100) {
+                    fillEl.style.background = 'var(--warning)';
+                } else if (isActive) {
+                    fillEl.style.background = 'linear-gradient(90deg, var(--accent), var(--success))';
+                } else {
+                    fillEl.style.background = 'var(--text-muted)';
+                }
+            }
+
+            const daysEl = document.getElementById('daysLeft');
+            if (daysEl) {
+                if (isLocked && progress === 0 && daysLeft > 100) {
+                    daysEl.textContent = '—';
+                } else if (progress >= 100) {
+                    daysEl.textContent = '0';
+                } else {
+                    daysEl.textContent = daysLeft || '—';
+                }
+            }
+
+            const phaseEl = document.getElementById('phaseBadge');
+            if (phaseEl) {
+                if (isLocked) {
+                    if (progress === 0) { phaseEl.textContent = '🔒 Locked'; phaseEl.className = 'phase-badge locked'; }
+                    else if (progress >= 100) { phaseEl.textContent = '✅ Complete'; phaseEl.className = 'phase-badge complete'; }
+                    else { phaseEl.textContent = '🔒 Locked'; phaseEl.className = 'phase-badge locked'; }
+                } else if (progress >= 100) {
+                    phaseEl.textContent = '✅ Complete';
+                    phaseEl.className = 'phase-badge complete';
+                } else if (progress > 75) {
+                    phaseEl.textContent = '📝 Post-Midterm';
+                    phaseEl.className = 'phase-badge post';
+                } else if (progress > 0) {
+                    phaseEl.textContent = '📋 Pre-Midterm';
+                    phaseEl.className = 'phase-badge pre';
+                } else {
+                    phaseEl.textContent = '⏳ Upcoming';
+                    phaseEl.className = 'phase-badge upcoming';
+                }
+            }
+        };
+
+        // ─── Click outside to close dropdowns ──────────────────────────
+        document.addEventListener('click', function (e) {
+            const yearBadge = document.getElementById('yearBadge');
+            const yearDropdown = document.getElementById('yearDropdown');
+            const termBadge = document.getElementById('termBadge');
+            const termDropdown = document.getElementById('termDropdown');
+
+            if (yearBadge && yearDropdown && !yearBadge.contains(e.target) && !yearDropdown.contains(e.target)) {
+                yearDropdown.classList.remove('open');
+                yearBadge.classList.remove('open');
+            }
+            if (termBadge && termDropdown && !termBadge.contains(e.target) && !termDropdown.contains(e.target)) {
+                termDropdown.classList.remove('open');
+                termBadge.classList.remove('open');
+            }
+        });
+
+        // ─── Open Help Center ──────────────────────────────────────────
+        window.openHelpCenter = function () {
+            const container = document.getElementById('help-center-container');
+            if (container && container.classList.contains('show')) {
+                const input = document.getElementById('help-search-input');
+                if (input) input.focus();
+                return;
+            }
+            // Load help center module
+            if (typeof window.navigateTo === 'function') {
+                window.navigateTo('help-center');
+            } else {
+                window.showToast('❓ Help Center — Press Ctrl+K to open', 'info', 2000);
+            }
+        };
+
+        // ─── Keyboard shortcuts ────────────────────────────────────────
+        document.addEventListener('keydown', function (e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                window.openHelpCenter();
+            }
+            if (e.key === 'Escape') {
+                const dd = document.getElementById('userDropdown');
+                if (dd) dd.classList.remove('open');
+                const menu = document.getElementById('userMenu');
+                if (menu) menu.classList.remove('open');
+                window.closeHub();
+                window.closeSidebarMobile();
+            }
+        });
+
+        console.log('✅ Index.html — Sidebar + Topbar v3 loaded');
+    </script>
+
     <script src="js/patches/fix-boot.js"></script>
 
 </body>

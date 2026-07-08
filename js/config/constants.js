@@ -245,12 +245,12 @@ const STORAGE_KEYS = {
     PWA_PROMPT_SHOWN: 'pwa_prompt_shown',
 };
 // ── GLOBAL EXPORTS ──────────────────────────────────────────────────
-window.APP_CONFIG    = APP_CONFIG;
-window.STORAGE_KEYS  = STORAGE_KEYS;
-window.SUPABASE_URL  = typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : window.SUPABASE_URL;
-window.USER_ROLES    = USER_ROLES;
+window.APP_CONFIG = APP_CONFIG;
+window.STORAGE_KEYS = STORAGE_KEYS;
+window.SUPABASE_URL = typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : window.SUPABASE_URL;
+window.USER_ROLES = USER_ROLES;
 window.USER_ROLE_LABELS = USER_ROLE_LABELS;
-window.GRADE_COLORS  = typeof GRADE_COLORS !== 'undefined' ? GRADE_COLORS : {};
+window.GRADE_COLORS = typeof GRADE_COLORS !== 'undefined' ? GRADE_COLORS : {};
 window.ASSESSMENT_TYPES = typeof ASSESSMENT_TYPES !== 'undefined' ? ASSESSMENT_TYPES : [];
 
 export {
@@ -280,4 +280,13 @@ export {
     ERROR_CATEGORIES,
     Z_INDEX,
     STORAGE_KEYS,
+};
+// ─── HELP CENTER ─────────────────────────────────────────────────────
+export const HELP_CONFIG = {
+    maxRecentItems: 10,
+    searchDebounce: 200,
+    shortcuts: {
+        open: 'Ctrl+K',
+        close: 'Escape',
+    }
 };

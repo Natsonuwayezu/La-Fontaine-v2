@@ -24,6 +24,7 @@ import {
 } from '../../core/state.js';
 import { esc, fmtDate, fmtDateTime } from '../../core/utils.js';
 import { insert, update, remove, getAll, logActivity, get } from '../../core/api.js';
+import { ensureStateLoaded } from '../../core/boot.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // MAIN RENDER FUNCTION

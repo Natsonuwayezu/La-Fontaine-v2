@@ -1,3 +1,5 @@
+
+import { ensureStateLoaded } from '../../core/boot.js';const state = window.state || {}; // state alias — resolves to global state
 // Sortable table: paid / partial / unpaid — per student or per category
         // Accessible by admin and accountant
         // ============================================================

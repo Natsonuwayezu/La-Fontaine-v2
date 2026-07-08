@@ -1,286 +1,255 @@
 /**
  * ECOLE LA FONTAINE — Navigation Configuration
- * Defines sidebar menu structure per role
- * Last updated: 2026-06-28
+ * Consolidated to Font Awesome icons only
+ * Last updated: 2026-07-07
  */
 
 // ──────────────────────────────────────────────────────────────────────
-// ROLE-BLOCKED MODULES
-// ──────────────────────────────────────────────────────────────────────
-
-// Teachers cannot access finance modules
-const TEACHER_BLOCKED_MODULES = new Set([
-    // ── Finance (All) ──
-    'fee-structure', 'payment-history', 'record-payment', 'financial-reports',
-    'overdue-payments', 'fee-waivers', 'receipts', 'carry-forward',
-    'student-fee-status', 'finance-audit', 'manual-adjustments',
-    'bulk-finance-actions', 'fee-assignments', 'fee-term-status',
-    'credit-balances', 'discounts', 'family-fee-summary', 'balances',
-    'finance-dashboard', 'receipt-printing', 'student-statements',
-
-    // ── Student Management (Write Ops) ──
-    'enroll-student', 'student-promotion', 'student-archive',
-    'sibling-linking', 'family-management',
-
-    // ── Staff & Timetable (Admin Only) ──
-    'user-management', 'subjects', 'teacher-assignments',
-    'teacher-performance', 'timetable', 'class-timetable',
-    'staff-timetable', 'timetable-conflicts', 'timetable-import',
-
-    // ── Settings (All) ──
-    'school-settings', 'academic-calendar', 'academic-years',
-    'class-management', 'grading-scale', 'grading-settings',
-    'backup-restore', 'system-logs', 'api-settings', 'settings',
-    'system-health', 'analytics-settings',
-
-    // ── Bulk Operations ──
-    'bulk-import', 'bulk-export',
-
-    // ── Extended Academics ──
-    'annual-register', 'rankings', 'marks-analysis', 'transcripts',
-    'academic-reports', 'ranking-engine', 'report-generator',
-
-    // ── Advanced Attendance ──
-    'attendance-summary', 'attendance-analytics',
-]);
-
-// Accountants cannot access academic modules
-const ACCOUNTANT_BLOCKED_MODULES = new Set([
-    // ── Academics (All) ──
-    'marks-entry', 'marks-database', 'class-register',
-    'annual-register', 'assessments', 'report-cards',
-    'rankings', 'statistics', 'timetable',
-    'teacher-timetable', 'class-timetable', 'assessment-locking',
-    'marks-analysis', 'marks-import-export', 'assessment-export',
-    'register-export', 'report-generator', 'ranking-engine',
-    'academic-reports', 'transcript', 'transcripts',
-
-    // ── Teacher Assignments ──
-    'teacher-assignments', 'teacher-performance',
-
-    // ── Student Management (Write Ops) ──
-    'enroll-student', 'student-promotion', 'student-archive',
-    'sibling-linking', 'family-management',
-
-    // ── Staff Management ──
-    'user-management', 'subjects',
-
-    // ── Settings (All) ──
-    'school-settings', 'academic-calendar', 'academic-years',
-    'class-management', 'grading-scale', 'grading-settings',
-    'backup-restore', 'system-logs', 'api-settings', 'settings',
-    'system-health', 'analytics-settings',
-
-    // ── Bulk Operations ──
-    'bulk-import', 'bulk-export',
-]);
-
-// ──────────────────────────────────────────────────────────────────────
-// NAV_CONFIG — Full Menu Structure
+// NAV_CONFIG — Full Menu Structure with Font Awesome icons
 // ──────────────────────────────────────────────────────────────────────
 
 const NAV_CONFIG = {
-    // ── ADMIN: Full Access ──────────────────────────────────────────
     admin: [
         {
-            section: '🏠 Dashboard & Overview',
+            section: 'Dashboard',
+            icon: 'fa-table-cells-large',
             items: [
-                { id: 'admin-dashboard', icon: '📊', label: 'Dashboard' },
-                { id: 'analytics', icon: '📈', label: 'Analytics' },
+                { id: 'admin-dashboard', icon: 'fa-gauge-high', label: 'Admin Dashboard' },
+                { id: 'accountant-dashboard', icon: 'fa-chart-pie', label: 'Accountant Dashboard' },
+                { id: 'teacher-dashboard', icon: 'fa-table', label: 'Teacher Dashboard' },
+                { id: 'analytics', icon: 'fa-chart-line', label: 'Academic Analytics' },
+                { id: 'finance-dashboard', icon: 'fa-sack-dollar', label: 'Finance Dashboard' },
             ]
         },
         {
-            section: '🔔 Communication',
+            section: 'Communication',
+            icon: 'fa-comments',
             items: [
-                { id: 'announcements', icon: '📢', label: 'Announcements' },
-                { id: 'notification-center', icon: '🔔', label: 'Notification Center' },
-                { id: 'reminders', icon: '⏰', label: 'Reminders' },
+                { id: 'notifications', icon: 'fa-bell', label: 'Notifications' },
+                { id: 'announcements', icon: 'fa-bullhorn', label: 'Announcements' },
+                { id: 'reminders', icon: 'fa-clock', label: 'Reminders' },
             ]
         },
         {
-            section: '📋 Attendance',
+            section: 'Attendance',
+            icon: 'fa-clipboard-check',
             items: [
-                { id: 'attendance', icon: '✅', label: 'Record Attendance' },
-                { id: 'attendance-reports', icon: '📊', label: 'Attendance Reports' },
-                { id: 'attendance-summary', icon: '📈', label: 'Attendance Summary' },
-                { id: 'attendance-analytics', icon: '📊', label: 'Attendance Analytics' },
+                { id: 'attendance', icon: 'fa-pen-to-square', label: 'Record Attendance' },
+                { id: 'attendance-reports', icon: 'fa-file-lines', label: 'Attendance Reports' },
+                { id: 'attendance-summary', icon: 'fa-chart-bar', label: 'Attendance Summary' },
+                { id: 'attendance-analytics', icon: 'fa-chart-line', label: 'Attendance Analytics' },
             ]
         },
         {
-            section: '👥 Student Management',
+            section: 'Students',
+            icon: 'fa-users',
             items: [
-                { id: 'student-list', icon: '👥', label: 'All Students' },
-                { id: 'enroll-student', icon: '➕', label: 'Enroll Student' },
-                { id: 'student-details', icon: '🔍', label: 'Student Details' },
-                { id: 'family-management', icon: '👨‍👩‍👧', label: 'Family Groups' },
-                { id: 'student-promotion', icon: '🎓', label: 'Student Promotion' },
-                { id: 'student-archive', icon: '📦', label: 'Student Archive' },
+                { id: 'student-list', icon: 'fa-users', label: 'All Students' },
+                { id: 'enroll-student', icon: 'fa-user-plus', label: 'Enroll Student' },
+                { id: 'student-details', icon: 'fa-id-card', label: 'Student Profile' },
+                { id: 'family-management', icon: 'fa-house-chimney-user', label: 'Family Management' },
+                { id: 'student-archive', icon: 'fa-box-archive', label: 'Archive' },
+                { id: 'student-fee-status', icon: 'fa-coins', label: 'Student Fee Status' },
             ]
         },
         {
-            section: '📚 Academics Core',
+            section: 'Academics',
+            icon: 'fa-graduation-cap',
             items: [
-                { id: 'marks-entry', icon: '📝', label: 'Marks Entry' },
-                { id: 'marks-database', icon: '📋', label: 'Marks Database' },
-                { id: 'class-register', icon: '📋', label: 'Class Register' },
-                { id: 'report-cards', icon: '📄', label: 'Report Cards' },
-                { id: 'transcripts', icon: '📜', label: 'Transcripts' },
-                { id: 'academic-reports', icon: '📈', label: 'Academic Reports' },
-                { id: 'statistics', icon: '📊', label: 'Statistics' },
+                { id: 'assessments', icon: 'fa-clipboard-list', label: 'Assessments' },
+                { id: 'marks-entry', icon: 'fa-pencil', label: 'Marks Entry' },
+                { id: 'marks-database', icon: 'fa-database', label: 'Marks Database' },
+                { id: 'class-register', icon: 'fa-table-list', label: 'Class Register' },
+                { id: 'report-cards', icon: 'fa-file-invoice', label: 'Report Cards' },
+                { id: 'transcripts', icon: 'fa-scroll', label: 'Transcripts' },
+                { id: 'statistics', icon: 'fa-chart-pie', label: 'Statistics' },
             ]
         },
         {
-            section: '💰 Finance Management',
+            section: 'Finance',
+            icon: 'fa-sack-dollar',
             items: [
-                { id: 'finance-dashboard', icon: '💰', label: 'Finance Dashboard' },
-                { id: 'fee-structure', icon: '📋', label: 'Fee Structure' },
-                { id: 'record-payment', icon: '💵', label: 'Record Payment' },
-                { id: 'payment-history', icon: '📜', label: 'Payment History' },
-                { id: 'receipt-printing', icon: '🧾', label: 'Receipts & Printing' },
-                { id: 'overdue-payments', icon: '⚠️', label: 'Overdue Payments' },
-                { id: 'fee-waivers', icon: '🎁', label: 'Fee Waivers' },
-                { id: 'balances', icon: '⚖️', label: 'Student Balances' },
-                { id: 'payment-reversals', icon: '↩️', label: 'Payment Reversals' },
-                { id: 'financial-reports', icon: '📊', label: 'Financial Reports' },
-                { id: 'fee-term-status', icon: '📊', label: 'Fee Term Status' },
-                { id: 'carry-forward', icon: '📅', label: 'Fee Carry Forward' },
-                { id: 'student-fee-status', icon: '📋', label: 'Student Fee Status' },
-                { id: 'family-fee-summary', icon: '👨‍👩‍👧', label: 'Family Fee Summary' },
-                { id: 'credit-balances', icon: '⭐', label: 'Credit Balances' },
-                { id: 'discounts', icon: '🎁', label: 'Discounts' },
+                { id: 'finance-dashboard', icon: 'fa-chart-column', label: 'Finance Dashboard' },
+                { id: 'fee-structure', icon: 'fa-list-ol', label: 'Fee Structure' },
+                { id: 'record-payment', icon: 'fa-money-bill-wave', label: 'Record Payment' },
+                { id: 'payment-history', icon: 'fa-clock-rotate-left', label: 'Payment History' },
+                { id: 'receipts', icon: 'fa-receipt', label: 'Receipts' },
+                { id: 'fee-waivers', icon: 'fa-tag', label: 'Waivers / Discounts' },
+                { id: 'payment-reversals', icon: 'fa-rotate-left', label: 'Reversals' },
+                { id: 'finance-audit', icon: 'fa-magnifying-glass-chart', label: 'Finance Audit' },
+                { id: 'fee-term-status', icon: 'fa-calendar-check', label: 'Fee Term Status' },
+                { id: 'student-fee-status', icon: 'fa-wallet', label: 'Student Fee Status' },
+                { id: 'family-fee-summary', icon: 'fa-users-rectangle', label: 'Family Fee Summary' },
+                { id: 'carry-forward', icon: 'fa-forward', label: 'Carry Forward' },
             ]
         },
         {
-            section: '👨‍🏫 Staff & Timetable',
+            section: 'Staff',
+            icon: 'fa-chalkboard-user',
             items: [
-                { id: 'user-management', icon: '👨‍🏫', label: 'Staff Management' },
-                { id: 'subjects', icon: '📖', label: 'Subjects' },
-                { id: 'teacher-assignments', icon: '📌', label: 'Teacher Assignments' },
-                { id: 'teacher-performance', icon: '⭐', label: 'Teacher Performance' },
-                { id: 'timetable', icon: '🕐', label: 'Master Timetable' },
+                { id: 'user-management', icon: 'fa-users-gear', label: 'User Management' },
+                { id: 'class-management', icon: 'fa-book', label: 'Class / Subjects' },
+                { id: 'teacher-assignments', icon: 'fa-person-chalkboard', label: 'Teacher Assignments' },
+                { id: 'teacher-performance', icon: 'fa-chart-line', label: 'Teacher Performance' },
+                { id: 'timetable', icon: 'fa-calendar-days', label: 'Timetable' },
             ]
         },
         {
-            section: '⚙️ Settings & Configuration',
+            section: 'Bulk Operations',
+            icon: 'fa-layer-group',
             items: [
-                { id: 'school-settings', icon: '🏫', label: 'School Settings' },
-                { id: 'academic-calendar', icon: '📅', label: 'Academic Calendar' },
-                { id: 'academic-years', icon: '📆', label: 'Academic Years' },
-                { id: 'class-management', icon: '🏛️', label: 'Class Management' },
-                { id: 'grading-scale', icon: '📊', label: 'Grading Scale' },
-                { id: 'backup-restore', icon: '💾', label: 'Backup & Restore' },
-                { id: 'system-logs', icon: '📋', label: 'System Logs' },
-                { id: 'api-settings', icon: '🔌', label: 'API Settings' },
-                { id: 'settings', icon: '⚙️', label: 'System Settings' },
+                { id: 'bulk-import', icon: 'fa-file-import', label: 'Bulk Import' },
+                { id: 'bulk-export', icon: 'fa-file-export', label: 'Bulk Export' },
+                { id: 'student-promotion', icon: 'fa-arrow-up-right-dots', label: 'Student Promotion' },
+                { id: 'carry-forward', icon: 'fa-forward', label: 'Carry Forward' },
             ]
         },
         {
-            section: '📦 Bulk Operations',
+            section: 'Settings',
+            icon: 'fa-gear',
             items: [
-                { id: 'bulk-import', icon: '📤', label: 'Bulk Import' },
-                { id: 'bulk-export', icon: '📥', label: 'Bulk Export' },
+                { id: 'school-settings', icon: 'fa-school', label: 'School Settings' },
+                { id: 'academic-calendar', icon: 'fa-calendar', label: 'Academic Calendar' },
+                { id: 'grading-scale', icon: 'fa-star-half-stroke', label: 'Grading Settings' },
+                { id: 'backup-restore', icon: 'fa-hard-drive', label: 'Backup & Restore' },
+                { id: 'system-logs', icon: 'fa-list-check', label: 'System Logs' },
+                { id: 'system-settings', icon: 'fa-plug', label: 'System / API Settings' },
+                { id: 'system-health', icon: 'fa-heart-pulse', label: 'System Health' },
+            ]
+        },
+        // In NAV_CONFIG.admin section, add:
+        {
+            section: 'Help',
+            icon: 'fa-circle-question',
+            items: [
+                { id: 'help-center', icon: 'fa-circle-question', label: 'Help Center' },
+                { id: 'faq', icon: 'fa-list', label: 'FAQ' },
+                { id: 'support', icon: 'fa-envelope', label: 'Contact Support' },
             ]
         },
     ],
 
-    // ── TEACHER: Academics + Own Classes ──────────────────────────
+    // ── TEACHER ──────────────────────────────────────────────────────
     teacher: [
         {
-            section: '🏠 Dashboard',
+            section: 'Dashboard',
+            icon: 'fa-table-cells-large',
             items: [
-                { id: 'teacher-dashboard', icon: '📊', label: 'My Dashboard' },
-                { id: 'notification-center', icon: '🔔', label: 'Notifications' },
+                { id: 'teacher-dashboard', icon: 'fa-table', label: 'My Dashboard' },
+                { id: 'notifications', icon: 'fa-bell', label: 'Notifications' },
             ]
         },
         {
-            section: '📚 Academics',
+            section: 'Academics',
+            icon: 'fa-graduation-cap',
             items: [
-                { id: 'marks-entry', icon: '📝', label: 'Marks Entry' },
-                { id: 'marks-database', icon: '📋', label: 'Marks Database' },
-                { id: 'class-register', icon: '📋', label: 'Class Register' },
-                { id: 'report-cards', icon: '📄', label: 'Report Cards' },
-                { id: 'statistics', icon: '📊', label: 'Statistics' },
+                { id: 'marks-entry', icon: 'fa-pencil', label: 'Marks Entry' },
+                { id: 'marks-database', icon: 'fa-database', label: 'Marks Database' },
+                { id: 'class-register', icon: 'fa-table-list', label: 'Class Register' },
+                { id: 'report-cards', icon: 'fa-file-invoice', label: 'Report Cards' },
+                { id: 'statistics', icon: 'fa-chart-pie', label: 'Statistics' },
             ]
         },
         {
-            section: '👥 Students',
+            section: 'Students',
+            icon: 'fa-users',
             items: [
-                { id: 'student-list', icon: '👥', label: 'All Students' },
-                { id: 'student-details', icon: '🔍', label: 'Student Details' },
+                { id: 'student-list', icon: 'fa-users', label: 'All Students' },
+                { id: 'student-details', icon: 'fa-id-card', label: 'Student Details' },
             ]
         },
         {
-            section: '📋 Attendance',
+            section: 'Attendance',
+            icon: 'fa-clipboard-check',
             items: [
-                { id: 'attendance', icon: '✅', label: 'Record Attendance' },
-                { id: 'attendance-reports', icon: '📊', label: 'Attendance Reports' },
+                { id: 'attendance', icon: 'fa-pen-to-square', label: 'Record Attendance' },
+                { id: 'attendance-reports', icon: 'fa-file-lines', label: 'Attendance Reports' },
             ]
         },
         {
-            section: '🕐 Timetable',
+            section: 'Timetable',
+            icon: 'fa-calendar-days',
             items: [
-                { id: 'teacher-timetable', icon: '🕐', label: 'My Timetable' },
+                { id: 'teacher-timetable', icon: 'fa-calendar-days', label: 'My Timetable' },
             ]
         },
     ],
 
-    // ── ACCOUNTANT: Finance + Attendance ──────────────────────────
+    // ── ACCOUNTANT ──────────────────────────────────────────────────
     accountant: [
         {
-            section: '🏠 Dashboard',
+            section: 'Dashboard',
+            icon: 'fa-table-cells-large',
             items: [
-                { id: 'accountant-dashboard', icon: '💰', label: 'Finance Dashboard' },
-                { id: 'notification-center', icon: '🔔', label: 'Notifications' },
+                { id: 'accountant-dashboard', icon: 'fa-chart-pie', label: 'Finance Dashboard' },
+                { id: 'notifications', icon: 'fa-bell', label: 'Notifications' },
             ]
         },
         {
-            section: '📋 Attendance',
+            section: 'Attendance',
+            icon: 'fa-clipboard-check',
             items: [
-                { id: 'attendance', icon: '✅', label: 'Record Attendance' },
-                { id: 'attendance-reports', icon: '📊', label: 'Attendance Reports' },
-                { id: 'attendance-summary', icon: '📈', label: 'Attendance Summary' },
-                { id: 'attendance-analytics', icon: '📊', label: 'Attendance Analytics' },
+                { id: 'attendance', icon: 'fa-pen-to-square', label: 'Record Attendance' },
+                { id: 'attendance-reports', icon: 'fa-file-lines', label: 'Attendance Reports' },
+                { id: 'attendance-summary', icon: 'fa-chart-bar', label: 'Attendance Summary' },
+                { id: 'attendance-analytics', icon: 'fa-chart-line', label: 'Attendance Analytics' },
             ]
         },
         {
-            section: '👥 Students',
+            section: 'Students',
+            icon: 'fa-users',
             items: [
-                { id: 'student-list', icon: '👥', label: 'All Students' },
-                { id: 'student-details', icon: '🔍', label: 'Student Details' },
-                { id: 'student-fee-status', icon: '📋', label: 'Student Fee Status' },
-                { id: 'balances', icon: '⚖️', label: 'Balances' },
+                { id: 'student-list', icon: 'fa-users', label: 'All Students' },
+                { id: 'student-details', icon: 'fa-id-card', label: 'Student Details' },
+                { id: 'student-fee-status', icon: 'fa-wallet', label: 'Student Fee Status' },
             ]
         },
         {
-            section: '💰 Finance',
+            section: 'Finance',
+            icon: 'fa-sack-dollar',
             items: [
-                { id: 'fee-structure', icon: '📋', label: 'Fee Structure' },
-                { id: 'record-payment', icon: '💵', label: 'Record Payment' },
-                { id: 'payment-history', icon: '📜', label: 'Payment History' },
-                { id: 'receipt-printing', icon: '🧾', label: 'Receipts' },
-                { id: 'overdue-payments', icon: '⚠️', label: 'Overdue Payments' },
-                { id: 'fee-waivers', icon: '🎁', label: 'Fee Waivers' },
-                { id: 'payment-reversals', icon: '↩️', label: 'Payment Reversals' },
-                { id: 'financial-reports', icon: '📊', label: 'Financial Reports' },
-                { id: 'fee-term-status', icon: '📊', label: 'Fee Term Status' },
-                { id: 'carry-forward', icon: '📅', label: 'Fee Carry Forward' },
-                { id: 'family-fee-summary', icon: '👨‍👩‍👧', label: 'Family Fee Summary' },
-                { id: 'credit-balances', icon: '⭐', label: 'Credit Balances' },
-                { id: 'discounts', icon: '🎁', label: 'Discounts' },
+                { id: 'fee-structure', icon: 'fa-list-ol', label: 'Fee Structure' },
+                { id: 'record-payment', icon: 'fa-money-bill-wave', label: 'Record Payment' },
+                { id: 'payment-history', icon: 'fa-clock-rotate-left', label: 'Payment History' },
+                { id: 'receipts', icon: 'fa-receipt', label: 'Receipts' },
+                { id: 'fee-waivers', icon: 'fa-tag', label: 'Waivers / Discounts' },
+                { id: 'payment-reversals', icon: 'fa-rotate-left', label: 'Reversals' },
+                { id: 'finance-audit', icon: 'fa-magnifying-glass-chart', label: 'Finance Audit' },
+                { id: 'fee-term-status', icon: 'fa-calendar-check', label: 'Fee Term Status' },
+                { id: 'student-fee-status', icon: 'fa-wallet', label: 'Student Fee Status' },
+                { id: 'family-fee-summary', icon: 'fa-users-rectangle', label: 'Family Fee Summary' },
+                { id: 'carry-forward', icon: 'fa-forward', label: 'Carry Forward' },
             ]
         },
     ],
 };
 
-// ──────────────────────────────────────────────────────────────────────
-// NAVIGATION HELPERS
-// ──────────────────────────────────────────────────────────────────────
+// ─── ROLE-BLOCKED MODULES ──────────────────────────────────────────
 
-/**
- * Get the navigation config for a specific role
- * @param {string} role - 'admin' | 'teacher' | 'accountant'
- * @returns {Array} Filtered navigation sections
- */
+const TEACHER_BLOCKED_MODULES = new Set([
+    'finance-dashboard', 'fee-structure', 'record-payment', 'payment-history',
+    'receipts', 'fee-waivers', 'payment-reversals', 'finance-audit',
+    'fee-term-status', 'student-fee-status', 'family-fee-summary',
+    'carry-forward', 'enroll-student', 'student-archive',
+    'user-management', 'class-management', 'teacher-assignments',
+    'teacher-performance', 'timetable', 'bulk-import', 'bulk-export',
+    'student-promotion', 'school-settings', 'academic-calendar',
+    'grading-scale', 'backup-restore', 'system-logs', 'system-settings',
+    'system-health', 'analytics'
+]);
+
+const ACCOUNTANT_BLOCKED_MODULES = new Set([
+    'marks-entry', 'marks-database', 'class-register', 'report-cards',
+    'transcripts', 'statistics', 'assessments', 'teacher-performance',
+    'timetable', 'enroll-student', 'student-archive',
+    'user-management', 'class-management', 'teacher-assignments',
+    'school-settings', 'academic-calendar', 'grading-scale',
+    'backup-restore', 'system-logs', 'system-settings', 'system-health',
+    'analytics', 'bulk-import', 'bulk-export', 'student-promotion'
+]);
+
+// ─── HELPERS ────────────────────────────────────────────────────────
+
 function getNavConfig(role) {
     const config = NAV_CONFIG[role] || [];
     return config.map(section => ({
@@ -293,12 +262,6 @@ function getNavConfig(role) {
     })).filter(section => section.items.length > 0);
 }
 
-/**
- * Find a nav item's label by ID
- * @param {string} id - Module ID
- * @param {string} role - User role
- * @returns {string} Display label
- */
 function findNavLabel(id, role) {
     const config = getNavConfig(role);
     for (const section of config) {
@@ -309,11 +272,6 @@ function findNavLabel(id, role) {
     return id;
 }
 
-/**
- * Get the default dashboard module for a role
- * @param {string} role - 'admin' | 'teacher' | 'accountant'
- * @returns {string} Module ID
- */
 function getDefaultModule(role) {
     const map = {
         admin: 'admin-dashboard',
@@ -322,13 +280,8 @@ function getDefaultModule(role) {
     };
     return map[role] || 'admin-dashboard';
 }
-// ── GLOBAL EXPORTS ──────────────────────────────────────────────────
-window.NAV_CONFIG                  = NAV_CONFIG;
-window.TEACHER_BLOCKED_MODULES     = TEACHER_BLOCKED_MODULES;
-window.ACCOUNTANT_BLOCKED_MODULES  = ACCOUNTANT_BLOCKED_MODULES;
-window.getNavConfig                = getNavConfig;
-window.findNavLabel                = findNavLabel;
-window.getDefaultModule            = getDefaultModule;
+
+// ─── EXPORTS ────────────────────────────────────────────────────────
 
 export {
     NAV_CONFIG,

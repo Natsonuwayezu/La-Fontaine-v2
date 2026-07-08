@@ -30,6 +30,7 @@ import { esc, fmtCurrency, fmtDate } from '../../core/utils.js';
 import { insert, update, remove, getAll, get } from '../../core/api.js';
 import { notifyAction } from '../../core/notifications.js';
 import { exportToExcel } from '../../core/utils.js';
+import { ensureStateLoaded } from '../../core/boot.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // STATE

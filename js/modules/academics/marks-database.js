@@ -14,7 +14,7 @@
 
 
 
-const ensureStateLoaded = window.ensureStateLoaded || (async () => {}); // global from boot.js
+const ensureStateLoaded = window.ensureStateLoaded || (async () => { }); // global from boot.js
 import {
     state,
     getClassById,
@@ -32,6 +32,7 @@ import { getGrade, getGradeClass } from '../../core/formulas.js';
 import { update, remove, getAll, insert } from '../../core/api.js';
 import { notifyAction } from '../../core/notifications.js';
 import { exportToExcel } from '../../core/utils.js';
+import { ensureStateLoaded } from '../../core/boot.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // STATE
@@ -161,7 +162,6 @@ export async function renderMarksDatabase(container) {
     window._exportAllMarks = exportAllMarks;
     window._resetMarksFilters = resetMarksFilters;
     window._editMark = editMark;
-    window._deleteMark = deleteMark;
     window._lockAssessment = lockAssessment;
     window._onYearChange = onYearChange;
 

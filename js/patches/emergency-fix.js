@@ -114,3 +114,25 @@
     console.log('  openLoginCard:', typeof window.openLoginCard);
     console.log('  logout:', typeof window.logout);
 })();
+
+// ── Patch missing theme exports ──
+if (typeof window.getCurrentTheme === 'undefined') {
+    window.getCurrentTheme = function () {
+        return document.documentElement.getAttribute('data-theme') || 'light';
+    };
+    console.log('[Emergency] getCurrentTheme patched');
+}
+
+// ── Patch missing chartWithYear ──
+if (typeof window.chartWithYear === 'undefined') {
+    window.chartWithYear = function (title, chartHtml, yearId) {
+        return `<div style="margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span style="font-weight:600;font-size:0.85rem;">${title}</span>
+                <span style="font-size:0.65rem;color:var(--text-muted);">📅 ${yearId || 'Current Year'}</span>
+            </div>
+            ${chartHtml}
+        </div>`;
+    };
+    console.log('[Emergency] chartWithYear patched');
+}

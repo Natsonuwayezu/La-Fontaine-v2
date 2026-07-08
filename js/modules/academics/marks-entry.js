@@ -32,6 +32,7 @@ import { getGrade, getGradeClass, getCurrentPhase } from '../../core/formulas.js
 import { insert, update, getAll, get } from '../../core/api.js';
 import { notifyAction } from '../../core/notifications.js';
 import { saveMarksOffline, syncOfflineMarks } from '../../core/offline.js';
+import { ensureStateLoaded } from '../../core/boot.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // STATE

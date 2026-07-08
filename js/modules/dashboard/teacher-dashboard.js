@@ -13,7 +13,7 @@
 
 
 
-const ensureStateLoaded = window.ensureStateLoaded || (async () => {}); // global from boot.js
+const ensureStateLoaded = window.ensureStateLoaded || (async () => { }); // global from boot.js
 import {
     state,
     getCurrentUser,
@@ -25,10 +25,12 @@ import {
     getYearData,
     getCurrentYearData
 } from '../../core/state.js';
+import { animateCards, setupCardClickEffects } from '../../ui/card-animations.js';
 import { esc, fmtDate, fmtAgo, fmtCurrency } from '../../core/utils.js';
 import { getGrade, getGradeClass, getCurrentPhase } from '../../core/formulas.js';
 import { asciiHorizontalBar, progressBar } from '../../ui/charts.js';
 import { getAll } from '../../core/api.js';
+import { ensureStateLoaded } from '../../core/boot.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // ENHANCED GREETING HELPER — Two Lines

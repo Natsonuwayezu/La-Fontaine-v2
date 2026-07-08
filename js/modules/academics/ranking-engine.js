@@ -1,3 +1,4 @@
+const state = window.state || {}; // state alias — resolves to global state
 // Advanced rankings: class, subject, overall, honour roll, trends
         // ════════════════════════════════════════════════════════════════════════
 

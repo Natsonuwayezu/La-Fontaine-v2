@@ -29,7 +29,8 @@ import {
 import { esc, fmtCurrency, fmtDate, fmtPct, fmtAgo } from '../../core/utils.js';
 import { getGrade, getGradeClass, rankStudents, termProgress } from '../../core/formulas.js';
 import { asciiHorizontalBar, gradeDistributionChart, trendIndicator } from '../../ui/charts.js';
-import { refreshYearData } from '../../core/boot.js';
+import { refreshYearData, ensureStateLoaded} from '../../core/boot.js';
+import { animateCards, setupCardClickEffects } from '../../ui/card-animations.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // ENHANCED GREETING HELPER — Two Lines

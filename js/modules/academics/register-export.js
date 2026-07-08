@@ -1,3 +1,4 @@
+const state = window.state || {}; // state alias — resolves to global state
 // Full register export with PDF/Excel and print options
         // ════════════════════════════════════════════════════════════════════════
 

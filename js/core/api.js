@@ -61,11 +61,32 @@ export async function apiRequest(path, method = 'GET', body = null, returnHeader
             const msg = data?.message || data?.hint || `HTTP ${res.status}`;
             console.error('[API]', method, path, 'failed:', msg);
 
-            // Fallback for missing term_number column in terms table
-            if (method === 'GET' && path.includes('order=term_number') && msg.includes('term_number')) {
-                const fallbackPath = path.replace(/order=term_number\.(asc|desc)/, 'order=name.$1');
-                console.warn('[API] Falling back from term_number ordering to name ordering:', fallbackPath);
-                return apiRequest(fallbackPath, method, body, returnHeaders, extraHeaders);
+            // Generic fallback: if the DB reports a missing column, strip any
+            // filters/orders that reference that column and retry once.
+            try {
+                const missingColMatch = msg.match(/column\s+([\w\.]+)\s+does not exist/i);
+                if (missingColMatch && method === 'GET') {
+                    const fullName = missingColMatch[1];
+                    const col = fullName.split('.').pop();
+                    let fallbackPath = path;
+
+                    // Remove filters like "col=eq.xxx" or "col=lt.xxx" etc.
+                    const filterRegex = new RegExp('([?&])' + col + '=[^&]*', 'g');
+                    fallbackPath = fallbackPath.replace(filterRegex, '$1');
+
+                    // Remove order clauses like order=col.asc or order=col.desc
+                    fallbackPath = fallbackPath.replace(new RegExp('order=' + col + '\.(asc|desc)', 'g'), '');
+
+                    // Clean up query string (remove duplicate & or trailing ?/&)
+                    fallbackPath = fallbackPath.replace(/[?&]+$/, '').replace('?&', '?').replace(/&&+/g, '&');
+
+                    if (fallbackPath !== path) {
+                        console.warn('[API] Retrying without missing column', col, '->', fallbackPath);
+                        return apiRequest(fallbackPath, method, body, returnHeaders, extraHeaders);
+                    }
+                }
+            } catch (e) {
+                console.warn('[API] Error building fallback path', e.message);
             }
 
             return { success: false, error: msg, data: [] };

@@ -1,3 +1,5 @@
+
+import { ensureStateLoaded } from '../../core/boot.js';const state = window.state || {}; // state alias — resolves to global state
 // js/modules/timetable-import.js
 // Timetable Import Module - Import timetable from Excel/CSV files
 
@@ -233,5 +235,3 @@ async function executeTimetableImport() {
     document.getElementById('import-preview-container').style.display = 'none';
     document.getElementById('timetable-import-file').value = '';
 }
-
-export { renderTimetableImport };

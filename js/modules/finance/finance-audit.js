@@ -1,3 +1,5 @@
+
+import { ensureStateLoaded } from '../../core/boot.js';const state = window.state || {}; // state alias — resolves to global state
 // js/modules/finance-audit.js
 // Finance Audit Module - Track and audit all financial transactions
 
@@ -260,5 +262,3 @@ function exportAuditLog() {
 function getById(table, id) {
     return getAll(table, { id: id }).then(r => r[0]);
 }
-
-export { renderFinanceAudit };

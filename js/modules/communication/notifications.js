@@ -28,6 +28,7 @@ import { update, getAll, insert, remove, updateWhere, logActivity } from '../../
 import { updateNotificationBadge, fetchUnreadNotifications, markNotificationRead, markAllNotificationsRead } from '../../core/notifications.js';
 import { confirmDialog } from '../../ui/modals.js';
 import { showToast } from '../../ui/toast.js';
+import { ensureStateLoaded } from '../../core/boot.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // STATE

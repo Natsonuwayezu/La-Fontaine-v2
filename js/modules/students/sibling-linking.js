@@ -10,6 +10,7 @@ const ensureStateLoaded = window.ensureStateLoaded || (async () => {}); // globa
 import { state, getClassById, getCurrentUser } from '../../core/state.js';
 import { esc } from '../../core/utils.js';
 import { update, insert } from '../../core/api.js';
+import { ensureStateLoaded } from '../../core/boot.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // MAIN RENDER FUNCTION

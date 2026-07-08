@@ -31,6 +31,7 @@ import { esc, fmtDate } from '../../core/utils.js';
 import { getAll, get, getYearData as apiGetYearData } from '../../core/api.js';
 import { exportToExcel } from '../../core/utils.js';
 import { asciiHorizontalBar } from '../../ui/charts.js';
+import { ensureStateLoaded } from '../../core/boot.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // STATE

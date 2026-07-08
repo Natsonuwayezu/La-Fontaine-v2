@@ -1,17 +1,8 @@
 /**
  * ECOLE LA FONTAINE — Analytics Dashboard
- * Advanced analytics with trends, subject analysis, teacher performance, and risk indicators
- * Last updated: 2026-07-03
- * 
- * CHANGES:
- * - Added academic year selector
- * - Analytics data filtered by selected academic year
- * - Year-over-year comparison support
- * - Multiple years shown in trend data
- * - Academic year label in all charts
- * - Support for viewing historical analytics
+ * Updated with Chart.js interactive charts
+ * Last updated: 2026-07-07
  */
-
 
 import {
     state,
@@ -27,7 +18,19 @@ import {
 } from '../../core/state.js';
 import { esc, fmtDate, fmtPct, fmtCurrency } from '../../core/utils.js';
 import { getGrade, getGradeClass, getCurrentPhase } from '../../core/formulas.js';
-import { asciiHorizontalBar, gradeDistributionChart, trendIndicator, chartWithYear } from '../../ui/charts.js';
+import {
+    asciiHorizontalBar,
+    gradeDistributionChart,
+    trendIndicator,
+    chartWithYear,
+    createBarChart,
+    createLineChart,
+    createDoughnutChart,
+    createPieChart,
+    getClassPerformanceData,
+    getFeeCollectionData,
+    getPaymentMethodData
+} from '../../ui/charts.js';
 import { getAll, getYearData as apiGetYearData } from '../../core/api.js';
 
 // ──────────────────────────────────────────────────────────────────────
@@ -36,9 +39,10 @@ import { getAll, getYearData as apiGetYearData } from '../../core/api.js';
 
 let selectedYearId = null;
 let analyticsCache = {};
+let chartInstances = {};
 
 // ──────────────────────────────────────────────────────────────────────
-// MAIN RENDER FUNCTION
+// RENDER ANALYTICS WITH CHARTS
 // ──────────────────────────────────────────────────────────────────────
 
 export async function renderAnalytics(container) {
@@ -59,7 +63,6 @@ export async function renderAnalytics(container) {
         .filter(t => t.academic_year_id === state.currentAcadYear?.id)
         .sort((a, b) => a.term_number - b.term_number);
 
-    // Default to current year
     if (!selectedYearId) {
         selectedYearId = state.filters?.academic_year_id || currentYear?.id || null;
     }
@@ -67,8 +70,10 @@ export async function renderAnalytics(container) {
     const classes = (state.classes || []).filter(c => c.is_active !== false);
     const subjects = (state.subjects || []).filter(s => s.is_active !== false);
 
+    // ── Render HTML with Chart.js canvas containers ──
     container.innerHTML = `
         <div class="analytics-module">
+            <!-- Header -->
             <div class="dash-card">
                 <div class="dash-card-header" style="flex-wrap:wrap;gap:8px;">
                     <span class="dash-card-title">📈 Analytics Dashboard</span>
@@ -106,15 +111,15 @@ export async function renderAnalytics(container) {
         </div>
     `;
 
+    // ── Expose global functions ──
     window._loadAnalyticsData = loadAnalyticsData;
     window._exportAnalyticsReport = exportAnalyticsReport;
-    window._loadAnalyticsData = loadAnalyticsData;
 
     await loadAnalyticsData();
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// LOAD ANALYTICS DATA
+// LOAD ANALYTICS DATA WITH CHARTS
 // ──────────────────────────────────────────────────────────────────────
 
 async function loadAnalyticsData() {
@@ -126,7 +131,6 @@ async function loadAnalyticsData() {
     const classId = document.getElementById('analytics-class')?.value;
     const subjectId = document.getElementById('analytics-subject')?.value;
 
-    // Update selected year
     if (yearId) {
         selectedYearId = yearId === 'all' ? 'all' : parseInt(yearId);
         if (selectedYearId !== 'all') {
@@ -140,10 +144,488 @@ async function loadAnalyticsData() {
 
     try {
         const data = await calculateAnalytics(selectedYearId, termId, classId, subjectId);
-        content.innerHTML = renderAnalyticsContent(data, selectedYearId);
+        content.innerHTML = renderAnalyticsContentWithCharts(data, selectedYearId);
+
+        // ── Initialize Chart.js charts after DOM render ──
+        setTimeout(() => {
+            initializeCharts(data, selectedYearId);
+        }, 100);
+
     } catch (error) {
         console.error('[Analytics] Error:', error);
         content.innerHTML = `<div class="alert alert-danger">Error loading analytics: ${esc(error.message)}</div>`;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// RENDER ANALYTICS CONTENT WITH CHARTS
+// ──────────────────────────────────────────────────────────────────────
+
+function renderAnalyticsContentWithCharts(data, yearId) {
+    const {
+        summary, classPerformance, subjectPerformance, trendData,
+        yearComparison, teacherPerformance, atRiskStudents, topStudents, passMark
+    } = data;
+
+    const yearLabel = getYearLabel(yearId);
+    const isAllYears = yearId === 'all';
+
+    // ── Get data for charts ──
+    const classChartData = classPerformance.map(c => ({
+        label: c.name,
+        value: c.avg,
+        color: c.avg >= 70 ? '#10b981' : c.avg >= 50 ? '#f59e0b' : '#ef4444'
+    }));
+
+    const subjectChartData = subjectPerformance.slice(0, 10).map(s => ({
+        label: s.code || s.name,
+        value: s.avg,
+        color: s.avg >= 70 ? '#10b981' : c.avg >= 50 ? '#f59e0b' : '#ef4444'
+    }));
+
+    // ── Payment method data ──
+    const paymentMethods = getPaymentMethodData();
+    const paymentLabels = paymentMethods.map(p => p.label);
+    const paymentValues = paymentMethods.map(p => p.value);
+
+    // ── Collection rate data ──
+    const feeData = getFeeCollectionData();
+    const feeLabels = feeData.map(f => f.label);
+    const feeValues = feeData.map(f => f.value);
+
+    // ── Grade distribution for donut ──
+    const gradeLabels = ['A+', 'A', 'B', 'C', 'D', 'F'];
+    const gradeValues = gradeLabels.map(g => summary.gradeDist[g] || 0);
+
+    return `
+        <!-- YEAR LABEL -->
+        <div style="margin-bottom:16px;padding:8px 16px;background:var(--bg-tertiary);border-radius:var(--r-md);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <span style="font-weight:600;font-size:0.9rem;">📅 ${esc(yearLabel)}</span>
+            <span style="font-size:0.75rem;color:var(--text-muted);">
+                ${isAllYears ? 'All years combined' : `${summary.totalStudents} students · ${summary.totalAssessments} assessments`}
+            </span>
+        </div>
+
+        <!-- SUMMARY STATS -->
+        <div class="stats-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px;">
+            <div class="stat-card" style="padding:14px 16px;background:var(--bg-secondary);border-radius:var(--r-lg);border:1px solid var(--border-light);">
+                <div style="font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">Students</div>
+                <div style="font-size:1.5rem;font-weight:700;">${summary.totalStudents}</div>
+                <div style="font-size:0.7rem;color:var(--text-muted);">${isAllYears ? 'all years' : 'active'}</div>
+            </div>
+            <div class="stat-card" style="padding:14px 16px;background:var(--bg-secondary);border-radius:var(--r-lg);border:1px solid var(--border-light);">
+                <div style="font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">Assessments</div>
+                <div style="font-size:1.5rem;font-weight:700;">${summary.totalAssessments}</div>
+                <div style="font-size:0.7rem;color:var(--text-muted);">this period</div>
+            </div>
+            <div class="stat-card" style="padding:14px 16px;background:var(--bg-secondary);border-radius:var(--r-lg);border:1px solid var(--border-light);">
+                <div style="font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">Average</div>
+                <div style="font-size:1.5rem;font-weight:700;color:${summary.avgScore >= 70 ? 'var(--success)' : summary.avgScore >= 50 ? 'var(--warning)' : 'var(--danger)'};">${summary.avgScore.toFixed(1)}%</div>
+                <div style="font-size:0.7rem;color:var(--text-muted);">school-wide</div>
+            </div>
+            <div class="stat-card" style="padding:14px 16px;background:var(--bg-secondary);border-radius:var(--r-lg);border:1px solid var(--border-light);">
+                <div style="font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">Pass Rate</div>
+                <div style="font-size:1.5rem;font-weight:700;color:${summary.passRate >= 70 ? 'var(--success)' : summary.passRate >= 50 ? 'var(--warning)' : 'var(--danger)'};">${summary.passRate.toFixed(1)}%</div>
+                <div style="font-size:0.7rem;color:var(--text-muted);">≥${passMark}%</div>
+            </div>
+            <div class="stat-card" style="padding:14px 16px;background:var(--bg-secondary);border-radius:var(--r-lg);border:1px solid var(--border-light);">
+                <div style="font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">At-Risk</div>
+                <div style="font-size:1.5rem;font-weight:700;color:var(--danger);">${atRiskStudents.length}</div>
+                <div style="font-size:0.7rem;color:var(--text-muted);">below ${passMark}%</div>
+            </div>
+            <div class="stat-card" style="padding:14px 16px;background:var(--bg-secondary);border-radius:var(--r-lg);border:1px solid var(--border-light);">
+                <div style="font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">Marks Entered</div>
+                <div style="font-size:1.5rem;font-weight:700;">${summary.totalMarks.toLocaleString()}</div>
+                <div style="font-size:0.7rem;color:var(--text-muted);">total records</div>
+            </div>
+        </div>
+
+        <!-- CHART GRID ROW 1: Bar Chart + Line Chart -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+            <div class="chart-card" style="background:var(--bg-secondary);border-radius:var(--r-lg);border:1px solid var(--border-light);overflow:hidden;padding:16px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <span style="font-weight:600;font-size:0.85rem;"><i class="fa-solid fa-chart-bar" style="color:#3b82f6;"></i> Class Performance</span>
+                    <span style="font-size:0.6rem;color:var(--text-muted);">Bar Chart</span>
+                </div>
+                <div style="height:220px;">
+                    <canvas id="chartBar"></canvas>
+                </div>
+                <div style="margin-top:6px;font-size:0.6rem;color:var(--text-muted);text-align:center;">Average scores by class</div>
+            </div>
+
+            <div class="chart-card" style="background:var(--bg-secondary);border-radius:var(--r-lg);border:1px solid var(--border-light);overflow:hidden;padding:16px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <span style="font-weight:600;font-size:0.85rem;"><i class="fa-solid fa-chart-line" style="color:#8b5cf6;"></i> Performance Trend</span>
+                    <span style="font-size:0.6rem;color:var(--text-muted);">Line Chart</span>
+                </div>
+                <div style="height:220px;">
+                    <canvas id="chartLine"></canvas>
+                </div>
+                <div style="margin-top:6px;font-size:0.6rem;color:var(--text-muted);text-align:center;">${isAllYears ? 'Year-over-year' : 'Term-by-term'} performance</div>
+            </div>
+        </div>
+
+        <!-- CHART GRID ROW 2: Donut + Donut with Center -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+            <div class="chart-card" style="background:var(--bg-secondary);border-radius:var(--r-lg);border:1px solid var(--border-light);overflow:hidden;padding:16px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <span style="font-weight:600;font-size:0.85rem;"><i class="fa-solid fa-circle" style="color:#f472b6;"></i> Payment Methods</span>
+                    <span style="font-size:0.6rem;color:var(--text-muted);">Donut</span>
+                </div>
+                <div style="height:200px;">
+                    <canvas id="chartDonut"></canvas>
+                </div>
+                <div style="margin-top:6px;font-size:0.6rem;color:var(--text-muted);text-align:center;">Payment method distribution</div>
+            </div>
+
+            <div class="chart-card" style="background:var(--bg-secondary);border-radius:var(--r-lg);border:1px solid var(--border-light);overflow:hidden;padding:16px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <span style="font-weight:600;font-size:0.85rem;"><i class="fa-solid fa-circle" style="color:#6366f1;"></i> Grade Distribution</span>
+                    <span style="font-size:0.6rem;color:var(--text-muted);">Donut</span>
+                </div>
+                <div style="height:200px;">
+                    <canvas id="chartDonutCenter"></canvas>
+                </div>
+                <div style="margin-top:6px;font-size:0.6rem;color:var(--text-muted);text-align:center;">Student grade distribution</div>
+            </div>
+        </div>
+
+        <!-- ASCII CHARTS SECTION -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+            <div class="dash-card" style="background:var(--bg-secondary);border-radius:var(--r-lg);border:1px solid var(--border-light);overflow:hidden;">
+                <div class="dash-card-header" style="padding:12px 16px;border-bottom:1px solid var(--border-light);display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-weight:600;font-size:0.9rem;">📊 Subject Performance (ASCII)</span>
+                    <span style="font-size:0.7rem;color:var(--text-muted);">${subjectPerformance.length} subjects</span>
+                </div>
+                <div class="dash-card-body" style="padding:12px 16px;">
+                    ${subjectPerformance.length ? asciiHorizontalBar(
+        subjectPerformance.slice(0, 10).map(s => ({
+            label: s.code || s.name,
+            value: s.avg,
+            color: s.avg >= 70 ? '#10b981' : s.avg >= 50 ? '#f59e0b' : '#ef4444'
+        })),
+        28
+    ) : '<div style="text-align:center;padding:20px;color:var(--text-muted);">No data available</div>'}
+                </div>
+            </div>
+
+            <div class="dash-card" style="background:var(--bg-secondary);border-radius:var(--r-lg);border:1px solid var(--border-light);overflow:hidden;">
+                <div class="dash-card-header" style="padding:12px 16px;border-bottom:1px solid var(--border-light);display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-weight:600;font-size:0.9rem;">📊 Grade Distribution (ASCII)</span>
+                    <span style="font-size:0.7rem;color:var(--text-muted);">${Object.values(summary.gradeDist).reduce((a, b) => a + b, 0)} students</span>
+                </div>
+                <div class="dash-card-body" style="padding:12px 16px;">
+                    ${Object.values(summary.gradeDist).reduce((a, b) => a + b, 0) > 0
+            ? gradeDistributionChart(summary.gradeDist, 28)
+            : '<div style="text-align:center;padding:20px;color:var(--text-muted);">No grade data available</div>'}
+                </div>
+            </div>
+        </div>
+
+        <!-- YEAR-OVER-YEAR COMPARISON -->
+        ${yearComparison.length > 1 ? `
+            <div class="dash-card" style="margin-bottom:20px;background:var(--bg-secondary);border-radius:var(--r-lg);border:1px solid var(--border-light);overflow:hidden;">
+                <div class="dash-card-header" style="padding:12px 16px;border-bottom:1px solid var(--border-light);">
+                    <span style="font-weight:600;font-size:0.9rem;">📊 Year-over-Year Comparison</span>
+                    <span style="font-size:0.7rem;color:var(--text-muted);">${yearComparison.map(y => y.year).join(' vs ')}</span>
+                </div>
+                <div class="dash-card-body" style="padding:12px 16px;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                        ${yearComparison.map((y, i) => `
+                            <div style="padding:12px;background:${i === yearComparison.length - 1 ? 'var(--role-light)' : 'var(--bg-tertiary)'};border-radius:8px;text-align:center;">
+                                <div style="font-size:0.7rem;color:var(--text-muted);">${esc(y.year)}</div>
+                                <div style="font-size:1.3rem;font-weight:700;color:${y.avg >= 70 ? 'var(--success)' : y.avg >= 50 ? 'var(--warning)' : 'var(--danger)'};">${y.avg.toFixed(1)}%</div>
+                                <div><span class="badge ${getGradeClass(y.avg)}">${y.grade}</span></div>
+                                <div style="font-size:0.65rem;color:var(--text-muted);margin-top:4px;">${y.assessments} assessments · ${y.marks} marks</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        ` : ''}
+
+        <!-- CLASS PERFORMANCE TABLE -->
+        <div class="dash-card" style="margin-bottom:20px;background:var(--bg-secondary);border-radius:var(--r-lg);border:1px solid var(--border-light);overflow:hidden;">
+            <div class="dash-card-header" style="padding:12px 16px;border-bottom:1px solid var(--border-light);display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-weight:600;font-size:0.9rem;">🏫 Class Performance Details</span>
+                <span style="font-size:0.7rem;color:var(--text-muted);">${classPerformance.length} classes</span>
+            </div>
+            <div class="dash-card-body" style="padding:0;">
+                ${classPerformance.length ? `
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%;border-collapse:collapse;font-size:0.8rem;">
+                            <thead>
+                                <tr style="background:var(--bg-tertiary);">
+                                    <th style="padding:8px 12px;text-align:left;font-weight:600;font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);">Class</th>
+                                    <th style="padding:8px 12px;text-align:left;font-weight:600;font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);">Students</th>
+                                    <th style="padding:8px 12px;text-align:left;font-weight:600;font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);">Avg %</th>
+                                    <th style="padding:8px 12px;text-align:left;font-weight:600;font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);">Grade</th>
+                                    <th style="padding:8px 12px;text-align:left;font-weight:600;font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);">Assessments</th>
+                                    <th style="padding:8px 12px;text-align:left;font-weight:600;font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);">Marks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${classPerformance.map(c => `
+                                    <tr style="border-bottom:1px solid var(--border-light);">
+                                        <td style="padding:8px 12px;font-weight:500;">${esc(c.name)}</td>
+                                        <td style="padding:8px 12px;">${c.students}</td>
+                                        <td style="padding:8px 12px;font-weight:600;color:${c.avg >= 70 ? 'var(--success)' : c.avg >= 50 ? 'var(--warning)' : 'var(--danger)'};">${c.avg.toFixed(1)}%</td>
+                                        <td style="padding:8px 12px;"><span class="badge ${getGradeClass(c.avg)}">${c.grade}</span></td>
+                                        <td style="padding:8px 12px;">${c.assessments}</td>
+                                        <td style="padding:8px 12px;">${c.marks}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                ` : '<div style="text-align:center;padding:20px;color:var(--text-muted);">No data available</div>'}
+            </div>
+        </div>
+
+        <!-- AT-RISK STUDENTS -->
+        <div class="dash-card" style="background:var(--bg-secondary);border-radius:var(--r-lg);border:1px solid var(--border-light);overflow:hidden;">
+            <div class="dash-card-header" style="padding:12px 16px;border-bottom:1px solid var(--border-light);display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-weight:600;font-size:0.9rem;">⚠️ At-Risk Students (Below ${passMark}%)</span>
+                <span style="font-size:0.7rem;color:var(--text-muted);">${atRiskStudents.length} students</span>
+            </div>
+            <div class="dash-card-body" style="padding:0;">
+                ${atRiskStudents.length ? `
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%;border-collapse:collapse;font-size:0.8rem;">
+                            <thead>
+                                <tr style="background:var(--bg-tertiary);">
+                                    <th style="padding:8px 12px;text-align:left;font-weight:600;font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);">Student</th>
+                                    <th style="padding:8px 12px;text-align:left;font-weight:600;font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);">Class</th>
+                                    <th style="padding:8px 12px;text-align:left;font-weight:600;font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);">%</th>
+                                    <th style="padding:8px 12px;text-align:left;font-weight:600;font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);">Grade</th>
+                                    <th style="padding:8px 12px;text-align:left;font-weight:600;font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);">Gap</th>
+                                    <th style="padding:8px 12px;text-align:left;font-weight:600;font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${atRiskStudents.slice(0, 15).map(s => `
+                                    <tr style="border-bottom:1px solid var(--border-light);">
+                                        <td style="padding:8px 12px;font-weight:500;">${esc(s.name)}</td>
+                                        <td style="padding:8px 12px;">${esc(s.class)}</td>
+                                        <td style="padding:8px 12px;font-weight:600;color:var(--danger);">${s.pct.toFixed(1)}%</td>
+                                        <td style="padding:8px 12px;"><span class="badge ${getGradeClass(s.pct)}">${s.grade}</span></td>
+                                        <td style="padding:8px 12px;color:var(--danger);">${s.gap.toFixed(1)}%</td>
+                                        <td style="padding:8px 12px;">
+                                            <button class="btn btn-sm btn-outline" onclick="window.navigateToWithData('student-details',{student_id:${s.id}})" style="padding:2px 8px;font-size:0.65rem;">👁️ View</button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    ${atRiskStudents.length > 15 ? `<div style="padding:8px 12px;text-align:center;font-size:0.7rem;color:var(--text-muted);">+ ${atRiskStudents.length - 15} more</div>` : ''}
+                ` : '<div style="text-align:center;padding:20px;color:var(--text-muted);">🎉 No at-risk students!</div>'}
+            </div>
+        </div>
+    `;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// INITIALIZE CHART.JS CHARTS
+// ──────────────────────────────────────────────────────────────────────
+
+function initializeCharts(data, yearId) {
+    const { classPerformance, subjectPerformance, trendData, summary } = data;
+
+    // ── Destroy existing charts ──
+    for (const [key, chart] of Object.entries(chartInstances)) {
+        if (chart) {
+            try { chart.destroy(); } catch (e) { }
+        }
+    }
+    chartInstances = {};
+
+    // ── Check if Chart.js is loaded ──
+    if (typeof Chart === 'undefined') {
+        console.warn('[Analytics] Chart.js not loaded — using ASCII charts only');
+        return;
+    }
+
+    try {
+        // ── 1. Bar Chart: Class Performance ──
+        const barCanvas = document.getElementById('chartBar');
+        if (barCanvas && classPerformance.length) {
+            const labels = classPerformance.map(c => c.name);
+            const values = classPerformance.map(c => c.avg);
+            const colors = classPerformance.map(c =>
+                c.avg >= 70 ? '#10b981' : c.avg >= 50 ? '#f59e0b' : '#ef4444'
+            );
+
+            chartInstances.bar = new Chart(barCanvas, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Average Score (%)',
+                        data: values,
+                        backgroundColor: colors.map(c => c + 'CC'),
+                        borderColor: colors,
+                        borderWidth: 1,
+                        borderRadius: 6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--border-light').trim() || 'rgba(255,255,255,0.04)',
+                            },
+                            ticks: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || 'rgba(255,255,255,0.4)',
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || 'rgba(255,255,255,0.4)',
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ── 2. Line Chart: Performance Trend ──
+        const lineCanvas = document.getElementById('chartLine');
+        if (lineCanvas && trendData.length >= 2) {
+            const labels = trendData.map(t => t.year);
+            const values = trendData.map(t => t.avg);
+            const isAllYears = yearId === 'all';
+
+            chartInstances.line = new Chart(lineCanvas, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: isAllYears ? 'Year-over-Year' : 'Term Performance',
+                        data: values,
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139,92,246,0.1)',
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: '#8b5cf6',
+                        pointRadius: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--border-light').trim() || 'rgba(255,255,255,0.04)',
+                            },
+                            ticks: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || 'rgba(255,255,255,0.4)',
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || 'rgba(255,255,255,0.4)',
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ── 3. Donut Chart: Payment Methods ──
+        const donutCanvas = document.getElementById('chartDonut');
+        if (donutCanvas) {
+            const paymentData = getPaymentMethodData();
+            if (paymentData.length) {
+                const colors = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444', '#f472b6'];
+                chartInstances.donut = new Chart(donutCanvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: paymentData.map(p => p.label),
+                        datasets: [{
+                            data: paymentData.map(p => p.value),
+                            backgroundColor: paymentData.map((_, i) => colors[i % colors.length]),
+                            borderColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-secondary').trim() || '#0f172a',
+                            borderWidth: 2,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '60%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || 'rgba(255,255,255,0.7)',
+                                    padding: 12,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // ── 4. Donut Chart: Grade Distribution ──
+        const donutCenterCanvas = document.getElementById('chartDonutCenter');
+        if (donutCenterCanvas) {
+            const gradeLabels = ['A+', 'A', 'B', 'C', 'D', 'F'];
+            const gradeValues = gradeLabels.map(g => summary.gradeDist[g] || 0);
+            const colors = ['#10b981', '#34d399', '#60a5fa', '#fbbf24', '#f97316', '#ef4444'];
+
+            if (gradeValues.reduce((a, b) => a + b, 0) > 0) {
+                chartInstances.donutCenter = new Chart(donutCenterCanvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: gradeLabels,
+                        datasets: [{
+                            data: gradeValues,
+                            backgroundColor: colors,
+                            borderColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-secondary').trim() || '#0f172a',
+                            borderWidth: 2,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || 'rgba(255,255,255,0.7)',
+                                    padding: 12,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        console.log('✅ Chart.js charts initialized');
+    } catch (error) {
+        console.warn('[Analytics] Chart initialization error:', error);
     }
 }
 
@@ -796,7 +1278,7 @@ function showToast(message, type = 'info', duration = 3500) {
 
 async function ensureStateLoaded() {
     if (!state.classes.length) {
-        const loadInitialData = window.loadInitialData || (async () => {});
+        const loadInitialData = window.loadInitialData || (async () => { });
         await loadInitialData(false);
     }
 }

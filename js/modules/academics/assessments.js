@@ -28,6 +28,7 @@ import { esc, fmtDate, fmtAgo } from '../../core/utils.js';
 import { getCurrentPhase, getGrade, getGradeClass } from '../../core/formulas.js';
 import { insert, update, remove, getAll, get } from '../../core/api.js';
 import { notifyAction } from '../../core/notifications.js';
+import { ensureStateLoaded } from '../../core/boot.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // STATE

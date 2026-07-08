@@ -11,6 +11,7 @@ import { state, getCurrentUser, getClassById, getSubjectById, getTeacherById } f
 import { esc } from '../../core/utils.js';
 import { getAll, remove, refreshTable, logActivity } from '../../core/api.js';
 import { TIMETABLE_DAYS, TIMETABLE_TIME_SLOTS } from '../../config/constants.js';
+import { ensureStateLoaded } from '../../core/boot.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // MAIN RENDER FUNCTION

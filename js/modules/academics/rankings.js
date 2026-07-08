@@ -1,3 +1,4 @@
+const state = window.state || {}; // state alias — resolves to global state
 // ============================================================
 // RANKINGS MODULE - Student ranking and position calculations
 // ============================================================
@@ -226,5 +227,3 @@ async function ensureStateLoaded() {
     if (!state.terms.length) await refreshTable('terms');
     if (!state.assessments.length) await refreshTable('assessments');
 }
-
-export { renderRankings };

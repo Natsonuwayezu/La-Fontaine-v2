@@ -30,6 +30,7 @@ import { insert, update, remove, getAll, get } from '../../core/api.js';
 import { getFullStudentBalance } from '../../core/fees.js';
 import { notifyAction } from '../../core/notifications.js';
 import { exportToExcel, downloadReceiptPDF } from '../../core/utils.js';
+import { ensureStateLoaded } from '../../core/boot.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // STATE

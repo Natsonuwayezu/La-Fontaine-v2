@@ -1,3 +1,5 @@
+
+import { ensureStateLoaded } from '../../core/boot.js';const state = window.state || {}; // state alias — resolves to global state
 // js/modules/family-fee-summary.js
 // Family Fee Summary Module - View combined fee status for all family members
 
@@ -418,5 +420,3 @@ function exportFamilyFeeSummary() {
     exportToExcel(data, `Family_Fee_Summary_${new Date().toISOString().split('T')[0]}`);
     showToast('✅ Family fee summary exported', 'success');
 }
-
-export { renderFamilyFeeSummary };

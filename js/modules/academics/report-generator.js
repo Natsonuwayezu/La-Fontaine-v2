@@ -1,3 +1,4 @@
+const state = window.state || {}; // state alias — resolves to global state
 // Batch report card generation with templates, queue, and PDF export
         // ════════════════════════════════════════════════════════════════════════
 

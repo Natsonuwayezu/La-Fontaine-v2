@@ -25,6 +25,7 @@ import {
 import { esc, fmtCurrency, fmtDate } from '../../core/utils.js';
 import { exportToExcel, downloadReceiptPDF } from '../../core/utils.js';
 import { refreshTable } from '../../core/api.js';
+import { ensureStateLoaded } from '../../core/boot.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // STATE

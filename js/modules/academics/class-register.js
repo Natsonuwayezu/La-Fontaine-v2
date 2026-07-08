@@ -28,6 +28,7 @@ import { esc, fmtDate, fmtPct } from '../../core/utils.js';
 import { getGrade, getGradeClass, calcSubjectPostMidterm, calcPreMidtermPrimary, calcPreMidtermNursery, getCurrentPhase } from '../../core/formulas.js';
 import { exportToExcel } from '../../core/utils.js';
 import { getAll } from '../../core/api.js';
+import { ensureStateLoaded } from '../../core/boot.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // STATE

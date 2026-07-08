@@ -164,6 +164,10 @@ const MODULE_REGISTRY = {
     // ── Student Extended ──
     'student-fees': () => import('../modules/students/student-fees.js').then(m => m.renderStudentFees),
     'bulk-student-actions': () => import('../modules/students/bulk-student-actions.js').then(m => m.renderBulkStudentActions),
+    // ── Help ──
+    'help-center': () => import('../modules/help/help-center.js').then(m => m.renderHelpCenter),
+    'faq': () => import('../modules/help/help-center.js').then(m => m.renderHelpCenter),
+    'support': () => import('../modules/help/help-center.js').then(m => m.renderHelpCenter),
 };
 
 // ──────────────────────────────────────────────────────────────────────

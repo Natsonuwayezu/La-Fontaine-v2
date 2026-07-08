@@ -11,6 +11,7 @@ import { state, getClassById, getCurrentUser } from '../../core/state.js';
 import { esc, fmtDate } from '../../core/utils.js';
 import { update, remove, getAll } from '../../core/api.js';
 import { notifyAction } from '../../core/notifications.js';
+import { ensureStateLoaded } from '../../core/boot.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // MAIN RENDER FUNCTION

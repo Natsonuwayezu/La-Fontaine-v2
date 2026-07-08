@@ -24,7 +24,7 @@ import {
 } from '../../core/state.js';
 import { esc, fmtPct } from '../../core/utils.js';
 import { getGrade, getGradeClass } from '../../core/formulas.js';
-import { asciiHorizontalBar, gradeDistributionChart, chartWithYear } from '../../ui/charts.js';
+import { asciiHorizontalBar, gradeDistributionChart, trendIndicator, chartWithYear, progressBar } from '../../ui/charts.js';
 import { getAll } from '../../core/api.js';
 
 // ──────────────────────────────────────────────────────────────────────
@@ -423,7 +423,7 @@ function showToast(message, type = 'info', duration = 3500) {
 
 async function ensureStateLoaded() {
     if (!state.classes || !state.classes.length) {
-        const fn = window.loadInitialData || (async () => {});
+        const fn = window.loadInitialData || (async () => { });
         await fn(false);
     }
 }

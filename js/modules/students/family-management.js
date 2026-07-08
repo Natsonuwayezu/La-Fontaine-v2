@@ -12,6 +12,7 @@ import { esc, fmtDate, fmtCurrency } from '../../core/utils.js';
 import { getFullStudentBalance } from '../../core/fees.js';
 import { insert, update, remove, getAll } from '../../core/api.js';
 import { notifyAction } from '../../core/notifications.js';
+import { ensureStateLoaded } from '../../core/boot.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // MAIN RENDER FUNCTION

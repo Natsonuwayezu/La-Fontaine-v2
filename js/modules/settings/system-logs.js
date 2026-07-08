@@ -11,6 +11,7 @@ import { state, getCurrentUser } from '../../core/state.js';
 import { esc, fmtDate, fmtDateTime, fmtAgo } from '../../core/utils.js';
 import { getAll, removeWhere, logActivity } from '../../core/api.js';
 import { exportToExcel } from '../../core/utils.js';
+import { ensureStateLoaded } from '../../core/boot.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // MAIN RENDER FUNCTION

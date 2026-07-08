@@ -16,15 +16,16 @@
 import { state, updateState, invalidateCache, resetFilters, initState } from './state.js';
 import { checkAuth, saveSession, clearSession, logout, resetSessionExpiry } from './auth.js';
 import { get, getSchoolSettings, getAllRecords, getYearData } from './api.js';
-import { navigateTo } from './router.js';
+import { navigateTo, getLastModule } from './router.js';
 import { getDefaultModule, getNavConfig } from '../config/navigation.js';
 import { APP_CONFIG, STORAGE_KEYS, DEFAULT_GRADES } from '../config/constants.js';
 import { getCurrentPhase, termProgress } from './formulas.js';
 import { initOfflineSupport, loadStateFromCache, saveStateToCache, clearStateCache } from './offline.js';
 import { initTheme } from '../ui/theme.js';
 import { buildSidebar, initSidebar } from '../ui/sidebar.js';
-import { updateTopbarUser, renderTopbar, initUserDropdown, initNotifications } from '../ui/topbar.js';
+import { updateTopbarUser, renderTopbar, initUserDropdown } from '../ui/topbar.js';
 import { initPWA } from '../ui/shell.js';
+import { showToast } from '../ui/toast.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // BOOT STATE
@@ -521,7 +522,7 @@ export async function initApp() {
 window.initApp = initApp;
 window.bootApp = bootApp;
 // ── ensureStateLoaded — shared global used by all modules ─────────────────────
-async function ensureStateLoaded(forceRefresh = false) {
+export async function ensureStateLoaded(forceRefresh = false) {
     if (!state.classes || !state.classes.length) {
         console.log('[Boot] State empty — loading initial data...');
         await loadInitialData(forceRefresh);
@@ -529,7 +530,7 @@ async function ensureStateLoaded(forceRefresh = false) {
 }
 
 window.ensureStateLoaded = ensureStateLoaded;
-window.loadInitialData   = loadInitialData;
+window.loadInitialData = loadInitialData;
 
 
 console.log('[Boot] initApp exported:', typeof initApp);

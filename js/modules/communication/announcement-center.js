@@ -276,7 +276,7 @@ async function runTermCleanup() {
             academic_year_id: currentYear.id,
             term_id: term.id,
             created_at: new Date().toISOString(),
-            created_by: state.currentUser?.id || null
+            created_by: state.currentUser?.id,
         });
 
         // Log the cleanup
@@ -665,7 +665,7 @@ function closeModal(modalId) {
 
 async function ensureStateLoaded() {
     if (!state.classes.length) {
-        const loadInitialData = window.loadInitialData || (async () => {});
+        const loadInitialData = window.loadInitialData || (async () => { });
         await loadInitialData(false);
     }
 }

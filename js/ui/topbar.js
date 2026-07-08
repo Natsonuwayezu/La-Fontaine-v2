@@ -1,223 +1,218 @@
 /**
  * ECOLE LA FONTAINE — Topbar Component
- * Page title, user menu, notifications, theme toggle, year/term progress
- * Last updated: 2026-07-03
- * 
- * CHANGES:
- * - Added academic year detection from sidebar state
- * - Term progress reflects selected year (not just current)
- * - Shows correct term (1st/2nd/3rd) based on selected year
- * - 0% progress for future years, 100% for completed years
- * - Phase indicator (Pre/Post Midterm) based on selected year
+ * Last updated: 2026-07-07
  */
 
-
-import {
-    state,
-    getCurrentUser,
-    getCurrentAcademicYear,
-    getActiveAcademicYearId,
-    getTermsByYear,
-    getTermStatus
-} from '../core/state.js';
-import { updateNotificationBadge, fetchUnreadNotifications } from '../core/notifications.js';
+import { state, getCurrentUser, getCurrentAcademicYear, getTermsByYear } from '../core/state.js';
+import { updateNotificationBadge } from '../core/notifications.js';
 import { navigateTo } from '../core/router.js';
 import { logout } from '../core/auth.js';
 import { showProfileModal, showChangePasswordModal } from './modals.js';
-import { toggleTheme } from './theme.js';
+import { toggleTheme, getCurrentTheme } from './theme.js';
 import { getCurrentPhase, termProgress } from '../core/formulas.js';
+import { showToast } from './toast.js';
 import { esc } from '../core/utils.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // RENDER TOPBAR
 // ──────────────────────────────────────────────────────────────────────
 
-/**
- * Render/update the topbar user info
- */
 export function renderTopbar() {
     const user = getCurrentUser();
     if (!user) return;
 
     updateTopbarUser(user);
     updateNotificationBadge();
+    updateDateTime();
     updateTopbarYearAndTerm();
+    updateThemeUI();
+
+    // Start clock
+    if (!window._clockInterval) {
+        window._clockInterval = setInterval(updateDateTime, 30000);
+    }
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// TOPBAR USER
+// UPDATE TOPBAR USER
 // ──────────────────────────────────────────────────────────────────────
 
 export function updateTopbarUser(user) {
     if (!user) return;
 
-    const nameEl = document.getElementById('topbar-username');
-    const avatarEl = document.getElementById('topbar-avatar');
-    const dropdownName = document.getElementById('dropdown-username');
-    const dropdownRole = document.getElementById('dropdown-userrole');
+    const nameEl = document.getElementById('topbarUserName');
+    const roleEl = document.getElementById('topbarUserRole');
+    const avatarEl = document.getElementById('topbarUserAvatar');
+    const dropdownAvatar = document.querySelector('.dropdown-header .user-avatar');
+    const dropdownName = document.querySelector('.dropdown-header .user-info .name');
 
-    if (nameEl) nameEl.textContent = user.name || user.username || 'User';
-    if (avatarEl) avatarEl.textContent = '👤';
-    if (dropdownName) dropdownName.textContent = user.name || user.username || 'User';
-    if (dropdownRole) dropdownRole.textContent = user.role ? (user.role.charAt(0).toUpperCase() + user.role.slice(1)) : '—';
+    const displayName = user.name || user.username || 'User';
+    const displayRole = user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : '—';
+    const initials = displayName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+
+    if (nameEl) nameEl.textContent = displayName;
+    if (roleEl) roleEl.textContent = displayRole;
+    if (avatarEl) avatarEl.textContent = initials || '👤';
+    if (dropdownAvatar) dropdownAvatar.textContent = initials || '👤';
+    if (dropdownName) dropdownName.textContent = displayName;
 
     // Also update sidebar
     updateSidebarUser(user);
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// TOPBAR YEAR & TERM PROGRESS
+// UPDATE DATE & TIME
 // ──────────────────────────────────────────────────────────────────────
 
-/**
- * Update the topbar with current year, term, and progress
- * Detects selected year from sidebar/state
- */
+export function updateDateTime() {
+    const now = new Date();
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    const dayEl = document.getElementById('currentDay');
+    const monthEl = document.getElementById('currentMonth');
+    const yearEl = document.getElementById('currentYear');
+    const timeEl = document.getElementById('currentTime');
+
+    if (dayEl) dayEl.textContent = now.getDate();
+    if (monthEl) monthEl.textContent = months[now.getMonth()];
+    if (yearEl) yearEl.textContent = now.getFullYear();
+
+    if (timeEl) {
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        timeEl.textContent = `${hours}:${minutes}`;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// UPDATE THEME UI
+// ──────────────────────────────────────────────────────────────────────
+
+export function updateThemeUI() {
+    const theme = getCurrentTheme() || 'dark';
+    const icon = document.getElementById('dropdownThemeIcon');
+    const label = document.getElementById('dropdownThemeLabel');
+
+    if (icon) {
+        icon.className = theme === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+    }
+    if (label) {
+        label.textContent = theme === 'dark' ? 'Dark Mode' : 'Light Mode';
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// UPDATE TOPBAR YEAR & TERM
+// ──────────────────────────────────────────────────────────────────────
+
 export function updateTopbarYearAndTerm() {
-    // Get selected year from state (set by sidebar year selector)
     const selectedYearId = state.filters?.academic_year_id || state.currentAcadYear?.id;
     const selectedYear = (state.academicYears || []).find(y => y.id === selectedYearId);
     const currentYear = getCurrentAcademicYear();
 
-    // Determine if selected year is active/current
-    const isCurrentYear = selectedYear?.id === currentYear?.id;
     const isActiveYear = selectedYear?.is_active === true;
+    const isCurrentYear = selectedYear?.id === currentYear?.id;
 
-    // Get terms for selected year
     const terms = getTermsByYear(selectedYearId);
     const today = new Date().toISOString().split('T')[0];
 
-    // Determine which term to show based on dates
     let activeTerm = null;
-    let termIndex = 0;
     let progress = 0;
     let daysLeft = 0;
-    let statusText = '';
+    let termDisplay = 'No Term';
 
-    if (terms.length === 0) {
-        // No terms defined for this year
-        statusText = 'No terms defined';
-        progress = 0;
-    } else {
-        // Find current term based on dates
-        for (let i = 0; i < terms.length; i++) {
-            const term = terms[i];
+    if (terms.length > 0) {
+        for (const term of terms) {
             if (term.start_date && term.end_date) {
                 if (today >= term.start_date && today <= term.end_date) {
                     activeTerm = term;
-                    termIndex = i;
                     break;
                 }
             }
         }
 
-        // If no active term found, determine if year is in future or past
         if (!activeTerm) {
             const firstTerm = terms[0];
             const lastTerm = terms[terms.length - 1];
-
             if (firstTerm?.start_date && today < firstTerm.start_date) {
-                // Year hasn't started yet
                 activeTerm = firstTerm;
-                termIndex = 0;
                 progress = 0;
-                statusText = 'Not started';
             } else if (lastTerm?.end_date && today > lastTerm.end_date) {
-                // Year is completed
                 activeTerm = lastTerm;
-                termIndex = terms.length - 1;
                 progress = 100;
-                statusText = 'Completed';
             } else {
-                // Fallback: use first term
                 activeTerm = firstTerm || terms[0];
-                termIndex = 0;
             }
         }
 
-        // Calculate progress for active term
         if (activeTerm) {
             const prog = termProgress(activeTerm);
             progress = prog.pct;
             daysLeft = prog.daysLeft;
-            statusText = prog.text;
+            termDisplay = activeTerm.name || `Term ${activeTerm.term_number || 1}`;
         }
     }
 
-    // Get phase for active term
-    const phase = activeTerm ? getCurrentPhase(activeTerm) : 'post_midterm';
-    const phaseText = phase === 'pre_midterm' ? '📋 Pre-Midterm' : '📝 Post-Midterm';
-    const phaseClass = phase === 'pre_midterm' ? 'phase-pre' : 'phase-post';
+    // ─── Update DOM ──────────────────────────────────────────────────
 
-    // Build term display name
-    const termName = activeTerm?.name || terms[0]?.name || 'No Term';
-    const termNumber = activeTerm?.term_number || (termIndex + 1);
-    const termDisplay = `Term ${termNumber}`;
-
-    // Year status indicator
-    let yearStatus = '';
-    let yearStatusColor = '';
-    if (isActiveYear && isCurrentYear) {
-        yearStatus = '🟢';
-        yearStatusColor = 'var(--success)';
-    } else if (isActiveYear && !isCurrentYear) {
-        yearStatus = '🟡';
-        yearStatusColor = 'var(--warning)';
-    } else if (!isActiveYear && selectedYear) {
-        yearStatus = '🔒';
-        yearStatusColor = 'var(--text-muted)';
-    }
-
-    // ── Update DOM ──
-
-    // Term name
-    const termNameEl = document.getElementById('prog-term-name');
-    if (termNameEl) {
-        termNameEl.textContent = termDisplay;
-        termNameEl.title = `${termName} (${phaseText})`;
-    }
-
-    // Academic year
-    const yearEl = document.getElementById('prog-acad-year');
+    // Academic Year
+    const yearEl = document.getElementById('academicYear');
     if (yearEl) {
-        const yearDisplay = selectedYear?.name || '2025-2026';
-        yearEl.textContent = `${yearDisplay} ${yearStatus}`;
-        yearEl.style.color = yearStatusColor;
+        yearEl.textContent = selectedYear?.name || '2025 – 2026';
     }
 
-    // Progress bar
-    const fillEl = document.getElementById('prog-fill');
-    if (fillEl) {
-        fillEl.style.width = Math.min(100, progress) + '%';
-        // Color based on progress
-        if (progress >= 100) {
+    // Term
+    const termEl = document.getElementById('termDisplay');
+    if (termEl) {
+        termEl.textContent = termDisplay;
+    }
+
+    // Status Dot
+    const statusDot = document.getElementById('yearStatus');
+    if (statusDot) {
+        if (!isActiveYear || !isCurrentYear) {
+            statusDot.className = 'status-dot locked';
+            statusDot.textContent = '🔒';
+            statusDot.style.fontSize = '10px';
+            statusDot.style.display = 'inline-flex';
+            statusDot.style.alignItems = 'center';
+            statusDot.style.justifyContent = 'center';
+            statusDot.style.width = '14px';
+            statusDot.style.height = '14px';
+            statusDot.style.borderRadius = '50%';
+            statusDot.style.background = 'var(--warning)';
+            statusDot.style.color = '#0a1628';
+        } else {
+            statusDot.className = 'status-dot active';
+            statusDot.textContent = '';
+            statusDot.style.fontSize = '';
+            statusDot.style.display = '';
+            statusDot.style.width = '6px';
+            statusDot.style.height = '6px';
+            statusDot.style.borderRadius = '50%';
+            statusDot.style.background = 'var(--success)';
+        }
+    }
+
+    // Progress Bar
+    const fillEl = document.getElementById('progressFill');
+    const textEl = document.getElementById('progressText');
+    if (fillEl && textEl) {
+        const pct = Math.min(100, progress);
+        fillEl.style.width = pct + '%';
+        textEl.textContent = pct + '%';
+
+        if (pct >= 100) {
             fillEl.style.background = 'var(--success)';
-        } else if (progress >= 75) {
+        } else if (!isActiveYear) {
             fillEl.style.background = 'var(--warning)';
         } else {
-            fillEl.style.background = 'var(--role-primary)';
+            fillEl.style.background = 'linear-gradient(90deg, var(--accent), var(--success))';
         }
     }
 
-    // Progress text
-    const textEl = document.getElementById('prog-text');
-    if (textEl) {
-        const isCompleted = progress >= 100;
-        const isFuture = progress === 0 && activeTerm?.start_date && today < activeTerm.start_date;
-        if (isCompleted) {
-            textEl.textContent = '✅ Completed';
-            textEl.style.color = 'var(--success)';
-        } else if (isFuture) {
-            textEl.textContent = '⏳ Not started';
-            textEl.style.color = 'var(--text-muted)';
-        } else {
-            textEl.textContent = statusText || `${Math.round(progress)}% complete`;
-            textEl.style.color = 'var(--text-muted)';
-        }
-    }
-
-    // Days left
-    const daysEl = document.getElementById('prog-days');
+    // Days Left
+    const daysEl = document.getElementById('daysLeft');
     if (daysEl) {
         if (progress >= 100) {
             daysEl.textContent = '0';
@@ -228,104 +223,48 @@ export function updateTopbarYearAndTerm() {
         }
     }
 
-    // Phase indicator (compact badge in topbar right)
-    const phaseIndicator = document.getElementById('phase-indicator-compact');
-    if (phaseIndicator) {
-        const isCompleted = progress >= 100;
-        const isFuture = progress === 0 && activeTerm?.start_date && today < activeTerm.start_date;
-        if (isCompleted) {
-            phaseIndicator.textContent = '✅ Complete';
-            phaseIndicator.className = 'phase-badge-compact phase-post';
-            phaseIndicator.style.background = 'var(--success-bg)';
-            phaseIndicator.style.color = 'var(--success)';
-        } else if (isFuture) {
-            phaseIndicator.textContent = '⏳ Upcoming';
-            phaseIndicator.className = 'phase-badge-compact';
-            phaseIndicator.style.background = 'var(--bg-tertiary)';
-            phaseIndicator.style.color = 'var(--text-muted)';
+    // Phase Badge
+    const phaseEl = document.getElementById('phaseBadge');
+    if (phaseEl) {
+        const phase = activeTerm ? getCurrentPhase(activeTerm) : 'post_midterm';
+
+        if (progress >= 100) {
+            phaseEl.textContent = '✅ Complete';
+            phaseEl.className = 'phase-badge complete';
+        } else if (progress === 0 && activeTerm?.start_date && today < activeTerm.start_date) {
+            phaseEl.textContent = '⏳ Upcoming';
+            phaseEl.className = 'phase-badge upcoming';
+        } else if (!isActiveYear) {
+            phaseEl.textContent = '🔒 Locked';
+            phaseEl.className = 'phase-badge locked';
+        } else if (phase === 'pre_midterm') {
+            phaseEl.textContent = '📋 Pre-Midterm';
+            phaseEl.className = 'phase-badge pre';
         } else {
-            phaseIndicator.textContent = phaseText;
-            phaseIndicator.className = `phase-badge-compact ${phaseClass}`;
-            phaseIndicator.style.background = '';
-            phaseIndicator.style.color = '';
+            phaseEl.textContent = '📝 Post-Midterm';
+            phaseEl.className = 'phase-badge post';
         }
     }
-
-    // ── Year status tooltip ──
-    const yearWrap = document.querySelector('.progress-label');
-    if (yearWrap) {
-        let tooltip = '';
-        if (!selectedYear) {
-            tooltip = 'No academic year selected';
-        } else if (isActiveYear && isCurrentYear) {
-            tooltip = `Active year — ${selectedYear.name}`;
-        } else if (isActiveYear && !isCurrentYear) {
-            tooltip = `Active year (not current) — ${selectedYear.name}`;
-        } else {
-            tooltip = `Inactive year — Read-only — ${selectedYear.name}`;
-        }
-        yearWrap.title = tooltip;
-    }
-
-    // ── Store current state for other modules ──
-    window._topbarYearState = {
-        selectedYearId,
-        selectedYear,
-        isCurrentYear,
-        isActiveYear,
-        activeTerm,
-        progress,
-        phase,
-        termName: termDisplay,
-    };
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// USER DROPDOWN
+// TOGGLE USER DROPDOWN
 // ──────────────────────────────────────────────────────────────────────
 
 export function toggleUserDropdown() {
-    const dd = document.getElementById('user-dropdown');
-    if (dd) dd.classList.toggle('open');
+    const dd = document.getElementById('userDropdown');
+    const menu = document.getElementById('userMenu');
+    if (dd) {
+        dd.classList.toggle('open');
+        if (menu) menu.classList.toggle('open');
+    }
 }
 
 export function closeUserDropdown() {
-    const dd = document.getElementById('user-dropdown');
+    const dd = document.getElementById('userDropdown');
+    const menu = document.getElementById('userMenu');
     if (dd) dd.classList.remove('open');
-}
-
-// ──────────────────────────────────────────────────────────────────────
-// NOTIFICATIONS
-// ──────────────────────────────────────────────────────────────────────
-
-export function initNotifications() {
-    // Initial badge update
-    updateNotificationBadge();
-
-    // Start polling (if not already started)
-    if (typeof startNotificationPolling === 'function') {
-        startNotificationPolling(30000);
-    }
-
-    // Click on bell navigates to notification center
-    const bell = document.querySelector('.notif-bell');
-    if (bell) {
-        bell.addEventListener('click', function (e) {
-            e.stopPropagation();
-            navigateTo('notification-center');
-        });
-    }
-} 
-
-// ──────────────────────────────────────────────────────────────────────
-// THEME TOGGLE (in dropdown)
-// ──────────────────────────────────────────────────────────────────────
-
-export function updateThemeUI(theme) {
-    const icon = document.getElementById('dropdown-theme-icon');
-    const text = document.getElementById('dropdown-theme-text');
-    if (icon) icon.textContent = theme === 'dark' ? '☀️' : '🌙';
-    if (text) text.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
+    if (menu) menu.classList.remove('open');
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -333,24 +272,74 @@ export function updateThemeUI(theme) {
 // ──────────────────────────────────────────────────────────────────────
 
 export function initUserDropdown() {
-    const dd = document.getElementById('user-dropdown');
-    if (dd) dd.classList.remove('open');
-
-    // Close on outside click
+    // Close dropdown on outside click
     document.addEventListener('click', function (e) {
-        if (dd && !e.target.closest('.user-menu') && !e.target.closest('.user-dropdown')) {
+        const menu = document.getElementById('userMenu');
+        const dd = document.getElementById('userDropdown');
+        if (menu && dd && !menu.contains(e.target)) {
             dd.classList.remove('open');
+            menu.classList.remove('open');
         }
     });
+
+    console.log('[Topbar] User dropdown initialized');
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// PAGE TITLE
+// INIT NOTIFICATIONS (placeholder)
 // ──────────────────────────────────────────────────────────────────────
 
-export function setPageTitle(title) {
-    const el = document.getElementById('page-title');
-    if (el) el.textContent = title;
+export function initNotifications() {
+    // Notifications are handled by updateNotificationBadge in renderTopbar
+    console.log('[Topbar] Notifications initialized');
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// HANDLE THEME TOGGLE
+// ──────────────────────────────────────────────────────────────────────
+
+export function handleThemeToggle() {
+    toggleTheme();
+    updateThemeUI();
+    const theme = getCurrentTheme() || 'dark';
+    showToast(theme === 'dark' ? '🌙 Dark mode activated' : '☀️ Light mode activated', 'info');
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// HANDLE INSTALL
+// ──────────────────────────────────────────────────────────────────────
+
+let deferredPrompt = null;
+
+export function initPWAInstall() {
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        const btn = document.getElementById('installBtn');
+        if (btn) btn.classList.add('show');
+    });
+
+    window.addEventListener('appinstalled', () => {
+        const btn = document.getElementById('installBtn');
+        if (btn) btn.classList.remove('show');
+        deferredPrompt = null;
+        showToast('✅ App installed successfully!', 'success');
+    });
+}
+
+export function installApp() {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                const btn = document.getElementById('installBtn');
+                if (btn) btn.classList.remove('show');
+            }
+            deferredPrompt = null;
+        });
+    } else {
+        showToast('App is already installed or cannot be installed in this browser.', 'info');
+    }
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -359,13 +348,31 @@ export function setPageTitle(title) {
 
 function updateSidebarUser(user) {
     if (!user) return;
-    const avatarEl = document.getElementById('sidebar-avatar');
-    const nameEl = document.getElementById('sidebar-username');
-    const roleEl = document.getElementById('sidebar-userrole');
+    const avatarEl = document.getElementById('sidebarUserAvatar');
+    const nameEl = document.getElementById('sidebarUserName');
+    const roleEl = document.getElementById('sidebarUserRole');
 
-    if (avatarEl) avatarEl.textContent = '👤';
-    if (nameEl) nameEl.textContent = user.name || user.username || 'User';
-    if (roleEl) roleEl.textContent = user.role ? (user.role.charAt(0).toUpperCase() + user.role.slice(1)) : '—';
+    const displayName = user.name || user.username || 'User';
+    const displayRole = user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : '—';
+    const initials = displayName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+
+    if (avatarEl) avatarEl.textContent = initials || '👤';
+    if (nameEl) nameEl.textContent = displayName;
+    if (roleEl) roleEl.textContent = displayRole;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// INIT TOPBAR
+// ──────────────────────────────────────────────────────────────────────
+
+export function initTopbar() {
+    // PWA install
+    initPWAInstall();
+
+    // Initial render
+    renderTopbar();
+
+    console.log('✅ Topbar initialized');
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -375,5 +382,7 @@ function updateSidebarUser(user) {
 window.toggleUserDropdown = toggleUserDropdown;
 window.showProfileModal = showProfileModal;
 window.showChangePasswordModal = showChangePasswordModal;
-window.toggleTheme = toggleTheme;
+window.handleThemeToggle = handleThemeToggle;
+window.installApp = installApp;
 window.logout = logout;
+window.navigateTo = navigateTo;

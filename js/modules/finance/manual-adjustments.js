@@ -1,3 +1,5 @@
+
+import { ensureStateLoaded } from '../../core/boot.js';const state = window.state || {}; // state alias — resolves to global state
 // SECTION 60: MANUAL ADJUSTMENTS
         // ================================================================
 

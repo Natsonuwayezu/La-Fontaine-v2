@@ -11,6 +11,7 @@ import { state, getCurrentUser } from '../../core/state.js';
 import { esc, fmtDateTime } from '../../core/utils.js';
 import { getAllRecords, insertBatch, removeWhere, logActivity } from '../../core/api.js';
 import { APP_CONFIG } from '../../config/constants.js';
+import { ensureStateLoaded } from '../../core/boot.js';
 
 const BACKUP_KEY = 'elf_backup_history';
 

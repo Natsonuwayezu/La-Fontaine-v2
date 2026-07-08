@@ -14,7 +14,7 @@
 
 
 
-const ensureStateLoaded = window.ensureStateLoaded || (async () => {}); // global from boot.js
+const ensureStateLoaded = window.ensureStateLoaded || (async () => { }); // global from boot.js
 import {
     state,
     getClassById,
@@ -29,6 +29,7 @@ import {
 import { esc, fmtDate, fmtPct, exportToExcel } from '../../core/utils.js';
 import { getGrade, getGradeClass, calculateGPA, rankStudents } from '../../core/formulas.js';
 import { getAll, get, getYearData as apiGetYearData } from '../../core/api.js';
+import { ensureStateLoaded } from '../../core/boot.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // STATE
@@ -279,6 +280,14 @@ export async function renderTranscripts(container) {
     window._resetTranscriptSettings = resetTranscriptSettings;
     window._printTranscriptGuide = printTranscriptGuide;
     window._loadTranscriptsByYear = loadTranscriptsByYear;
+}
+
+// Preview transcript (delegates to loadTranscriptData to render preview)
+async function previewTranscript() {
+    // Ensure the selected student is loaded and show preview
+    await loadTranscriptData();
+    const preview = document.getElementById('transcript-preview');
+    if (preview) preview.style.display = 'block';
 }
 
 // ──────────────────────────────────────────────────────────────────────

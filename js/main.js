@@ -14,6 +14,7 @@ import { initOfflineSupport } from './core/offline.js';
 import { initUserDropdown, initNotifications } from './ui/topbar.js';
 import { showToast } from './ui/toast.js';
 import { closeModal } from './ui/modals.js';
+import { openHelpCenter, closeHelpCenter } from './modules/help/help-center.js';
 
 let appInitialized = false;
 let bootTime = Date.now();
@@ -102,9 +103,32 @@ function showLoginPage() {
 
 function setupGlobalEventListeners() {
     // ── Keyboard shortcuts ──
+    // ════════════════════════════════════════════════════════════
+    //  NEW — Ctrl+K / Cmd+K → Open Help Center
+    // ════════════════════════════════════════════════════════════
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+
+        // Check if help center is already open
+        const container = document.getElementById('help-center-container');
+        if (container && container.classList.contains('show')) {
+            // If already open, focus the search input
+            const input = document.getElementById('help-search-input');
+            if (input) input.focus();
+        } else {
+            // Open help center
+            if (typeof openHelpCenter === 'function') {
+                openHelpCenter();
+            } else {
+                console.warn('[Main] Help Center not available');
+                showToast('❓ Help Center — Press Ctrl+K to open', 'info', 2000);
+            }
+        }
+        return;
+    }
     document.addEventListener('keydown', function (e) {
-        // Ctrl+K or Cmd+K → command palette (future)
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        // Ctrl+L or Cmd+L → command palette (future)
+        if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
             e.preventDefault();
             // Open command palette (future implementation)
             console.log('[Main] Command palette triggered');
@@ -211,7 +235,6 @@ function setupGlobalEventListeners() {
             }
         }
     });
-
     console.log('[Main] Global event listeners registered');
 }
 
@@ -272,41 +295,86 @@ function initParticles() {
 // ──────────────────────────────────────────────────────────────────────
 
 function initBackToTop() {
-    const btn = document.getElementById('back-to-top');
+    let btn = document.getElementById('back-to-top');
+
     if (!btn) {
-        // Create back-to-top button if it doesn't exist
-        const newBtn = document.createElement('button');
-        newBtn.id = 'back-to-top';
-        newBtn.innerHTML = '⬆';
-        newBtn.style.cssText = `
+        btn = document.createElement('button');
+        btn.id = 'back-to-top';
+        btn.innerHTML = '⬆';
+        btn.setAttribute('aria-label', 'Back to top');
+        btn.style.cssText = `
             position: fixed;
-            bottom: 80px;
-            right: 20px;
+            bottom: 90px;
+            right: 24px;
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            background: var(--role-primary);
+            background: var(--role-primary, #1a3a5c);
             color: white;
             border: none;
             font-size: 20px;
             cursor: pointer;
-            box-shadow: var(--shadow-lg);
-            z-index: 100;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+            z-index: 999;
             display: none;
+            align-items: center;
+            justify-content: center;
             transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px) scale(0.9);
         `;
-        document.body.appendChild(newBtn);
-    }
 
-    const button = document.getElementById('back-to-top');
-    if (button) {
-        window.addEventListener('scroll', function () {
-            button.style.display = window.scrollY > 300 ? 'flex' : 'none';
-        }, { passive: true });
+        // Hover effect
+        btn.addEventListener('mouseenter', function () {
+            this.style.transform = 'scale(1.1)';
+            this.style.boxShadow = '0 6px 24px rgba(0, 0, 0, 0.35)';
+        });
+        btn.addEventListener('mouseleave', function () {
+            this.style.transform = 'scale(1)';
+            this.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.25)';
+        });
 
-        button.addEventListener('click', function () {
+        // Click to scroll
+        btn.addEventListener('click', function () {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
+
+        document.body.appendChild(btn);
+        console.log('[Main] Back-to-top button created on right side');
+    }
+
+    // Show/hide on scroll
+    let isVisible = false;
+    window.addEventListener('scroll', function () {
+        const scrollY = window.scrollY || window.pageYOffset;
+        const shouldShow = scrollY > 300;
+
+        if (shouldShow && !isVisible) {
+            btn.style.display = 'flex';
+            // Trigger animation
+            requestAnimationFrame(() => {
+                btn.style.opacity = '1';
+                btn.style.transform = 'translateY(0) scale(1)';
+            });
+            isVisible = true;
+        } else if (!shouldShow && isVisible) {
+            btn.style.opacity = '0';
+            btn.style.transform = 'translateY(20px) scale(0.9)';
+            setTimeout(() => {
+                if (!shouldShow) {
+                    btn.style.display = 'none';
+                }
+            }, 300);
+            isVisible = false;
+        }
+    }, { passive: true });
+
+    // Check initial state
+    if (window.scrollY > 300) {
+        btn.style.display = 'flex';
+        btn.style.opacity = '1';
+        btn.style.transform = 'translateY(0) scale(1)';
+        isVisible = true;
     }
 }
 

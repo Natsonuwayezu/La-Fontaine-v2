@@ -212,6 +212,18 @@ window._updateFeeTotal = function () {
     }
 };
 
+// Add the updateFeeTotal function
+function updateFeeTotal() {
+    const checkboxes = document.querySelectorAll('.fee-checkbox');
+    let total = 0;
+    checkboxes.forEach(cb => {
+        if (cb.checked) {
+            total += parseFloat(cb.dataset.amount) || 0;
+        }
+    });
+    document.getElementById('feeTotal').textContent = total.toLocaleString() + ' RWF';
+}
+
 // ──────────────────────────────────────────────────────────────────────
 // SUBMIT ENROLL
 // ──────────────────────────────────────────────────────────────────────

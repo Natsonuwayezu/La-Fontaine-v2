@@ -12,6 +12,7 @@ import { esc } from '../../core/utils.js';
 import { getGrade, getGradeClass } from '../../core/formulas.js';
 import { insert, update, remove, refreshTable, logActivity } from '../../core/api.js';
 import { DEFAULT_GRADES } from '../../config/constants.js';
+import { ensureStateLoaded } from '../../core/boot.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // MAIN RENDER FUNCTION

@@ -1,3 +1,5 @@
+
+import { ensureStateLoaded } from '../../core/boot.js';const state = window.state || {}; // state alias — resolves to global state
 // js/modules/fee-assignments.js
 // Fee Assignments Module - Assign fee categories to classes and students
 
@@ -559,5 +561,3 @@ function exportFeeAssignments() {
     exportToExcel(data, `Fee_Assignments_${new Date().toISOString().split('T')[0]}`);
     showToast('✅ Fee assignments exported', 'success');
 }
-
-export { renderFeeAssignments };

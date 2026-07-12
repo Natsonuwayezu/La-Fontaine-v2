@@ -1,0 +1,907 @@
+/* ═══════════════════════════════════════════════════════════════════
+   STATEMENTS PRINT — css/print/statements-print.css
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: Print-specific styles for student fee statements.
+   Applied when printing financial statements. Hides navigation,
+   optimizes layout for paper, and ensures professional branding.
+   No pure white (#FFFFFF), no pure black (#000000).
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   PRINT RESET — Hide UI chrome
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+
+    /* ── Hide all navigation elements ── */
+    .sidebar,
+    .topbar,
+    .menu-toggle,
+    .btn-group,
+    .filters-bar,
+    .pagination,
+    .notif-bell,
+    .user-menu,
+    .term-progress-bar,
+    .quick-actions,
+    .modal-overlay,
+    .no-print,
+    #pwa-install-btn,
+    #back-to-top,
+    .print-hide,
+    .sidebar-overlay,
+    .task-loader-overlay,
+    .boot-loader,
+    .toast-container,
+    #toast-container {
+        display: none !important;
+    }
+
+    /* ── Main content full width ── */
+    .main-content {
+        margin-left: 0 !important;
+        padding: 0 !important;
+        background: var(--bg-body, #f5f0eb) !important;
+    }
+
+    #dynamic-content {
+        padding: 0 !important;
+    }
+
+    /* ── Body reset ── */
+    body {
+        background: var(--bg-body, #f5f0eb) !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        color: var(--text-body, #2c241e) !important;
+    }
+
+    /* ── Remove all shadows ── */
+    .statement-container {
+        box-shadow: none !important;
+        border: 1px solid var(--border-medium, #d4c8be) !important;
+        margin: 0 auto !important;
+        background: var(--bg-card, #fcfaf8) !important;
+        border-radius: 0 !important;
+    }
+
+    /* ── Page setup ── */
+    @page {
+        margin: 10mm 8mm 8mm 8mm;
+        size: A4 portrait;
+    }
+
+    /* ── Force background colors ── */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   STATEMENT PRINT STYLES
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+
+    /* ── Statement Container ── */
+    .statement-container {
+        max-width: 780px;
+        margin: 0 auto;
+        padding: 0;
+        background: transparent !important;
+    }
+
+    /* ── Statement Main ── */
+    .statement {
+        max-width: 780px;
+        margin: 0 auto;
+        background: var(--bg-card, #fcfaf8) !important;
+        border: 1px solid var(--border-medium, #d4c8be) !important;
+        border-radius: 8px !important;
+        overflow: hidden;
+        box-shadow: none !important;
+        font-family: 'DM Sans', 'Plus Jakarta Sans', Arial, sans-serif;
+        page-break-inside: avoid;
+    }
+
+    /* ── Header ── */
+    .statement-header {
+        background: var(--role-primary, #2d1f3a) !important;
+        color: var(--text-inverse, #f5f0eb) !important;
+        padding: 16px 20px !important;
+        display: flex !important;
+        gap: 12px !important;
+        align-items: center !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .statement-header .statement-logo {
+        width: 48px !important;
+        height: 48px !important;
+        background: rgba(245, 240, 235, 0.10) !important;
+        border-radius: 8px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 22px !important;
+        overflow: hidden !important;
+        flex-shrink: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .statement-header .statement-logo img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: contain !important;
+    }
+
+    .statement-header .statement-title-group {
+        flex: 1 !important;
+    }
+
+    .statement-header .statement-title-group h1 {
+        font-family: 'Playfair Display', 'Syne', Georgia, serif !important;
+        font-size: 16px !important;
+        font-weight: 700 !important;
+        margin: 0 0 2px 0 !important;
+        color: var(--text-inverse, #f5f0eb) !important;
+        letter-spacing: 0.3px !important;
+    }
+
+    .statement-header .statement-title-group p {
+        font-size: 10px !important;
+        opacity: 0.75 !important;
+        margin: 0 !important;
+        color: var(--text-inverse, #f5f0eb) !important;
+    }
+
+    .statement-header .statement-title-group .statement-type {
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        background: rgba(245, 240, 235, 0.12) !important;
+        padding: 2px 10px !important;
+        border-radius: 12px !important;
+        display: inline-block !important;
+        margin-top: 2px !important;
+        color: var(--text-inverse, #f5f0eb) !important;
+        letter-spacing: 0.5px !important;
+    }
+
+    /* ── Info Bar ── */
+    .statement-info-bar {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr 1fr !important;
+        padding: 10px 16px !important;
+        background: var(--bg-tertiary, #f0ebe6) !important;
+        border-bottom: 1px solid var(--border-light, #e8e0d8) !important;
+        gap: 8px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .statement-info-bar .info-item {
+        font-size: 10px !important;
+        color: var(--text-body, #2c241e) !important;
+    }
+
+    .statement-info-bar .info-item strong {
+        display: block !important;
+        font-size: 8px !important;
+        text-transform: uppercase !important;
+        color: var(--text-muted, #a8988e) !important;
+        letter-spacing: 0.3px !important;
+        font-weight: 600 !important;
+        margin-bottom: 1px !important;
+    }
+
+    .statement-info-bar .info-item span {
+        font-weight: 600 !important;
+        font-size: 11px !important;
+        color: var(--text-dark, #1a1410) !important;
+    }
+
+    /* ── Summary Cards ── */
+    .statement-summary {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr 1fr 1fr !important;
+        gap: 8px !important;
+        padding: 12px 16px !important;
+        background: var(--bg-card-alt, #faf7f4) !important;
+        border-bottom: 1px solid var(--border-light, #e8e0d8) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .statement-summary .summary-card {
+        text-align: center !important;
+        padding: 6px 8px !important;
+        background: var(--bg-card, #fcfaf8) !important;
+        border-radius: 6px !important;
+        border: 1px solid var(--border-light, #e8e0d8) !important;
+    }
+
+    .statement-summary .summary-card .summary-label {
+        font-size: 7px !important;
+        text-transform: uppercase !important;
+        color: var(--text-muted, #a8988e) !important;
+        letter-spacing: 0.3px !important;
+        font-weight: 600 !important;
+    }
+
+    .statement-summary .summary-card .summary-value {
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        color: var(--text-dark, #1a1410) !important;
+        font-family: 'Syne', 'Playfair Display', serif !important;
+    }
+
+    .statement-summary .summary-card .summary-value.positive {
+        color: var(--success, #3a7a5a) !important;
+    }
+
+    .statement-summary .summary-card .summary-value.negative {
+        color: var(--danger, #c45a4a) !important;
+    }
+
+    .statement-summary .summary-card .summary-value.neutral {
+        color: var(--text-soft, #6b5f56) !important;
+    }
+
+    /* ── Fee Breakdown Table ── */
+    .statement-fees {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 9px !important;
+        margin: 0 !important;
+    }
+
+    .statement-fees thead th {
+        background: var(--bg-tertiary, #f0ebe6) !important;
+        color: var(--text-dark, #1a1410) !important;
+        padding: 5px 8px !important;
+        font-size: 7px !important;
+        font-weight: 700 !important;
+        text-align: left !important;
+        border-bottom: 2px solid var(--border-medium, #d4c8be) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.4px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .statement-fees thead th:not(:first-child) {
+        text-align: right !important;
+    }
+
+    .statement-fees tbody td {
+        padding: 4px 8px !important;
+        font-size: 9px !important;
+        border-bottom: 1px solid var(--border-light, #e8e0d8) !important;
+        color: var(--text-body, #2c241e) !important;
+    }
+
+    .statement-fees tbody td:not(:first-child) {
+        text-align: right !important;
+    }
+
+    .statement-fees tbody tr:last-child td {
+        border-bottom: none !important;
+    }
+
+    .statement-fees tbody tr:nth-child(even) {
+        background: rgba(240, 235, 230, 0.25) !important;
+    }
+
+    /* ── Fee Status Badge ── */
+    .statement-fees .status-badge {
+        display: inline-block !important;
+        padding: 1px 6px !important;
+        border-radius: 8px !important;
+        font-size: 7px !important;
+        font-weight: 600 !important;
+        text-align: center !important;
+        min-width: 36px !important;
+    }
+
+    .statement-fees .status-badge.paid {
+        background: var(--success-bg, #dce8e0) !important;
+        color: #065f46 !important;
+        border: 1px solid var(--success, #3a7a5a) !important;
+    }
+
+    .statement-fees .status-badge.partial {
+        background: var(--warning-bg, #f0e8d0) !important;
+        color: #92400e !important;
+        border: 1px solid var(--warning, #b8983a) !important;
+    }
+
+    .statement-fees .status-badge.unpaid {
+        background: var(--danger-bg, #f0e0dc) !important;
+        color: #991b1b !important;
+        border: 1px solid var(--danger, #c45a4a) !important;
+    }
+
+    .statement-fees .status-badge.waived {
+        background: var(--bg-tertiary, #f0ebe6) !important;
+        color: var(--text-muted, #a8988e) !important;
+        border: 1px solid var(--border-medium, #d4c8be) !important;
+        text-decoration: line-through !important;
+    }
+
+    /* ── Payment History Table ── */
+    .statement-payments {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 9px !important;
+        margin: 0 !important;
+    }
+
+    .statement-payments thead th {
+        background: var(--bg-tertiary, #f0ebe6) !important;
+        color: var(--text-dark, #1a1410) !important;
+        padding: 5px 8px !important;
+        font-size: 7px !important;
+        font-weight: 700 !important;
+        text-align: left !important;
+        border-bottom: 2px solid var(--border-medium, #d4c8be) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.4px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .statement-payments thead th:not(:first-child) {
+        text-align: right !important;
+    }
+
+    .statement-payments tbody td {
+        padding: 4px 8px !important;
+        font-size: 9px !important;
+        border-bottom: 1px solid var(--border-light, #e8e0d8) !important;
+        color: var(--text-body, #2c241e) !important;
+    }
+
+    .statement-payments tbody td:not(:first-child) {
+        text-align: right !important;
+    }
+
+    .statement-payments tbody tr:nth-child(even) {
+        background: rgba(240, 235, 230, 0.25) !important;
+    }
+
+    .statement-payments .payment-method {
+        font-size: 8px !important;
+        color: var(--text-muted, #a8988e) !important;
+    }
+
+    /* ── Running Balance ── */
+    .statement-running-balance {
+        font-weight: 600 !important;
+        font-size: 9px !important;
+    }
+
+    .statement-running-balance.positive {
+        color: var(--success, #3a7a5a) !important;
+    }
+
+    .statement-running-balance.negative {
+        color: var(--danger, #c45a4a) !important;
+    }
+
+    /* ── Footer ── */
+    .statement-footer {
+        padding: 10px 16px !important;
+        background: var(--bg-tertiary, #f0ebe6) !important;
+        border-top: 1px solid var(--border-light, #e8e0d8) !important;
+        font-size: 8px !important;
+        color: var(--text-muted, #a8988e) !important;
+        text-align: center !important;
+        line-height: 1.6 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .statement-footer .footer-motto {
+        font-style: italic !important;
+        font-size: 9px !important;
+        color: var(--text-soft, #6b5f56) !important;
+    }
+
+    .statement-footer .footer-signatures {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 20px !important;
+        margin-top: 8px !important;
+        text-align: center !important;
+        font-size: 8px !important;
+        color: var(--text-soft, #6b5f56) !important;
+    }
+
+    .statement-footer .footer-signatures .sig-line {
+        border-top: 1px solid var(--border-dark, #b8a89e) !important;
+        padding-top: 4px !important;
+        margin-top: 16px !important;
+    }
+
+    /* ── Amount in Words ── */
+    .statement-amount-words {
+        padding: 6px 16px !important;
+        background: var(--bg-card-alt, #faf7f4) !important;
+        border-bottom: 1px solid var(--border-light, #e8e0d8) !important;
+        font-size: 9px !important;
+        font-weight: 500 !important;
+        color: var(--text-soft, #6b5f56) !important;
+        text-align: center !important;
+        font-style: italic !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .statement-amount-words strong {
+        color: var(--text-dark, #1a1410) !important;
+        font-weight: 700 !important;
+    }
+
+    /* ── Section Titles ── */
+    .statement-section-title {
+        font-family: 'Syne', 'Playfair Display', serif !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        color: var(--text-dark, #1a1410) !important;
+        padding: 10px 16px 4px 16px !important;
+        margin: 0 !important;
+        border-bottom: 1px solid var(--border-light, #e8e0d8) !important;
+    }
+
+    .statement-section-title .section-count {
+        font-size: 9px !important;
+        font-weight: 400 !important;
+        color: var(--text-muted, #a8988e) !important;
+        margin-left: 6px !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   NO DATA / EMPTY STATE
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    .statement-empty {
+        padding: 20px !important;
+        text-align: center !important;
+        color: var(--text-muted, #a8988e) !important;
+        font-size: 11px !important;
+        background: var(--bg-card-alt, #faf7f4) !important;
+        border-bottom: 1px solid var(--border-light, #e8e0d8) !important;
+    }
+
+    .statement-empty .empty-icon {
+        font-size: 28px !important;
+        opacity: 0.4 !important;
+        margin-bottom: 4px !important;
+    }
+
+    .statement-empty .empty-title {
+        font-weight: 600 !important;
+        color: var(--text-soft, #6b5f56) !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE — Print Overrides
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    [data-theme="dark"] .statement {
+        background: var(--bg-card, #241d18) !important;
+        border-color: var(--border-medium, #4a3d35) !important;
+    }
+
+    [data-theme="dark"] .statement-header {
+        background: var(--role-primary, #4d2f4a) !important;
+    }
+
+    [data-theme="dark"] .statement-info-bar {
+        background: var(--bg-tertiary, #2a221c) !important;
+        border-bottom-color: var(--border-light, #332a24) !important;
+    }
+
+    [data-theme="dark"] .statement-info-bar .info-item {
+        color: var(--text-body, #d4ccc6) !important;
+    }
+
+    [data-theme="dark"] .statement-info-bar .info-item strong {
+        color: var(--text-muted, #6b5f56) !important;
+    }
+
+    [data-theme="dark"] .statement-info-bar .info-item span {
+        color: var(--text-dark, #f0ebe6) !important;
+    }
+
+    [data-theme="dark"] .statement-summary {
+        background: var(--bg-card-alt, #2a221c) !important;
+        border-bottom-color: var(--border-light, #332a24) !important;
+    }
+
+    [data-theme="dark"] .statement-summary .summary-card {
+        background: var(--bg-card, #241d18) !important;
+        border-color: var(--border-light, #332a24) !important;
+    }
+
+    [data-theme="dark"] .statement-summary .summary-card .summary-label {
+        color: var(--text-muted, #6b5f56) !important;
+    }
+
+    [data-theme="dark"] .statement-summary .summary-card .summary-value {
+        color: var(--text-dark, #f0ebe6) !important;
+    }
+
+    [data-theme="dark"] .statement-summary .summary-card .summary-value.positive {
+        color: var(--success, #5a9a7a) !important;
+    }
+
+    [data-theme="dark"] .statement-summary .summary-card .summary-value.negative {
+        color: var(--danger, #d46a5a) !important;
+    }
+
+    [data-theme="dark"] .statement-summary .summary-card .summary-value.neutral {
+        color: var(--text-soft, #9a8e86) !important;
+    }
+
+    [data-theme="dark"] .statement-fees thead th {
+        background: var(--bg-tertiary, #2a221c) !important;
+        color: var(--text-dark, #f0ebe6) !important;
+        border-bottom-color: var(--border-medium, #4a3d35) !important;
+    }
+
+    [data-theme="dark"] .statement-fees tbody td {
+        border-bottom-color: var(--border-light, #332a24) !important;
+        color: var(--text-body, #d4ccc6) !important;
+    }
+
+    [data-theme="dark"] .statement-fees tbody tr:nth-child(even) {
+        background: rgba(240, 235, 230, 0.04) !important;
+    }
+
+    [data-theme="dark"] .statement-fees .status-badge.paid {
+        background: rgba(90, 154, 122, 0.20) !important;
+        color: #86efac !important;
+        border-color: var(--success, #5a9a7a) !important;
+    }
+
+    [data-theme="dark"] .statement-fees .status-badge.partial {
+        background: rgba(201, 168, 76, 0.20) !important;
+        color: #fcd34d !important;
+        border-color: var(--warning, #c9a84c) !important;
+    }
+
+    [data-theme="dark"] .statement-fees .status-badge.unpaid {
+        background: rgba(212, 106, 90, 0.20) !important;
+        color: #fca5a5 !important;
+        border-color: var(--danger, #d46a5a) !important;
+    }
+
+    [data-theme="dark"] .statement-fees .status-badge.waived {
+        background: rgba(240, 235, 230, 0.04) !important;
+        color: var(--text-muted, #6b5f56) !important;
+        border-color: var(--border-medium, #4a3d35) !important;
+    }
+
+    [data-theme="dark"] .statement-payments thead th {
+        background: var(--bg-tertiary, #2a221c) !important;
+        color: var(--text-dark, #f0ebe6) !important;
+        border-bottom-color: var(--border-medium, #4a3d35) !important;
+    }
+
+    [data-theme="dark"] .statement-payments tbody td {
+        border-bottom-color: var(--border-light, #332a24) !important;
+        color: var(--text-body, #d4ccc6) !important;
+    }
+
+    [data-theme="dark"] .statement-payments tbody tr:nth-child(even) {
+        background: rgba(240, 235, 230, 0.04) !important;
+    }
+
+    [data-theme="dark"] .statement-payments .payment-method {
+        color: var(--text-muted, #6b5f56) !important;
+    }
+
+    [data-theme="dark"] .statement-amount-words {
+        background: var(--bg-card-alt, #2a221c) !important;
+        border-bottom-color: var(--border-light, #332a24) !important;
+        color: var(--text-soft, #9a8e86) !important;
+    }
+
+    [data-theme="dark"] .statement-amount-words strong {
+        color: var(--text-dark, #f0ebe6) !important;
+    }
+
+    [data-theme="dark"] .statement-footer {
+        background: var(--bg-tertiary, #2a221c) !important;
+        border-top-color: var(--border-light, #332a24) !important;
+        color: var(--text-muted, #6b5f56) !important;
+    }
+
+    [data-theme="dark"] .statement-footer .footer-motto {
+        color: var(--text-soft, #9a8e86) !important;
+    }
+
+    [data-theme="dark"] .statement-footer .footer-signatures {
+        color: var(--text-soft, #9a8e86) !important;
+    }
+
+    [data-theme="dark"] .statement-footer .footer-signatures .sig-line {
+        border-top-color: var(--border-dark, #6b5f56) !important;
+    }
+
+    [data-theme="dark"] .statement-section-title {
+        color: var(--text-dark, #f0ebe6) !important;
+        border-bottom-color: var(--border-light, #332a24) !important;
+    }
+
+    [data-theme="dark"] .statement-section-title .section-count {
+        color: var(--text-muted, #6b5f56) !important;
+    }
+
+    [data-theme="dark"] .statement-empty {
+        color: var(--text-muted, #6b5f56) !important;
+        background: var(--bg-card-alt, #2a221c) !important;
+        border-bottom-color: var(--border-light, #332a24) !important;
+    }
+
+    [data-theme="dark"] .statement-empty .empty-title {
+        color: var(--text-soft, #9a8e86) !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   THERMAL / COMPACT PRINT (80mm)
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print and (max-width: 80mm) {
+    .statement {
+        max-width: 100% !important;
+        border-radius: 0 !important;
+        border: none !important;
+        font-size: 8px !important;
+        padding: 4px !important;
+    }
+
+    .statement-header {
+        padding: 6px 8px !important;
+        flex-direction: column !important;
+        gap: 2px !important;
+        text-align: center !important;
+    }
+
+    .statement-header .statement-logo {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 14px !important;
+    }
+
+    .statement-header .statement-title-group h1 {
+        font-size: 12px !important;
+    }
+
+    .statement-header .statement-title-group p {
+        font-size: 7px !important;
+    }
+
+    .statement-header .statement-title-group .statement-type {
+        font-size: 8px !important;
+        padding: 1px 6px !important;
+    }
+
+    .statement-info-bar {
+        grid-template-columns: 1fr 1fr !important;
+        padding: 6px 8px !important;
+        gap: 4px !important;
+    }
+
+    .statement-info-bar .info-item {
+        font-size: 7px !important;
+    }
+
+    .statement-info-bar .info-item strong {
+        font-size: 6px !important;
+    }
+
+    .statement-info-bar .info-item span {
+        font-size: 8px !important;
+    }
+
+    .statement-summary {
+        grid-template-columns: 1fr 1fr !important;
+        padding: 6px 8px !important;
+        gap: 4px !important;
+    }
+
+    .statement-summary .summary-card .summary-label {
+        font-size: 6px !important;
+    }
+
+    .statement-summary .summary-card .summary-value {
+        font-size: 10px !important;
+    }
+
+    .statement-fees {
+        font-size: 7px !important;
+    }
+
+    .statement-fees thead th {
+        font-size: 6px !important;
+        padding: 3px 4px !important;
+    }
+
+    .statement-fees tbody td {
+        font-size: 7px !important;
+        padding: 3px 4px !important;
+    }
+
+    .statement-fees .status-badge {
+        font-size: 6px !important;
+        padding: 0 4px !important;
+        min-width: 28px !important;
+    }
+
+    .statement-payments {
+        font-size: 7px !important;
+    }
+
+    .statement-payments thead th {
+        font-size: 6px !important;
+        padding: 3px 4px !important;
+    }
+
+    .statement-payments tbody td {
+        font-size: 7px !important;
+        padding: 3px 4px !important;
+    }
+
+    .statement-amount-words {
+        font-size: 7px !important;
+        padding: 4px 8px !important;
+    }
+
+    .statement-footer {
+        padding: 4px 8px !important;
+        font-size: 6px !important;
+    }
+
+    .statement-footer .footer-motto {
+        font-size: 7px !important;
+    }
+
+    .statement-footer .footer-signatures {
+        font-size: 6px !important;
+        gap: 8px !important;
+    }
+
+    .statement-footer .footer-signatures .sig-line {
+        margin-top: 10px !important;
+    }
+
+    .statement-section-title {
+        font-size: 9px !important;
+        padding: 6px 8px 2px 8px !important;
+    }
+
+    .statement-section-title .section-count {
+        font-size: 7px !important;
+    }
+
+    .statement-empty {
+        padding: 10px !important;
+        font-size: 8px !important;
+    }
+
+    .statement-empty .empty-icon {
+        font-size: 18px !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ACCESSIBILITY — High Contrast Print
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print and (prefers-contrast: high) {
+    .statement {
+        border-width: 2px !important;
+        border-color: var(--text-dark, #1a1410) !important;
+    }
+
+    .statement-header {
+        background: var(--text-dark, #1a1410) !important;
+        color: var(--text-inverse, #f5f0eb) !important;
+    }
+
+    .statement-fees thead th {
+        background: var(--text-dark, #1a1410) !important;
+        color: var(--text-inverse, #f5f0eb) !important;
+        border-bottom-color: var(--text-dark, #1a1410) !important;
+    }
+
+    .statement-payments thead th {
+        background: var(--text-dark, #1a1410) !important;
+        color: var(--text-inverse, #f5f0eb) !important;
+        border-bottom-color: var(--text-dark, #1a1410) !important;
+    }
+
+    .statement-fees .status-badge {
+        border-width: 1.5px !important;
+    }
+
+    .statement-summary .summary-card {
+        border-width: 1.5px !important;
+        border-color: var(--text-dark, #1a1410) !important;
+    }
+
+    .statement-footer .footer-signatures .sig-line {
+        border-top-width: 1.5px !important;
+        border-top-color: var(--text-dark, #1a1410) !important;
+    }
+
+    .statement-info-bar {
+        border-bottom-color: var(--text-dark, #1a1410) !important;
+    }
+
+    .statement-summary {
+        border-bottom-color: var(--text-dark, #1a1410) !important;
+    }
+
+    .statement-amount-words {
+        border-bottom-color: var(--text-dark, #1a1410) !important;
+    }
+
+    .statement-footer {
+        border-top-color: var(--text-dark, #1a1410) !important;
+    }
+
+    .statement-section-title {
+        border-bottom-color: var(--text-dark, #1a1410) !important;
+    }
+
+    .statement-fees tbody td {
+        border-bottom-color: var(--text-dark, #1a1410) !important;
+    }
+
+    .statement-payments tbody td {
+        border-bottom-color: var(--text-dark, #1a1410) !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   UTILITY — Force Page Breaks
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    .page-break-before {
+        page-break-before: always !important;
+    }
+
+    .page-break-after {
+        page-break-after: always !important;
+    }
+
+    .page-break-inside-avoid {
+        page-break-inside: avoid !important;
+    }
+
+    .page-break-after-avoid {
+        page-break-after: avoid !important;
+    }
+
+    /* ── Batch statements ── */
+    .batch-statement .statement {
+        page-break-after: always !important;
+    }
+
+    .batch-statement .statement:last-child {
+        page-break-after: avoid !important;
+    }
+}

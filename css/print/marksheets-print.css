@@ -1,0 +1,1484 @@
+/* ═══════════════════════════════════════════════════════════════════
+   MARKSHEETS PRINT — css/print/marksheets-print.css
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: Print-optimized styles for class registers, mark sheets,
+   and academic reports. Designed for landscape A4 printing.
+   No pure white (#FFFFFF), no pure black (#000000).
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   PRINT BASE — Hide navigation, optimize layout
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+
+    /* ── Hide all navigation elements ── */
+    .sidebar,
+    .topbar,
+    .menu-toggle,
+    .btn-group,
+    .filters-bar,
+    .pagination,
+    .notif-bell,
+    .user-menu,
+    .term-progress-bar,
+    .quick-actions,
+    .modal-overlay,
+    .no-print,
+    #pwa-install-btn,
+    #back-to-top,
+    .bottom-nav,
+    .search-wrapper,
+    .search-overlay,
+    .filter-modal,
+    .toast-container,
+    .task-loader-overlay,
+    .sidebar-overlay {
+        display: none !important;
+    }
+
+    /* ── Main content full width ── */
+    .main-content {
+        margin-left: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    #dynamic-content {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* ── Remove backgrounds and shadows ── */
+    body {
+        background: #f5f0eb !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .dash-card,
+    .stat-card,
+    .card,
+    .report-card,
+    .register-container {
+        background: #fcfaf8 !important;
+        border: 1px solid #d4c8be !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+        padding: 8px !important;
+        page-break-inside: avoid;
+    }
+
+    .dash-card-header {
+        background: #f0ebe6 !important;
+        border-bottom: 1px solid #d4c8be !important;
+        padding: 8px 12px !important;
+    }
+
+    .dash-card-body {
+        padding: 8px 12px !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAGE SETUP — A4 Landscape
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    @page {
+        size: A4 landscape;
+        margin: 12mm 10mm 12mm 10mm;
+    }
+
+    @page :first {
+        margin-top: 15mm;
+    }
+
+    /* ── Page breaks ── */
+    .page-break-before {
+        page-break-before: always;
+    }
+
+    .page-break-after {
+        page-break-after: always;
+    }
+
+    .page-break-inside-avoid {
+        page-break-inside: avoid;
+    }
+
+    /* ── Orphans and widows control ── */
+    p,
+    li,
+    .register-row,
+    .student-row {
+        orphans: 3;
+        widows: 3;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    .section-title {
+        orphans: 2;
+        widows: 2;
+    }
+
+    /* ── Avoid breaking tables ── */
+    table {
+        page-break-inside: auto;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+
+    tfoot {
+        display: table-footer-group;
+    }
+
+    /* ── Ensure header repeats on each page ── */
+    thead th {
+        background: #e8e0d8 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   REGISTER TABLE — Class Register Print Styles
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+
+    .register-table,
+    .cr-table,
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 8.5px;
+        line-height: 1.3;
+        font-family: 'DM Sans', -apple-system, sans-serif;
+    }
+
+    .register-table th,
+    .cr-table th,
+    .data-table th {
+        background: #e8e0d8 !important;
+        color: #1a1410 !important;
+        font-weight: 700;
+        text-align: center;
+        padding: 4px 4px;
+        border: 1px solid #d4c8be;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .register-table td,
+    .cr-table td,
+    .data-table td {
+        padding: 3px 4px;
+        border: 1px solid #d4c8be;
+        text-align: center;
+        color: #2c241e;
+        background: #fcfaf8 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* ── Alternate row colors ── */
+    .register-table tbody tr:nth-child(even),
+    .cr-table tbody tr:nth-child(even),
+    .data-table tbody tr:nth-child(even) {
+        background: #f5f0eb !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* ── Sticky columns (print version uses static positioning) ── */
+    .cr-col-rank,
+    .cr-col-name {
+        position: static !important;
+        background: #f5f0eb !important;
+        font-weight: 600;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .cr-col-rank {
+        width: 28px;
+        min-width: 28px;
+        max-width: 28px;
+        text-align: center;
+    }
+
+    .cr-col-name {
+        width: 140px;
+        min-width: 140px;
+        max-width: 140px;
+        text-align: left;
+        padding-left: 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* ── Header rows (subject names) ── */
+    .subject-group-header {
+        background: #d4c8be !important;
+        font-weight: 700;
+        color: #1a1410 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .subject-group-header th {
+        background: #d4c8be !important;
+        color: #1a1410 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* ── Sub-header (MG/EX rows) ── */
+    .sub-header th {
+        background: #e8e0d8 !important;
+        font-weight: 600;
+        font-size: 7px;
+        color: #2c241e !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* ── Average row ── */
+    .average-row td,
+    .average-row th {
+        background: #d4c8be !important;
+        font-weight: 700;
+        color: #1a1410 !important;
+        border-top: 2px solid #b8a89e;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* ── Total row ── */
+    .total-row td,
+    .total-row th {
+        background: #d4c8be !important;
+        font-weight: 700;
+        color: #1a1410 !important;
+        border-top: 2px solid #b8a89e;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* ── Color-coded cells ── */
+    .cell-high {
+        background: #dce8e0 !important;
+        color: #065f46 !important;
+        font-weight: 600;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .cell-medium {
+        background: #f0e8d0 !important;
+        color: #92400e !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .cell-low {
+        background: #f0e0dc !important;
+        color: #991b1b !important;
+        font-weight: 600;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .cell-fail {
+        background: #f0e0dc !important;
+        color: #991b1b !important;
+        font-weight: 700;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* ─── Grade badges in print ── */
+    .grade-Ap,
+    .grade-A,
+    .grade-B,
+    .grade-C,
+    .grade-D,
+    .grade-F {
+        display: inline-block;
+        padding: 1px 5px;
+        border-radius: 0;
+        font-weight: 700;
+        font-size: 7.5px;
+        background: transparent !important;
+        border: 1px solid #d4c8be;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .grade-Ap {
+        border-color: #3a7a5a;
+        color: #065f46;
+    }
+
+    .grade-A {
+        border-color: #5a9a7a;
+        color: #065f46;
+    }
+
+    .grade-B {
+        border-color: #6a8aba;
+        color: #1a3a5a;
+    }
+
+    .grade-C {
+        border-color: #c9a84c;
+        color: #92400e;
+    }
+
+    .grade-D {
+        border-color: #c48a3a;
+        color: #9a4a1a;
+    }
+
+    .grade-F {
+        border-color: #c45a4a;
+        color: #991b1b;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   REGISTER HEADER — School name, title, date
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    .register-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        padding-bottom: 6px;
+        border-bottom: 2px solid #b8a89e;
+    }
+
+    .register-header .school-name {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 16px;
+        font-weight: 700;
+        color: #1a1410;
+        letter-spacing: 0.5px;
+    }
+
+    .register-header .register-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 14px;
+        font-weight: 600;
+        color: #2c241e;
+    }
+
+    .register-header .register-meta {
+        font-size: 8px;
+        color: #6b5f56;
+        text-align: right;
+        line-height: 1.4;
+    }
+
+    .register-header .register-meta .term {
+        font-weight: 600;
+        color: #1a1410;
+    }
+
+    /* ── Phase badge ── */
+    .phase-badge-print {
+        display: inline-block;
+        padding: 1px 8px;
+        border-radius: 0;
+        font-size: 7px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        background: #e8e0d8 !important;
+        color: #1a1410 !important;
+        border: 1px solid #b8a89e;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .phase-badge-print.pre {
+        background: #f0e8d0 !important;
+        border-color: #c9a84c;
+        color: #92400e !important;
+    }
+
+    .phase-badge-print.post {
+        background: #dce8e0 !important;
+        border-color: #3a7a5a;
+        color: #065f46 !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MARK SHEET — Individual student marks
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    .marksheet-container {
+        max-width: 100%;
+        padding: 4px 8px;
+    }
+
+    .marksheet-student-header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 24px;
+        padding: 6px 10px;
+        background: #f0ebe6 !important;
+        border: 1px solid #d4c8be;
+        margin-bottom: 6px;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .marksheet-student-header .field {
+        font-size: 8px;
+        color: #6b5f56;
+    }
+
+    .marksheet-student-header .field strong {
+        color: #1a1410;
+        font-weight: 600;
+    }
+
+    .marksheet-student-header .field .value {
+        color: #2c241e;
+        font-weight: 500;
+    }
+
+    /* ── Assessment columns ── */
+    .marksheet-table th.assessment-col {
+        font-size: 7px;
+        padding: 3px 2px;
+        writing-mode: vertical-lr;
+        text-orientation: mixed;
+        height: 40px;
+        white-space: nowrap;
+    }
+
+    .marksheet-table td.score-cell {
+        font-size: 8px;
+        font-weight: 500;
+        text-align: center;
+    }
+
+    .marksheet-table td.score-cell.empty {
+        color: #b8a89e;
+        font-style: italic;
+    }
+
+    /* ─── Summary row ── */
+    .marksheet-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 4px;
+        padding: 6px 10px;
+        background: #f0ebe6 !important;
+        border: 1px solid #d4c8be;
+        margin-top: 6px;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .marksheet-summary .stat {
+        text-align: center;
+        font-size: 7.5px;
+        color: #6b5f56;
+    }
+
+    .marksheet-summary .stat .value {
+        font-size: 10px;
+        font-weight: 700;
+        color: #1a1410;
+        display: block;
+    }
+
+    .marksheet-summary .stat .value.high {
+        color: #065f46;
+    }
+
+    .marksheet-summary .stat .value.low {
+        color: #991b1b;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FOOTER — Page numbers, generation info
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    .print-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 6px;
+        margin-top: 8px;
+        border-top: 1px solid #d4c8be;
+        font-size: 7px;
+        color: #6b5f56;
+    }
+
+    .print-footer .left {
+        text-align: left;
+    }
+
+    .print-footer .center {
+        text-align: center;
+    }
+
+    .print-footer .right {
+        text-align: right;
+    }
+
+    .print-footer .page-number::after {
+        content: "Page " counter(page) " of " counter(pages);
+    }
+
+    .print-footer .generated {
+        font-style: italic;
+    }
+
+    .print-footer .school-name {
+        font-weight: 600;
+        color: #1a1410;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   NURSERY SPECIFIC — French language support
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    .nursery-register .register-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 13px;
+    }
+
+    .nursery-register .subject-header-fr {
+        font-size: 7px;
+        font-weight: 600;
+    }
+
+    .nursery-register .note-column {
+        font-size: 7px;
+        font-weight: 700;
+        color: #1a1410;
+    }
+
+    .nursery-register .cote-column {
+        font-size: 7px;
+        font-weight: 700;
+        color: #1a1410;
+    }
+
+    /* ─── French phase labels ── */
+    .phase-label-fr {
+        font-size: 7px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #6b5f56;
+        letter-spacing: 0.5px;
+    }
+
+    .phase-label-fr.pre {
+        color: #92400e;
+    }
+
+    .phase-label-fr.post {
+        color: #065f46;
+    }
+
+    .phase-label-fr.annual {
+        color: #1a3a5a;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PRIMARY SPECIFIC — English language support
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    .primary-register .register-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .primary-register .subject-header-en {
+        font-size: 7.5px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .primary-register .score-column {
+        font-size: 8px;
+        font-weight: 600;
+        color: #1a1410;
+    }
+
+    .primary-register .grade-column {
+        font-size: 7.5px;
+        font-weight: 700;
+    }
+
+    .primary-register .percentage-column {
+        font-size: 7.5px;
+        font-weight: 600;
+    }
+
+    /* ─── Phase labels ── */
+    .phase-label-en {
+        font-size: 7px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #6b5f56;
+        letter-spacing: 0.5px;
+    }
+
+    .phase-label-en.pre {
+        color: #92400e;
+    }
+
+    .phase-label-en.post {
+        color: #065f46;
+    }
+
+    .phase-label-en.annual {
+        color: #1a3a5a;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MARK ENTRY SHEET — Teacher marks entry print
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    .markentry-sheet .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+        padding-bottom: 4px;
+        border-bottom: 1px solid #d4c8be;
+    }
+
+    .markentry-sheet .header .assessment-info {
+        font-size: 9px;
+        color: #2c241e;
+    }
+
+    .markentry-sheet .header .assessment-info strong {
+        color: #1a1410;
+        font-weight: 700;
+    }
+
+    .markentry-sheet .header .assessment-info .sub {
+        font-size: 7.5px;
+        color: #6b5f56;
+    }
+
+    /* ─── Blank marks entry rows ── */
+    .markentry-sheet .entry-row {
+        display: grid;
+        grid-template-columns: 30px 1fr 60px 40px 30px;
+        gap: 4px;
+        padding: 2px 4px;
+        border-bottom: 1px dotted #d4c8be;
+        font-size: 8px;
+    }
+
+    .markentry-sheet .entry-row .rank {
+        text-align: center;
+        color: #6b5f56;
+        font-size: 7px;
+    }
+
+    .markentry-sheet .entry-row .student-name {
+        font-weight: 500;
+        color: #1a1410;
+        padding-left: 4px;
+    }
+
+    .markentry-sheet .entry-row .score-input {
+        border: none;
+        border-bottom: 1px solid #b8a89e;
+        background: transparent;
+        text-align: center;
+        font-size: 8px;
+        font-weight: 600;
+        color: #1a1410;
+        padding: 2px 0;
+        width: 100%;
+    }
+
+    .markentry-sheet .entry-row .score-input:focus {
+        outline: none;
+    }
+
+    .markentry-sheet .entry-row .max-score {
+        text-align: center;
+        color: #6b5f56;
+        font-size: 7px;
+        padding-top: 2px;
+    }
+
+    .markentry-sheet .entry-row .absent-check {
+        text-align: center;
+        font-size: 10px;
+        color: #b8a89e;
+    }
+
+    .markentry-sheet .entry-row .absent-check.checked {
+        color: #c45a4a;
+        font-weight: 700;
+    }
+
+    /* ─── Summary row ── */
+    .markentry-sheet .summary-row {
+        display: grid;
+        grid-template-columns: 30px 1fr 60px 40px 30px;
+        gap: 4px;
+        padding: 4px 4px;
+        margin-top: 4px;
+        border-top: 2px solid #b8a89e;
+        background: #f0ebe6 !important;
+        font-weight: 700;
+        font-size: 8px;
+        color: #1a1410;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .markentry-sheet .summary-row .label {
+        grid-column: span 2;
+        text-align: right;
+        padding-right: 8px;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   COVER PAGE — For bound reports
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    .cover-page {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        text-align: center;
+        padding: 40px;
+        page-break-after: always;
+        border: 2px solid #d4c8be;
+        background: #fcfaf8 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .cover-page .logo {
+        font-size: 48px;
+        margin-bottom: 20px;
+    }
+
+    .cover-page .school-name {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a1410;
+        letter-spacing: 2px;
+        margin-bottom: 4px;
+    }
+
+    .cover-page .school-motto {
+        font-size: 12px;
+        font-style: italic;
+        color: #6b5f56;
+        margin-bottom: 24px;
+    }
+
+    .cover-page .report-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 22px;
+        font-weight: 600;
+        color: #2c241e;
+        margin-bottom: 8px;
+        padding: 12px 30px;
+        border-top: 2px solid #d4c8be;
+        border-bottom: 2px solid #d4c8be;
+    }
+
+    .cover-page .report-meta {
+        font-size: 10px;
+        color: #6b5f56;
+        margin-top: 16px;
+        line-height: 1.8;
+    }
+
+    .cover-page .report-meta .label {
+        font-weight: 600;
+        color: #1a1410;
+    }
+
+    .cover-page .report-meta .value {
+        color: #2c241e;
+    }
+
+    .cover-page .footer {
+        margin-top: auto;
+        padding-top: 20px;
+        font-size: 8px;
+        color: #6b5f56;
+        border-top: 1px solid #d4c8be;
+        width: 100%;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RESPONSIVE PRINT — Adjust for smaller paper
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print and (max-width: 800px) {
+
+    .register-table,
+    .cr-table,
+    .data-table {
+        font-size: 7px;
+    }
+
+    .register-table th,
+    .cr-table th,
+    .data-table th {
+        padding: 2px 3px;
+        font-size: 6.5px;
+    }
+
+    .register-table td,
+    .cr-table td,
+    .data-table td {
+        padding: 2px 3px;
+        font-size: 6.5px;
+    }
+
+    .cr-col-name {
+        width: 100px;
+        min-width: 100px;
+        max-width: 100px;
+        font-size: 6.5px;
+    }
+
+    .cr-col-rank {
+        width: 22px;
+        min-width: 22px;
+        max-width: 22px;
+    }
+
+    .register-header .school-name {
+        font-size: 13px;
+    }
+
+    .register-header .register-title {
+        font-size: 11px;
+    }
+
+    .register-header .register-meta {
+        font-size: 6.5px;
+    }
+}
+
+@media print and (max-width: 600px) {
+
+    .register-table,
+    .cr-table,
+    .data-table {
+        font-size: 6px;
+    }
+
+    .register-table th,
+    .cr-table th,
+    .data-table th {
+        padding: 1px 2px;
+        font-size: 5.5px;
+    }
+
+    .register-table td,
+    .cr-table td,
+    .data-table td {
+        padding: 1px 2px;
+        font-size: 5.5px;
+    }
+
+    .cr-col-name {
+        width: 80px;
+        min-width: 80px;
+        max-width: 80px;
+        font-size: 5.5px;
+    }
+
+    .cr-col-rank {
+        width: 18px;
+        min-width: 18px;
+        max-width: 18px;
+    }
+
+    .register-header .school-name {
+        font-size: 11px;
+    }
+
+    .register-header .register-title {
+        font-size: 9px;
+    }
+
+    .register-header .register-meta {
+        font-size: 5.5px;
+    }
+
+    .marksheet-student-header .field {
+        font-size: 6.5px;
+    }
+
+    .marksheet-summary .stat {
+        font-size: 6px;
+    }
+
+    .marksheet-summary .stat .value {
+        font-size: 8px;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK THEME PRINT OVERRIDES
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    [data-theme="dark"] body {
+        background: #1a1410 !important;
+    }
+
+    [data-theme="dark"] .dash-card,
+    [data-theme="dark"] .stat-card,
+    [data-theme="dark"] .card,
+    [data-theme="dark"] .report-card,
+    [data-theme="dark"] .register-container {
+        background: #241d18 !important;
+        border-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .dash-card-header {
+        background: #2a221c !important;
+        border-bottom-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .register-table th,
+    [data-theme="dark"] .cr-table th,
+    [data-theme="dark"] .data-table th {
+        background: #2a221c !important;
+        color: #f0ebe6 !important;
+        border-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .register-table td,
+    [data-theme="dark"] .cr-table td,
+    [data-theme="dark"] .data-table td {
+        border-color: #4a3d35 !important;
+        color: #d4ccc6 !important;
+        background: #241d18 !important;
+    }
+
+    [data-theme="dark"] .register-table tbody tr:nth-child(even),
+    [data-theme="dark"] .cr-table tbody tr:nth-child(even),
+    [data-theme="dark"] .data-table tbody tr:nth-child(even) {
+        background: #1a1410 !important;
+    }
+
+    [data-theme="dark"] .cr-col-rank,
+    [data-theme="dark"] .cr-col-name {
+        background: #1a1410 !important;
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .subject-group-header {
+        background: #3a2a24 !important;
+    }
+
+    [data-theme="dark"] .subject-group-header th {
+        background: #3a2a24 !important;
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .sub-header th {
+        background: #2a221c !important;
+        color: #d4ccc6 !important;
+    }
+
+    [data-theme="dark"] .average-row td,
+    [data-theme="dark"] .average-row th {
+        background: #3a2a24 !important;
+        color: #f0ebe6 !important;
+        border-top-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .total-row td,
+    [data-theme="dark"] .total-row th {
+        background: #3a2a24 !important;
+        color: #f0ebe6 !important;
+        border-top-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .register-header {
+        border-bottom-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .register-header .school-name {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .register-header .register-title {
+        color: #d4ccc6 !important;
+    }
+
+    [data-theme="dark"] .register-header .register-meta {
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .register-header .register-meta .term {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .marksheet-student-header {
+        background: #2a221c !important;
+        border-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .marksheet-student-header .field {
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .marksheet-student-header .field strong {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .marksheet-student-header .field .value {
+        color: #d4ccc6 !important;
+    }
+
+    [data-theme="dark"] .marksheet-summary {
+        background: #2a221c !important;
+        border-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .marksheet-summary .stat {
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .marksheet-summary .stat .value {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .print-footer {
+        border-top-color: #4a3d35 !important;
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .print-footer .school-name {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .phase-badge-print {
+        background: #2a221c !important;
+        border-color: #4a3d35 !important;
+        color: #d4ccc6 !important;
+    }
+
+    [data-theme="dark"] .phase-badge-print.pre {
+        background: #3a2a10 !important;
+        border-color: #c9a84c !important;
+        color: #fcd34d !important;
+    }
+
+    [data-theme="dark"] .phase-badge-print.post {
+        background: #1a3a2a !important;
+        border-color: #5a9a7a !important;
+        color: #86efac !important;
+    }
+
+    /* ── Continuing from [data-theme="dark"] .grade-A ── */
+    [data-theme="dark"] .grade-Ap,
+    [data-theme="dark"] .grade-A,
+    [data-theme="dark"] .grade-B,
+    [data-theme="dark"] .grade-C,
+    [data-theme="dark"] .grade-D,
+    [data-theme="dark"] .grade-F {
+        background: transparent !important;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    [data-theme="dark"] .grade-Ap {
+        border-color: #3d8a6a;
+        color: #86efac !important;
+    }
+
+    [data-theme="dark"] .grade-A {
+        border-color: #5a9a7a;
+        color: #86efac !important;
+    }
+
+    [data-theme="dark"] .grade-B {
+        border-color: #6a8aba;
+        color: #93c5fd !important;
+    }
+
+    [data-theme="dark"] .grade-C {
+        border-color: #d9aa4b;
+        color: #fcd34d !important;
+    }
+
+    [data-theme="dark"] .grade-D {
+        border-color: #c48a3a;
+        color: #fdba74 !important;
+    }
+
+    [data-theme="dark"] .grade-F {
+        border-color: #c45a4a;
+        color: #fca5a5 !important;
+    }
+
+    [data-theme="dark"] .cell-high {
+        background: #1a3a2a !important;
+        color: #86efac !important;
+    }
+
+    [data-theme="dark"] .cell-medium {
+        background: #3a2a10 !important;
+        color: #fcd34d !important;
+    }
+
+    [data-theme="dark"] .cell-low {
+        background: #3a1a14 !important;
+        color: #fca5a5 !important;
+    }
+
+    [data-theme="dark"] .cell-fail {
+        background: #3a1a14 !important;
+        color: #fca5a5 !important;
+    }
+
+    [data-theme="dark"] .cover-page {
+        background: #1a1410 !important;
+        border-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .cover-page .school-name {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .cover-page .school-motto {
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .cover-page .report-title {
+        color: #d4ccc6 !important;
+        border-top-color: #4a3d35 !important;
+        border-bottom-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .cover-page .report-meta {
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .cover-page .report-meta .label {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .cover-page .report-meta .value {
+        color: #d4ccc6 !important;
+    }
+
+    [data-theme="dark"] .cover-page .footer {
+        color: #9a8e86 !important;
+        border-top-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .markentry-sheet .header {
+        border-bottom-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .markentry-sheet .header .assessment-info {
+        color: #d4ccc6 !important;
+    }
+
+    [data-theme="dark"] .markentry-sheet .header .assessment-info strong {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .markentry-sheet .header .assessment-info .sub {
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .markentry-sheet .entry-row {
+        border-bottom-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .markentry-sheet .entry-row .rank {
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .markentry-sheet .entry-row .student-name {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .markentry-sheet .entry-row .score-input {
+        border-bottom-color: #4a3d35 !important;
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .markentry-sheet .entry-row .max-score {
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .markentry-sheet .entry-row .absent-check {
+        color: #5a4e46 !important;
+    }
+
+    [data-theme="dark"] .markentry-sheet .entry-row .absent-check.checked {
+        color: #fca5a5 !important;
+    }
+
+    [data-theme="dark"] .markentry-sheet .summary-row {
+        background: #2a221c !important;
+        border-top-color: #4a3d35 !important;
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .nursery-register .note-column,
+    [data-theme="dark"] .nursery-register .cote-column {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .nursery-register .subject-header-fr,
+    [data-theme="dark"] .primary-register .subject-header-en {
+        color: #d4ccc6 !important;
+    }
+
+    [data-theme="dark"] .primary-register .score-column {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .phase-label-fr,
+    [data-theme="dark"] .phase-label-en {
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .phase-label-fr.pre,
+    [data-theme="dark"] .phase-label-en.pre {
+        color: #fcd34d !important;
+    }
+
+    [data-theme="dark"] .phase-label-fr.post,
+    [data-theme="dark"] .phase-label-en.post {
+        color: #86efac !important;
+    }
+
+    [data-theme="dark"] .phase-label-fr.annual,
+    [data-theme="dark"] .phase-label-en.annual {
+        color: #93c5fd !important;
+    }
+
+    [data-theme="dark"] .print-footer {
+        border-top-color: #4a3d35 !important;
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .print-footer .school-name {
+        color: #f0ebe6 !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   UTILITIES — Print-only helpers
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+
+    /* ── Show/hide helpers ── */
+    .print-show {
+        display: block !important;
+    }
+
+    .print-show-inline {
+        display: inline !important;
+    }
+
+    .print-show-flex {
+        display: flex !important;
+    }
+
+    .print-hide {
+        display: none !important;
+    }
+
+    /* ── Text alignment ── */
+    .print-text-left {
+        text-align: left !important;
+    }
+
+    .print-text-center {
+        text-align: center !important;
+    }
+
+    .print-text-right {
+        text-align: right !important;
+    }
+
+    /* ── Font weight ── */
+    .print-bold {
+        font-weight: 700 !important;
+    }
+
+    .print-normal {
+        font-weight: 400 !important;
+    }
+
+    /* ── Monospace for marks/codes ── */
+    .print-mono {
+        font-family: 'Courier New', monospace !important;
+        letter-spacing: 0.5px;
+    }
+
+    /* ── Compact spacing ── */
+    .print-compact td,
+    .print-compact th {
+        padding: 2px 3px !important;
+        font-size: 7px !important;
+    }
+
+    /* ── Wide spacing ── */
+    .print-spacious td,
+    .print-spacious th {
+        padding: 6px 8px !important;
+        font-size: 9px !important;
+    }
+
+    /* ── Vertical text for narrow column headers ── */
+    .print-vertical {
+        writing-mode: vertical-lr;
+        text-orientation: mixed;
+        white-space: nowrap;
+    }
+
+    /* ── Watermark for draft prints ── */
+    .print-watermark {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-30deg);
+        font-size: 64px;
+        font-weight: 900;
+        color: rgba(26, 20, 16, 0.05) !important;
+        text-transform: uppercase;
+        letter-spacing: 12px;
+        pointer-events: none;
+        z-index: 9999;
+        font-family: 'Playfair Display', serif;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    [data-theme="dark"] .print-watermark {
+        color: rgba(240, 235, 230, 0.04) !important;
+    }
+
+    /* ── Highlight important cells ── */
+    .print-highlight {
+        background: #f0e8d0 !important;
+        font-weight: 700 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    [data-theme="dark"] .print-highlight {
+        background: #3a2a10 !important;
+    }
+
+    /* ── Border helpers ── */
+    .print-border-top {
+        border-top: 1px solid #d4c8be !important;
+    }
+
+    .print-border-bottom {
+        border-bottom: 1px solid #d4c8be !important;
+    }
+
+    .print-border-thick {
+        border-top: 2px solid #2d1f3a !important;
+    }
+
+    [data-theme="dark"] .print-border-top {
+        border-top-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .print-border-bottom {
+        border-bottom-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .print-border-thick {
+        border-top-color: #4d2f4a !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   REDUCED MOTION — Respect system preference
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print and (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}

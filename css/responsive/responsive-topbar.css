@@ -1,0 +1,1020 @@
+/* ═══════════════════════════════════════════════════════════════════
+   RESPONSIVE TOPBAR — css/responsive/responsive-topbar.css
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: Responsive adjustments for the topbar component.
+   Handles stacking, hiding, and resizing at all breakpoints.
+   No pure white (#FFFFFF), no pure black (#000000).
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   TOPBAR BASE (applies at all sizes)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.topbar {
+    background: var(--topbar-bg, #fcfaf8);
+    border-bottom: 1px solid var(--topbar-border, #e8e0d8);
+    padding: 10px 28px 8px;
+    position: sticky;
+    top: 0;
+    z-index: var(--z-medium, 100);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 1px 0 rgba(26, 20, 16, 0.03), 0 4px 24px rgba(26, 20, 16, 0.04);
+    transition: all var(--transition, 0.3s cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+[data-theme="dark"] .topbar {
+    background: var(--topbar-bg, #1a1410);
+    border-bottom-color: var(--topbar-border, rgba(240, 235, 230, 0.06));
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.15), 0 4px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Topbar rows ── */
+.topbar-row1 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 44px;
+}
+
+.topbar-row2 {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 6px;
+    padding-top: 8px;
+    border-top: 1px solid var(--topbar-border, #e8e0d8);
+    flex-wrap: wrap;
+    transition: border-color var(--transition, 0.3s cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+[data-theme="dark"] .topbar-row2 {
+    border-top-color: rgba(240, 235, 230, 0.06);
+}
+
+/* ── Topbar sections ── */
+.topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 0;
+}
+
+.topbar-center {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BREAKPOINT: 1200px — Wide desktop
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1200px) {
+    .topbar {
+        padding: 10px 20px 8px;
+    }
+
+    .topbar-row1 {
+        gap: 12px;
+    }
+
+    .topbar-left {
+        gap: 10px;
+    }
+
+    .topbar-center {
+        gap: 10px;
+    }
+
+    .topbar-right {
+        gap: 4px;
+    }
+
+    /* ── Progress container ── */
+    .progress-container {
+        max-width: 160px;
+        min-width: 100px;
+    }
+
+    /* ── Date display ── */
+    .date-display .date-text .year {
+        display: none;
+    }
+
+    .date-display .divider {
+        margin: 0 4px;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BREAKPOINT: 1024px — Desktop / Tablet landscape
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+    .topbar {
+        padding: 8px 16px 6px;
+    }
+
+    .topbar-row1 {
+        min-height: 40px;
+        gap: 10px;
+    }
+
+    /* ── Page title ── */
+    .page-title {
+        font-size: 1rem;
+    }
+
+    .page-subtitle {
+        font-size: 0.7rem;
+    }
+
+    /* ── Date display ── */
+    .date-display {
+        padding: 3px 10px 3px 8px;
+    }
+
+    .date-display .date-text {
+        font-size: 0.75rem;
+    }
+
+    .date-display .time-text {
+        font-size: 0.7rem;
+    }
+
+    .date-display .divider {
+        height: 14px;
+    }
+
+    /* ── User menu ── */
+    .user-menu {
+        padding: 2px 10px 2px 2px;
+    }
+
+    .user-menu .user-info .name {
+        max-width: 80px;
+        font-size: 0.8rem;
+    }
+
+    .user-menu .user-info .role {
+        font-size: 0.6rem;
+    }
+
+    .user-menu .user-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 10px;
+    }
+
+    /* ── Icon buttons ── */
+    .icon-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 0.85rem;
+    }
+
+    .icon-btn .notif-count {
+        font-size: 8px;
+        min-width: 16px;
+        height: 16px;
+        top: -3px;
+        right: -3px;
+    }
+
+    /* ── Install button ── */
+    .install-btn {
+        font-size: 0.7rem;
+        padding: 4px 10px 4px 8px;
+    }
+
+    .install-btn i {
+        font-size: 12px;
+    }
+
+    /* ── Row 2 ── */
+    .topbar-row2 {
+        gap: 10px;
+        margin-top: 4px;
+        padding-top: 6px;
+    }
+
+    .year-badge {
+        font-size: 0.7rem;
+    }
+
+    .term-badge {
+        font-size: 0.7rem;
+        padding: 2px 10px;
+    }
+
+    .progress-container {
+        max-width: 140px;
+        min-width: 80px;
+    }
+
+    .progress-container .progress-text {
+        font-size: 0.65rem;
+        min-width: 28px;
+    }
+
+    .phase-badge {
+        font-size: 0.6rem;
+        padding: 2px 10px;
+    }
+
+    .days-remaining {
+        font-size: 0.65rem;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BREAKPOINT: 820px — Tablet portrait
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 820px) {
+    .topbar {
+        padding: 6px 14px 4px;
+    }
+
+    .topbar-row1 {
+        min-height: 36px;
+        gap: 8px;
+    }
+
+    /* ── Hamburger ── */
+    .hamburger-btn {
+        display: flex;
+        width: 34px;
+        height: 34px;
+        font-size: 0.85rem;
+    }
+
+    /* ── Page title ── */
+    .page-title {
+        font-size: 0.9rem;
+    }
+
+    .page-subtitle {
+        display: none;
+    }
+
+    /* ── Date display ── */
+    .date-display .date-text .day {
+        display: none;
+    }
+
+    .date-display .date-text .year {
+        display: inline;
+    }
+
+    .date-display .date-text {
+        font-size: 0.7rem;
+    }
+
+    .date-display .time-text {
+        font-size: 0.65rem;
+    }
+
+    .date-display .divider {
+        display: none;
+    }
+
+    .date-display .date-icon {
+        font-size: 11px;
+    }
+
+    /* ── User menu ── */
+    .user-menu {
+        padding: 2px 8px 2px 2px;
+    }
+
+    .user-menu .user-info .name {
+        max-width: 60px;
+        font-size: 0.7rem;
+    }
+
+    .user-menu .user-info .role {
+        display: none;
+    }
+
+    .user-menu .user-avatar {
+        width: 24px;
+        height: 24px;
+        font-size: 8px;
+    }
+
+    .user-menu .chevron {
+        font-size: 8px;
+    }
+
+    /* ── Icon buttons ── */
+    .icon-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 0.75rem;
+    }
+
+    .icon-btn .notif-count {
+        font-size: 7px;
+        min-width: 14px;
+        height: 14px;
+        top: -2px;
+        right: -2px;
+    }
+
+    /* ── Install button ── */
+    .install-btn {
+        font-size: 0.65rem;
+        padding: 3px 8px 3px 6px;
+    }
+
+    .install-btn i {
+        font-size: 10px;
+    }
+
+    .install-btn .label {
+        display: none;
+    }
+
+    /* ── Row 2 ── */
+    .topbar-row2 {
+        gap: 8px;
+        margin-top: 3px;
+        padding-top: 5px;
+    }
+
+    .year-badge {
+        font-size: 0.65rem;
+    }
+
+    .term-badge {
+        font-size: 0.65rem;
+        padding: 2px 8px;
+    }
+
+    .progress-container {
+        max-width: 100px;
+        min-width: 60px;
+    }
+
+    .progress-container .progress-text {
+        font-size: 0.6rem;
+        min-width: 24px;
+    }
+
+    .phase-badge {
+        font-size: 0.55rem;
+        padding: 2px 8px;
+    }
+
+    .days-remaining {
+        font-size: 0.6rem;
+    }
+
+    .days-remaining i {
+        font-size: 10px;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BREAKPOINT: 640px — Large mobile
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+    .topbar {
+        padding: 4px 10px 3px;
+    }
+
+    .topbar-row1 {
+        min-height: 32px;
+        gap: 6px;
+    }
+
+    /* ── Hamburger ── */
+    .hamburger-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 0.75rem;
+    }
+
+    /* ── Page title ── */
+    .page-title {
+        font-size: 0.8rem;
+    }
+
+    /* ── Date display ── */
+    .date-display {
+        padding: 2px 6px 2px 4px;
+    }
+
+    .date-display .date-text {
+        font-size: 0.6rem;
+    }
+
+    .date-display .time-text {
+        font-size: 0.55rem;
+    }
+
+    .date-display .date-icon {
+        font-size: 9px;
+    }
+
+    /* ── User menu ── */
+    .user-menu {
+        padding: 1px 6px 1px 1px;
+        gap: 4px;
+    }
+
+    .user-menu .user-info .name {
+        max-width: 40px;
+        font-size: 0.6rem;
+    }
+
+    .user-menu .user-avatar {
+        width: 20px;
+        height: 20px;
+        font-size: 7px;
+    }
+
+    .user-menu .chevron {
+        font-size: 7px;
+    }
+
+    /* ── Icon buttons ── */
+    .icon-btn {
+        width: 26px;
+        height: 26px;
+        font-size: 0.65rem;
+    }
+
+    .icon-btn .notif-count {
+        font-size: 6px;
+        min-width: 12px;
+        height: 12px;
+        top: -2px;
+        right: -2px;
+        border-width: 1px;
+    }
+
+    /* ── Install button ── */
+    .install-btn {
+        font-size: 0.6rem;
+        padding: 2px 6px 2px 4px;
+        gap: 4px;
+    }
+
+    .install-btn i {
+        font-size: 9px;
+    }
+
+    /* ── Dropdown ── */
+    .dropdown {
+        min-width: 160px;
+        right: -8px;
+    }
+
+    .dropdown-item {
+        font-size: 0.7rem;
+        padding: 6px 12px;
+    }
+
+    .dropdown-item .shortcut {
+        display: none;
+    }
+
+    .dropdown-header {
+        padding: 6px 12px;
+    }
+
+    .dropdown-header .user-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 10px;
+    }
+
+    .dropdown-header .user-info .name {
+        font-size: 0.75rem;
+    }
+
+    .dropdown-header .user-info .role {
+        font-size: 0.6rem;
+    }
+
+    /* ── Row 2 ── */
+    .topbar-row2 {
+        gap: 6px;
+        margin-top: 2px;
+        padding-top: 4px;
+        flex-wrap: wrap;
+    }
+
+    .year-badge {
+        font-size: 0.6rem;
+    }
+
+    .year-badge .status-dot {
+        width: 4px;
+        height: 4px;
+    }
+
+    .term-badge {
+        font-size: 0.6rem;
+        padding: 1px 6px;
+    }
+
+    .progress-container {
+        max-width: 80px;
+        min-width: 50px;
+    }
+
+    .progress-container .progress-bar {
+        height: 3px;
+    }
+
+    .progress-container .progress-text {
+        font-size: 0.55rem;
+        min-width: 20px;
+    }
+
+    .phase-badge {
+        font-size: 0.5rem;
+        padding: 1px 6px;
+    }
+
+    .days-remaining {
+        font-size: 0.55rem;
+    }
+
+    .days-remaining i {
+        font-size: 8px;
+    }
+
+    .days-remaining .label {
+        display: none;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BREAKPOINT: 480px — Small mobile
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .topbar {
+        padding: 3px 8px 2px;
+    }
+
+    .topbar-row1 {
+        min-height: 28px;
+        gap: 4px;
+    }
+
+    /* ── Hamburger ── */
+    .hamburger-btn {
+        width: 26px;
+        height: 26px;
+        font-size: 0.65rem;
+    }
+
+    /* ── Page title ── */
+    .page-title {
+        font-size: 0.7rem;
+    }
+
+    .page-title .highlight {
+        display: none;
+    }
+
+    /* ── Date display ── */
+    .date-display {
+        padding: 1px 4px;
+    }
+
+    .date-display .date-text {
+        font-size: 0.5rem;
+    }
+
+    .date-display .time-text {
+        font-size: 0.5rem;
+    }
+
+    .date-display .date-icon {
+        display: none;
+    }
+
+    /* ── User menu ── */
+    .user-menu {
+        padding: 1px 4px 1px 1px;
+        gap: 2px;
+        border: none;
+    }
+
+    .user-menu .user-info .name {
+        max-width: 30px;
+        font-size: 0.5rem;
+    }
+
+    .user-menu .user-avatar {
+        width: 18px;
+        height: 18px;
+        font-size: 6px;
+    }
+
+    .user-menu .chevron {
+        display: none;
+    }
+
+    /* ── Icon buttons ── */
+    .icon-btn {
+        width: 22px;
+        height: 22px;
+        font-size: 0.55rem;
+        border: none;
+    }
+
+    .icon-btn .notif-count {
+        font-size: 5px;
+        min-width: 10px;
+        height: 10px;
+        top: -1px;
+        right: -1px;
+        border-width: 1px;
+    }
+
+    .icon-btn .notif-count.hidden {
+        display: none;
+    }
+
+    /* ── Install button ── */
+    .install-btn {
+        display: none !important;
+    }
+
+    /* ── Row 2 ── */
+    .topbar-row2 {
+        gap: 4px;
+        margin-top: 1px;
+        padding-top: 3px;
+        border-top-width: 1px;
+    }
+
+    .year-badge {
+        font-size: 0.5rem;
+    }
+
+    .year-badge .status-dot {
+        width: 3px;
+        height: 3px;
+        margin-right: 2px;
+    }
+
+    .year-badge .label {
+        display: none;
+    }
+
+    .term-badge {
+        font-size: 0.5rem;
+        padding: 1px 4px;
+    }
+
+    .term-badge strong {
+        font-size: 0.5rem;
+    }
+
+    .progress-container {
+        max-width: 60px;
+        min-width: 40px;
+    }
+
+    .progress-container .progress-text {
+        font-size: 0.45rem;
+        min-width: 16px;
+    }
+
+    .phase-badge {
+        display: none !important;
+    }
+
+    .days-remaining {
+        font-size: 0.45rem;
+    }
+
+    .days-remaining i {
+        display: none;
+    }
+
+    .days-remaining strong {
+        font-size: 0.5rem;
+    }
+
+    /* ── Dropdown ── */
+    .dropdown {
+        min-width: 140px;
+        right: -4px;
+        top: calc(100% + 4px);
+    }
+
+    .dropdown-item {
+        font-size: 0.65rem;
+        padding: 4px 10px;
+        gap: 6px;
+    }
+
+    .dropdown-item .icon {
+        font-size: 11px;
+        width: 16px;
+    }
+
+    .dropdown-divider {
+        margin: 2px 8px;
+    }
+
+    .dropdown-header {
+        padding: 4px 10px;
+    }
+
+    .dropdown-header .user-avatar {
+        width: 24px;
+        height: 24px;
+        font-size: 8px;
+    }
+
+    .dropdown-header .user-info .name {
+        font-size: 0.65rem;
+    }
+
+    .dropdown-header .user-info .role {
+        font-size: 0.5rem;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BREAKPOINT: 380px — Very small mobile
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 380px) {
+    .topbar {
+        padding: 2px 6px 1px;
+    }
+
+    .topbar-row1 {
+        min-height: 24px;
+        gap: 3px;
+    }
+
+    /* ── Hamburger ── */
+    .hamburger-btn {
+        width: 22px;
+        height: 22px;
+        font-size: 0.55rem;
+    }
+
+    /* ── Page title ── */
+    .page-title {
+        font-size: 0.6rem;
+    }
+
+    /* ── Date display ── */
+    .date-display {
+        padding: 0 2px;
+    }
+
+    .date-display .date-text {
+        font-size: 0.45rem;
+    }
+
+    .date-display .time-text {
+        display: none;
+    }
+
+    /* ── User menu ── */
+    .user-menu {
+        padding: 0 2px 0 0;
+    }
+
+    .user-menu .user-info .name {
+        display: none !important;
+    }
+
+    .user-menu .user-avatar {
+        width: 16px;
+        height: 16px;
+        font-size: 5px;
+    }
+
+    /* ── Icon buttons ── */
+    .icon-btn {
+        width: 18px;
+        height: 18px;
+        font-size: 0.45rem;
+    }
+
+    .icon-btn .notif-count {
+        display: none !important;
+    }
+
+    /* ── Row 2 ── */
+    .topbar-row2 {
+        gap: 3px;
+        padding-top: 2px;
+    }
+
+    .year-badge {
+        font-size: 0.45rem;
+    }
+
+    .year-badge .status-dot {
+        width: 2px;
+        height: 2px;
+    }
+
+    .term-badge {
+        font-size: 0.45rem;
+        padding: 0 4px;
+    }
+
+    .term-badge strong {
+        font-size: 0.45rem;
+    }
+
+    .progress-container {
+        max-width: 40px;
+        min-width: 30px;
+    }
+
+    .progress-container .progress-text {
+        display: none;
+    }
+
+    .days-remaining {
+        font-size: 0.4rem;
+    }
+
+    .days-remaining strong {
+        font-size: 0.45rem;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SPECIAL CASES
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── When topbar has only one row (no row2) ── */
+.topbar.single-row .topbar-row2 {
+    display: none;
+}
+
+.topbar.single-row .topbar-row1 {
+    min-height: 48px;
+}
+
+@media (max-width: 640px) {
+    .topbar.single-row .topbar-row1 {
+        min-height: 40px;
+    }
+}
+
+/* ── When topbar has no user menu ── */
+.topbar.no-user .user-menu {
+    display: none;
+}
+
+/* ── When topbar has no notifications ── */
+.topbar.no-notifs .icon-btn.notif-btn {
+    display: none;
+}
+
+/* ── When topbar is fixed ── */
+.topbar.fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--z-high, 200);
+}
+
+.topbar.fixed+.main-content {
+    padding-top: calc(var(--topbar-h, 64px) + 8px);
+}
+
+/* ── When topbar is hidden ── */
+.topbar.hidden {
+    display: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK THEME OVERRIDES
+   ═══════════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] {
+    .topbar {
+        background: var(--topbar-bg, #1a1410);
+        border-bottom-color: rgba(240, 235, 230, 0.06);
+        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.15), 0 4px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .topbar-row2 {
+        border-top-color: rgba(240, 235, 230, 0.06);
+    }
+
+    .user-menu:hover {
+        background: rgba(240, 235, 230, 0.04);
+    }
+
+    .icon-btn:hover {
+        background: rgba(240, 235, 230, 0.04);
+    }
+
+    .dropdown {
+        background: var(--bg-card, #241d18);
+        border-color: rgba(240, 235, 230, 0.06);
+    }
+
+    .dropdown-item:hover {
+        background: rgba(240, 235, 230, 0.04);
+    }
+
+    .dropdown-item .shortcut {
+        background: rgba(240, 235, 230, 0.04);
+        color: var(--text-muted, #6b5f56);
+    }
+
+    .dropdown-divider {
+        background: rgba(240, 235, 230, 0.06);
+    }
+
+    .date-display:hover {
+        background: rgba(240, 235, 230, 0.04);
+    }
+
+    .install-btn {
+        border-color: rgba(240, 235, 230, 0.06);
+    }
+
+    .install-btn:hover {
+        border-color: var(--role-primary, #4d2f4a);
+        background: rgba(77, 47, 74, 0.15);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SAFE AREA INSETS (Notch phones)
+   ═══════════════════════════════════════════════════════════════════ */
+
+@supports (padding: env(safe-area-inset-top)) {
+    .topbar {
+        padding-top: calc(10px + env(safe-area-inset-top, 0));
+    }
+
+    @media (max-width: 820px) {
+        .topbar {
+            padding-top: calc(6px + env(safe-area-inset-top, 0));
+        }
+    }
+
+    @media (max-width: 640px) {
+        .topbar {
+            padding-top: calc(4px + env(safe-area-inset-top, 0));
+        }
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   REDUCED MOTION (Accessibility)
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+    .topbar {
+        transition: none;
+    }
+
+    .topbar .user-menu .chevron {
+        transition: none;
+    }
+
+    .topbar .icon-btn .notif-count {
+        transition: none;
+    }
+
+    .topbar .dropdown {
+        transition: none;
+    }
+
+    .topbar .dropdown.open {
+        transition: none;
+    }
+
+    .topbar .install-btn {
+        transition: none;
+    }
+}

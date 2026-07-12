@@ -1,0 +1,2292 @@
+/* ═══════════════════════════════════════════════════════════════════
+   PRINT STYLES — css/print/print.css
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: Comprehensive print styles for all document types.
+   Report cards, receipts, registers, transcripts, and statements.
+   No pure white (#FFFFFF), no pure black (#000000).
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   GLOBAL PRINT RESETS
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+
+    /* ── Reset body ── */
+    body {
+        background: #f5f0eb !important;
+        color: #2c241e !important;
+        font-family: 'DM Sans', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        font-size: 10pt !important;
+        line-height: 1.5 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* ── Hide navigation elements ── */
+    .sidebar,
+    .topbar,
+    .menu-toggle,
+    .btn-group,
+    .filters-bar,
+    .pagination,
+    .notif-bell,
+    .user-menu,
+    .term-progress-bar,
+    .quick-actions,
+    .modal-overlay,
+    .no-print,
+    #pwa-install-btn,
+    #back-to-top,
+    .bottom-nav,
+    .sidebar-overlay,
+    .search-overlay,
+    .filter-modal,
+    .toast-container,
+    .task-loader-overlay,
+    .boot-loader,
+    .page-loader,
+    .nav-section,
+    .sidebar-nav,
+    .sidebar-header,
+    .sidebar-footer,
+    .badge-row,
+    .faq-button,
+    .install-btn,
+    .icon-btn,
+    .user-menu,
+    .hamburger-btn,
+    .topbar-right,
+    .topbar-center,
+    .topbar-left .divider,
+    .topbar-left .greeting-text,
+    .topbar-row2,
+    .phase-badge,
+    .progress-container,
+    .days-remaining,
+    .year-badge,
+    .term-badge,
+    .date-display,
+    .quick-actions,
+    .btn,
+    .no-print {
+        display: none !important;
+    }
+
+    /* ── Main content full width ── */
+    .main-content {
+        margin-left: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+        background: #f5f0eb !important;
+    }
+
+    #dynamic-content {
+        padding: 0 !important;
+        max-width: 100% !important;
+    }
+
+    /* ── Container full width ── */
+    .container,
+    .container-fluid {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* ── Remove shadows and backgrounds ── */
+    .dash-card,
+    .stat-card,
+    .card,
+    .report-card,
+    .receipt-container,
+    .transcript-container {
+        box-shadow: none !important;
+        border: 1px solid #d4c8be !important;
+        background: #fcfaf8 !important;
+    }
+
+    /* ── Page breaks ── */
+    .page-break-before {
+        page-break-before: always !important;
+    }
+
+    .page-break-after {
+        page-break-after: always !important;
+    }
+
+    .page-break-inside-avoid {
+        page-break-inside: avoid !important;
+    }
+
+    /* ── Avoid orphans and widows ── */
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    li {
+        orphans: 3 !important;
+        widows: 3 !important;
+    }
+
+    /* ── Links ── */
+    a {
+        color: #2d1f3a !important;
+        text-decoration: underline !important;
+        text-underline-offset: 2px !important;
+    }
+
+    a[href]::after {
+        content: ' (' attr(href) ')' !important;
+        font-size: 0.8em !important;
+        color: #6b5f56 !important;
+    }
+
+    a[href^="#"]::after,
+    a[href^="javascript:"]::after {
+        content: '' !important;
+    }
+
+    /* ── Headings ── */
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        color: #1a1410 !important;
+        font-family: 'Playfair Display', 'Syne', serif !important;
+        page-break-after: avoid !important;
+    }
+
+    /* ── Tables ── */
+    table {
+        page-break-inside: auto !important;
+        border-collapse: collapse !important;
+        width: 100% !important;
+        font-size: 9pt !important;
+    }
+
+    thead {
+        display: table-header-group !important;
+        page-break-after: avoid !important;
+    }
+
+    tbody {
+        page-break-inside: auto !important;
+    }
+
+    tr {
+        page-break-inside: avoid !important;
+        page-break-after: auto !important;
+    }
+
+    th,
+    td {
+        border: 1px solid #d4c8be !important;
+        padding: 4px 6px !important;
+        text-align: left !important;
+        vertical-align: middle !important;
+        color: #2c241e !important;
+    }
+
+    th {
+        background: #2d1f3a !important;
+        color: #f5f0eb !important;
+        font-weight: 700 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* ── Badges ── */
+    .badge {
+        border: 1px solid #d4c8be !important;
+        background: #f0ebe6 !important;
+        color: #2c241e !important;
+        padding: 1px 6px !important;
+        border-radius: 3px !important;
+        font-size: 8pt !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .badge-success {
+        background: #dce8e0 !important;
+        border-color: #3a7a5a !important;
+        color: #065f46 !important;
+    }
+
+    .badge-warning {
+        background: #f0e8d0 !important;
+        border-color: #b8983a !important;
+        color: #92400e !important;
+    }
+
+    .badge-danger {
+        background: #f0e0dc !important;
+        border-color: #c45a4a !important;
+        color: #991b1b !important;
+    }
+
+    .badge-info {
+        background: #dce8ec !important;
+        border-color: #4a7a8a !important;
+        color: #1a4a5a !important;
+    }
+
+    /* ── Grade badges ── */
+    .grade-Ap,
+    .grade-A {
+        background: #dce8e0 !important;
+        border-color: #3a7a5a !important;
+        color: #065f46 !important;
+    }
+
+    .grade-B {
+        background: #e8e6ed !important;
+        border-color: #6a8aba !important;
+        color: #2a1a4a !important;
+    }
+
+    .grade-C {
+        background: #f0e8d0 !important;
+        border-color: #c9a84c !important;
+        color: #92400e !important;
+    }
+
+    .grade-D {
+        background: #f0e0d0 !important;
+        border-color: #c48a3a !important;
+        color: #9a4a1a !important;
+    }
+
+    .grade-F {
+        background: #f0e0dc !important;
+        border-color: #c45a4a !important;
+        color: #991b1b !important;
+    }
+
+    /* ── QR Code ── */
+    .report-qr-block img,
+    .qr-code img {
+        border: 1px solid #d4c8be !important;
+        border-radius: 4px !important;
+        max-width: 80px !important;
+        max-height: 80px !important;
+    }
+
+    /* ── Footer ── */
+    .footer {
+        display: none !important;
+    }
+
+    /* ── Print footer (page number) ── */
+    @page {
+        margin: 12mm 10mm 12mm 10mm !important;
+        size: A4 !important;
+    }
+
+    @page: footer {
+        content: 'ECOLE LA FONTAINE · Page ' counter(page) ' of ' counter(pages) !important;
+        font-size: 8pt !important;
+        color: #6b5f56 !important;
+        text-align: center !important;
+        border-top: 1px solid #d4c8be !important;
+        padding-top: 4mm !important;
+        margin-top: 4mm !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   REPORT CARDS PRINT STYLES
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    .report-card {
+        max-width: 100% !important;
+        margin: 0 auto !important;
+        background: #fcfaf8 !important;
+        border: 1px solid #d4c8be !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+        page-break-after: always !important;
+        box-shadow: none !important;
+    }
+
+    .report-card:last-child {
+        page-break-after: avoid !important;
+    }
+
+    /* ── Report header ── */
+    .report-header {
+        background: #2d1f3a !important;
+        color: #f5f0eb !important;
+        padding: 16px 20px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 16px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .report-header .report-logo {
+        width: 56px !important;
+        height: 56px !important;
+        background: rgba(245, 240, 235, 0.10) !important;
+        border-radius: 8px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 24px !important;
+        flex-shrink: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .report-header .report-header-text h2 {
+        color: #f5f0eb !important;
+        font-size: 14pt !important;
+        margin: 0 !important;
+        font-weight: 700 !important;
+    }
+
+    .report-header .report-header-text h3 {
+        color: #f5f0eb !important;
+        font-size: 11pt !important;
+        margin: 4px 0 0 !important;
+        font-weight: 600 !important;
+    }
+
+    .report-header .report-header-text p {
+        color: rgba(245, 240, 235, 0.75) !important;
+        font-size: 8pt !important;
+        margin: 0 !important;
+    }
+
+    /* ── Report info grid ── */
+    .report-info {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        border-bottom: 1px solid #d4c8be !important;
+        background: #f8f4f0 !important;
+    }
+
+    .report-info-item {
+        padding: 8px 14px !important;
+        border-right: 1px solid #d4c8be !important;
+        border-bottom: 1px solid #d4c8be !important;
+    }
+
+    .report-info-item strong {
+        display: block !important;
+        font-size: 7pt !important;
+        text-transform: uppercase !important;
+        color: #6b5f56 !important;
+        letter-spacing: 0.5px !important;
+        margin-bottom: 2px !important;
+    }
+
+    .report-info-item span {
+        font-size: 9pt !important;
+        font-weight: 600 !important;
+        color: #1a1410 !important;
+    }
+
+    /* ── Report subjects table ── */
+    .report-subjects {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 8.5pt !important;
+    }
+
+    .report-subjects thead th {
+        background: #e8e0d8 !important;
+        color: #1a1410 !important;
+        padding: 6px 10px !important;
+        font-weight: 700 !important;
+        text-align: center !important;
+        border: 1px solid #d4c8be !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .report-subjects tbody td {
+        padding: 5px 8px !important;
+        border: 1px solid #d4c8be !important;
+        text-align: center !important;
+    }
+
+    .report-subjects tbody td:first-child {
+        text-align: left !important;
+        font-weight: 600 !important;
+    }
+
+    .report-subjects tbody tr:nth-child(even) {
+        background: #f8f4f0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* ── Report summary ── */
+    .report-summary {
+        background: #2d1f3a !important;
+        color: #f5f0eb !important;
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)) !important;
+        padding: 12px 16px !important;
+        text-align: center !important;
+        gap: 8px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .report-summary .summary-label {
+        font-size: 7pt !important;
+        opacity: 0.75 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+    }
+
+    .report-summary .summary-value {
+        font-size: 12pt !important;
+        font-weight: 700 !important;
+        margin-top: 2px !important;
+    }
+
+    /* ── Report footer ── */
+    .report-footer {
+        padding: 12px 16px !important;
+        background: #f8f4f0 !important;
+        border-top: 1px solid #d4c8be !important;
+        font-size: 8pt !important;
+        color: #6b5f56 !important;
+        text-align: center !important;
+        line-height: 1.8 !important;
+    }
+
+    .report-footer .decision-banner {
+        padding: 8px 16px !important;
+        border-radius: 4px !important;
+        margin: 8px 0 !important;
+        font-weight: 700 !important;
+    }
+
+    .report-footer .decision-banner.pass {
+        background: #dce8e0 !important;
+        color: #065f46 !important;
+        border: 1px solid #3a7a5a !important;
+    }
+
+    .report-footer .decision-banner.remedial {
+        background: #f0e8d0 !important;
+        color: #92400e !important;
+        border: 1px solid #b8983a !important;
+    }
+
+    .report-footer .decision-banner.fail {
+        background: #f0e0dc !important;
+        color: #991b1b !important;
+        border: 1px solid #c45a4a !important;
+    }
+
+    /* ── Signatures ── */
+    .report-footer .signature-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr 1fr !important;
+        gap: 16px !important;
+        margin-top: 12px !important;
+        text-align: center !important;
+    }
+
+    .report-footer .signature-grid .sig-line {
+        border-top: 1px solid #6b5f56 !important;
+        padding-top: 4px !important;
+        font-size: 7pt !important;
+        color: #6b5f56 !important;
+    }
+
+    .report-footer .signature-grid .sig-label {
+        font-size: 7pt !important;
+        font-weight: 600 !important;
+        color: #2c241e !important;
+        margin-bottom: 4px !important;
+    }
+
+    /* ── QR Code block ── */
+    .report-qr-block {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 12px !important;
+        padding: 8px 12px !important;
+        border-top: 1px solid #d4c8be !important;
+        background: #f8f4f0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .report-qr-block .qr-info {
+        font-size: 7pt !important;
+        color: #6b5f56 !important;
+        text-align: right !important;
+        line-height: 1.6 !important;
+    }
+
+    .report-qr-block .qr-info strong {
+        color: #1a1410 !important;
+    }
+
+    .report-qr-block img {
+        width: 64px !important;
+        height: 64px !important;
+        border: 1px solid #d4c8be !important;
+        border-radius: 4px !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RECEIPTS PRINT STYLES
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+
+    /* ── A4 Receipt ── */
+    .receipt-container {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 16px !important;
+        background: #fcfaf8 !important;
+        border: 1px solid #d4c8be !important;
+        border-radius: 8px !important;
+        box-shadow: none !important;
+        font-family: 'DM Sans', sans-serif !important;
+    }
+
+    .receipt-container .receipt-header {
+        text-align: center !important;
+        border-bottom: 2px solid #2d1f3a !important;
+        padding-bottom: 12px !important;
+        margin-bottom: 12px !important;
+    }
+
+    .receipt-container .receipt-header .school-name {
+        font-family: 'Playfair Display', serif !important;
+        font-size: 16pt !important;
+        font-weight: 700 !important;
+        color: #1a1410 !important;
+    }
+
+    .receipt-container .receipt-header .school-address {
+        font-size: 8pt !important;
+        color: #6b5f56 !important;
+    }
+
+    .receipt-container .receipt-header .receipt-title {
+        font-size: 12pt !important;
+        font-weight: 700 !important;
+        color: #2d1f3a !important;
+        letter-spacing: 2px !important;
+        margin-top: 4px !important;
+    }
+
+    .receipt-container .receipt-header .receipt-number {
+        font-size: 10pt !important;
+        font-weight: 600 !important;
+        color: #2c241e !important;
+        font-family: monospace !important;
+    }
+
+    /* ── Receipt info grid ── */
+    .receipt-container .receipt-info {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 4px 16px !important;
+        margin: 8px 0 !important;
+        padding: 8px 0 !important;
+        border-bottom: 1px solid #e8e0d8 !important;
+    }
+
+    .receipt-container .receipt-info .info-row {
+        display: flex !important;
+        justify-content: space-between !important;
+        padding: 2px 0 !important;
+        font-size: 8.5pt !important;
+    }
+
+    .receipt-container .receipt-info .info-row .label {
+        color: #6b5f56 !important;
+        font-weight: 500 !important;
+    }
+
+    .receipt-container .receipt-info .info-row .value {
+        color: #1a1410 !important;
+        font-weight: 600 !important;
+    }
+
+    /* ── Receipt fee table ── */
+    .receipt-container .receipt-fees {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        margin: 8px 0 !important;
+        font-size: 8pt !important;
+    }
+
+    .receipt-container .receipt-fees thead th {
+        background: #e8e0d8 !important;
+        color: #1a1410 !important;
+        padding: 4px 6px !important;
+        font-weight: 700 !important;
+        text-align: left !important;
+        border: 1px solid #d4c8be !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .receipt-container .receipt-fees tbody td {
+        padding: 4px 6px !important;
+        border: 1px solid #d4c8be !important;
+    }
+
+    .receipt-container .receipt-fees tbody td:not(:first-child) {
+        text-align: right !important;
+    }
+
+    /* ── Receipt total ── */
+    .receipt-container .receipt-total {
+        display: flex !important;
+        justify-content: space-between !important;
+        padding: 8px 12px !important;
+        background: #f0ebe6 !important;
+        border-radius: 4px !important;
+        margin: 8px 0 !important;
+        font-size: 11pt !important;
+        font-weight: 700 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .receipt-container .receipt-total .total-label {
+        color: #1a1410 !important;
+    }
+
+    .receipt-container .receipt-total .total-amount {
+        color: #2d1f3a !important;
+    }
+
+    /* ── Receipt amount in words ── */
+    .receipt-container .amount-in-words {
+        font-size: 7.5pt !important;
+        color: #6b5f56 !important;
+        text-align: center !important;
+        padding: 4px !important;
+        border-top: 1px solid #e8e0d8 !important;
+        margin-top: 8px !important;
+        font-style: italic !important;
+    }
+
+    /* ── Receipt footer ── */
+    .receipt-container .receipt-footer {
+        text-align: center !important;
+        font-size: 7pt !important;
+        color: #6b5f56 !important;
+        padding-top: 8px !important;
+        border-top: 1px solid #e8e0d8 !important;
+        margin-top: 8px !important;
+    }
+
+    .receipt-container .receipt-footer .signature {
+        display: flex !important;
+        justify-content: space-between !important;
+        margin-top: 12px !important;
+        padding-top: 8px !important;
+    }
+
+    .receipt-container .receipt-footer .signature .sig-box {
+        text-align: center !important;
+        flex: 1 !important;
+    }
+
+    .receipt-container .receipt-footer .signature .sig-box .sig-line {
+        border-top: 1px solid #6b5f56 !important;
+        padding-top: 4px !important;
+        font-size: 7pt !important;
+        color: #6b5f56 !important;
+        margin-top: 20px !important;
+    }
+
+    .receipt-container .receipt-footer .signature .sig-box .sig-label {
+        font-size: 7pt !important;
+        font-weight: 600 !important;
+        color: #2c241e !important;
+        margin-bottom: 4px !important;
+    }
+
+    /* ── Thermal receipt (80mm) ── */
+    .receipt-thermal {
+        max-width: 80mm !important;
+        margin: 0 auto !important;
+        padding: 8px !important;
+        font-family: 'Courier New', monospace !important;
+        font-size: 8pt !important;
+        line-height: 1.4 !important;
+        background: #fcfaf8 !important;
+    }
+
+    .receipt-thermal .receipt-header {
+        text-align: center !important;
+        border-bottom: 1px dashed #6b5f56 !important;
+        padding-bottom: 6px !important;
+        margin-bottom: 6px !important;
+    }
+
+    .receipt-thermal .receipt-header .school-name {
+        font-size: 11pt !important;
+        font-weight: 700 !important;
+        color: #1a1410 !important;
+    }
+
+    .receipt-thermal .receipt-header .receipt-title {
+        font-size: 9pt !important;
+        font-weight: 600 !important;
+        color: #2d1f3a !important;
+    }
+
+    .receipt-thermal .receipt-body .info-row {
+        display: flex !important;
+        justify-content: space-between !important;
+        padding: 1px 0 !important;
+        font-size: 7.5pt !important;
+    }
+
+    .receipt-thermal .receipt-body .info-row .label {
+        color: #6b5f56 !important;
+    }
+
+    .receipt-thermal .receipt-body .info-row .value {
+        color: #1a1410 !important;
+        font-weight: 600 !important;
+    }
+
+    .receipt-thermal .receipt-body .divider {
+        border-top: 1px dashed #6b5f56 !important;
+        margin: 4px 0 !important;
+    }
+
+    .receipt-thermal .receipt-body .total-row {
+        display: flex !important;
+        justify-content: space-between !important;
+        padding: 4px 0 !important;
+        font-size: 10pt !important;
+        font-weight: 700 !important;
+        border-top: 1px solid #2d1f3a !important;
+        border-bottom: 1px solid #2d1f3a !important;
+        margin: 4px 0 !important;
+    }
+
+    .receipt-thermal .receipt-body .total-row .total-label {
+        color: #1a1410 !important;
+    }
+
+    .receipt-thermal .receipt-body .total-row .total-amount {
+        color: #2d1f3a !important;
+    }
+
+    .receipt-thermal .receipt-footer {
+        text-align: center !important;
+        font-size: 6.5pt !important;
+        color: #6b5f56 !important;
+        padding-top: 4px !important;
+        border-top: 1px dashed #6b5f56 !important;
+        margin-top: 4px !important;
+    }
+
+    .receipt-thermal .receipt-footer .thanks {
+        font-size: 7pt !important;
+        font-weight: 600 !important;
+        color: #1a1410 !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CLASS REGISTER PRINT STYLES
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    .register-container {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #fcfaf8 !important;
+    }
+
+    .register-container .register-header {
+        text-align: center !important;
+        border-bottom: 2px solid #2d1f3a !important;
+        padding-bottom: 8px !important;
+        margin-bottom: 12px !important;
+    }
+
+    .register-container .register-header .school-name {
+        font-family: 'Playfair Display', serif !important;
+        font-size: 14pt !important;
+        font-weight: 700 !important;
+        color: #1a1410 !important;
+    }
+
+    .register-container .register-header .register-title {
+        font-size: 11pt !important;
+        font-weight: 700 !important;
+        color: #2d1f3a !important;
+    }
+
+    .register-container .register-header .register-subtitle {
+        font-size: 8pt !important;
+        color: #6b5f56 !important;
+    }
+
+    /* ── Register table ── */
+    .register-container .register-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 7.5pt !important;
+        page-break-inside: auto !important;
+    }
+
+    .register-container .register-table thead th {
+        background: #2d1f3a !important;
+        color: #f5f0eb !important;
+        padding: 4px 6px !important;
+        font-weight: 700 !important;
+        text-align: center !important;
+        border: 1px solid #d4c8be !important;
+        font-size: 6.5pt !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .register-container .register-table tbody td {
+        padding: 3px 4px !important;
+        border: 1px solid #d4c8be !important;
+        text-align: center !important;
+        font-size: 7pt !important;
+        color: #2c241e !important;
+    }
+
+    .register-container .register-table tbody td:first-child {
+        font-weight: 700 !important;
+        text-align: center !important;
+    }
+
+    .register-container .register-table tbody td:nth-child(2) {
+        text-align: left !important;
+        font-weight: 600 !important;
+    }
+
+    .register-container .register-table tbody tr:nth-child(even) {
+        background: #f8f4f0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* ── Sticky columns in print ── */
+    .register-container .register-table .sticky-col {
+        position: static !important;
+    }
+
+    /* ── Register footer ── */
+    .register-container .register-footer {
+        text-align: center !important;
+        font-size: 7pt !important;
+        color: #6b5f56 !important;
+        padding-top: 8px !important;
+        border-top: 1px solid #d4c8be !important;
+        margin-top: 12px !important;
+    }
+
+    /* ── Landscape orientation for wide registers ── */
+    @page register-landscape {
+        size: A4 landscape !important;
+        margin: 8mm 6mm !important;
+    }
+
+    .register-container.landscape {
+        page: register-landscape !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TRANSCRIPTS PRINT STYLES
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    .transcript-container {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 20px !important;
+        background: #fcfaf8 !important;
+        border: 1px solid #d4c8be !important;
+        border-radius: 8px !important;
+        box-shadow: none !important;
+        font-family: 'DM Sans', sans-serif !important;
+        page-break-inside: avoid !important;
+    }
+
+    .transcript-container .transcript-header {
+        text-align: center !important;
+        border-bottom: 2px solid #2d1f3a !important;
+        padding-bottom: 12px !important;
+        margin-bottom: 12px !important;
+    }
+
+    .transcript-container .transcript-header .school-name {
+        font-family: 'Playfair Display', serif !important;
+        font-size: 16pt !important;
+        font-weight: 700 !important;
+        color: #1a1410 !important;
+    }
+
+    .transcript-container .transcript-header .school-address {
+        font-size: 8pt !important;
+        color: #6b5f56 !important;
+    }
+
+    .transcript-container .transcript-header .transcript-title {
+        font-size: 12pt !important;
+        font-weight: 700 !important;
+        color: #2d1f3a !important;
+        letter-spacing: 2px !important;
+        margin-top: 4px !important;
+    }
+
+    /* ── Transcript student info ── */
+    .transcript-container .transcript-student-info {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr 1fr !important;
+        gap: 4px 16px !important;
+        padding: 8px 0 !important;
+        border-bottom: 1px solid #e8e0d8 !important;
+        margin-bottom: 12px !important;
+    }
+
+    .transcript-container .transcript-student-info .info-item {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .transcript-container .transcript-student-info .info-item .label {
+        font-size: 6.5pt !important;
+        text-transform: uppercase !important;
+        color: #6b5f56 !important;
+        letter-spacing: 0.5px !important;
+    }
+
+    .transcript-container .transcript-student-info .info-item .value {
+        font-size: 9pt !important;
+        font-weight: 600 !important;
+        color: #1a1410 !important;
+    }
+
+    /* ── Transcript table ── */
+    .transcript-container .transcript-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 8pt !important;
+        margin: 8px 0 !important;
+    }
+
+    /* ── Continuing from .transcript-table thead th { background: #2... ── */
+    .transcript-container .transcript-table thead th {
+        background: #2d1f3a !important;
+        color: #f5f0eb !important;
+        padding: 5px 8px !important;
+        font-weight: 700 !important;
+        text-align: center !important;
+        border: 1px solid #d4c8be !important;
+        font-size: 7pt !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .transcript-container .transcript-table tbody td {
+        padding: 4px 8px !important;
+        border: 1px solid #d4c8be !important;
+        text-align: center !important;
+        font-size: 8pt !important;
+        color: #2c241e !important;
+    }
+
+    .transcript-container .transcript-table tbody td:first-child {
+        text-align: left !important;
+        font-weight: 600 !important;
+    }
+
+    .transcript-container .transcript-table tbody tr:nth-child(even) {
+        background: #f8f4f0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* ── Term totals row ── */
+    .transcript-container .transcript-table .term-total-row td {
+        background: #e8e0d8 !important;
+        font-weight: 700 !important;
+        color: #1a1410 !important;
+        border-top: 2px solid #b8a89e !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* ── Annual total row ── */
+    .transcript-container .transcript-table .annual-total-row td {
+        background: #2d1f3a !important;
+        color: #f5f0eb !important;
+        font-weight: 700 !important;
+        font-size: 9pt !important;
+        border-top: 2px solid #1a1410 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* ── Transcript summary box ── */
+    .transcript-container .transcript-summary {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 8px !important;
+        margin: 12px 0 !important;
+        padding: 10px !important;
+        background: #f0ebe6 !important;
+        border: 1px solid #d4c8be !important;
+        border-radius: 4px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .transcript-container .transcript-summary .summary-item {
+        text-align: center !important;
+    }
+
+    .transcript-container .transcript-summary .summary-item .s-label {
+        font-size: 6.5pt !important;
+        text-transform: uppercase !important;
+        color: #6b5f56 !important;
+        letter-spacing: 0.5px !important;
+        display: block !important;
+    }
+
+    .transcript-container .transcript-summary .summary-item .s-value {
+        font-size: 12pt !important;
+        font-weight: 700 !important;
+        color: #1a1410 !important;
+        display: block !important;
+        margin-top: 2px !important;
+    }
+
+    .transcript-container .transcript-summary .summary-item .s-value.pass {
+        color: #065f46 !important;
+    }
+
+    .transcript-container .transcript-summary .summary-item .s-value.fail {
+        color: #991b1b !important;
+    }
+
+    /* ── Transcript decision banner ── */
+    .transcript-container .transcript-decision {
+        text-align: center !important;
+        padding: 8px 16px !important;
+        margin: 8px 0 !important;
+        border-radius: 4px !important;
+        font-size: 10pt !important;
+        font-weight: 700 !important;
+        letter-spacing: 1px !important;
+        text-transform: uppercase !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .transcript-container .transcript-decision.pass {
+        background: #dce8e0 !important;
+        color: #065f46 !important;
+        border: 1px solid #3a7a5a !important;
+    }
+
+    .transcript-container .transcript-decision.remedial {
+        background: #f0e8d0 !important;
+        color: #92400e !important;
+        border: 1px solid #b8983a !important;
+    }
+
+    .transcript-container .transcript-decision.fail {
+        background: #f0e0dc !important;
+        color: #991b1b !important;
+        border: 1px solid #c45a4a !important;
+    }
+
+    /* ── Transcript footer ── */
+    .transcript-container .transcript-footer {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: flex-end !important;
+        padding-top: 12px !important;
+        margin-top: 12px !important;
+        border-top: 1px solid #d4c8be !important;
+        font-size: 7pt !important;
+        color: #6b5f56 !important;
+    }
+
+    .transcript-container .transcript-footer .sig-grid {
+        display: flex !important;
+        gap: 32px !important;
+    }
+
+    .transcript-container .transcript-footer .sig-block {
+        text-align: center !important;
+    }
+
+    .transcript-container .transcript-footer .sig-block .sig-line {
+        border-top: 1px solid #6b5f56 !important;
+        padding-top: 4px !important;
+        margin-top: 20px !important;
+        font-size: 6.5pt !important;
+        min-width: 100px !important;
+    }
+
+    .transcript-container .transcript-footer .sig-block .sig-label {
+        font-size: 7pt !important;
+        font-weight: 600 !important;
+        color: #2c241e !important;
+    }
+
+    .transcript-container .transcript-footer .gen-info {
+        text-align: right !important;
+        font-size: 6.5pt !important;
+        color: #6b5f56 !important;
+        line-height: 1.8 !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   STUDENT STATEMENTS PRINT STYLES
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    .statement-container {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 20px !important;
+        background: #fcfaf8 !important;
+        border: 1px solid #d4c8be !important;
+        border-radius: 8px !important;
+        box-shadow: none !important;
+        font-family: 'DM Sans', sans-serif !important;
+        page-break-after: always !important;
+    }
+
+    .statement-container:last-child {
+        page-break-after: avoid !important;
+    }
+
+    /* ── Statement header ── */
+    .statement-container .statement-header {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        border-bottom: 2px solid #2d1f3a !important;
+        padding-bottom: 12px !important;
+        margin-bottom: 12px !important;
+    }
+
+    .statement-container .statement-header .school-name {
+        font-family: 'Playfair Display', serif !important;
+        font-size: 14pt !important;
+        font-weight: 700 !important;
+        color: #1a1410 !important;
+    }
+
+    .statement-container .statement-header .school-address {
+        font-size: 7.5pt !important;
+        color: #6b5f56 !important;
+        margin-top: 2px !important;
+    }
+
+    .statement-container .statement-header .statement-title {
+        font-size: 13pt !important;
+        font-weight: 700 !important;
+        color: #2d1f3a !important;
+        letter-spacing: 1.5px !important;
+        text-transform: uppercase !important;
+        text-align: right !important;
+    }
+
+    .statement-container .statement-header .statement-number {
+        font-size: 8pt !important;
+        color: #6b5f56 !important;
+        text-align: right !important;
+        font-family: monospace !important;
+        margin-top: 2px !important;
+    }
+
+    /* ── Statement student info ── */
+    .statement-container .statement-student {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 4px 16px !important;
+        padding: 8px 12px !important;
+        background: #f0ebe6 !important;
+        border: 1px solid #d4c8be !important;
+        border-radius: 4px !important;
+        margin-bottom: 12px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .statement-container .statement-student .s-field {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .statement-container .statement-student .s-field .s-label {
+        font-size: 6.5pt !important;
+        text-transform: uppercase !important;
+        color: #6b5f56 !important;
+        letter-spacing: 0.5px !important;
+    }
+
+    .statement-container .statement-student .s-field .s-value {
+        font-size: 9pt !important;
+        font-weight: 600 !important;
+        color: #1a1410 !important;
+    }
+
+    /* ── Statement ledger table ── */
+    .statement-container .statement-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 8pt !important;
+        margin: 8px 0 !important;
+    }
+
+    .statement-container .statement-table thead th {
+        background: #2d1f3a !important;
+        color: #f5f0eb !important;
+        padding: 5px 8px !important;
+        font-weight: 700 !important;
+        text-align: left !important;
+        border: 1px solid #d4c8be !important;
+        font-size: 7pt !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .statement-container .statement-table thead th:not(:first-child) {
+        text-align: right !important;
+    }
+
+    .statement-container .statement-table tbody td {
+        padding: 4px 8px !important;
+        border: 1px solid #d4c8be !important;
+        color: #2c241e !important;
+        font-size: 7.5pt !important;
+    }
+
+    .statement-container .statement-table tbody td:not(:first-child) {
+        text-align: right !important;
+    }
+
+    .statement-container .statement-table tbody tr:nth-child(even) {
+        background: #f8f4f0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* ── Running balance coloring ── */
+    .statement-container .statement-table .balance-credit {
+        color: #065f46 !important;
+        font-weight: 600 !important;
+    }
+
+    .statement-container .statement-table .balance-debit {
+        color: #991b1b !important;
+        font-weight: 600 !important;
+    }
+
+    /* ── Statement totals row ── */
+    .statement-container .statement-table tfoot td {
+        background: #e8e0d8 !important;
+        font-weight: 700 !important;
+        color: #1a1410 !important;
+        border-top: 2px solid #2d1f3a !important;
+        padding: 6px 8px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .statement-container .statement-table tfoot td:not(:first-child) {
+        text-align: right !important;
+    }
+
+    /* ── Statement balance summary box ── */
+    .statement-container .statement-balance {
+        display: flex !important;
+        justify-content: flex-end !important;
+        margin: 8px 0 !important;
+    }
+
+    .statement-container .statement-balance .balance-box {
+        padding: 10px 20px !important;
+        background: #f0ebe6 !important;
+        border: 2px solid #2d1f3a !important;
+        border-radius: 4px !important;
+        text-align: center !important;
+        min-width: 180px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .statement-container .statement-balance .balance-box .b-label {
+        font-size: 7pt !important;
+        text-transform: uppercase !important;
+        color: #6b5f56 !important;
+        letter-spacing: 0.5px !important;
+    }
+
+    .statement-container .statement-balance .balance-box .b-amount {
+        font-size: 14pt !important;
+        font-weight: 700 !important;
+        color: #2d1f3a !important;
+        margin-top: 2px !important;
+    }
+
+    .statement-container .statement-balance .balance-box .b-amount.settled {
+        color: #065f46 !important;
+    }
+
+    .statement-container .statement-balance .balance-box .b-amount.owing {
+        color: #991b1b !important;
+    }
+
+    .statement-container .statement-balance .balance-box .b-words {
+        font-size: 6.5pt !important;
+        color: #6b5f56 !important;
+        font-style: italic !important;
+        margin-top: 2px !important;
+    }
+
+    /* ── Statement footer ── */
+    .statement-container .statement-footer {
+        text-align: center !important;
+        font-size: 7pt !important;
+        color: #6b5f56 !important;
+        padding-top: 8px !important;
+        border-top: 1px solid #d4c8be !important;
+        margin-top: 12px !important;
+        line-height: 1.8 !important;
+    }
+
+    .statement-container .statement-footer .footer-school {
+        font-weight: 600 !important;
+        color: #1a1410 !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ATTENDANCE SHEET PRINT STYLES
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    .attendance-print-container {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #fcfaf8 !important;
+        font-family: 'DM Sans', sans-serif !important;
+    }
+
+    .attendance-print-container .att-header {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        border-bottom: 2px solid #2d1f3a !important;
+        padding-bottom: 8px !important;
+        margin-bottom: 10px !important;
+    }
+
+    .attendance-print-container .att-header .school-name {
+        font-family: 'Playfair Display', serif !important;
+        font-size: 13pt !important;
+        font-weight: 700 !important;
+        color: #1a1410 !important;
+    }
+
+    .attendance-print-container .att-header .att-title {
+        font-size: 10pt !important;
+        font-weight: 600 !important;
+        color: #2d1f3a !important;
+        text-align: right !important;
+    }
+
+    .attendance-print-container .att-header .att-meta {
+        font-size: 7pt !important;
+        color: #6b5f56 !important;
+        text-align: right !important;
+    }
+
+    /* ── Attendance table ── */
+    .attendance-print-container .att-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 7.5pt !important;
+    }
+
+    .attendance-print-container .att-table th {
+        background: #2d1f3a !important;
+        color: #f5f0eb !important;
+        padding: 4px 5px !important;
+        font-weight: 700 !important;
+        text-align: center !important;
+        border: 1px solid #d4c8be !important;
+        font-size: 6.5pt !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .attendance-print-container .att-table td {
+        padding: 3px 4px !important;
+        border: 1px solid #d4c8be !important;
+        text-align: center !important;
+        font-size: 7pt !important;
+        color: #2c241e !important;
+    }
+
+    .attendance-print-container .att-table td:nth-child(2) {
+        text-align: left !important;
+        font-weight: 500 !important;
+    }
+
+    .attendance-print-container .att-table tbody tr:nth-child(even) {
+        background: #f8f4f0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* ── Attendance status cells ── */
+    .attendance-print-container .att-present {
+        background: #dce8e0 !important;
+        color: #065f46 !important;
+        font-weight: 700 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .attendance-print-container .att-absent {
+        background: #f0e0dc !important;
+        color: #991b1b !important;
+        font-weight: 700 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .attendance-print-container .att-late {
+        background: #f0e8d0 !important;
+        color: #92400e !important;
+        font-weight: 700 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .attendance-print-container .att-excused {
+        background: #dce8ec !important;
+        color: #1a4a5a !important;
+        font-weight: 700 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* ── Attendance totals row ── */
+    .attendance-print-container .att-totals td {
+        background: #e8e0d8 !important;
+        font-weight: 700 !important;
+        color: #1a1410 !important;
+        border-top: 2px solid #b8a89e !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* ── Attendance legend ── */
+    .attendance-print-container .att-legend {
+        display: flex !important;
+        gap: 16px !important;
+        justify-content: flex-end !important;
+        margin-top: 6px !important;
+        font-size: 6.5pt !important;
+        color: #6b5f56 !important;
+    }
+
+    .attendance-print-container .att-legend .legend-item {
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+    }
+
+    .attendance-print-container .att-legend .legend-dot {
+        width: 8px !important;
+        height: 8px !important;
+        border-radius: 50% !important;
+        display: inline-block !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    .attendance-print-container .att-legend .legend-dot.present {
+        background: #3a7a5a !important;
+    }
+
+    .attendance-print-container .att-legend .legend-dot.absent {
+        background: #c45a4a !important;
+    }
+
+    .attendance-print-container .att-legend .legend-dot.late {
+        background: #c9a84c !important;
+    }
+
+    .attendance-print-container .att-legend .legend-dot.excused {
+        background: #4a7a8a !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK THEME PRINT OVERRIDES
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+
+    /* ── Body ── */
+    [data-theme="dark"] body {
+        background: #1a1410 !important;
+        color: #d4ccc6 !important;
+    }
+
+    /* ── Cards and containers ── */
+    [data-theme="dark"] .dash-card,
+    [data-theme="dark"] .stat-card,
+    [data-theme="dark"] .card,
+    [data-theme="dark"] .report-card,
+    [data-theme="dark"] .receipt-container,
+    [data-theme="dark"] .transcript-container,
+    [data-theme="dark"] .statement-container,
+    [data-theme="dark"] .register-container,
+    [data-theme="dark"] .attendance-print-container {
+        background: #241d18 !important;
+        border-color: #4a3d35 !important;
+    }
+
+    /* ── Report header ── */
+    [data-theme="dark"] .report-header {
+        background: #1a1410 !important;
+    }
+
+    [data-theme="dark"] .report-header .report-header-text h2,
+    [data-theme="dark"] .report-header .report-header-text h3 {
+        color: #f0ebe6 !important;
+    }
+
+    /* ── Report info ── */
+    [data-theme="dark"] .report-info {
+        background: #1a1410 !important;
+        border-bottom-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .report-info-item {
+        border-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .report-info-item strong {
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .report-info-item span {
+        color: #f0ebe6 !important;
+    }
+
+    /* ── Report subjects table ── */
+    [data-theme="dark"] .report-subjects thead th {
+        background: #2a221c !important;
+        color: #f0ebe6 !important;
+        border-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .report-subjects tbody td {
+        border-color: #4a3d35 !important;
+        color: #d4ccc6 !important;
+    }
+
+    [data-theme="dark"] .report-subjects tbody tr:nth-child(even) {
+        background: #1a1410 !important;
+    }
+
+    /* ── Report summary ── */
+    [data-theme="dark"] .report-summary {
+        background: #1a1410 !important;
+    }
+
+    /* ── Report footer ── */
+    [data-theme="dark"] .report-footer {
+        background: #1a1410 !important;
+        border-top-color: #4a3d35 !important;
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .report-footer .decision-banner.pass {
+        background: #1a3a2a !important;
+        color: #86efac !important;
+        border-color: #3d8a6a !important;
+    }
+
+    [data-theme="dark"] .report-footer .decision-banner.remedial {
+        background: #3a2a10 !important;
+        color: #fcd34d !important;
+        border-color: #c9a84c !important;
+    }
+
+    [data-theme="dark"] .report-footer .decision-banner.fail {
+        background: #3a1a14 !important;
+        color: #fca5a5 !important;
+        border-color: #c45a4a !important;
+    }
+
+    [data-theme="dark"] .report-footer .signature-grid .sig-line {
+        border-top-color: #4a3d35 !important;
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .report-footer .signature-grid .sig-label {
+        color: #d4ccc6 !important;
+    }
+
+    /* ── QR block ── */
+    [data-theme="dark"] .report-qr-block {
+        background: #1a1410 !important;
+        border-top-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .report-qr-block .qr-info {
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .report-qr-block .qr-info strong {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .report-qr-block img {
+        border-color: #4a3d35 !important;
+    }
+
+    /* ── Receipt dark ── */
+    [data-theme="dark"] .receipt-container .receipt-header {
+        border-bottom-color: #4d2f4a !important;
+    }
+
+    [data-theme="dark"] .receipt-container .receipt-header .school-name {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .receipt-container .receipt-header .school-address,
+    [data-theme="dark"] .receipt-container .receipt-header .receipt-number {
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .receipt-container .receipt-header .receipt-title {
+        color: #c5a8c0 !important;
+    }
+
+    [data-theme="dark"] .receipt-container .receipt-info {
+        border-bottom-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .receipt-container .receipt-info .info-row .label {
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .receipt-container .receipt-info .info-row .value {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .receipt-container .receipt-fees thead th {
+        background: #2a221c !important;
+        color: #f0ebe6 !important;
+        border-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .receipt-container .receipt-fees tbody td {
+        border-color: #4a3d35 !important;
+        color: #d4ccc6 !important;
+    }
+
+    [data-theme="dark"] .receipt-container .receipt-total {
+        background: #2a221c !important;
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .receipt-container .amount-in-words {
+        color: #9a8e86 !important;
+        border-top-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .receipt-container .receipt-footer {
+        border-top-color: #4a3d35 !important;
+        color: #9a8e86 !important;
+    }
+
+    /* ── Register dark ── */
+    [data-theme="dark"] .register-container .register-header {
+        border-bottom-color: #4d2f4a !important;
+    }
+
+    [data-theme="dark"] .register-container .register-header .school-name {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .register-container .register-header .register-title {
+        color: #c5a8c0 !important;
+    }
+
+    [data-theme="dark"] .register-container .register-header .register-subtitle {
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .register-container .register-table thead th {
+        background: #2a221c !important;
+        color: #f0ebe6 !important;
+        border-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .register-container .register-table tbody td {
+        border-color: #4a3d35 !important;
+        color: #d4ccc6 !important;
+    }
+
+    [data-theme="dark"] .register-container .register-table tbody tr:nth-child(even) {
+        background: #1a1410 !important;
+    }
+
+    [data-theme="dark"] .register-container .register-footer {
+        border-top-color: #4a3d35 !important;
+        color: #9a8e86 !important;
+    }
+
+    /* ── Transcript dark ── */
+    [data-theme="dark"] .transcript-container .transcript-header {
+        border-bottom-color: #4d2f4a !important;
+    }
+
+    [data-theme="dark"] .transcript-container .transcript-header .school-name {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .transcript-container .transcript-header .school-address {
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .transcript-container .transcript-header .transcript-title {
+        color: #c5a8c0 !important;
+    }
+
+    [data-theme="dark"] .transcript-container .transcript-student-info {
+        border-bottom-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .transcript-container .transcript-student-info .info-item .label {
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .transcript-container .transcript-student-info .info-item .value {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .transcript-container .transcript-table thead th {
+        background: #2a221c !important;
+        color: #f0ebe6 !important;
+        border-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .transcript-container .transcript-table tbody td {
+        border-color: #4a3d35 !important;
+        color: #d4ccc6 !important;
+    }
+
+    [data-theme="dark"] .transcript-container .transcript-table tbody tr:nth-child(even) {
+        background: #1a1410 !important;
+    }
+
+    [data-theme="dark"] .transcript-container .transcript-table .term-total-row td {
+        background: #2a221c !important;
+        color: #f0ebe6 !important;
+        border-top-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .transcript-container .transcript-table .annual-total-row td {
+        background: #1a1410 !important;
+        color: #f0ebe6 !important;
+        border-top-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .transcript-container .transcript-summary {
+        background: #2a221c !important;
+        border-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .transcript-container .transcript-summary .summary-item .s-label {
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .transcript-container .transcript-summary .summary-item .s-value {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .transcript-container .transcript-decision.pass {
+        background: #1a3a2a !important;
+        color: #86efac !important;
+        border-color: #3d8a6a !important;
+    }
+
+    [data-theme="dark"] .transcript-container .transcript-decision.remedial {
+        background: #3a2a10 !important;
+        color: #fcd34d !important;
+        border-color: #c9a84c !important;
+    }
+
+    [data-theme="dark"] .transcript-container .transcript-decision.fail {
+        background: #3a1a14 !important;
+        color: #fca5a5 !important;
+        border-color: #c45a4a !important;
+    }
+
+    [data-theme="dark"] .transcript-container .transcript-footer {
+        border-top-color: #4a3d35 !important;
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .transcript-container .transcript-footer .sig-block .sig-line {
+        border-top-color: #4a3d35 !important;
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .transcript-container .transcript-footer .sig-block .sig-label {
+        color: #d4ccc6 !important;
+    }
+
+    /* ── Statement dark ── */
+    [data-theme="dark"] .statement-container .statement-header {
+        border-bottom-color: #4d2f4a !important;
+    }
+
+    [data-theme="dark"] .statement-container .statement-header .school-name {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .statement-container .statement-header .school-address,
+    [data-theme="dark"] .statement-container .statement-header .statement-number {
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .statement-container .statement-header .statement-title {
+        color: #c5a8c0 !important;
+    }
+
+    [data-theme="dark"] .statement-container .statement-student {
+        background: #2a221c !important;
+        border-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .statement-container .statement-student .s-field .s-label {
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .statement-container .statement-student .s-field .s-value {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .statement-container .statement-table thead th {
+        background: #2a221c !important;
+        color: #f0ebe6 !important;
+        border-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .statement-container .statement-table tbody td {
+        border-color: #4a3d35 !important;
+        color: #d4ccc6 !important;
+    }
+
+    [data-theme="dark"] .statement-container .statement-table tbody tr:nth-child(even) {
+        background: #1a1410 !important;
+    }
+
+    [data-theme="dark"] .statement-container .statement-table .balance-credit {
+        color: #86efac !important;
+    }
+
+    [data-theme="dark"] .statement-container .statement-table .balance-debit {
+        color: #fca5a5 !important;
+    }
+
+    [data-theme="dark"] .statement-container .statement-table tfoot td {
+        background: #2a221c !important;
+        color: #f0ebe6 !important;
+        border-top-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .statement-container .statement-balance .balance-box {
+        background: #2a221c !important;
+        border-color: #4d2f4a !important;
+    }
+
+    [data-theme="dark"] .statement-container .statement-balance .balance-box .b-label {
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .statement-container .statement-balance .balance-box .b-amount {
+        color: #c5a8c0 !important;
+    }
+
+    [data-theme="dark"] .statement-container .statement-balance .balance-box .b-amount.settled {
+        color: #86efac !important;
+    }
+
+    [data-theme="dark"] .statement-container .statement-balance .balance-box .b-amount.owing {
+        color: #fca5a5 !important;
+    }
+
+    [data-theme="dark"] .statement-container .statement-balance .balance-box .b-words {
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .statement-container .statement-footer {
+        border-top-color: #4a3d35 !important;
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .statement-container .statement-footer .footer-school {
+        color: #f0ebe6 !important;
+    }
+
+    /* ── Attendance dark ── */
+    [data-theme="dark"] .attendance-print-container .att-header {
+        border-bottom-color: #4d2f4a !important;
+    }
+
+    [data-theme="dark"] .attendance-print-container .att-header .school-name {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .attendance-print-container .att-header .att-title {
+        color: #c5a8c0 !important;
+    }
+
+    [data-theme="dark"] .attendance-print-container .att-header .att-meta {
+        color: #9a8e86 !important;
+    }
+
+    [data-theme="dark"] .attendance-print-container .att-table th {
+        background: #2a221c !important;
+        color: #f0ebe6 !important;
+        border-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .attendance-print-container .att-table td {
+        border-color: #4a3d35 !important;
+        color: #d4ccc6 !important;
+    }
+
+    [data-theme="dark"] .attendance-print-container .att-table tbody tr:nth-child(even) {
+        background: #1a1410 !important;
+    }
+
+    [data-theme="dark"] .attendance-print-container .att-present {
+        background: #1a3a2a !important;
+        color: #86efac !important;
+    }
+
+    [data-theme="dark"] .attendance-print-container .att-absent {
+        background: #3a1a14 !important;
+        color: #fca5a5 !important;
+    }
+
+    [data-theme="dark"] .attendance-print-container .att-late {
+        background: #3a2a10 !important;
+        color: #fcd34d !important;
+    }
+
+    [data-theme="dark"] .attendance-print-container .att-excused {
+        background: #1a2a3a !important;
+        color: #93c5fd !important;
+    }
+
+    [data-theme="dark"] .attendance-print-container .att-totals td {
+        background: #2a221c !important;
+        color: #f0ebe6 !important;
+        border-top-color: #4a3d35 !important;
+    }
+
+    [data-theme="dark"] .attendance-print-container .att-legend {
+        color: #9a8e86 !important;
+    }
+
+    /* ── Grade badges dark ── */
+    [data-theme="dark"] .grade-Ap,
+    [data-theme="dark"] .grade-A {
+        background: #1a3a2a !important;
+        border-color: #3d8a6a !important;
+        color: #86efac !important;
+    }
+
+    [data-theme="dark"] .grade-B {
+        background: #1a2a3a !important;
+        border-color: #6a8aba !important;
+        color: #93c5fd !important;
+    }
+
+    [data-theme="dark"] .grade-C {
+        background: #3a2a10 !important;
+        border-color: #d9aa4b !important;
+        color: #fcd34d !important;
+    }
+
+    [data-theme="dark"] .grade-D {
+        background: #3a2010 !important;
+        border-color: #c48a3a !important;
+        color: #fdba74 !important;
+    }
+
+    [data-theme="dark"] .grade-F {
+        background: #3a1a14 !important;
+        border-color: #c45a4a !important;
+        color: #fca5a5 !important;
+    }
+
+    /* ── Generic badges dark ── */
+    [data-theme="dark"] .badge {
+        background: #2a221c !important;
+        border-color: #4a3d35 !important;
+        color: #d4ccc6 !important;
+    }
+
+    [data-theme="dark"] .badge-success {
+        background: #1a3a2a !important;
+        border-color: #3d8a6a !important;
+        color: #86efac !important;
+    }
+
+    [data-theme="dark"] .badge-warning {
+        background: #3a2a10 !important;
+        border-color: #c9a84c !important;
+        color: #fcd34d !important;
+    }
+
+    [data-theme="dark"] .badge-danger {
+        background: #3a1a14 !important;
+        border-color: #c45a4a !important;
+        color: #fca5a5 !important;
+    }
+
+    [data-theme="dark"] .badge-info {
+        background: #1a2a3a !important;
+        border-color: #4a7a8a !important;
+        color: #93c5fd !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PRINT UTILITIES
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+
+    /* ── Visibility ── */
+    .print-show {
+        display: block !important;
+    }
+
+    .print-show-inline {
+        display: inline !important;
+    }
+
+    .print-show-flex {
+        display: flex !important;
+    }
+
+    .print-show-grid {
+        display: grid !important;
+    }
+
+    .print-hide {
+        display: none !important;
+    }
+
+    /* ── Spacing ── */
+    .print-mt-0 {
+        margin-top: 0 !important;
+    }
+
+    .print-mb-0 {
+        margin-bottom: 0 !important;
+    }
+
+    .print-mt-sm {
+        margin-top: 4px !important;
+    }
+
+    .print-mb-sm {
+        margin-bottom: 4px !important;
+    }
+
+    .print-mt-md {
+        margin-top: 8px !important;
+    }
+
+    .print-mb-md {
+        margin-bottom: 8px !important;
+    }
+
+    .print-mt-lg {
+        margin-top: 16px !important;
+    }
+
+    .print-mb-lg {
+        margin-bottom: 16px !important;
+    }
+
+    /* ── Text ── */
+    .print-text-left {
+        text-align: left !important;
+    }
+
+    .print-text-center {
+        text-align: center !important;
+    }
+
+    .print-text-right {
+        text-align: right !important;
+    }
+
+    .print-bold {
+        font-weight: 700 !important;
+    }
+
+    .print-normal {
+        font-weight: 400 !important;
+    }
+
+    .print-italic {
+        font-style: italic !important;
+    }
+
+    .print-mono {
+        font-family: 'Courier New', monospace !important;
+    }
+
+    .print-small {
+        font-size: 7pt !important;
+    }
+
+    .print-large {
+        font-size: 11pt !important;
+    }
+
+    /* ── Colors ── */
+    .print-color-muted {
+        color: #6b5f56 !important;
+    }
+
+    .print-color-dark {
+        color: #1a1410 !important;
+    }
+
+    .print-color-pass {
+        color: #065f46 !important;
+    }
+
+    .print-color-fail {
+        color: #991b1b !important;
+    }
+
+    .print-color-warn {
+        color: #92400e !important;
+    }
+
+    /* ── Borders ── */
+    .print-border-top {
+        border-top: 1px solid #d4c8be !important;
+    }
+
+    .print-border-bottom {
+        border-bottom: 1px solid #d4c8be !important;
+    }
+
+    .print-border-thick {
+        border-top: 2px solid #2d1f3a !important;
+    }
+
+    .print-border-dashed {
+        border-top: 1px dashed #d4c8be !important;
+    }
+
+    /* ── Page breaks ── */
+    .print-break-before {
+        page-break-before: always !important;
+    }
+
+    .print-break-after {
+        page-break-after: always !important;
+    }
+
+    .print-no-break {
+        page-break-inside: avoid !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   REDUCED MOTION
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print and (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}

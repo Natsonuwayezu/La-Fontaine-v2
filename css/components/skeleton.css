@@ -1,0 +1,618 @@
+/* ═══════════════════════════════════════════════════════════════════
+   SKELETON LOADERS — css/components/skeleton.css
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: Placeholder loading states for content that is
+   being fetched or processed. Provides visual feedback that
+   content is loading.
+   No pure white (#FFFFFF), no pure black (#000000).
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   BASE SKELETON
+   ═══════════════════════════════════════════════════════════════════ */
+
+.skeleton {
+    background: linear-gradient(90deg,
+            var(--bg-tertiary, #f0ebe6) 25%,
+            var(--bg-card, #fcfaf8) 50%,
+            var(--bg-tertiary, #f0ebe6) 75%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s ease-in-out infinite;
+    border-radius: var(--r-sm, 6px);
+}
+
+[data-theme="dark"] .skeleton {
+    background: linear-gradient(90deg,
+            rgba(240, 235, 230, 0.04) 25%,
+            rgba(240, 235, 230, 0.08) 50%,
+            rgba(240, 235, 230, 0.04) 75%);
+    background-size: 200% 100%;
+}
+
+.skeleton-dark {
+    background: linear-gradient(90deg,
+            #2a221c 25%,
+            #3a322c 50%,
+            #2a221c 75%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s ease-in-out infinite;
+    border-radius: var(--r-sm, 6px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SKELETON LINES
+   ═══════════════════════════════════════════════════════════════════ */
+
+.skeleton-line {
+    height: 12px;
+    background: var(--bg-tertiary, #f0ebe6);
+    border-radius: 6px;
+    margin-bottom: var(--sm, 8px);
+}
+
+[data-theme="dark"] .skeleton-line {
+    background: rgba(240, 235, 230, 0.04);
+}
+
+.skeleton-line.lg {
+    height: 20px;
+    margin-bottom: var(--md, 12px);
+}
+
+.skeleton-line.md {
+    height: 16px;
+    margin-bottom: var(--sm, 10px);
+}
+
+.skeleton-line.sm {
+    height: 10px;
+    margin-bottom: var(--xs, 6px);
+}
+
+.skeleton-line.xs {
+    height: 6px;
+    margin-bottom: 4px;
+}
+
+/* ── Width variants ── */
+.skeleton-line.w-25 {
+    width: 25%;
+}
+
+.skeleton-line.w-50 {
+    width: 50%;
+}
+
+.skeleton-line.w-75 {
+    width: 75%;
+}
+
+.skeleton-line.w-100 {
+    width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SKELETON AVATARS
+   ═══════════════════════════════════════════════════════════════════ */
+
+.skeleton-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--bg-tertiary, #f0ebe6);
+}
+
+[data-theme="dark"] .skeleton-avatar {
+    background: rgba(240, 235, 230, 0.04);
+}
+
+.skeleton-avatar-sm {
+    width: 32px;
+    height: 32px;
+}
+
+.skeleton-avatar-lg {
+    width: 80px;
+    height: 80px;
+}
+
+.skeleton-avatar-xl {
+    width: 120px;
+    height: 120px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SKELETON CARDS
+   ═══════════════════════════════════════════════════════════════════ */
+
+.skeleton-card {
+    background: var(--bg-card, #fcfaf8);
+    border: 1px solid var(--border-light, #e8e0d8);
+    border-radius: var(--r-lg, 14px);
+    padding: var(--lg, 24px);
+    margin-bottom: var(--md, 16px);
+}
+
+[data-theme="dark"] .skeleton-card {
+    background: rgba(26, 20, 16, 0.85);
+    border-color: rgba(240, 235, 230, 0.06);
+}
+
+.skeleton-card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--md, 16px);
+    margin-bottom: var(--lg, 24px);
+}
+
+.skeleton-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sm, 8px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SKELETON GRID
+   ═══════════════════════════════════════════════════════════════════ */
+
+.skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--md, 16px);
+}
+
+.skeleton-grid-item {
+    background: var(--bg-card, #fcfaf8);
+    border: 1px solid var(--border-light, #e8e0d8);
+    border-radius: var(--r-md, 10px);
+    padding: var(--md, 16px);
+}
+
+[data-theme="dark"] .skeleton-grid-item {
+    background: rgba(26, 20, 16, 0.85);
+    border-color: rgba(240, 235, 230, 0.06);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SKELETON LIST
+   ═══════════════════════════════════════════════════════════════════ */
+
+.skeleton-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sm, 8px);
+}
+
+.skeleton-list-item {
+    display: flex;
+    align-items: center;
+    gap: var(--md, 16px);
+    padding: var(--sm, 8px) var(--md, 16px);
+    background: var(--bg-card, #fcfaf8);
+    border: 1px solid var(--border-light, #e8e0d8);
+    border-radius: var(--r-md, 10px);
+}
+
+[data-theme="dark"] .skeleton-list-item {
+    background: rgba(26, 20, 16, 0.85);
+    border-color: rgba(240, 235, 230, 0.06);
+}
+
+.skeleton-list-item .skeleton-avatar {
+    width: 32px;
+    height: 32px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SKELETON CHARTS
+   ═══════════════════════════════════════════════════════════════════ */
+
+.skeleton-chart {
+    height: 300px;
+    background: var(--bg-tertiary, #f0ebe6);
+    border-radius: var(--r-md, 10px);
+    position: relative;
+    overflow: hidden;
+}
+
+[data-theme="dark"] .skeleton-chart {
+    background: rgba(240, 235, 230, 0.04);
+}
+
+.skeleton-chart::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--border-light, #e8e0d8);
+}
+
+[data-theme="dark"] .skeleton-chart::after {
+    background: rgba(240, 235, 230, 0.06);
+}
+
+.skeleton-chart-sm {
+    height: 200px;
+}
+
+.skeleton-chart-lg {
+    height: 400px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SKELETON WIDGETS
+   ═══════════════════════════════════════════════════════════════════ */
+
+.skeleton-widget {
+    background: var(--bg-card, #fcfaf8);
+    border: 1px solid var(--border-light, #e8e0d8);
+    border-radius: var(--r-lg, 14px);
+    padding: var(--lg, 24px);
+}
+
+[data-theme="dark"] .skeleton-widget {
+    background: rgba(26, 20, 16, 0.85);
+    border-color: rgba(240, 235, 230, 0.06);
+}
+
+.skeleton-widget-title {
+    height: 20px;
+    width: 60%;
+    margin-bottom: var(--md, 16px);
+}
+
+.skeleton-widget-value {
+    height: 36px;
+    width: 40%;
+    margin-bottom: var(--sm, 8px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SKELETON TABLE
+   ═══════════════════════════════════════════════════════════════════ */
+
+.skeleton-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.skeleton-table th,
+.skeleton-table td {
+    padding: var(--sm, 8px) var(--md, 16px);
+}
+
+.skeleton-table th .skeleton-line {
+    height: 10px;
+    width: 80%;
+}
+
+.skeleton-table td .skeleton-line {
+    height: 10px;
+    width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SKELETON BUTTON
+   ═══════════════════════════════════════════════════════════════════ */
+
+.skeleton-btn {
+    height: 36px;
+    width: 100px;
+    border-radius: var(--r-md, 10px);
+    background: var(--bg-tertiary, #f0ebe6);
+}
+
+[data-theme="dark"] .skeleton-btn {
+    background: rgba(240, 235, 230, 0.04);
+}
+
+.skeleton-btn-sm {
+    height: 28px;
+    width: 70px;
+}
+
+.skeleton-btn-lg {
+    height: 44px;
+    width: 140px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SKELETON BADGE
+   ═══════════════════════════════════════════════════════════════════ */
+
+.skeleton-badge {
+    height: 22px;
+    width: 60px;
+    border-radius: var(--r-full, 9999px);
+    background: var(--bg-tertiary, #f0ebe6);
+}
+
+[data-theme="dark"] .skeleton-badge {
+    background: rgba(240, 235, 230, 0.04);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SKELETON WITH ANIMATION VARIANTS
+   ═══════════════════════════════════════════════════════════════════ */
+
+.skeleton-pulse {
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.skeleton-shimmer {
+    animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonShimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.skeleton-shimmer-fast {
+    animation: skeletonShimmer 0.8s ease-in-out infinite;
+}
+
+.skeleton-shimmer-slow {
+    animation: skeletonShimmer 2.5s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SKELETON CONTAINER — Full page loading
+   ═══════════════════════════════════════════════════════════════════ */
+
+.skeleton-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--lg, 24px);
+    padding: var(--lg, 24px);
+}
+
+.skeleton-container .skeleton-row {
+    display: flex;
+    gap: var(--md, 16px);
+    align-items: center;
+}
+
+.skeleton-container .skeleton-row .skeleton-avatar {
+    flex-shrink: 0;
+}
+
+.skeleton-container .skeleton-row .skeleton-lines {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--xs, 4px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SKELETON CARD GRID — For dashboard layouts
+   ═══════════════════════════════════════════════════════════════════ */
+
+.skeleton-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--md, 16px);
+    margin-bottom: var(--lg, 24px);
+}
+
+.skeleton-dashboard-card {
+    height: 120px;
+    background: var(--bg-card, #fcfaf8);
+    border: 1px solid var(--border-light, #e8e0d8);
+    border-radius: var(--r-lg, 14px);
+    padding: var(--md, 16px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+[data-theme="dark"] .skeleton-dashboard-card {
+    background: rgba(26, 20, 16, 0.85);
+    border-color: rgba(240, 235, 230, 0.06);
+}
+
+.skeleton-dashboard-card .skeleton-line:first-child {
+    width: 60%;
+}
+
+.skeleton-dashboard-card .skeleton-line:last-child {
+    width: 40%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .skeleton-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: var(--sm, 8px);
+    }
+
+    .skeleton-card {
+        padding: var(--md, 16px);
+    }
+
+    .skeleton-card-header {
+        gap: var(--sm, 8px);
+        margin-bottom: var(--md, 16px);
+    }
+
+    .skeleton-dashboard-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: var(--sm, 8px);
+    }
+
+    .skeleton-dashboard-card {
+        height: 100px;
+        padding: var(--sm, 8px) var(--md, 12px);
+    }
+
+    .skeleton-chart {
+        height: 200px;
+    }
+
+    .skeleton-chart-sm {
+        height: 150px;
+    }
+
+    .skeleton-chart-lg {
+        height: 280px;
+    }
+
+    .skeleton-list-item {
+        padding: var(--xs, 4px) var(--sm, 8px);
+        gap: var(--sm, 8px);
+    }
+
+    .skeleton-container {
+        padding: var(--md, 16px);
+        gap: var(--md, 16px);
+    }
+}
+
+@media (max-width: 480px) {
+    .skeleton-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--xs, 4px);
+    }
+
+    .skeleton-grid-item {
+        padding: var(--sm, 8px);
+    }
+
+    .skeleton-dashboard-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--xs, 4px);
+    }
+
+    .skeleton-dashboard-card {
+        height: 80px;
+        padding: var(--xs, 4px) var(--sm, 8px);
+    }
+
+    .skeleton-dashboard-card .skeleton-line {
+        height: 8px;
+        margin-bottom: var(--xs, 4px);
+    }
+
+    .skeleton-chart {
+        height: 150px;
+    }
+
+    .skeleton-chart-sm {
+        height: 120px;
+    }
+
+    .skeleton-chart-lg {
+        height: 200px;
+    }
+
+    .skeleton-avatar {
+        width: 32px;
+        height: 32px;
+    }
+
+    .skeleton-avatar-lg {
+        width: 56px;
+        height: 56px;
+    }
+
+    .skeleton-avatar-xl {
+        width: 80px;
+        height: 80px;
+    }
+
+    .skeleton-line.lg {
+        height: 16px;
+    }
+
+    .skeleton-line.md {
+        height: 12px;
+    }
+
+    .skeleton-btn {
+        height: 30px;
+        width: 80px;
+    }
+
+    .skeleton-btn-sm {
+        height: 24px;
+        width: 60px;
+    }
+
+    .skeleton-btn-lg {
+        height: 36px;
+        width: 110px;
+    }
+
+    .skeleton-card {
+        padding: var(--sm, 8px);
+    }
+
+    .skeleton-card-header {
+        gap: var(--xs, 4px);
+        margin-bottom: var(--sm, 8px);
+    }
+
+    .skeleton-widget {
+        padding: var(--md, 16px);
+    }
+
+    .skeleton-widget-title {
+        height: 16px;
+        width: 70%;
+    }
+
+    .skeleton-widget-value {
+        height: 28px;
+        width: 50%;
+    }
+
+    .skeleton-container {
+        padding: var(--sm, 8px);
+        gap: var(--sm, 8px);
+    }
+
+    .skeleton-container .skeleton-row {
+        gap: var(--sm, 8px);
+    }
+
+    .skeleton-badge {
+        height: 18px;
+        width: 50px;
+    }
+}
+
+@media (max-width: 380px) {
+    .skeleton-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .skeleton-dashboard-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .skeleton-dashboard-card {
+        height: 70px;
+    }
+}

@@ -1,102 +1,1238 @@
 /* ═══════════════════════════════════════════════════════════════════
-   LIGHT THEME
+   LIGHT THEME — ECOLE LA FONTAINE
    ═══════════════════════════════════════════════════════════════════
    Purpose: Explicit light mode overrides. Applied when
    data-theme="light" is set on the HTML element.
+   No pure white (#FFFFFF), no pure black (#000000).
    ═══════════════════════════════════════════════════════════════════ */
 
 [data-theme="light"] {
-    /* ─── Colors ─── */
+    /* ═══════════════════════════════════════════════════════════════
+       BACKGROUNDS — Warm, organic, soft
+       ═══════════════════════════════════════════════════════════════ */
+
     --bg-body: #f5f0eb;
-    --bg-card: #ffffff;
-    --bg-card-hover: #f8fafc;
+    --bg-card: #fcfaf8;
+    --bg-card-hover: #f8f4f0;
     --bg-card-alt: #faf7f4;
+    --bg-tertiary: #f0ebe6;
+    --bg-hover: #f5f0eb;
+    --bg-active: #e8e0d8;
+    --bg-disabled: #f0ebe6;
+    --bg-surface: #fcfaf8;
+    --bg-input: #f8f4f0;
+    --bg-input-hover: #f0ebe6;
+    --bg-selection: rgba(181, 101, 118, 0.10);
     --bg-accent-soft: #f0ebe6;
-    --bg-overlay: rgba(0, 0, 0, 0.4);
-    --bg-surface: #ffffff;
-    --bg-input: #f8fafc;
-    --bg-input-hover: #f1f5f9;
-    --bg-selection: rgba(196, 69, 54, 0.1);
-    --bg-hover: rgba(0, 0, 0, 0.03);
+    --bg-overlay: rgba(26, 20, 16, 0.40);
+
+    /* ═══════════════════════════════════════════════════════════════
+       TEXT — Warm, rich, readable
+       ═══════════════════════════════════════════════════════════════ */
 
     --text-dark: #1a1410;
-    --text-body: #3d342e;
-    --text-soft: #7a6e66;
-    --text-muted: #b5aaa2;
-    --text-dim: #d4ccc6;
+    --text-body: #2c241e;
+    --text-soft: #6b5f56;
+    --text-muted: #a8988e;
+    --text-dim: #c4b8b0;
+    --text-primary: #2c241e;
+    --text-secondary: #6b5f56;
+    --text-disabled: #c4b8b0;
+    --text-inverse: #f5f0eb;
 
-    --border-color: #e2e8f0;
-    --border-color-hover: #cbd5e1;
+    /* ═══════════════════════════════════════════════════════════════
+       BORDERS — Soft, warm
+       ═══════════════════════════════════════════════════════════════ */
 
-    /* ─── Role colors ─── */
-    --primary: #c44536;
-    --primary-dark: #a83528;
-    --primary-light: #e8c9c2;
-    --primary-glow: rgba(196, 69, 54, 0.12);
-    --primary-gradient: linear-gradient(135deg, #c44536, #a83528);
+    --border-light: #e8e0d8;
+    --border-medium: #d4c8be;
+    --border-dark: #b8a89e;
+    --border-focus: #b56576;
+    --border-error: #c45a4a;
+    --border-success: #3a7a5a;
 
-    --secondary: #2d6a4f;
-    --secondary-light: #d4e8df;
-    --secondary-glow: rgba(45, 106, 79, 0.12);
+    /* ═══════════════════════════════════════════════════════════════
+       ROLE COLORS — Admin (Deep Burgundy/Navy)
+       ═══════════════════════════════════════════════════════════════ */
 
-    --gold: #c99a3b;
+    --admin-primary: #2d1f3a;
+    --admin-secondary: #7a5a7a;
+    --admin-accent: #c9a84c;
+    --admin-light: rgba(45, 31, 58, 0.08);
+    --admin-gradient: linear-gradient(135deg, #2d1f3a, #4d2f4a);
+
+    /* ═══════════════════════════════════════════════════════════════
+       ACCOUNTANT ROLE COLORS — Teal/Sage
+       ═══════════════════════════════════════════════════════════════ */
+
+    --accountant-primary: #2d5a4a;
+    --accountant-secondary: #5a8a7a;
+    --accountant-accent: #c9a84c;
+    --accountant-light: rgba(45, 90, 74, 0.08);
+    --accountant-gradient: linear-gradient(135deg, #2d5a4a, #4d7a6a);
+
+    /* ═══════════════════════════════════════════════════════════════
+       TEACHER ROLE COLORS — Plum/Purple
+       ═══════════════════════════════════════════════════════════════ */
+
+    --teacher-primary: #4a2d5a;
+    --teacher-secondary: #8a5a9a;
+    --teacher-accent: #c9a84c;
+    --teacher-light: rgba(74, 45, 90, 0.08);
+    --teacher-gradient: linear-gradient(135deg, #4a2d5a, #6a3d7a);
+
+    /* ═══════════════════════════════════════════════════════════════
+       ACTIVE ROLE (OVERRIDDEN BY BODY CLASS)
+       ═══════════════════════════════════════════════════════════════ */
+
+    --role-primary: var(--admin-primary);
+    --role-secondary: var(--admin-secondary);
+    --role-accent: var(--admin-accent);
+    --role-light: var(--admin-light);
+    --role-gradient: var(--admin-gradient);
+
+    /* ═══════════════════════════════════════════════════════════════
+       SEMANTIC COLORS
+       ═══════════════════════════════════════════════════════════════ */
+
+    --success: #3a7a5a;
+    --success-bg: #dce8e0;
+    --success-border: #3a7a5a;
+    --warning: #b8983a;
+    --warning-bg: #f0e8d0;
+    --warning-border: #b8983a;
+    --danger: #c45a4a;
+    --danger-bg: #f0e0dc;
+    --danger-border: #c45a4a;
+    --info: #4a7a8a;
+    --info-bg: #dce8ec;
+    --info-border: #4a7a8a;
+
+    /* ═══════════════════════════════════════════════════════════════
+       ACCENT COLORS
+       ═══════════════════════════════════════════════════════════════ */
+
+    --gold: #c9a84c;
     --gold-light: #f5e6c8;
-    --gold-glow: rgba(201, 154, 59, 0.12);
-
+    --gold-glow: rgba(201, 154, 59, 0.10);
     --rose: #b56576;
     --rose-light: #f0dde2;
-    --rose-glow: rgba(181, 101, 118, 0.12);
-
+    --rose-glow: rgba(181, 101, 118, 0.10);
     --teal: #3a7d7a;
     --teal-light: #d4e8e7;
-    --teal-glow: rgba(58, 125, 122, 0.12);
+    --teal-glow: rgba(58, 125, 122, 0.10);
+    --purple: #7a5a9a;
+    --purple-light: #e8dcec;
+    --emerald: #3a8a6a;
+    --emerald-light: #dce8e0;
+    --cyan: #3a7a8a;
+    --cyan-light: #dce8ec;
 
-    --ink: #2c2c3a;
-    --ink-light: #e8e6ed;
+    /* ═══════════════════════════════════════════════════════════════
+       GRADE COLORS
+       ═══════════════════════════════════════════════════════════════ */
 
-    --purple: #7c5cfc;
-    --purple-light: #e8e2fc;
+    --grade-aplus: #3a7a5a;
+    --grade-a: #5a9a7a;
+    --grade-b: #6a8aba;
+    --grade-c: #c9a84c;
+    --grade-d: #c48a3a;
+    --grade-f: #c45a4a;
 
-    --emerald: #10b981;
-    --emerald-light: #6ee7b7;
+    /* ═══════════════════════════════════════════════════════════════
+       SHADOWS
+       ═══════════════════════════════════════════════════════════════ */
 
-    --cyan: #06b6d4;
-    --cyan-light: #67e8f9;
-
-    /* ─── Status colors ─── */
-    --success: #10b981;
-    --success-light: #d1fae5;
-    --warning: #f59e0b;
-    --warning-light: #fef3c7;
-    --danger: #ef4444;
-    --danger-light: #fee2e2;
-    --info: #0ea5e9;
-    --info-light: #dbeafe;
-
-    /* ─── Shadows ─── */
+    --shadow-none: none;
+    --shadow-sm: 0 1px 2px rgba(26, 20, 16, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(26, 20, 16, 0.08), 0 2px 4px -1px rgba(26, 20, 16, 0.04);
+    --shadow-lg: 0 10px 15px -3px rgba(26, 20, 16, 0.08), 0 4px 6px -2px rgba(26, 20, 16, 0.04);
+    --shadow-xl: 0 20px 25px -5px rgba(26, 20, 16, 0.08), 0 10px 10px -5px rgba(26, 20, 16, 0.04);
+    --shadow-2xl: 0 25px 50px -12px rgba(26, 20, 16, 0.15);
+    --shadow-inner: inset 0 2px 4px 0 rgba(26, 20, 16, 0.04);
+    --shadow-focus: 0 0 0 3px rgba(181, 101, 118, 0.12);
     --shadow-card: 0 2px 20px rgba(26, 20, 16, 0.06);
-    --shadow-hover: 0 8px 40px rgba(26, 20, 16, 0.10);
-    --shadow-overlay: 0 20px 60px rgba(0, 0, 0, 0.3);
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+    --shadow-hover: 0 8px 40px rgba(26, 20, 16, 0.08);
+    --shadow-overlay: 0 20px 60px rgba(10, 8, 6, 0.25);
 
-    /* ─── Sidebar ─── */
-    --sidebar-bg: #ffffff;
-    --sidebar-border: #e2e8f0;
-    --sidebar-hover: #f1f5f9;
+    /* ═══════════════════════════════════════════════════════════════
+       SIDEBAR — Light, warm
+       ═══════════════════════════════════════════════════════════════ */
+
+    --sidebar-bg: #fcfaf8;
+    --sidebar-border: #e8e0d8;
+    --sidebar-hover: #f5f0eb;
     --sidebar-text: #1a1410;
-    --sidebar-text-muted: #7a6e66;
+    --sidebar-text-muted: #6b5f56;
 
-    /* ─── Topbar ─── */
-    --topbar-bg: #ffffff;
-    --topbar-border: #e2e8f0;
+    /* ═══════════════════════════════════════════════════════════════
+       TOPBAR — Light, warm
+       ═══════════════════════════════════════════════════════════════ */
+
+    --topbar-bg: #fcfaf8;
+    --topbar-border: #e8e0d8;
     --topbar-text: #1a1410;
-    --topbar-text-muted: #7a6e66;
-    --topbar-text-dim: #b5aaa2;
-    --topbar-hover: #f1f5f9;
+    --topbar-text-muted: #6b5f56;
+    --topbar-text-dim: #a8988e;
+    --topbar-hover: #f5f0eb;
 
-    /* ─── Scrollbar ─── */
+    /* ═══════════════════════════════════════════════════════════════
+       SCROLLBAR
+       ═══════════════════════════════════════════════════════════════ */
+
     --scrollbar-track: #f5f0eb;
-    --scrollbar-thumb: #b5aaa2;
+    --scrollbar-thumb: #c4b8b0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   LIGHT MODE — COMPONENT OVERRIDES
+   ═══════════════════════════════════════════════════════════════════ */
+
+[data-theme="light"] {
+    /* ─── CARDS ───────────────────────────────────────────────────── */
+
+    .stat-card,
+    .dash-card {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+    }
+
+    .stat-card::before {
+        background: var(--role-primary);
+    }
+
+    .stat-card:hover {
+        box-shadow: var(--shadow-md);
+    }
+
+    .stat-value {
+        color: var(--text-dark);
+    }
+
+    .stat-label {
+        color: var(--text-soft);
+    }
+
+    /* ─── TABLES ──────────────────────────────────────────────────── */
+
+    .data-table thead tr {
+        background: var(--bg-tertiary);
+    }
+
+    .data-table th {
+        color: var(--text-secondary);
+        border-bottom-color: var(--border-light);
+    }
+
+    .data-table td {
+        border-bottom-color: var(--border-light);
+        color: var(--text-body);
+    }
+
+    .data-table tbody tr:hover {
+        background: var(--bg-hover);
+    }
+
+    .data-table .alt-row {
+        background: var(--bg-tertiary);
+    }
+
+    /* ─── FORMS ───────────────────────────────────────────────────── */
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        background: var(--bg-input);
+        border-color: var(--border-medium);
+        color: var(--text-body);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: var(--role-primary);
+        box-shadow: var(--shadow-focus);
+    }
+
+    .form-group label {
+        color: var(--text-secondary);
+    }
+
+    .form-group input:disabled,
+    .form-group select:disabled,
+    .form-group textarea:disabled {
+        background: var(--bg-disabled);
+        color: var(--text-disabled);
+    }
+
+    /* ─── MODALS ──────────────────────────────────────────────────── */
+
+    .modal-overlay {
+        background: var(--bg-overlay);
+    }
+
+    .modal {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+    }
+
+    .modal-header {
+        border-bottom-color: var(--border-light);
+    }
+
+    .modal-header h3,
+    .modal-header h2,
+    .modal-header h4 {
+        color: var(--text-dark);
+    }
+
+    .modal-footer {
+        border-top-color: var(--border-light);
+    }
+
+    .modal-close {
+        color: var(--text-muted);
+    }
+
+    .modal-close:hover {
+        color: var(--text-body);
+        background: var(--bg-hover);
+    }
+
+    /* ─── DROPDOWNS ───────────────────────────────────────────────── */
+
+    .dropdown-menu {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+    }
+
+    .dropdown-item {
+        color: var(--text-secondary);
+    }
+
+    .dropdown-item:hover {
+        background: var(--bg-hover);
+        color: var(--text-body);
+    }
+
+    .dropdown-header {
+        background: var(--bg-tertiary);
+        color: var(--text-muted);
+    }
+
+    .dropdown-divider {
+        background: var(--border-light);
+    }
+
+    /* ─── TOASTS ──────────────────────────────────────────────────── */
+
+    .toast {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+        color: var(--text-body);
+    }
+
+    .toast .msg {
+        color: var(--text-body);
+    }
+
+    .toast .msg strong {
+        color: var(--text-dark);
+    }
+
+    .toast .close {
+        color: var(--text-muted);
+    }
+
+    .toast .close:hover {
+        color: var(--text-body);
+    }
+
+    /* ─── SIDEBAR ─────────────────────────────────────────────────── */
+
+    .sidebar {
+        background: var(--sidebar-bg);
+        border-right-color: var(--sidebar-border);
+    }
+
+    .sidebar-header {
+        border-bottom-color: var(--sidebar-border);
+    }
+
+    .sidebar-school-name {
+        color: var(--sidebar-text);
+    }
+
+    .sidebar-school-name small {
+        color: var(--sidebar-text-muted);
+    }
+
+    .sidebar-footer {
+        border-top-color: var(--sidebar-border);
+    }
+
+    .sidebar-user-name {
+        color: var(--sidebar-text);
+    }
+
+    .sidebar-user-role {
+        color: var(--sidebar-text-muted);
+    }
+
+    .nav-item {
+        color: var(--text-secondary);
+    }
+
+    .nav-item:hover {
+        background: var(--bg-hover);
+        color: var(--text-body);
+    }
+
+    .nav-item.active {
+        background: var(--role-light);
+        color: var(--role-primary);
+    }
+
+    .nav-section-title {
+        color: var(--text-muted);
+    }
+
+    .nav-section-title:hover {
+        color: var(--text-secondary);
+    }
+
+    .nav-section-arrow {
+        color: var(--text-muted);
+    }
+
+    /* ─── TOPBAR ──────────────────────────────────────────────────── */
+
+    .topbar {
+        background: var(--topbar-bg);
+        border-bottom-color: var(--topbar-border);
+    }
+
+    .page-title {
+        color: var(--topbar-text);
+    }
+
+    .page-subtitle {
+        color: var(--topbar-text-dim);
+    }
+
+    .user-dropdown {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+    }
+
+    .user-name {
+        color: var(--text-body);
+    }
+
+    .menu-toggle {
+        color: var(--text-muted);
+    }
+
+    .menu-toggle:hover {
+        background: var(--bg-hover);
+        color: var(--text-body);
+    }
+
+    /* ─── TERM PROGRESS ───────────────────────────────────────────── */
+
+    .term-progress-bar {
+        background: var(--bg-card);
+        border-bottom-color: var(--border-light);
+    }
+
+    .progress-label {
+        color: var(--text-muted);
+    }
+
+    .progress-label strong {
+        color: var(--text-body);
+    }
+
+    .progress-track {
+        background: var(--bg-tertiary);
+    }
+
+    .progress-text {
+        color: var(--text-muted);
+    }
+
+    .progress-days {
+        color: var(--text-muted);
+    }
+
+    .progress-days strong {
+        color: var(--role-primary);
+    }
+
+    /* ─── BADGES ──────────────────────────────────────────────────── */
+
+    .badge-neutral {
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+    }
+
+    .badge-light {
+        background: var(--bg-card);
+        color: var(--text-body);
+        border-color: var(--border-light);
+    }
+
+    .badge-success {
+        background: var(--success-bg);
+        color: #065f46;
+    }
+
+    .badge-warning {
+        background: var(--warning-bg);
+        color: #92400e;
+    }
+
+    .badge-danger {
+        background: var(--danger-bg);
+        color: #991b1b;
+    }
+
+    .badge-info {
+        background: var(--info-bg);
+        color: #1a4a5a;
+    }
+
+    .badge-primary {
+        background: var(--role-light);
+        color: var(--role-primary);
+    }
+
+    /* ─── GRADE BADGES ────────────────────────────────────────────── */
+
+    .grade-Ap {
+        background: #dce8e0;
+        color: #065f46;
+    }
+
+    .grade-A {
+        background: #dce8e0;
+        color: #065f46;
+    }
+
+    .grade-B {
+        background: #e8e6ed;
+        color: #2a1a4a;
+    }
+
+    .grade-C {
+        background: #f0e8d0;
+        color: #92400e;
+    }
+
+    .grade-D {
+        background: #f0e0d0;
+        color: #9a4a1a;
+    }
+
+    .grade-F {
+        background: #f0e0dc;
+        color: #991b1b;
+    }
+
+    /* ─── ALERTS ──────────────────────────────────────────────────── */
+
+    .alert-info {
+        background: var(--info-bg);
+        border-color: var(--info-border);
+        color: #1a4a5a;
+    }
+
+    .alert-success {
+        background: var(--success-bg);
+        border-color: var(--success-border);
+        color: #065f46;
+    }
+
+    .alert-warning {
+        background: var(--warning-bg);
+        border-color: var(--warning-border);
+        color: #92400e;
+    }
+
+    .alert-danger {
+        background: var(--danger-bg);
+        border-color: var(--danger-border);
+        color: #991b1b;
+    }
+
+    /* ─── SKELETON LOADERS ───────────────────────────────────────── */
+
+    .skeleton {
+        background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-card) 50%, var(--bg-tertiary) 75%);
+        background-size: 200% 100%;
+    }
+
+    .skeleton-dark {
+        background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+        background-size: 200% 100%;
+    }
+
+    .skeleton-line {
+        background: var(--bg-tertiary);
+    }
+
+    .skeleton-avatar {
+        background: var(--bg-tertiary);
+    }
+
+    .skeleton-card {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+    }
+
+    .skeleton-grid-item {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+    }
+
+    .skeleton-list-item {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+    }
+
+    .skeleton-chart {
+        background: var(--bg-tertiary);
+    }
+
+    .skeleton-widget {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+    }
+
+    /* ─── QUICK ACTIONS ───────────────────────────────────────────── */
+
+    .quick-btn {
+        background: var(--bg-tertiary);
+        border-color: var(--border-medium);
+    }
+
+    .quick-btn:hover {
+        background: var(--role-light);
+        border-color: var(--role-primary);
+    }
+
+    .quick-btn .qb-title {
+        color: var(--text-body);
+    }
+
+    .quick-btn .qb-sub {
+        color: var(--text-muted);
+    }
+
+    /* ─── DASHBOARD ────────────────────────────────────────────────── */
+
+    .dashboard-greeting {
+        background: var(--role-light);
+    }
+
+    .dashboard-greeting h2 {
+        color: var(--text-dark);
+    }
+
+    /* ─── ATTENDANCE ───────────────────────────────────────────────── */
+
+    .attendance-summary-card {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+    }
+
+    .attendance-date-picker input[type="date"] {
+        background: var(--bg-input);
+        border-color: var(--border-medium);
+        color: var(--text-body);
+    }
+
+    .attendance-date-picker input[type="date"]:focus {
+        border-color: var(--role-primary);
+    }
+
+    .attendance-status.present {
+        background: var(--success-bg);
+        color: var(--success);
+    }
+
+    .attendance-status.absent {
+        background: var(--danger-bg);
+        color: var(--danger);
+    }
+
+    .attendance-status.late {
+        background: var(--warning-bg);
+        color: var(--warning);
+    }
+
+    .attendance-status.excused {
+        background: var(--info-bg);
+        color: var(--info);
+    }
+
+    /* ─── FEE CARDS ────────────────────────────────────────────────── */
+
+    .fee-card {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+    }
+
+    .fee-card-amount {
+        color: var(--role-primary);
+    }
+
+    .fee-card-label {
+        color: var(--text-muted);
+    }
+
+    /* ─── PAYMENT FORM ────────────────────────────────────────────── */
+
+    .payment-form {
+        background: var(--bg-tertiary);
+    }
+
+    .payment-category-item {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+    }
+
+    .payment-category-item.selected {
+        border-color: var(--role-primary);
+        background: var(--role-light);
+    }
+
+    /* ─── SETTINGS ─────────────────────────────────────────────────── */
+
+    .setting-card {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+    }
+
+    .setting-card:hover {
+        border-color: var(--role-primary);
+    }
+
+    .setting-card .setting-desc {
+        color: var(--text-muted);
+    }
+
+    .logo-preview {
+        background: var(--bg-tertiary);
+        border-color: var(--border-medium);
+    }
+
+    /* ─── REPORT CARDS ────────────────────────────────────────────── */
+
+    .report-card {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+    }
+
+    .report-header {
+        background: var(--role-primary);
+    }
+
+    .report-header-text h2,
+    .report-header-text h3,
+    .report-header-text p {
+        color: var(--text-inverse);
+    }
+
+    .report-info-item {
+        border-color: var(--border-light);
+    }
+
+    .report-info-item strong {
+        color: var(--text-muted);
+    }
+
+    .report-info-item span {
+        color: var(--text-body);
+    }
+
+    .report-subjects th {
+        background: var(--bg-tertiary);
+        color: var(--text-body);
+        border-color: var(--border-light);
+    }
+
+    .report-subjects td {
+        border-color: var(--border-light);
+        color: var(--text-body);
+    }
+
+    .report-footer {
+        background: var(--bg-tertiary);
+        color: var(--text-muted);
+        border-top-color: var(--border-light);
+    }
+
+    .report-footer .decision-banner.pass {
+        background: var(--success-bg);
+        color: #065f46;
+    }
+
+    .report-footer .decision-banner.remedial {
+        background: var(--warning-bg);
+        color: #92400e;
+    }
+
+    .report-footer .decision-banner.fail {
+        background: var(--danger-bg);
+        color: #991b1b;
+    }
+
+    .report-qr-block {
+        background: var(--bg-tertiary);
+        border-top-color: var(--border-light);
+    }
+
+    .report-qr-block img {
+        border-color: var(--border-medium);
+    }
+
+    /* ─── RECEIPT PREVIEW ─────────────────────────────────────────── */
+
+    .receipt-preview {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+        color: var(--text-body);
+    }
+
+    /* ─── TOGGLE / CHECKBOX ───────────────────────────────────────── */
+
+    .toggle-track {
+        background: var(--bg-tertiary);
+        border-color: var(--border-medium);
+    }
+
+    .toggle-track.active {
+        background: var(--role-primary);
+    }
+
+    /* ─── SCROLLBAR ────────────────────────────────────────────────── */
+
+    ::-webkit-scrollbar-track {
+        background: var(--scrollbar-track);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--scrollbar-thumb);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--border-dark);
+    }
+
+    ::-webkit-scrollbar-corner {
+        background: var(--scrollbar-track);
+    }
+
+    /* ─── SELECTION ────────────────────────────────────────────────── */
+
+    ::selection {
+        background: var(--role-primary);
+        color: var(--text-inverse);
+    }
+
+    ::-moz-selection {
+        background: var(--role-primary);
+        color: var(--text-inverse);
+    }
+
+    /* ─── LOGIN ────────────────────────────────────────────────────── */
+
+    .login-card {
+        background: rgba(252, 250, 248, 0.88);
+        border-color: rgba(200, 190, 180, 0.40);
+    }
+
+    .login-field input,
+    .login-field select {
+        background: rgba(252, 250, 248, 0.70);
+        border-color: rgba(200, 190, 180, 0.40);
+        color: var(--text-body);
+    }
+
+    .login-field input:focus,
+    .login-field select:focus {
+        border-color: var(--role-primary);
+        box-shadow: 0 0 0 3px rgba(181, 101, 118, 0.10);
+    }
+
+    .login-subtitle {
+        color: var(--text-muted);
+    }
+
+    .login-alert {
+        background: var(--danger-bg);
+        color: var(--danger);
+    }
+
+    /* ─── MARKS ENTRY ──────────────────────────────────────────────── */
+
+    .marks-input {
+        background: var(--bg-input);
+        border-color: var(--border-medium);
+        color: var(--text-body);
+    }
+
+    .marks-input:focus {
+        border-color: var(--role-primary);
+    }
+
+    .marks-input:disabled {
+        background: var(--bg-disabled);
+        color: var(--text-disabled);
+    }
+
+    .assessment-card {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+    }
+
+    .assessment-card-header {
+        background: var(--bg-tertiary);
+        border-bottom-color: var(--border-light);
+    }
+
+    /* ─── TIMETABLE ────────────────────────────────────────────────── */
+
+    .timetable-slot {
+        background: var(--role-light);
+        border-left-color: var(--role-primary);
+    }
+
+    .timetable-break {
+        background: var(--bg-tertiary);
+        color: var(--text-muted);
+    }
+
+    .timetable-table th {
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+    }
+
+    .timetable-table td {
+        border-color: var(--border-light);
+    }
+
+    /* ─── TEACHER CARD ────────────────────────────────────────────── */
+
+    .teacher-card {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+    }
+
+    .teacher-card:hover {
+        border-color: var(--border-medium);
+    }
+
+    .teacher-avatar {
+        background: var(--bg-tertiary);
+    }
+
+    .teacher-details {
+        color: var(--text-muted);
+    }
+
+    /* ─── ANALYTICS ────────────────────────────────────────────────── */
+
+    .analytics-filters {
+        background: var(--bg-tertiary);
+    }
+
+    .analytics-chart-container {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+    }
+
+    .grade-bar-track {
+        background: var(--bg-tertiary);
+    }
+
+    /* ─── NOTIFICATIONS ───────────────────────────────────────────── */
+
+    .notification-item {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+    }
+
+    .notification-item.unread {
+        border-left-color: var(--role-primary);
+        background: var(--role-light);
+    }
+
+    .notification-item:hover {
+        border-color: var(--border-medium);
+    }
+
+    .notification-header {
+        color: var(--text-body);
+    }
+
+    .notification-time {
+        color: var(--text-muted);
+    }
+
+    .notification-body {
+        border-top-color: var(--border-light);
+        color: var(--text-secondary);
+    }
+
+    .notification-actions {
+        border-top-color: var(--border-light);
+    }
+
+    .notification-filter {
+        background: var(--bg-tertiary);
+    }
+
+    /* ─── ANNOUNCEMENTS ───────────────────────────────────────────── */
+
+    .announcement-form {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+    }
+
+    .announcement-preview {
+        background: var(--bg-tertiary);
+    }
+
+    /* ─── REMINDERS ────────────────────────────────────────────────── */
+
+    .reminder-item {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+    }
+
+    .reminder-item:hover {
+        border-color: var(--border-medium);
+    }
+
+    .reminder-item.completed {
+        opacity: 0.60;
+    }
+
+    /* ─── BULK IMPORT ─────────────────────────────────────────────── */
+
+    .import-preview-row.valid {
+        border-left-color: var(--success);
+    }
+
+    .import-preview-row.invalid {
+        border-left-color: var(--danger);
+        opacity: 0.60;
+    }
+
+    /* ─── ERROR STATES ────────────────────────────────────────────── */
+
+    .form-group .is-invalid {
+        border-color: var(--danger);
+    }
+
+    .form-group .is-invalid:focus {
+        box-shadow: 0 0 0 3px rgba(196, 90, 74, 0.10);
+    }
+
+    .invalid-feedback {
+        color: var(--danger);
+    }
+
+    .form-group .is-valid {
+        border-color: var(--success);
+    }
+
+    .form-group .is-valid:focus {
+        box-shadow: 0 0 0 3px rgba(58, 122, 90, 0.10);
+    }
+
+    .valid-feedback {
+        color: var(--success);
+    }
+
+    /* ─── OTHER COMPONENTS ────────────────────────────────────────── */
+
+    .field-hint {
+        color: var(--text-muted);
+    }
+
+    .result-count {
+        color: var(--text-muted);
+    }
+
+    .page-btn {
+        background: var(--bg-card);
+        border-color: var(--border-medium);
+        color: var(--text-body);
+    }
+
+    .page-btn:hover {
+        background: var(--bg-hover);
+        border-color: var(--role-primary);
+    }
+
+    .page-btn.active {
+        background: var(--role-primary);
+        color: var(--text-inverse);
+        border-color: var(--role-primary);
+    }
+
+    .page-btn.disabled {
+        opacity: 0.50;
+    }
+
+    .pagination-ellipsis {
+        color: var(--text-muted);
+    }
+
+    .tab-btn {
+        color: var(--text-muted);
+    }
+
+    .tab-btn:hover {
+        color: var(--text-body);
+        background: var(--bg-hover);
+    }
+
+    .tab-btn.active {
+        color: var(--role-primary);
+        border-bottom-color: var(--role-primary);
+    }
+
+    .tab-content {
+        color: var(--text-body);
+    }
+
+    /* ─── FILTERS BAR ─────────────────────────────────────────────── */
+
+    .filters-bar {
+        background: var(--bg-tertiary);
+    }
+
+    .filters-bar select,
+    .filters-bar input {
+        background: var(--bg-input);
+        border-color: var(--border-medium);
+        color: var(--text-body);
+    }
+
+    .filters-bar select:focus,
+    .filters-bar input:focus {
+        border-color: var(--role-primary);
+    }
+
+    /* ─── PAGINATION ───────────────────────────────────────────────── */
+
+    .pagination .page-btn {
+        background: var(--bg-card);
+        border-color: var(--border-medium);
+        color: var(--text-body);
+    }
+
+    .pagination .page-btn:hover {
+        background: var(--bg-hover);
+        border-color: var(--role-primary);
+    }
+
+    .pagination .page-btn.active {
+        background: var(--role-primary);
+        color: var(--text-inverse);
+        border-color: var(--role-primary);
+    }
+
+    /* ─── BUTTON OVERRIDES ────────────────────────────────────────── */
+
+    .btn-outline {
+        background: transparent;
+        border-color: var(--border-medium);
+        color: var(--text-body);
+    }
+
+    .btn-outline:hover {
+        background: var(--bg-hover);
+        border-color: var(--role-primary);
+    }
+
+    .btn-ghost {
+        background: transparent;
+        color: var(--text-secondary);
+    }
+
+    .btn-ghost:hover {
+        background: var(--bg-hover);
+        color: var(--text-body);
+    }
+
+    /* ─── EMPTY STATE ─────────────────────────────────────────────── */
+
+    .empty-state {
+        background: var(--bg-card);
+        border-color: var(--border-light);
+    }
+
+    .empty-state-title {
+        color: var(--text-body);
+    }
+
+    .empty-state-message {
+        color: var(--text-muted);
+    }
+
+    .filter-empty-state {
+        background: var(--bg-tertiary);
+    }
+
+    .filter-empty-state-title {
+        color: var(--text-body);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   LIGHT MODE — PRINT OVERRIDES
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    [data-theme="light"] .report-card {
+        background: #fcfaf8;
+        border-color: #d4c8be;
+    }
+
+    [data-theme="light"] .report-header {
+        background: #2d1f3a !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    [data-theme="light"] .report-summary {
+        background: #2d1f3a !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    [data-theme="light"] .data-table thead tr {
+        background: #2d1f3a !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    [data-theme="light"] .data-table th {
+        color: #f5f0eb !important;
+    }
+
+    [data-theme="light"] .data-table td {
+        color: #2c241e !important;
+    }
+
+    [data-theme="light"] .badge {
+        border: 1px solid #b8a89e;
+        background: #f0ebe6 !important;
+        color: #2c241e !important;
+    }
 }

@@ -1,0 +1,1242 @@
+/* ═══════════════════════════════════════════════════════════════════
+   TABLET RESPONSIVE — 769px to 1024px
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: Styles for tablet devices (iPad, Galaxy Tab, etc.)
+   Adjusts layout, spacing, font sizes, and component sizing.
+   No pure white (#FFFFFF), no pure black (#000000).
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    /* ═══════════════════════════════════════════════════════════════
+       LAYOUT — Container & Grid Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .container {
+        padding: 0 var(--md, 16px);
+        max-width: 100%;
+    }
+
+    .container-fluid {
+        padding: 0 var(--md, 16px);
+    }
+
+    /* ── Grid System ──────────────────────────────────────────────── */
+
+    .grid-cols-4,
+    .grid-cols-5,
+    .grid-cols-6,
+    .grid-cols-7,
+    .grid-cols-8,
+    .grid-cols-9,
+    .grid-cols-10,
+    .grid-cols-11,
+    .grid-cols-12 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .grid-cols-2 {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .grid-cols-3 {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    /* ── Stats Grid ────────────────────────────────────────────────── */
+
+    .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--sm, 8px);
+    }
+
+    .stats-row-cols-6 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .stats-row-cols-5 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .stats-row-cols-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stat-grid-cols-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stat-grid-cols-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* ── Two-Column Layout ─────────────────────────────────────────── */
+
+    .two-col {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--md, 16px);
+    }
+
+    .three-col {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--md, 16px);
+    }
+
+    .four-col {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--md, 16px);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       SIDEBAR — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .sidebar {
+        width: 240px;
+        min-width: 240px;
+    }
+
+    .sidebar-header {
+        padding: var(--sm, 8px) var(--md, 16px);
+    }
+
+    .sidebar .school-brand .logo-box {
+        width: 38px;
+        height: 38px;
+        font-size: 18px;
+    }
+
+    .sidebar .brand-name {
+        font-size: 12px;
+    }
+
+    .sidebar .brand-sub {
+        font-size: 9px;
+    }
+
+    .sidebar-nav {
+        padding: 4px 6px 8px;
+    }
+
+    .nav-section-label {
+        padding: 8px 8px 2px;
+        font-size: 8px;
+        letter-spacing: 1px;
+    }
+
+    .nav-item {
+        padding: 6px 8px;
+        font-size: 12px;
+        gap: 8px;
+    }
+
+    .nav-item i {
+        font-size: 13px;
+        width: 16px;
+    }
+
+    .nav-group-header {
+        padding: 6px 8px;
+        font-size: 12px;
+        gap: 8px;
+    }
+
+    .nav-group-header i,
+    .nav-group-header svg {
+        width: 16px;
+        height: 16px;
+        font-size: 14px;
+    }
+
+    .nav-chevron {
+        font-size: 9px;
+    }
+
+    .nav-children {
+        margin-left: 16px;
+        padding-left: 8px;
+    }
+
+    .nav-child {
+        padding: 4px 6px;
+        font-size: 11px;
+        gap: 6px;
+    }
+
+    .nav-child .child-dot {
+        width: 3px;
+        height: 3px;
+    }
+
+    .child-badge {
+        font-size: 8px;
+        padding: 0 5px;
+        line-height: 14px;
+    }
+
+    .user-profile {
+        padding: 8px 10px;
+        gap: 8px;
+    }
+
+    .user-profile .user-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 10px;
+    }
+
+    .user-profile .user-name {
+        font-size: 11px;
+    }
+
+    .user-profile .user-role {
+        font-size: 9px;
+    }
+
+    .user-profile .logout-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 12px;
+    }
+
+    /* ── Badge Row ──────────────────────────────────────────────────── */
+
+    .badge-row {
+        gap: 4px;
+        margin-top: 6px;
+    }
+
+    .badge-pill {
+        padding: 2px 8px 2px 6px;
+        font-size: 9px;
+    }
+
+    .badge-pill .dot {
+        width: 5px;
+        height: 5px;
+    }
+
+    .badge-pill .locked {
+        font-size: 7px;
+        width: 12px;
+        height: 12px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       TOPBAR — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .topbar {
+        padding: 8px 16px 6px;
+        height: auto;
+        min-height: 56px;
+    }
+
+    .topbar-row1 {
+        min-height: 36px;
+        gap: 12px;
+    }
+
+    .topbar-left {
+        gap: 10px;
+    }
+
+    .page-title {
+        font-size: 15px;
+    }
+
+    .page-subtitle {
+        font-size: 10px;
+    }
+
+    .hamburger-btn {
+        display: none;
+    }
+
+    .date-display {
+        padding: 3px 10px 3px 8px;
+    }
+
+    .date-display .date-text {
+        font-size: 12px;
+    }
+
+    .date-display .time-text {
+        font-size: 11px;
+    }
+
+    .date-display .divider {
+        height: 14px;
+    }
+
+    /* ── Topbar Right ──────────────────────────────────────────────── */
+
+    .icon-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 14px;
+    }
+
+    .icon-btn .notif-count {
+        font-size: 8px;
+        min-width: 16px;
+        height: 16px;
+        top: -3px;
+        right: -3px;
+    }
+
+    .user-menu {
+        padding: 2px 10px 2px 2px;
+    }
+
+    .user-menu .user-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 10px;
+    }
+
+    .user-menu .user-info .name {
+        font-size: 11px;
+        max-width: 80px;
+    }
+
+    .user-menu .user-info .role {
+        font-size: 9px;
+    }
+
+    .user-menu .chevron {
+        font-size: 9px;
+    }
+
+    .install-btn {
+        font-size: 11px;
+        padding: 4px 12px 4px 10px;
+    }
+
+    .install-btn i {
+        font-size: 13px;
+    }
+
+    /* ── Dropdown ───────────────────────────────────────────────────── */
+
+    .dropdown {
+        min-width: 190px;
+    }
+
+    .dropdown-item {
+        padding: 6px 14px;
+        font-size: 12px;
+        gap: 8px;
+    }
+
+    .dropdown-item .icon {
+        font-size: 13px;
+        width: 18px;
+    }
+
+    .dropdown-header {
+        padding: 8px 14px 6px;
+        gap: 10px;
+    }
+
+    .dropdown-header .user-avatar {
+        width: 30px;
+        height: 30px;
+        font-size: 10px;
+    }
+
+    .dropdown-header .user-info .name {
+        font-size: 12px;
+    }
+
+    .dropdown-header .user-info .role {
+        font-size: 9px;
+    }
+
+    /* ── Topbar Row 2 ──────────────────────────────────────────────── */
+
+    .topbar-row2 {
+        gap: 10px;
+        margin-top: 4px;
+        padding-top: 6px;
+        flex-wrap: wrap;
+    }
+
+    .year-badge {
+        font-size: 11px;
+    }
+
+    .year-badge .status-dot {
+        width: 5px;
+        height: 5px;
+    }
+
+    .term-badge {
+        font-size: 11px;
+        padding: 2px 10px;
+    }
+
+    .progress-container {
+        min-width: 100px;
+        max-width: 180px;
+    }
+
+    .progress-container .progress-text {
+        font-size: 10px;
+        min-width: 30px;
+    }
+
+    .phase-badge {
+        font-size: 9px;
+        padding: 2px 10px;
+    }
+
+    .days-remaining {
+        font-size: 10px;
+    }
+
+    .days-remaining i {
+        font-size: 11px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       CARDS & STATS — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .card {
+        height: 280px;
+        padding: 18px 16px 16px;
+    }
+
+    .card-value {
+        font-size: 28px;
+    }
+
+    .card-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 22px;
+    }
+
+    .card-label {
+        font-size: 12px;
+    }
+
+    .card-trend {
+        font-size: 11px;
+        padding: 3px 10px;
+    }
+
+    .stat-card {
+        padding: var(--md, 16px);
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+    }
+
+    .stat-icon {
+        font-size: 1.6rem;
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+    }
+
+    .dash-card-header {
+        padding: var(--sm, 8px) var(--md, 16px);
+    }
+
+    .dash-card-title {
+        font-size: 0.85rem;
+    }
+
+    .dash-card-body {
+        padding: var(--md, 16px);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       TABLES — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .data-table {
+        font-size: 0.8rem;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: var(--sm, 8px) var(--md, 12px);
+    }
+
+    .data-table th {
+        font-size: 0.65rem;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    /* ── Class Register ────────────────────────────────────────────── */
+
+    .cr-table {
+        font-size: 0.72rem;
+        min-width: 700px;
+    }
+
+    .cr-table th,
+    .cr-table td {
+        padding: 4px 6px;
+    }
+
+    .cr-col-rank {
+        width: 36px;
+        min-width: 36px;
+        max-width: 36px;
+    }
+
+    .cr-col-name {
+        width: 130px;
+        min-width: 130px;
+        max-width: 130px;
+        font-size: 0.72rem;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       FORMS — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--md, 16px);
+    }
+
+    .form-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .form-row-3 {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .form-row-4 {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+        min-height: 36px;
+    }
+
+    .form-group label {
+        font-size: 0.75rem;
+    }
+
+    .filters-bar {
+        padding: var(--sm, 8px) var(--md, 12px);
+        gap: var(--sm, 8px);
+    }
+
+    .filters-bar select,
+    .filters-bar input {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+        min-width: 100px;
+    }
+
+    .filters-bar .flex-1 {
+        min-width: 140px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       BUTTONS — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .btn {
+        padding: 6px 14px;
+        font-size: 0.8rem;
+        min-height: 32px;
+    }
+
+    .btn-sm {
+        padding: 4px 10px;
+        font-size: 0.7rem;
+        min-height: 26px;
+    }
+
+    .btn-lg {
+        padding: 10px 22px;
+        font-size: 0.9rem;
+        min-height: 40px;
+    }
+
+    .btn-icon {
+        padding: 6px;
+        width: 32px;
+        height: 32px;
+    }
+
+    .btn-icon i,
+    .btn-icon svg {
+        font-size: 14px;
+    }
+
+    .btn-group {
+        gap: var(--sm, 8px);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       MODALS — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .modal {
+        max-width: 80%;
+    }
+
+    .modal-lg {
+        max-width: 90%;
+    }
+
+    .modal-header {
+        padding: var(--md, 16px) var(--lg, 24px);
+    }
+
+    .modal-header h3,
+    .modal-header h2,
+    .modal-header h4 {
+        font-size: 1.1rem;
+    }
+
+    .modal-body {
+        padding: var(--md, 16px) var(--lg, 24px);
+    }
+
+    .modal-footer {
+        padding: var(--sm, 8px) var(--lg, 24px);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       CHARTS — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .chart-container {
+        min-height: 250px;
+    }
+
+    .chart-card .chart-container {
+        height: 180px;
+    }
+
+    .chart-card .chart-container.tall {
+        height: 200px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       FINANCE — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .finance-hub .hub-grid {
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        gap: 6px;
+    }
+
+    .finance-hub .hub-grid .mini-card {
+        padding: 8px 10px;
+    }
+
+    .finance-hub .hub-grid .mini-card .value {
+        font-size: 14px;
+    }
+
+    .finance-hub .hub-grid .mini-card .label {
+        font-size: 8px;
+    }
+
+    .fee-chart-card .chart-container {
+        height: 170px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       WIDGETS — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .widgets-row {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--md, 16px);
+    }
+
+    .widget-card {
+        padding: var(--sm, 8px) var(--md, 12px);
+    }
+
+    .widget-card .widget-head .title {
+        font-size: 12px;
+    }
+
+    .performer-item {
+        padding: 3px 0;
+    }
+
+    .performer-item .info .name {
+        font-size: 11px;
+    }
+
+    .performer-item .score {
+        font-size: 11px;
+    }
+
+    .risk-item {
+        padding: 3px 0;
+    }
+
+    .risk-item .info .name {
+        font-size: 11px;
+    }
+
+    .risk-item .score {
+        font-size: 11px;
+    }
+
+    .activity-item {
+        padding: 4px 0;
+        gap: 8px;
+    }
+
+    .activity-item .avatar {
+        width: 22px;
+        height: 22px;
+        font-size: 8px;
+    }
+
+    .activity-item .body .text {
+        font-size: 11px;
+    }
+
+    .activity-item .body .time {
+        font-size: 9px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       TABS — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .tabs {
+        gap: 0;
+    }
+
+    .tab-btn {
+        padding: 8px 14px;
+        font-size: 0.8rem;
+        flex: 1;
+        text-align: center;
+    }
+
+    .tab-btn .tab-badge {
+        font-size: 0.6rem;
+        padding: 1px 6px;
+    }
+
+    .tabs-pill {
+        gap: 6px;
+    }
+
+    .tabs-pill .tab-btn {
+        padding: 5px 14px;
+        font-size: 0.75rem;
+        flex: 0 1 auto;
+    }
+
+    .tabs-vertical .tabs-list {
+        min-width: 130px;
+    }
+
+    .tabs-vertical .tab-btn {
+        padding: 6px 12px;
+        font-size: 0.78rem;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       PAGINATION — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .page-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 0.78rem;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       MARKS ENTRY — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .marks-input {
+        width: 65px;
+        padding: 4px 6px;
+        font-size: 0.78rem;
+    }
+
+    .marks-entry-table {
+        font-size: 0.78rem;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       ATTENDANCE — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .attendance-summary {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .attendance-status {
+        width: 32px;
+        height: 32px;
+        font-size: 0.85rem;
+    }
+
+    .attendance-table {
+        min-width: 500px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       TIMETABLE — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .timetable-table {
+        font-size: 0.75rem;
+        min-width: 650px;
+    }
+
+    .timetable-table th,
+    .timetable-table td {
+        padding: var(--sm, 6px) var(--sm, 8px);
+    }
+
+    .timetable-slot {
+        padding: 2px 6px;
+        font-size: 0.7rem;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       NOTIFICATIONS — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .notification-item {
+        padding: var(--sm, 8px) var(--md, 12px);
+    }
+
+    .notification-header {
+        font-size: 12px;
+        gap: 6px;
+    }
+
+    .notification-title {
+        font-size: 12px;
+    }
+
+    .notification-body {
+        font-size: 12px;
+    }
+
+    .notification-time {
+        font-size: 9px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       SETTINGS — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .settings-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--md, 16px);
+    }
+
+    .setting-card {
+        padding: var(--md, 16px);
+    }
+
+    .setting-card .setting-icon {
+        font-size: 1.6rem;
+    }
+
+    .setting-card .setting-name {
+        font-size: 14px;
+    }
+
+    .setting-card .setting-desc {
+        font-size: 12px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       LOGIN — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .login-card .login-content {
+        padding: 24px 20px;
+    }
+
+    .login-card .school-name {
+        font-size: 20px;
+    }
+
+    .login-card .login-subtitle {
+        font-size: 11px;
+    }
+
+    .login-card .logo-box {
+        width: 64px;
+        height: 64px;
+        font-size: 28px;
+    }
+
+    .login-field input,
+    .login-field select {
+        padding: 10px 14px;
+        font-size: 14px;
+    }
+
+    .login-btn {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       LOADERS — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .boot-loader__frame {
+        width: 160px;
+        height: 160px;
+    }
+
+    .task-loader__stage {
+        width: 72px;
+        height: 72px;
+    }
+
+    .spinner {
+        width: 34px;
+        height: 34px;
+    }
+
+    .spinner-lg {
+        width: 48px;
+        height: 48px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       BREADCRUMBS — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .breadcrumb {
+        font-size: 12px;
+        padding: 6px 0;
+    }
+
+    .breadcrumb li {
+        padding: 0 6px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       TOOLTIPS — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .tooltip {
+        font-size: 11px;
+        padding: 4px 10px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       EMPTY STATES — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .empty-state {
+        padding: var(--xl, 32px) var(--lg, 24px);
+    }
+
+    .empty-state-icon {
+        font-size: 3rem;
+    }
+
+    .empty-state-title {
+        font-size: 1.1rem;
+    }
+
+    .empty-state-message {
+        font-size: 0.85rem;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       QUICK ACTIONS — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .quick-actions {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--sm, 8px);
+    }
+
+    .quick-btn {
+        padding: var(--md, 16px) var(--sm, 8px);
+    }
+
+    .quick-btn .qb-icon {
+        font-size: 1.8rem;
+    }
+
+    .quick-btn .qb-title {
+        font-size: 0.8rem;
+    }
+
+    .quick-btn .qb-sub {
+        font-size: 0.7rem;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       SCROLLBAR — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       HERO BANNER — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .hero {
+        padding: var(--lg, 24px);
+        flex-direction: row;
+        align-items: center;
+        gap: var(--lg, 24px);
+    }
+
+    .hero-left h1 {
+        font-size: 1.6rem;
+    }
+
+    .hero-left p {
+        font-size: 14px;
+    }
+
+    .hero-right {
+        gap: var(--md, 16px);
+    }
+
+    .hero-right .stat-block {
+        padding: 6px 14px;
+        min-width: 70px;
+    }
+
+    .hero-right .stat-block .num {
+        font-size: 22px;
+    }
+
+    .hero-right .stat-block .label {
+        font-size: 10px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       SEARCH — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .search-overlay {
+        padding-top: 80px;
+    }
+
+    .search-overlay .search-input-wrap input {
+        padding: 14px 48px 14px 48px;
+        font-size: 16px;
+    }
+
+    .search-overlay .search-input-wrap .search-icon-left {
+        left: 14px;
+        font-size: 16px;
+    }
+
+    .search-overlay .search-close {
+        top: 16px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       FILTER MODAL — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .filter-modal .filter-panel {
+        padding: var(--lg, 24px) var(--xl, 28px);
+        max-width: 480px;
+    }
+
+    .filter-modal .filter-panel .filter-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--sm, 8px);
+    }
+
+    .filter-modal .filter-panel .filter-header h2 {
+        font-size: 17px;
+    }
+
+    .filter-item .label {
+        font-size: 13px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       REPORT CARDS — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .report-card {
+        max-width: 680px;
+        margin: 0 auto;
+    }
+
+    .report-header {
+        padding: 18px 22px;
+        gap: 14px;
+    }
+
+    .report-header .report-logo {
+        width: 56px;
+        height: 56px;
+        font-size: 22px;
+    }
+
+    .report-header-text h2 {
+        font-size: 1rem;
+    }
+
+    .report-header-text h3 {
+        font-size: 0.82rem;
+    }
+
+    .report-info {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .report-info-item {
+        padding: 8px 14px;
+    }
+
+    .report-info-item strong {
+        font-size: 0.65rem;
+    }
+
+    .report-info-item span {
+        font-size: 0.8rem;
+    }
+
+    .report-subjects th {
+        padding: 6px 10px;
+        font-size: 0.7rem;
+    }
+
+    .report-subjects td {
+        padding: 5px 10px;
+        font-size: 0.78rem;
+    }
+
+    .report-summary {
+        padding: 12px 16px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .summary-value {
+        font-size: 1rem;
+    }
+
+    .report-footer {
+        padding: 10px 14px;
+        font-size: 0.75rem;
+    }
+
+    .report-qr-block {
+        padding: 6px 10px;
+        gap: 8px;
+    }
+
+    .report-qr-block img {
+        width: 64px;
+        height: 64px;
+    }
+
+    .report-qr-block div {
+        font-size: 8px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       FOOTER — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .footer {
+        font-size: 11px;
+        padding: 12px 0 4px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       TOAST — Tablet Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    .toast-container {
+        max-width: 360px;
+        bottom: 16px;
+        right: 16px;
+    }
+
+    .toast {
+        padding: 12px 14px;
+        font-size: 12px;
+    }
+
+    .toast-title {
+        font-size: 12px;
+    }
+
+    .toast-msg {
+        font-size: 11px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       PRINT — Tablet Print Adjustments
+       ═══════════════════════════════════════════════════════════════ */
+
+    @media print {
+        .sidebar {
+            display: none !important;
+        }
+
+        .topbar {
+            display: none !important;
+        }
+
+        .main-content {
+            margin-left: 0 !important;
+            padding: 0 !important;
+        }
+
+        .report-card {
+            max-width: 100%;
+            margin: 0;
+            box-shadow: none;
+            border: 1px solid var(--border-light, #e8e0d8);
+        }
+
+        .report-header {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .report-summary {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .data-table thead tr {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+}

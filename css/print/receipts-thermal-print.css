@@ -1,0 +1,841 @@
+/* ═══════════════════════════════════════════════════════════════════
+   RECEIPTS — THERMAL PRINT (80mm)
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: Optimized styles for 80mm thermal receipt printers.
+   Monospace font, compact layout, no tables, line-by-line.
+   No pure white (#FFFFFF), no pure black (#000000).
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   THERMAL RECEIPT CONTAINER
+   ═══════════════════════════════════════════════════════════════════ */
+
+.receipt-thermal {
+    width: 80mm;
+    max-width: 80mm;
+    margin: 0 auto;
+    padding: 4mm 3mm;
+    background: #fcfaf8;
+    color: #2c241e;
+    font-family: 'Courier New', 'Courier', 'Lucida Sans Typewriter', monospace;
+    font-size: 9px;
+    line-height: 1.3;
+    box-sizing: border-box;
+}
+
+[data-theme="dark"] .receipt-thermal {
+    background: #241d18;
+    color: #d4ccc6;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RECEIPT HEADER
+   ═══════════════════════════════════════════════════════════════════ */
+
+.receipt-thermal .header {
+    text-align: center;
+    padding-bottom: 2mm;
+    border-bottom: 1px dashed #6b5f56;
+    margin-bottom: 2mm;
+}
+
+[data-theme="dark"] .receipt-thermal .header {
+    border-bottom-color: rgba(240, 235, 230, 0.12);
+}
+
+.receipt-thermal .header .school-name {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #1a1410;
+}
+
+[data-theme="dark"] .receipt-thermal .header .school-name {
+    color: #f0ebe6;
+}
+
+.receipt-thermal .header .school-address {
+    font-size: 7px;
+    color: #6b5f56;
+    margin-top: 1px;
+}
+
+[data-theme="dark"] .receipt-thermal .header .school-address {
+    color: #9a8e86;
+}
+
+.receipt-thermal .header .receipt-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #2c241e;
+    margin-top: 2px;
+}
+
+[data-theme="dark"] .receipt-thermal .header .receipt-title {
+    color: #d4ccc6;
+}
+
+.receipt-thermal .header .receipt-number {
+    font-size: 8px;
+    background: #f0ebe6;
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 2px;
+    color: #2c241e;
+    margin-top: 2px;
+}
+
+[data-theme="dark"] .receipt-thermal .header .receipt-number {
+    background: rgba(240, 235, 230, 0.06);
+    color: #d4ccc6;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DIVIDER LINES
+   ═══════════════════════════════════════════════════════════════════ */
+
+.receipt-thermal .divider-dash {
+    border: none;
+    border-top: 1px dashed #6b5f56;
+    margin: 2mm 0;
+}
+
+[data-theme="dark"] .receipt-thermal .divider-dash {
+    border-top-color: rgba(240, 235, 230, 0.12);
+}
+
+.receipt-thermal .divider-dot {
+    border: none;
+    border-top: 1px dotted #6b5f56;
+    margin: 2mm 0;
+}
+
+[data-theme="dark"] .receipt-thermal .divider-dot {
+    border-top-color: rgba(240, 235, 230, 0.08);
+}
+
+.receipt-thermal .divider-solid {
+    border: none;
+    border-top: 1px solid #2c241e;
+    margin: 2mm 0;
+}
+
+[data-theme="dark"] .receipt-thermal .divider-solid {
+    border-top-color: #d4ccc6;
+}
+
+.receipt-thermal .divider-thick {
+    border: none;
+    border-top: 2px solid #2c241e;
+    margin: 2mm 0;
+}
+
+[data-theme="dark"] .receipt-thermal .divider-thick {
+    border-top-color: #d4ccc6;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RECEIPT BODY — Info Rows
+   ═══════════════════════════════════════════════════════════════════ */
+
+.receipt-thermal .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 1.5px 0;
+    font-size: 8.5px;
+}
+
+.receipt-thermal .info-row .label {
+    color: #6b5f56;
+    font-weight: 400;
+}
+
+[data-theme="dark"] .receipt-thermal .info-row .label {
+    color: #9a8e86;
+}
+
+.receipt-thermal .info-row .value {
+    color: #2c241e;
+    font-weight: 500;
+}
+
+[data-theme="dark"] .receipt-thermal .info-row .value {
+    color: #d4ccc6;
+}
+
+.receipt-thermal .info-row .value.uppercase {
+    text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FEE BREAKDOWN TABLE (Monospace, no borders)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.receipt-thermal .fee-table {
+    width: 100%;
+    font-size: 8px;
+    margin: 2mm 0;
+    border-collapse: collapse;
+}
+
+.receipt-thermal .fee-table th {
+    text-align: left;
+    font-size: 7px;
+    font-weight: 700;
+    color: #6b5f56;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px dotted #6b5f56;
+    padding: 2px 0;
+}
+
+[data-theme="dark"] .receipt-thermal .fee-table th {
+    color: #9a8e86;
+    border-bottom-color: rgba(240, 235, 230, 0.08);
+}
+
+.receipt-thermal .fee-table td {
+    padding: 1.5px 0;
+    vertical-align: top;
+}
+
+.receipt-thermal .fee-table .fee-name {
+    text-align: left;
+    font-weight: 400;
+    color: #2c241e;
+}
+
+[data-theme="dark"] .receipt-thermal .fee-table .fee-name {
+    color: #d4ccc6;
+}
+
+.receipt-thermal .fee-table .fee-amount {
+    text-align: right;
+    font-weight: 500;
+    color: #2c241e;
+}
+
+[data-theme="dark"] .receipt-thermal .fee-table .fee-amount {
+    color: #d4ccc6;
+}
+
+.receipt-thermal .fee-table .fee-paid {
+    text-align: right;
+    color: #3a7a5a;
+}
+
+[data-theme="dark"] .receipt-thermal .fee-table .fee-paid {
+    color: #5a9a7a;
+}
+
+.receipt-thermal .fee-table .fee-due {
+    text-align: right;
+    color: #c45a4a;
+}
+
+[data-theme="dark"] .receipt-thermal .fee-table .fee-due {
+    color: #d46a5a;
+}
+
+.receipt-thermal .fee-table .fee-status {
+    text-align: right;
+    font-size: 7px;
+}
+
+.receipt-thermal .fee-table .fee-status.paid {
+    color: #3a7a5a;
+}
+
+[data-theme="dark"] .receipt-thermal .fee-table .fee-status.paid {
+    color: #5a9a7a;
+}
+
+.receipt-thermal .fee-table .fee-status.partial {
+    color: #b8983a;
+}
+
+[data-theme="dark"] .receipt-thermal .fee-table .fee-status.partial {
+    color: #c9a84c;
+}
+
+.receipt-thermal .fee-table .fee-status.due {
+    color: #c45a4a;
+}
+
+[data-theme="dark"] .receipt-thermal .fee-table .fee-status.due {
+    color: #d46a5a;
+}
+
+/* ── Fee table with compact layout ── */
+.receipt-thermal .fee-table-compact td {
+    padding: 1px 0;
+    font-size: 7.5px;
+}
+
+.receipt-thermal .fee-table-compact .fee-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 35mm;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   AMOUNT BOX — Highlighted total
+   ═══════════════════════════════════════════════════════════════════ */
+
+.receipt-thermal .amount-box {
+    background: rgba(58, 122, 90, 0.08);
+    border: 1px solid rgba(58, 122, 90, 0.15);
+    padding: 2mm 3mm;
+    margin: 2mm 0;
+    text-align: center;
+    border-radius: 2px;
+}
+
+[data-theme="dark"] .receipt-thermal .amount-box {
+    background: rgba(90, 154, 122, 0.06);
+    border-color: rgba(90, 154, 122, 0.12);
+}
+
+.receipt-thermal .amount-box .amount-label {
+    font-size: 7px;
+    color: #6b5f56;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+[data-theme="dark"] .receipt-thermal .amount-box .amount-label {
+    color: #9a8e86;
+}
+
+.receipt-thermal .amount-box .amount-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1410;
+    letter-spacing: 0.5px;
+}
+
+[data-theme="dark"] .receipt-thermal .amount-box .amount-value {
+    color: #f0ebe6;
+}
+
+.receipt-thermal .amount-box .amount-words {
+    font-size: 7px;
+    color: #6b5f56;
+    font-weight: 400;
+    margin-top: 1px;
+}
+
+[data-theme="dark"] .receipt-thermal .amount-box .amount-words {
+    color: #9a8e86;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   STATUS BADGE
+   ═══════════════════════════════════════════════════════════════════ */
+
+.receipt-thermal .status-badge {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 2px;
+    font-size: 7px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.receipt-thermal .status-badge.paid {
+    background: rgba(58, 122, 90, 0.12);
+    color: #3a7a5a;
+}
+
+[data-theme="dark"] .receipt-thermal .status-badge.paid {
+    background: rgba(90, 154, 122, 0.10);
+    color: #5a9a7a;
+}
+
+.receipt-thermal .status-badge.partial {
+    background: rgba(184, 152, 58, 0.12);
+    color: #b8983a;
+}
+
+[data-theme="dark"] .receipt-thermal .status-badge.partial {
+    background: rgba(201, 168, 76, 0.10);
+    color: #c9a84c;
+}
+
+.receipt-thermal .status-badge.due {
+    background: rgba(196, 90, 74, 0.12);
+    color: #c45a4a;
+}
+
+[data-theme="dark"] .receipt-thermal .status-badge.due {
+    background: rgba(212, 106, 90, 0.10);
+    color: #d46a5a;
+}
+
+.receipt-thermal .status-badge.waived {
+    background: rgba(106, 61, 122, 0.12);
+    color: #6a3d7a;
+}
+
+[data-theme="dark"] .receipt-thermal .status-badge.waived {
+    background: rgba(138, 90, 154, 0.10);
+    color: #8a5a9a;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RECEIPT FOOTER
+   ═══════════════════════════════════════════════════════════════════ */
+
+.receipt-thermal .footer {
+    text-align: center;
+    padding-top: 2mm;
+    border-top: 1px dashed #6b5f56;
+    margin-top: 2mm;
+    font-size: 7px;
+    color: #6b5f56;
+}
+
+[data-theme="dark"] .receipt-thermal .footer {
+    border-top-color: rgba(240, 235, 230, 0.12);
+    color: #9a8e86;
+}
+
+.receipt-thermal .footer .thank-you {
+    font-size: 9px;
+    font-weight: 700;
+    color: #2c241e;
+    margin-bottom: 1px;
+}
+
+[data-theme="dark"] .receipt-thermal .footer .thank-you {
+    color: #d4ccc6;
+}
+
+.receipt-thermal .footer .company-tag {
+    font-size: 6px;
+    letter-spacing: 1px;
+    color: #6b5f56;
+}
+
+[data-theme="dark"] .receipt-thermal .footer .company-tag {
+    color: #9a8e86;
+}
+
+.receipt-thermal .footer .generated {
+    font-size: 6px;
+    color: #a8988e;
+    margin-top: 1px;
+}
+
+[data-theme="dark"] .receipt-thermal .footer .generated {
+    color: #6b5f56;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   QR CODE PLACEHOLDER (Small, monochrome)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.receipt-thermal .qr-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin: 2mm 0;
+    padding: 2px;
+    background: rgba(26, 20, 16, 0.02);
+    border: 1px solid rgba(26, 20, 16, 0.04);
+    border-radius: 2px;
+}
+
+[data-theme="dark"] .receipt-thermal .qr-container {
+    background: rgba(240, 235, 230, 0.02);
+    border-color: rgba(240, 235, 230, 0.04);
+}
+
+.receipt-thermal .qr-container .qr-image {
+    width: 24mm;
+    height: 24mm;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fcfaf8;
+    border: 1px solid rgba(26, 20, 16, 0.06);
+}
+
+[data-theme="dark"] .receipt-thermal .qr-container .qr-image {
+    background: #241d18;
+    border-color: rgba(240, 235, 230, 0.06);
+}
+
+.receipt-thermal .qr-container .qr-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.receipt-thermal .qr-container .qr-label {
+    font-size: 6px;
+    color: #6b5f56;
+    text-align: center;
+    line-height: 1.3;
+}
+
+[data-theme="dark"] .receipt-thermal .qr-container .qr-label {
+    color: #9a8e86;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SIGNATURE LINES
+   ═══════════════════════════════════════════════════════════════════ */
+
+.receipt-thermal .signature-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 4mm;
+    margin-top: 2mm;
+    padding-top: 2mm;
+    border-top: 1px dotted #6b5f56;
+}
+
+[data-theme="dark"] .receipt-thermal .signature-row {
+    border-top-color: rgba(240, 235, 230, 0.08);
+}
+
+.receipt-thermal .signature-row .sig-block {
+    flex: 1;
+    text-align: center;
+    font-size: 6px;
+    color: #6b5f56;
+}
+
+[data-theme="dark"] .receipt-thermal .signature-row .sig-block {
+    color: #9a8e86;
+}
+
+.receipt-thermal .signature-row .sig-block .sig-line {
+    display: block;
+    border-bottom: 1px solid #2c241e;
+    height: 8mm;
+    margin-bottom: 1px;
+}
+
+[data-theme="dark"] .receipt-thermal .signature-row .sig-block .sig-line {
+    border-bottom-color: #d4ccc6;
+}
+
+.receipt-thermal .signature-row .sig-block .sig-label {
+    font-size: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6b5f56;
+}
+
+[data-theme="dark"] .receipt-thermal .signature-row .sig-block .sig-label {
+    color: #9a8e86;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BARCODE (Optional)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.receipt-thermal .barcode-container {
+    text-align: center;
+    margin: 2mm 0;
+    padding: 1mm 0;
+    border-top: 1px dotted rgba(26, 20, 16, 0.06);
+    border-bottom: 1px dotted rgba(26, 20, 16, 0.06);
+}
+
+[data-theme="dark"] .receipt-thermal .barcode-container {
+    border-top-color: rgba(240, 235, 230, 0.04);
+    border-bottom-color: rgba(240, 235, 230, 0.04);
+}
+
+.receipt-thermal .barcode-container .barcode {
+    display: inline-block;
+    background: #2c241e;
+    padding: 1px 0;
+    width: 90%;
+    height: 6mm;
+    position: relative;
+    overflow: hidden;
+}
+
+[data-theme="dark"] .receipt-thermal .barcode-container .barcode {
+    background: #d4ccc6;
+}
+
+.receipt-thermal .barcode-container .barcode-text {
+    font-size: 6px;
+    color: #6b5f56;
+    letter-spacing: 2px;
+    margin-top: 1px;
+}
+
+[data-theme="dark"] .receipt-thermal .barcode-container .barcode-text {
+    color: #9a8e86;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CUSTOMER COPY INDICATOR
+   ═══════════════════════════════════════════════════════════════════ */
+
+.receipt-thermal .copy-indicator {
+    text-align: center;
+    font-size: 7px;
+    font-weight: 700;
+    color: #6b5f56;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 1mm 0;
+    padding: 0.5mm 0;
+    border-top: 1px dotted rgba(26, 20, 16, 0.04);
+    border-bottom: 1px dotted rgba(26, 20, 16, 0.04);
+}
+
+[data-theme="dark"] .receipt-thermal .copy-indicator {
+    color: #9a8e86;
+    border-top-color: rgba(240, 235, 230, 0.04);
+    border-bottom-color: rgba(240, 235, 230, 0.04);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   THERMAL PRINTER SPECIFIC — No page margins, no breaks
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    .receipt-thermal {
+        width: 80mm;
+        max-width: 80mm;
+        margin: 0;
+        padding: 2mm 2mm;
+        background: #fcfaf8;
+        color: #2c241e;
+    }
+
+    [data-theme="dark"] .receipt-thermal {
+        background: #241d18;
+        color: #d4ccc6;
+    }
+
+    .receipt-thermal .header .school-name {
+        color: #1a1410;
+    }
+
+    [data-theme="dark"] .receipt-thermal .header .school-name {
+        color: #f0ebe6;
+    }
+
+    .receipt-thermal .header .receipt-title {
+        color: #2c241e;
+    }
+
+    [data-theme="dark"] .receipt-thermal .header .receipt-title {
+        color: #d4ccc6;
+    }
+
+    .receipt-thermal .info-row .value {
+        color: #2c241e;
+    }
+
+    [data-theme="dark"] .receipt-thermal .info-row .value {
+        color: #d4ccc6;
+    }
+
+    .receipt-thermal .amount-box .amount-value {
+        color: #1a1410;
+    }
+
+    [data-theme="dark"] .receipt-thermal .amount-box .amount-value {
+        color: #f0ebe6;
+    }
+
+    .receipt-thermal .footer .thank-you {
+        color: #2c241e;
+    }
+
+    [data-theme="dark"] .receipt-thermal .footer .thank-you {
+        color: #d4ccc6;
+    }
+
+    .receipt-thermal .fee-table .fee-name {
+        color: #2c241e;
+    }
+
+    [data-theme="dark"] .receipt-thermal .fee-table .fee-name {
+        color: #d4ccc6;
+    }
+
+    .receipt-thermal .fee-table .fee-amount {
+        color: #2c241e;
+    }
+
+    [data-theme="dark"] .receipt-thermal .fee-table .fee-amount {
+        color: #d4ccc6;
+    }
+
+    .receipt-thermal .signature-row .sig-block .sig-line {
+        border-bottom-color: #2c241e;
+    }
+
+    [data-theme="dark"] .receipt-thermal .signature-row .sig-block .sig-line {
+        border-bottom-color: #d4ccc6;
+    }
+
+    /* ── Hide all non-receipt elements ── */
+    body * {
+        visibility: hidden;
+    }
+
+    .receipt-thermal,
+    .receipt-thermal * {
+        visibility: visible;
+    }
+
+    .receipt-thermal {
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+
+    /* ── Page settings for thermal printer ── */
+    @page {
+        size: 80mm auto;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* ── Prevent page breaks inside receipt ── */
+    .receipt-thermal {
+        page-break-after: avoid;
+        page-break-inside: avoid;
+    }
+
+    /* ── Dark mode print overrides ── */
+    [data-theme="dark"] .receipt-thermal {
+        background: #241d18 !important;
+        color: #d4ccc6 !important;
+    }
+
+    [data-theme="dark"] .receipt-thermal .header .school-name {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .receipt-thermal .header .receipt-title {
+        color: #d4ccc6 !important;
+    }
+
+    [data-theme="dark"] .receipt-thermal .amount-box .amount-value {
+        color: #f0ebe6 !important;
+    }
+
+    [data-theme="dark"] .receipt-thermal .footer .thank-you {
+        color: #d4ccc6 !important;
+    }
+
+    [data-theme="dark"] .receipt-thermal .divider-solid {
+        border-top-color: #d4ccc6 !important;
+    }
+
+    [data-theme="dark"] .receipt-thermal .divider-thick {
+        border-top-color: #d4ccc6 !important;
+    }
+
+    [data-theme="dark"] .receipt-thermal .signature-row .sig-block .sig-line {
+        border-bottom-color: #d4ccc6 !important;
+    }
+
+    [data-theme="dark"] .receipt-thermal .barcode-container .barcode {
+        background: #d4ccc6 !important;
+    }
+
+    [data-theme="dark"] .receipt-thermal .fee-table .fee-name {
+        color: #d4ccc6 !important;
+    }
+
+    [data-theme="dark"] .receipt-thermal .fee-table .fee-amount {
+        color: #d4ccc6 !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   COMPACT VARIANT — Extra small for 58mm printers
+   ═══════════════════════════════════════════════════════════════════ */
+
+.receipt-thermal.compact {
+    width: 58mm;
+    max-width: 58mm;
+    padding: 2mm 1.5mm;
+    font-size: 7px;
+}
+
+.receipt-thermal.compact .header .school-name {
+    font-size: 10px;
+}
+
+.receipt-thermal.compact .header .receipt-title {
+    font-size: 8px;
+}
+
+.receipt-thermal.compact .amount-box .amount-value {
+    font-size: 13px;
+}
+
+.receipt-thermal.compact .info-row {
+    font-size: 7px;
+    padding: 1px 0;
+}
+
+.receipt-thermal.compact .fee-table {
+    font-size: 6.5px;
+}
+
+.receipt-thermal.compact .fee-table td {
+    padding: 1px 0;
+}
+
+.receipt-thermal.compact .qr-container .qr-image {
+    width: 18mm;
+    height: 18mm;
+}
+
+.receipt-thermal.compact .signature-row .sig-block .sig-line {
+    height: 6mm;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK THEME OVERRIDES
+   ═══════════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] .receipt-thermal .header .receipt-number {
+    background: rgba(240, 235, 230, 0.06);
+    color: #d4ccc6;
+}
+
+[data-theme="dark"] .receipt-thermal .status-badge.paid {
+    background: rgba(90, 154, 122, 0.10);
+    color: #5a9a7a;
+}
+
+[data-theme="dark"] .receipt-thermal .status-badge.partial {
+    background: rgba(201, 168, 76, 0.10);
+    color: #c9a84c;
+}
+
+[data-theme="dark"] .receipt-thermal .status-badge.due {
+    background: rgba(212, 106, 90, 0.10);
+    color: #d46a5a;
+}
+
+[data-theme="dark"] .receipt-thermal .status-badge.waived {
+    background: rgba(138, 90, 154, 0.10);
+    color: #8a5a9a;
+}
+
+[data-theme="dark"] .receipt-thermal .qr-container .qr-image {
+    background: #241d18;
+    border-color: rgba(240, 235, 230, 0.06);
+}

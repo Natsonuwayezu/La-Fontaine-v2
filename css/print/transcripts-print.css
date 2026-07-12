@@ -1,0 +1,942 @@
+/* ═══════════════════════════════════════════════════════════════════
+   TRANSCRIPTS PRINT — css/print/transcripts-print.css
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: Print-specific styles for academic transcripts. Applied
+   when printing transcripts. Optimizes layout for paper, preserves
+   branding, and ensures multi-page consistency.
+   No pure white (#FFFFFF), no pure black (#000000).
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   PRINT RESET — Hide UI chrome
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+
+    /* ── Hide all navigation elements ── */
+    .sidebar,
+    .topbar,
+    .menu-toggle,
+    .btn-group,
+    .filters-bar,
+    .pagination,
+    .notif-bell,
+    .user-menu,
+    .term-progress-bar,
+    .quick-actions,
+    .modal-overlay,
+    .no-print,
+    #pwa-install-btn,
+    #back-to-top,
+    .print-hide,
+    .sidebar-overlay,
+    .task-loader-overlay,
+    .boot-loader,
+    .toast-container,
+    #toast-container {
+        display: none !important;
+    }
+
+    /* ── Main content full width ── */
+    .main-content {
+        margin-left: 0 !important;
+        padding: 0 !important;
+        background: var(--bg-body, #f5f0eb) !important;
+    }
+
+    #dynamic-content {
+        padding: 0 !important;
+    }
+
+    /* ── Body reset ── */
+    body {
+        background: var(--bg-body, #f5f0eb) !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        color: var(--text-body, #2c241e) !important;
+        font-family: 'DM Sans', 'Plus Jakarta Sans', Arial, sans-serif !important;
+    }
+
+    /* ── Remove all shadows and backgrounds ── */
+    .transcript-container {
+        box-shadow: none !important;
+        border: 1px solid var(--border-medium, #d4c8be) !important;
+        margin: 0 auto !important;
+        page-break-after: always;
+        background: var(--bg-card, #fcfaf8) !important;
+        border-radius: 0 !important;
+        max-width: 1000px !important;
+    }
+
+    .transcript-container:last-child {
+        page-break-after: avoid;
+    }
+
+    /* ── Page setup ── */
+    @page {
+        margin: 10mm 8mm 8mm 8mm;
+        size: A4 portrait;
+    }
+
+    /* ── Force background colors and images ── */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TRANSCRIPT PRINT STYLES
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+
+    /* ── Transcript Container ── */
+    .transcript-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0;
+        background: var(--bg-card, #fcfaf8) !important;
+        border: 1px solid var(--border-medium, #d4c8be) !important;
+        border-radius: 8px !important;
+        overflow: hidden;
+        box-shadow: none !important;
+        font-family: 'DM Sans', 'Plus Jakarta Sans', Arial, sans-serif;
+        page-break-inside: avoid;
+    }
+
+    /* ── Header ── */
+    .transcript-header {
+        background: var(--role-primary, #2d1f3a) !important;
+        color: var(--text-inverse, #f5f0eb) !important;
+        padding: 18px 22px !important;
+        display: flex !important;
+        gap: 14px !important;
+        align-items: center !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .transcript-header .transcript-logo {
+        width: 52px !important;
+        height: 52px !important;
+        background: rgba(245, 240, 235, 0.12) !important;
+        border-radius: 8px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 22px !important;
+        overflow: hidden !important;
+        flex-shrink: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .transcript-header .transcript-logo img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: contain !important;
+    }
+
+    .transcript-header .transcript-header-text {
+        flex: 1 !important;
+    }
+
+    .transcript-header .transcript-header-text h1 {
+        font-family: 'Playfair Display', 'Syne', Georgia, serif !important;
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        margin: 0 0 2px 0 !important;
+        color: var(--text-inverse, #f5f0eb) !important;
+        letter-spacing: 0.3px !important;
+    }
+
+    .transcript-header .transcript-header-text .school-address {
+        font-size: 9px !important;
+        opacity: 0.75 !important;
+        margin: 0 !important;
+        color: var(--text-inverse, #f5f0eb) !important;
+    }
+
+    .transcript-header .transcript-header-text .transcript-title {
+        font-family: 'Playfair Display', 'Syne', Georgia, serif !important;
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        margin: 4px 0 2px 0 !important;
+        letter-spacing: 0.4px !important;
+        color: var(--text-inverse, #f5f0eb) !important;
+    }
+
+    .transcript-header .transcript-header-text .transcript-subtitle {
+        font-size: 10px !important;
+        opacity: 0.70 !important;
+        margin: 0 !important;
+        color: var(--text-inverse, #f5f0eb) !important;
+    }
+
+    /* ── Student Info Grid ── */
+    .transcript-student-info {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 0 !important;
+        background: var(--bg-tertiary, #f0ebe6) !important;
+        border-bottom: 1px solid var(--border-light, #e8e0d8) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .transcript-student-info .info-item {
+        padding: 8px 14px !important;
+        border-right: 1px solid var(--border-light, #e8e0d8) !important;
+        font-size: 10px !important;
+    }
+
+    .transcript-student-info .info-item:last-child {
+        border-right: none !important;
+    }
+
+    .transcript-student-info .info-item strong {
+        display: block !important;
+        font-size: 7px !important;
+        text-transform: uppercase !important;
+        color: var(--text-muted, #a8988e) !important;
+        margin-bottom: 2px !important;
+        letter-spacing: 0.4px !important;
+        font-weight: 600 !important;
+    }
+
+    .transcript-student-info .info-item span {
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        color: var(--text-dark, #1a1410) !important;
+    }
+
+    .transcript-student-info .info-item .gpa-value {
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        color: var(--role-primary, #2d1f3a) !important;
+        font-family: 'Syne', 'Playfair Display', serif !important;
+    }
+
+    /* ── GPA Scale Note ── */
+    .transcript-gpa-note {
+        font-size: 7px !important;
+        color: var(--text-muted, #a8988e) !important;
+        margin-top: 2px !important;
+        font-style: italic !important;
+    }
+
+    /* ── Subject Table ── */
+    .transcript-subjects {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 10px !important;
+        margin: 0 !important;
+    }
+
+    .transcript-subjects thead th {
+        background: var(--bg-tertiary, #f0ebe6) !important;
+        color: var(--text-dark, #1a1410) !important;
+        padding: 6px 8px !important;
+        font-size: 8px !important;
+        font-weight: 700 !important;
+        text-align: center !important;
+        border: 1px solid var(--border-light, #e8e0d8) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.3px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .transcript-subjects thead th:first-child {
+        text-align: left !important;
+        padding-left: 12px !important;
+    }
+
+    .transcript-subjects thead th:last-child {
+        text-align: center !important;
+    }
+
+    .transcript-subjects tbody td {
+        padding: 5px 8px !important;
+        font-size: 9px !important;
+        border-bottom: 1px solid var(--border-light, #e8e0d8) !important;
+        text-align: center !important;
+        color: var(--text-body, #2c241e) !important;
+    }
+
+    .transcript-subjects tbody td:first-child {
+        text-align: left !important;
+        font-weight: 600 !important;
+        padding-left: 12px !important;
+    }
+
+    .transcript-subjects tbody td:last-child {
+        text-align: center !important;
+        font-weight: 600 !important;
+    }
+
+    .transcript-subjects tbody tr:nth-child(even) {
+        background: rgba(240, 235, 230, 0.30) !important;
+    }
+
+    /* ── Year Summary Row ── */
+    .transcript-subjects tbody tr.year-total {
+        background: var(--bg-tertiary, #f0ebe6) !important;
+        font-weight: 700 !important;
+        border-top: 2px solid var(--border-medium, #d4c8be) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .transcript-subjects tbody tr.year-total td {
+        font-weight: 700 !important;
+        color: var(--text-dark, #1a1410) !important;
+        padding: 6px 8px !important;
+        border-bottom: 2px solid var(--border-medium, #d4c8be) !important;
+    }
+
+    .transcript-subjects tbody tr.year-total td:first-child {
+        font-style: italic !important;
+        color: var(--text-soft, #6b5f56) !important;
+    }
+
+    /* ── Cumulative Summary ── */
+    .transcript-cumulative {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 0 !important;
+        background: var(--role-primary, #2d1f3a) !important;
+        color: var(--text-inverse, #f5f0eb) !important;
+        padding: 10px 14px !important;
+        text-align: center !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .transcript-cumulative .cum-item .cum-label {
+        font-size: 7px !important;
+        opacity: 0.70 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.3px !important;
+        font-weight: 600 !important;
+    }
+
+    .transcript-cumulative .cum-item .cum-value {
+        font-size: 16px !important;
+        font-weight: 700 !important;
+        margin-top: 2px !important;
+        font-family: 'Syne', 'Playfair Display', serif !important;
+        color: var(--text-inverse, #f5f0eb) !important;
+    }
+
+    /* ── Footer ── */
+    .transcript-footer {
+        padding: 10px 16px !important;
+        background: var(--bg-tertiary, #f0ebe6) !important;
+        text-align: center !important;
+        font-size: 8px !important;
+        color: var(--text-muted, #a8988e) !important;
+        border-top: 1px solid var(--border-light, #e8e0d8) !important;
+        line-height: 1.6 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .transcript-footer .footer-line {
+        margin: 2px 0 !important;
+    }
+
+    .transcript-footer .footer-line strong {
+        color: var(--text-dark, #1a1410) !important;
+        font-weight: 600 !important;
+    }
+
+    /* ── Signatures ── */
+    .transcript-signatures {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 16px !important;
+        margin-top: 8px !important;
+        padding-top: 8px !important;
+        border-top: 1px solid var(--border-light, #e8e0d8) !important;
+        text-align: center !important;
+    }
+
+    .transcript-signatures .sig-block .sig-line {
+        border-top: 1px solid var(--border-dark, #b8a89e) !important;
+        padding-top: 4px !important;
+        margin-top: 20px !important;
+        font-size: 8px !important;
+        font-weight: 600 !important;
+        color: var(--text-soft, #6b5f56) !important;
+    }
+
+    .transcript-signatures .sig-block .sig-label {
+        font-size: 7px !important;
+        color: var(--text-muted, #a8988e) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.3px !important;
+    }
+
+    /* ── QR Code Block ── */
+    .transcript-qr-block {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 8px !important;
+        padding: 6px 12px !important;
+        border-top: 1px solid var(--border-light, #e8e0d8) !important;
+        margin-top: 6px !important;
+        background: var(--bg-tertiary, #f0ebe6) !important;
+        border-radius: 0 0 8px 8px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .transcript-qr-block .qr-text {
+        font-size: 7px !important;
+        color: var(--text-muted, #a8988e) !important;
+        line-height: 1.5 !important;
+        text-align: left !important;
+    }
+
+    .transcript-qr-block .qr-text strong {
+        color: var(--text-dark, #1a1410) !important;
+    }
+
+    .transcript-qr-block img {
+        width: 56px !important;
+        height: 56px !important;
+        border: 1px solid var(--border-light, #e8e0d8) !important;
+        border-radius: 4px !important;
+        display: block !important;
+    }
+
+    /* ── Grade Badges ── */
+    .badge {
+        display: inline-block !important;
+        padding: 1px 6px !important;
+        border-radius: 10px !important;
+        font-size: 8px !important;
+        font-weight: 600 !important;
+        border: 1px solid transparent !important;
+    }
+
+    .badge.grade-Ap,
+    .badge.grade-A {
+        background: var(--success-bg, #dce8e0) !important;
+        color: #065f46 !important;
+        border-color: var(--success, #3a7a5a) !important;
+    }
+
+    .badge.grade-B {
+        background: var(--info-bg, #dce8ec) !important;
+        color: #1a3a5a !important;
+        border-color: var(--info, #4a7a8a) !important;
+    }
+
+    .badge.grade-C {
+        background: var(--warning-bg, #f0e8d0) !important;
+        color: #92400e !important;
+        border-color: var(--warning, #b8983a) !important;
+    }
+
+    .badge.grade-D {
+        background: #f0e0d0 !important;
+        color: #9a4a1a !important;
+        border-color: #c48a3a !important;
+    }
+
+    .badge.grade-F {
+        background: var(--danger-bg, #f0e0dc) !important;
+        color: #991b1b !important;
+        border-color: var(--danger, #c45a4a) !important;
+    }
+
+    .badge.badge-neutral {
+        background: var(--bg-tertiary, #f0ebe6) !important;
+        color: var(--text-muted, #a8988e) !important;
+        border-color: var(--border-medium, #d4c8be) !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MULTI-PAGE / BATCH TRANSCRIPT PRINT
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+
+    /* ── Page breaks between transcripts ── */
+    .transcript-container {
+        page-break-after: always !important;
+    }
+
+    .transcript-container:last-child {
+        page-break-after: avoid !important;
+    }
+
+    /* ── Avoid orphaned headers ── */
+    .transcript-container .transcript-header {
+        page-break-inside: avoid !important;
+    }
+
+    /* ── Avoid orphaned tables ── */
+    .transcript-container .transcript-subjects {
+        page-break-inside: avoid !important;
+    }
+
+    /* ── Avoid orphaned rows ── */
+    .transcript-container .transcript-subjects tbody tr {
+        page-break-inside: avoid !important;
+    }
+
+    /* ── Batch container ── */
+    .batch-transcripts-container {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .batch-transcripts-container .transcript-container {
+        margin: 0 auto 8px auto !important;
+        page-break-after: always !important;
+    }
+
+    .batch-transcripts-container .transcript-container:last-child {
+        margin-bottom: 0 !important;
+        page-break-after: avoid !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   LANDSCAPE ORIENTATION (for transcripts with many terms)
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print and (orientation: landscape) {
+    .transcript-container {
+        max-width: 100% !important;
+    }
+
+    .transcript-subjects {
+        font-size: 8px !important;
+    }
+
+    .transcript-subjects thead th {
+        font-size: 7px !important;
+        padding: 4px 6px !important;
+    }
+
+    .transcript-subjects tbody td {
+        font-size: 8px !important;
+        padding: 4px 6px !important;
+    }
+
+    .transcript-student-info {
+        grid-template-columns: repeat(4, 1fr) !important;
+    }
+
+    .transcript-cumulative {
+        grid-template-columns: repeat(5, 1fr) !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE — Transcript Print Overrides
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    [data-theme="dark"] .transcript-container {
+        background: var(--bg-card, #241d18) !important;
+        border-color: var(--border-medium, #4a3d35) !important;
+    }
+
+    [data-theme="dark"] .transcript-header {
+        background: var(--role-primary, #4d2f4a) !important;
+    }
+
+    [data-theme="dark"] .transcript-student-info {
+        background: var(--bg-tertiary, #2a221c) !important;
+        border-bottom-color: var(--border-light, #332a24) !important;
+    }
+
+    [data-theme="dark"] .transcript-student-info .info-item {
+        border-right-color: var(--border-light, #332a24) !important;
+    }
+
+    [data-theme="dark"] .transcript-student-info .info-item strong {
+        color: var(--text-muted, #6b5f56) !important;
+    }
+
+    [data-theme="dark"] .transcript-student-info .info-item span {
+        color: var(--text-dark, #f0ebe6) !important;
+    }
+
+    [data-theme="dark"] .transcript-student-info .info-item .gpa-value {
+        color: var(--role-primary, #4d2f4a) !important;
+    }
+
+    [data-theme="dark"] .transcript-subjects thead th {
+        background: var(--bg-tertiary, #2a221c) !important;
+        color: var(--text-dark, #f0ebe6) !important;
+        border-color: var(--border-light, #332a24) !important;
+    }
+
+    [data-theme="dark"] .transcript-subjects tbody td {
+        border-color: var(--border-light, #332a24) !important;
+        color: var(--text-body, #d4ccc6) !important;
+    }
+
+    [data-theme="dark"] .transcript-subjects tbody tr:nth-child(even) {
+        background: rgba(240, 235, 230, 0.04) !important;
+    }
+
+    [data-theme="dark"] .transcript-subjects tbody tr.year-total {
+        background: var(--bg-tertiary, #2a221c) !important;
+        border-top-color: var(--border-medium, #4a3d35) !important;
+    }
+
+    [data-theme="dark"] .transcript-subjects tbody tr.year-total td {
+        color: var(--text-dark, #f0ebe6) !important;
+        border-bottom-color: var(--border-medium, #4a3d35) !important;
+    }
+
+    [data-theme="dark"] .transcript-subjects tbody tr.year-total td:first-child {
+        color: var(--text-soft, #9a8e86) !important;
+    }
+
+    [data-theme="dark"] .transcript-cumulative {
+        background: var(--role-primary, #4d2f4a) !important;
+    }
+
+    [data-theme="dark"] .transcript-footer {
+        background: var(--bg-tertiary, #2a221c) !important;
+        border-top-color: var(--border-light, #332a24) !important;
+        color: var(--text-muted, #6b5f56) !important;
+    }
+
+    [data-theme="dark"] .transcript-footer .footer-line strong {
+        color: var(--text-dark, #f0ebe6) !important;
+    }
+
+    [data-theme="dark"] .transcript-signatures {
+        border-top-color: var(--border-light, #332a24) !important;
+    }
+
+    [data-theme="dark"] .transcript-signatures .sig-block .sig-line {
+        border-top-color: var(--border-dark, #6b5f56) !important;
+        color: var(--text-soft, #9a8e86) !important;
+    }
+
+    [data-theme="dark"] .transcript-signatures .sig-block .sig-label {
+        color: var(--text-muted, #6b5f56) !important;
+    }
+
+    [data-theme="dark"] .transcript-qr-block {
+        background: var(--bg-tertiary, #2a221c) !important;
+        border-top-color: var(--border-light, #332a24) !important;
+    }
+
+    [data-theme="dark"] .transcript-qr-block .qr-text {
+        color: var(--text-muted, #6b5f56) !important;
+    }
+
+    [data-theme="dark"] .transcript-qr-block .qr-text strong {
+        color: var(--text-dark, #f0ebe6) !important;
+    }
+
+    [data-theme="dark"] .transcript-qr-block img {
+        border-color: var(--border-medium, #4a3d35) !important;
+    }
+
+    [data-theme="dark"] .badge.grade-Ap,
+    [data-theme="dark"] .badge.grade-A {
+        background: rgba(90, 154, 122, 0.20) !important;
+        color: #86efac !important;
+        border-color: var(--success, #5a9a7a) !important;
+    }
+
+    [data-theme="dark"] .badge.grade-B {
+        background: rgba(106, 154, 170, 0.20) !important;
+        color: #93c5fd !important;
+        border-color: var(--info, #6a9aaa) !important;
+    }
+
+    [data-theme="dark"] .badge.grade-C {
+        background: rgba(201, 168, 76, 0.20) !important;
+        color: #fcd34d !important;
+        border-color: var(--warning, #c9a84c) !important;
+    }
+
+    [data-theme="dark"] .badge.grade-D {
+        background: rgba(196, 138, 58, 0.20) !important;
+        color: #fdba74 !important;
+        border-color: #c48a3a !important;
+    }
+
+    [data-theme="dark"] .badge.grade-F {
+        background: rgba(212, 106, 90, 0.20) !important;
+        color: #fca5a5 !important;
+        border-color: var(--danger, #d46a5a) !important;
+    }
+
+    [data-theme="dark"] .badge.badge-neutral {
+        background: rgba(240, 235, 230, 0.04) !important;
+        color: var(--text-muted, #6b5f56) !important;
+        border-color: var(--border-medium, #4a3d35) !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ACCESSIBILITY — High Contrast Print
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print and (prefers-contrast: high) {
+    .transcript-container {
+        border-width: 2px !important;
+        border-color: var(--text-dark, #1a1410) !important;
+    }
+
+    .transcript-header {
+        background: var(--text-dark, #1a1410) !important;
+        color: var(--text-inverse, #f5f0eb) !important;
+    }
+
+    .transcript-subjects thead th {
+        background: var(--text-dark, #1a1410) !important;
+        color: var(--text-inverse, #f5f0eb) !important;
+        border-color: var(--text-dark, #1a1410) !important;
+    }
+
+    .transcript-cumulative {
+        background: var(--text-dark, #1a1410) !important;
+        color: var(--text-inverse, #f5f0eb) !important;
+    }
+
+    .transcript-footer .decision-banner {
+        border-width: 2px !important;
+    }
+
+    .badge {
+        border-width: 1.5px !important;
+    }
+
+    .transcript-student-info .info-item {
+        border-color: var(--text-dark, #1a1410) !important;
+    }
+
+    .transcript-subjects tbody td {
+        border-color: var(--text-dark, #1a1410) !important;
+    }
+
+    .transcript-qr-block {
+        border-top-color: var(--text-dark, #1a1410) !important;
+    }
+
+    .transcript-qr-block img {
+        border-color: var(--text-dark, #1a1410) !important;
+    }
+
+    .transcript-signatures {
+        border-top-color: var(--text-dark, #1a1410) !important;
+    }
+
+    .transcript-signatures .sig-block .sig-line {
+        border-top-color: var(--text-dark, #1a1410) !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAGE MARGINS — Per Page Setup
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    .page-margin-top {
+        margin-top: 3mm !important;
+    }
+
+    .page-margin-bottom {
+        margin-bottom: 3mm !important;
+    }
+
+    .page-margin-left {
+        margin-left: 3mm !important;
+    }
+
+    .page-margin-right {
+        margin-right: 3mm !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   UTILITY — Force Page Breaks
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    .page-break-before {
+        page-break-before: always !important;
+    }
+
+    .page-break-after {
+        page-break-after: always !important;
+    }
+
+    .page-break-inside-avoid {
+        page-break-inside: avoid !important;
+    }
+
+    .page-break-after-avoid {
+        page-break-after: avoid !important;
+    }
+
+    /* ── Keep year total with its year ── */
+    .transcript-subjects tbody tr.year-total {
+        page-break-after: avoid !important;
+    }
+
+    /* ── Keep header with content ── */
+    .transcript-header {
+        page-break-after: avoid !important;
+    }
+
+    /* ── Keep summary with content ── */
+    .transcript-cumulative {
+        page-break-before: avoid !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   COMPACT / THERMAL PRINT (80mm)
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print and (max-width: 80mm) {
+    .transcript-container {
+        max-width: 100% !important;
+        border-radius: 0 !important;
+        border: none !important;
+        font-size: 7px !important;
+        padding: 4px !important;
+    }
+
+    .transcript-header {
+        padding: 6px 8px !important;
+        flex-direction: column !important;
+        gap: 3px !important;
+        text-align: center !important;
+    }
+
+    .transcript-header .transcript-logo {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 12px !important;
+    }
+
+    .transcript-header .transcript-header-text h1 {
+        font-size: 11px !important;
+    }
+
+    .transcript-header .transcript-header-text .transcript-title {
+        font-size: 9px !important;
+    }
+
+    .transcript-header .transcript-header-text .school-address {
+        font-size: 6px !important;
+    }
+
+    .transcript-header .transcript-header-text .transcript-subtitle {
+        font-size: 7px !important;
+    }
+
+    .transcript-student-info {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    .transcript-student-info .info-item {
+        padding: 3px 5px !important;
+        font-size: 7px !important;
+    }
+
+    .transcript-student-info .info-item strong {
+        font-size: 5px !important;
+    }
+
+    .transcript-student-info .info-item span {
+        font-size: 8px !important;
+    }
+
+    .transcript-student-info .info-item .gpa-value {
+        font-size: 10px !important;
+    }
+
+    .transcript-gpa-note {
+        font-size: 5px !important;
+    }
+
+    .transcript-subjects {
+        font-size: 6px !important;
+    }
+
+    .transcript-subjects thead th {
+        font-size: 5px !important;
+        padding: 2px 3px !important;
+    }
+
+    .transcript-subjects tbody td {
+        font-size: 6px !important;
+        padding: 2px 3px !important;
+    }
+
+    .transcript-cumulative {
+        grid-template-columns: repeat(2, 1fr) !important;
+        padding: 5px 6px !important;
+        gap: 2px !important;
+    }
+
+    .transcript-cumulative .cum-item .cum-label {
+        font-size: 5px !important;
+    }
+
+    .transcript-cumulative .cum-item .cum-value {
+        font-size: 10px !important;
+    }
+
+    .transcript-footer {
+        padding: 4px 6px !important;
+        font-size: 6px !important;
+    }
+
+    .transcript-signatures {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+        padding-top: 4px !important;
+        margin-top: 4px !important;
+    }
+
+    .transcript-signatures .sig-block .sig-line {
+        margin-top: 12px !important;
+        font-size: 6px !important;
+    }
+
+    .transcript-signatures .sig-block .sig-label {
+        font-size: 5px !important;
+    }
+
+    .transcript-qr-block {
+        padding: 3px 6px !important;
+        gap: 4px !important;
+    }
+
+    .transcript-qr-block img {
+        width: 32px !important;
+        height: 32px !important;
+    }
+
+    .transcript-qr-block .qr-text {
+        font-size: 5px !important;
+    }
+
+    .badge {
+        font-size: 5px !important;
+        padding: 0 3px !important;
+    }
+}

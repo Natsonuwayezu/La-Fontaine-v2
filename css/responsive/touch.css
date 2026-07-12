@@ -1,0 +1,995 @@
+/* ═══════════════════════════════════════════════════════════════════
+   TOUCH OPTIMIZATIONS — css/responsive/touch.css
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: Touch-specific enhancements for mobile devices.
+   Larger tap targets, touch feedback, swipe gestures,
+   and scroll optimizations.
+   No pure white (#FFFFFF), no pure black (#000000).
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   TOUCH TARGET SIZES — Minimum 44px for tap targets
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (pointer: coarse) {
+
+    /* ── Buttons ── */
+    .btn,
+    button,
+    .nav-item,
+    .tab-btn,
+    .page-btn,
+    .modal-close,
+    .dropdown-item,
+    .quick-btn,
+    .class-tab,
+    .toggle,
+    .checkbox,
+    .radio {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .btn-sm {
+        min-height: 38px;
+        min-width: 38px;
+    }
+
+    .btn-xs {
+        min-height: 32px;
+        min-width: 32px;
+    }
+
+    /* ── Form inputs ── */
+    input,
+    select,
+    textarea {
+        font-size: 16px !important;
+        /* Prevents iOS zoom on focus */
+        min-height: 44px;
+    }
+
+    input[type="checkbox"],
+    input[type="radio"] {
+        width: 22px;
+        height: 22px;
+        transform: scale(1.1);
+        margin-right: 8px;
+    }
+
+    /* ── Links ── */
+    a,
+    .clickable {
+        min-height: 44px;
+        padding: 8px 12px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    /* ── Navigation items ── */
+    .nav-item,
+    .nav-child {
+        min-height: 44px;
+        padding: 10px 14px;
+    }
+
+    .nav-group-header {
+        min-height: 44px;
+        padding: 10px 14px;
+    }
+
+    /* ── Badge pills ── */
+    .badge-pill {
+        min-height: 32px;
+        padding: 6px 14px;
+    }
+
+    /* ── Table cells ── */
+    .data-table td .btn {
+        min-height: 36px;
+        min-width: 36px;
+        padding: 6px 10px;
+    }
+
+    .data-table td {
+        padding: 10px 12px;
+    }
+
+    /* ── Quick actions ── */
+    .quick-btn {
+        min-height: 64px;
+        padding: 12px;
+    }
+
+    /* ── Toggle switch ── */
+    .toggle {
+        min-height: 32px;
+        min-width: 56px;
+    }
+
+    .toggle .toggle-track {
+        height: 28px;
+    }
+
+    .toggle .toggle-track::after {
+        width: 22px;
+        height: 22px;
+        top: 3px;
+        left: 3px;
+    }
+
+    .toggle input:checked+.toggle-track::after {
+        transform: translateX(26px);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TOUCH FEEDBACK — Active states for tactile response
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (pointer: coarse) {
+
+    /* ── Remove hover effects on touch ── */
+    .btn:hover,
+    .nav-item:hover,
+    .quick-btn:hover,
+    .module-card:hover,
+    .stat-card:hover,
+    .card-hover:hover,
+    .tab-btn:hover,
+    .dropdown-item:hover {
+        transform: none !important;
+    }
+
+    /* ── Active state for touch feedback ── */
+    .btn:active,
+    .nav-item:active,
+    .quick-btn:active,
+    .tab-btn:active,
+    .dropdown-item:active,
+    .modal-close:active,
+    .page-btn:active {
+        opacity: 0.65;
+        transition: opacity 0.05s;
+        transform: scale(0.96);
+    }
+
+    .stat-card:active,
+    .card-hover:active {
+        transform: scale(0.98) !important;
+        opacity: 0.85;
+        transition: opacity 0.05s, transform 0.05s;
+    }
+
+    /* ── Touch ripple effect ── */
+    .ripple-touch {
+        position: relative;
+        overflow: hidden;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .ripple-touch::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at var(--touch-x, 50%) var(--touch-y, 50%),
+                rgba(45, 31, 58, 0.08) 0%,
+                transparent 70%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+        border-radius: inherit;
+    }
+
+    .ripple-touch:active::after {
+        opacity: 1;
+    }
+
+    [data-theme="dark"] .ripple-touch::after {
+        background: radial-gradient(circle at var(--touch-x, 50%) var(--touch-y, 50%),
+                rgba(240, 235, 230, 0.06) 0%,
+                transparent 70%);
+    }
+
+    /* ── Button press feedback ── */
+    .btn-primary:active {
+        background: var(--role-secondary, #7a5a7a);
+    }
+
+    .btn-secondary:active {
+        opacity: 0.7;
+    }
+
+    .btn-success:active {
+        background: #2d6a4a;
+    }
+
+    .btn-danger:active {
+        background: #a84a3a;
+    }
+
+    .btn-warning:active {
+        background: #a08030;
+    }
+
+    .btn-info:active {
+        background: #3a6a7a;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SCROLL OPTIMIZATIONS
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (pointer: coarse) {
+
+    /* ── Smooth scrolling for containers ── */
+    .sidebar-nav,
+    .modal-body,
+    .table-wrapper,
+    .scrollable {
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        scroll-behavior: smooth;
+    }
+
+    /* ── Disable pull-to-refresh on modals ── */
+    .modal-body {
+        overscroll-behavior: contain;
+    }
+
+    /* ── Momentum scrolling ── */
+    .momentum-scroll {
+        -webkit-overflow-scrolling: touch;
+        overflow-y: auto;
+        scroll-behavior: smooth;
+    }
+
+    /* ── Hide scrollbars on touch for cleaner look ── */
+    .hide-scrollbar {
+        scrollbar-width: none;
+    }
+
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* ── Scroll snapping ── */
+    .snap-scroll {
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .snap-scroll .snap-item {
+        scroll-snap-align: start;
+        flex-shrink: 0;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SWIPE GESTURES
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (pointer: coarse) {
+
+    /* ── Swipe to dismiss ── */
+    .swipe-dismiss {
+        transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        touch-action: pan-y;
+    }
+
+    .swipe-dismiss.dismissing {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+
+    /* ── Swipe to reveal actions ── */
+    .swipe-reveal {
+        position: relative;
+        overflow: hidden;
+        touch-action: pan-y;
+    }
+
+    .swipe-reveal .swipe-content {
+        transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        will-change: transform;
+    }
+
+    .swipe-reveal .swipe-actions {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px;
+        transform: translateX(100%);
+        transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .swipe-reveal.revealed .swipe-content {
+        transform: translateX(-80px);
+    }
+
+    .swipe-reveal.revealed .swipe-actions {
+        transform: translateX(0);
+    }
+
+    /* ── Swipe to refresh indicator ── */
+    .pull-to-refresh {
+        position: relative;
+        overflow: hidden;
+        touch-action: pan-y;
+    }
+
+    .pull-to-refresh .pull-indicator {
+        position: absolute;
+        top: -60px;
+        left: 0;
+        right: 0;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: var(--bg-card, #fcfaf8);
+        border-bottom: 1px solid var(--border-light, #e8e0d8);
+        color: var(--text-muted, #a8988e);
+        font-size: 0.75rem;
+        transition: top 0.2s ease;
+        z-index: 10;
+    }
+
+    [data-theme="dark"] .pull-to-refresh .pull-indicator {
+        background: var(--bg-card, #241d18);
+        border-bottom-color: rgba(240, 235, 230, 0.06);
+        color: var(--text-muted, #6b5f56);
+    }
+
+    .pull-to-refresh .pull-indicator.active {
+        top: 0;
+    }
+
+    .pull-to-refresh .pull-indicator .spinner {
+        width: 20px;
+        height: 20px;
+        border-width: 2px;
+    }
+
+    .pull-to-refresh .pull-indicator .arrow {
+        transition: transform 0.3s ease;
+    }
+
+    .pull-to-refresh .pull-indicator .arrow.down {
+        transform: rotate(180deg);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ZOOM & GESTURE PREVENTION
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (pointer: coarse) {
+
+    /* ── Prevent double-tap zoom on interactive elements ── */
+    .no-zoom,
+    button,
+    .btn,
+    .nav-item,
+    .tab-btn,
+    .quick-btn,
+    .toggle,
+    .checkbox,
+    .radio {
+        touch-action: manipulation;
+    }
+
+    /* ── Prevent pull-to-refresh on critical containers ── */
+    .no-pull {
+        overscroll-behavior: contain;
+    }
+
+    /* ── Prevent pinch zoom on specific elements ── */
+    .no-pinch {
+        touch-action: pan-x pan-y;
+    }
+
+    /* ── Prevent text selection on interactive elements ── */
+    .no-select {
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TOUCH KEYBOARD OPTIMIZATIONS
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (pointer: coarse) {
+
+    /* ── Input focus scrolling prevention ── */
+    input:focus,
+    select:focus,
+    textarea:focus {
+        scroll-margin: 20px;
+    }
+
+    /* ── Auto-zoom prevention (already set via font-size: 16px) ── */
+    /* ── Form spacing for keyboard appearance ── */
+    .form-group {
+        margin-bottom: 12px;
+    }
+
+    /* ── Submit button positioning when keyboard is open ── */
+    .form-actions {
+        padding-bottom: env(safe-area-inset-bottom, 16px);
+    }
+
+    /* ── Dismiss keyboard button ── */
+    .keyboard-dismiss {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 44px;
+        background: var(--bg-card, #fcfaf8);
+        border-top: 1px solid var(--border-light, #e8e0d8);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--role-primary, #2d1f3a);
+        cursor: pointer;
+        z-index: 1000;
+        touch-action: manipulation;
+    }
+
+    [data-theme="dark"] .keyboard-dismiss {
+        background: var(--bg-card, #241d18);
+        border-top-color: rgba(240, 235, 230, 0.06);
+        color: var(--role-primary, #4d2f4a);
+    }
+
+    .keyboard-dismiss.visible {
+        display: flex;
+    }
+
+    .keyboard-dismiss:active {
+        opacity: 0.6;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SAFE AREA INSETS (Notch phones)
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (pointer: coarse) {
+    .safe-top {
+        padding-top: env(safe-area-inset-top, 0);
+    }
+
+    .safe-bottom {
+        padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+
+    .safe-left {
+        padding-left: env(safe-area-inset-left, 0);
+    }
+
+    .safe-right {
+        padding-right: env(safe-area-inset-right, 0);
+    }
+
+    /* ── Bottom navigation bar for mobile ── */
+    .bottom-nav {
+        padding-bottom: env(safe-area-inset-bottom, 8px);
+    }
+
+    /* ── Full-screen modals ── */
+    .modal-fullscreen {
+        padding-top: env(safe-area-inset-top, 16px);
+        padding-bottom: env(safe-area-inset-bottom, 16px);
+    }
+
+    /* ── Topbar safe area ── */
+    .topbar {
+        padding-top: env(safe-area-inset-top, 8px);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BOTTOM NAVIGATION (Mobile)
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (pointer: coarse) and (max-width: 768px) {
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--bg-card, #fcfaf8);
+        border-top: 1px solid var(--border-light, #e8e0d8);
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 6px 8px;
+        padding-bottom: calc(6px + env(safe-area-inset-bottom, 0));
+        z-index: 1000;
+        box-shadow: 0 -2px 20px rgba(26, 20, 16, 0.06);
+        touch-action: manipulation;
+    }
+
+    [data-theme="dark"] .bottom-nav {
+        background: var(--bg-card, #241d18);
+        border-top-color: rgba(240, 235, 230, 0.06);
+        box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.20);
+    }
+
+    .bottom-nav .nav-btn {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        padding: 6px 4px;
+        border-radius: 8px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        min-height: 44px;
+        min-width: 44px;
+        font-size: 10px;
+        font-weight: 500;
+        color: var(--text-muted, #a8988e);
+        transition: all 0.2s ease;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        position: relative;
+    }
+
+    [data-theme="dark"] .bottom-nav .nav-btn {
+        color: var(--text-muted, #6b5f56);
+    }
+
+    .bottom-nav .nav-btn .nav-icon {
+        font-size: 20px;
+        line-height: 1;
+    }
+
+    .bottom-nav .nav-btn .nav-label {
+        font-size: 9px;
+        line-height: 1.2;
+    }
+
+    .bottom-nav .nav-btn:active {
+        opacity: 0.6;
+        transform: scale(0.95);
+    }
+
+    .bottom-nav .nav-btn.active {
+        color: var(--role-primary, #2d1f3a);
+    }
+
+    [data-theme="dark"] .bottom-nav .nav-btn.active {
+        color: var(--role-primary, #4d2f4a);
+    }
+
+    .bottom-nav .nav-btn.active .nav-icon {
+        transform: scale(1.05);
+    }
+
+    /* ── Badge on bottom nav ── */
+    .bottom-nav .nav-btn .badge-dot {
+        position: absolute;
+        top: 4px;
+        right: 50%;
+        transform: translateX(calc(50% + 12px));
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--danger, #c45a4a);
+        border: 1.5px solid var(--bg-card, #fcfaf8);
+    }
+
+    [data-theme="dark"] .bottom-nav .nav-btn .badge-dot {
+        border-color: var(--bg-card, #241d18);
+    }
+
+    .bottom-nav .nav-btn .badge-count {
+        position: absolute;
+        top: 2px;
+        right: 50%;
+        transform: translateX(calc(50% + 10px));
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        border-radius: 99px;
+        background: var(--danger, #c45a4a);
+        color: var(--text-inverse, #f5f0eb);
+        font-size: 9px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1.5px solid var(--bg-card, #fcfaf8);
+    }
+
+    [data-theme="dark"] .bottom-nav .nav-btn .badge-count {
+        border-color: var(--bg-card, #241d18);
+        color: var(--text-inverse, #f5f0eb);
+    }
+
+    /* ── Hide bottom nav on certain pages ── */
+    .bottom-nav.hidden {
+        display: none;
+    }
+
+    /* ── Add padding for bottom nav ── */
+    .main-content {
+        padding-bottom: 70px;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TOUCH HAPTIC FEEDBACK (Vibration API)
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (pointer: coarse) {
+    .haptic-tap {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .haptic-tap:active {
+        /* Visual feedback fallback */
+        opacity: 0.7;
+        transition: opacity 0.05s;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RESPONSIVE TOUCH TABLES — Card view on mobile
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (pointer: coarse) and (max-width: 768px) {
+    .table-to-cards thead {
+        display: none;
+    }
+
+    .table-to-cards tbody,
+    .table-to-cards tr,
+    .table-to-cards td {
+        display: block;
+        width: 100%;
+    }
+
+    .table-to-cards tr {
+        margin-bottom: 12px;
+        border: 1px solid var(--border-light, #e8e0d8);
+        border-radius: var(--r-md, 10px);
+        background: var(--bg-card, #fcfaf8);
+        padding: 12px;
+        box-shadow: var(--shadow-sm, 0 1px 2px rgba(26, 20, 16, 0.05));
+    }
+
+    [data-theme="dark"] .table-to-cards tr {
+        border-color: rgba(240, 235, 230, 0.06);
+        background: var(--bg-card, #241d18);
+    }
+
+    .table-to-cards td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border-light, #e8e0d8);
+        text-align: right;
+    }
+
+    [data-theme="dark"] .table-to-cards td {
+        border-bottom-color: rgba(240, 235, 230, 0.04);
+    }
+
+    .table-to-cards td:last-child {
+        border-bottom: none;
+    }
+
+    .table-to-cards td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--text-soft, #6b5f56);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        text-align: left;
+        margin-right: 12px;
+    }
+
+    [data-theme="dark"] .table-to-cards td::before {
+        color: var(--text-soft, #9a8e86);
+    }
+
+    .table-to-cards td .btn {
+        min-height: 36px;
+        min-width: 36px;
+        padding: 4px 12px;
+        font-size: 0.75rem;
+    }
+
+    .table-to-cards td .btn-group {
+        flex-wrap: nowrap;
+        gap: 4px;
+    }
+
+    .table-to-cards td .btn-group .btn {
+        min-height: 32px;
+        min-width: 32px;
+        padding: 4px 8px;
+        font-size: 0.7rem;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TOUCH DRAGGABLE ITEMS
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (pointer: coarse) {
+    .draggable {
+        touch-action: none;
+        cursor: grab;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+
+    .draggable:active {
+        cursor: grabbing;
+    }
+
+    .draggable.dragging {
+        opacity: 0.7;
+        transform: scale(0.98);
+        z-index: 1000;
+        box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(26, 20, 16, 0.08));
+    }
+
+    /* ── Sortable list items ── */
+    .sortable-item {
+        touch-action: none;
+        cursor: grab;
+        padding: 12px 16px;
+        background: var(--bg-card, #fcfaf8);
+        border: 1px solid var(--border-light, #e8e0d8);
+        border-radius: var(--r-sm, 6px);
+        margin-bottom: 4px;
+        transition: all 0.2s ease;
+    }
+
+    [data-theme="dark"] .sortable-item {
+        background: var(--bg-card, #241d18);
+        border-color: rgba(240, 235, 230, 0.06);
+    }
+
+    .sortable-item:active {
+        cursor: grabbing;
+    }
+
+    .sortable-item.dragging {
+        opacity: 0.6;
+        transform: scale(0.97);
+        border-color: var(--role-primary, #2d1f3a);
+    }
+
+    [data-theme="dark"] .sortable-item.dragging {
+        border-color: var(--role-primary, #4d2f4a);
+    }
+
+    .sortable-item .drag-handle {
+        cursor: grab;
+        touch-action: none;
+        color: var(--text-muted, #a8988e);
+        padding: 4px 8px;
+    }
+
+    [data-theme="dark"] .sortable-item .drag-handle {
+        color: var(--text-muted, #6b5f56);
+    }
+
+    .sortable-item .drag-handle:active {
+        cursor: grabbing;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TOUCH CAROUSEL / HORIZONTAL SCROLL
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (pointer: coarse) {
+    .touch-carousel {
+        display: flex;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        gap: 12px;
+        padding: 4px 2px;
+        scrollbar-width: none;
+    }
+
+    .touch-carousel::-webkit-scrollbar {
+        display: none;
+    }
+
+    .touch-carousel .carousel-item {
+        flex: 0 0 85%;
+        max-width: 85%;
+        scroll-snap-align: start;
+        background: var(--bg-card, #fcfaf8);
+        border-radius: var(--r-md, 10px);
+        border: 1px solid var(--border-light, #e8e0d8);
+        padding: 16px;
+    }
+
+    [data-theme="dark"] .touch-carousel .carousel-item {
+        background: var(--bg-card, #241d18);
+        border-color: rgba(240, 235, 230, 0.06);
+    }
+
+    .touch-carousel .carousel-item:last-child {
+        flex: 0 0 80%;
+        max-width: 80%;
+    }
+
+    /* ── Carousel indicators ── */
+    .carousel-dots {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 0;
+    }
+
+    .carousel-dots .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--bg-tertiary, #f0ebe6);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        touch-action: manipulation;
+        min-height: 8px;
+        min-width: 8px;
+    }
+
+    [data-theme="dark"] .carousel-dots .dot {
+        background: rgba(240, 235, 230, 0.06);
+    }
+
+    .carousel-dots .dot.active {
+        width: 24px;
+        border-radius: 4px;
+        background: var(--role-primary, #2d1f3a);
+    }
+
+    [data-theme="dark"] .carousel-dots .dot.active {
+        background: var(--role-primary, #4d2f4a);
+    }
+
+    .carousel-dots .dot:active {
+        opacity: 0.6;
+        transform: scale(0.9);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   REDUCED MOTION (Accessibility)
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .btn:active,
+    .nav-item:active,
+    .quick-btn:active {
+        opacity: 0.7;
+        transform: none !important;
+    }
+
+    .ripple-touch::after {
+        display: none;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK THEME OVERRIDES
+   ═══════════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] {
+    @media (pointer: coarse) {
+        .ripple-touch::after {
+            background: radial-gradient(circle at var(--touch-x, 50%) var(--touch-y, 50%),
+                    rgba(240, 235, 230, 0.04) 0%,
+                    transparent 70%);
+        }
+
+        .bottom-nav {
+            background: var(--bg-card, #241d18);
+            border-top-color: rgba(240, 235, 230, 0.06);
+        }
+
+        .bottom-nav .nav-btn {
+            color: var(--text-muted, #6b5f56);
+        }
+
+        .bottom-nav .nav-btn.active {
+            color: var(--role-primary, #4d2f4a);
+        }
+
+        .pull-to-refresh .pull-indicator {
+            background: var(--bg-card, #241d18);
+            border-bottom-color: rgba(240, 235, 230, 0.06);
+            color: var(--text-muted, #6b5f56);
+        }
+
+        .keyboard-dismiss {
+            background: var(--bg-card, #241d18);
+            border-top-color: rgba(240, 235, 230, 0.06);
+            color: var(--role-primary, #4d2f4a);
+        }
+
+        .table-to-cards tr {
+            border-color: rgba(240, 235, 230, 0.06);
+            background: var(--bg-card, #241d18);
+        }
+
+        .table-to-cards td {
+            border-bottom-color: rgba(240, 235, 230, 0.04);
+        }
+
+        .table-to-cards td::before {
+            color: var(--text-soft, #9a8e86);
+        }
+
+        .sortable-item {
+            background: var(--bg-card, #241d18);
+            border-color: rgba(240, 235, 230, 0.06);
+        }
+
+        .sortable-item.dragging {
+            border-color: var(--role-primary, #4d2f4a);
+        }
+
+        .sortable-item .drag-handle {
+            color: var(--text-muted, #6b5f56);
+        }
+
+        .touch-carousel .carousel-item {
+            background: var(--bg-card, #241d18);
+            border-color: rgba(240, 235, 230, 0.06);
+        }
+
+        .carousel-dots .dot {
+            background: rgba(240, 235, 230, 0.06);
+        }
+
+        .carousel-dots .dot.active {
+            background: var(--role-primary, #4d2f4a);
+        }
+
+        .bottom-nav .nav-btn .badge-dot {
+            border-color: var(--bg-card, #241d18);
+        }
+
+        .bottom-nav .nav-btn .badge-count {
+            border-color: var(--bg-card, #241d18);
+        }
+    }
+}

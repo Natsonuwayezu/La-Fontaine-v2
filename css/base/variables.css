@@ -1,158 +1,391 @@
 /* ═══════════════════════════════════════════════════════════════════
-   VARIABLES — All design tokens (Light theme default)
+   VARIABLES — Complete Design System
    ═══════════════════════════════════════════════════════════════════
    Purpose: Centralize all design decisions. Any change here
    propagates throughout the entire application.
    ═══════════════════════════════════════════════════════════════════ */
 
 :root {
-    /* ─── Colors — Light theme (default) ─── */
+    /* ═══════════════════════════════════════════════════════════════
+       BACKGROUND COLORS — Warm, organic tones
+       No pure white (#FFFFFF), no pure black (#000000)
+       ═══════════════════════════════════════════════════════════════ */
+
     --bg-body: #f5f0eb;
-    --bg-card: #ffffff;
-    --bg-card-hover: #f8fafc;
+    --bg-card: #fcfaf8;
+    --bg-card-hover: #f8f4f0;
     --bg-card-alt: #faf7f4;
+    --bg-tertiary: #f0ebe6;
+    --bg-hover: #f5f0eb;
+    --bg-active: #e8e0d8;
+    --bg-disabled: #f0ebe6;
+    --bg-surface: #fcfaf8;
+    --bg-input: #f8f4f0;
+    --bg-input-hover: #f0ebe6;
+    --bg-selection: rgba(181, 101, 118, 0.10);
     --bg-accent-soft: #f0ebe6;
-    --bg-overlay: rgba(0, 0, 0, 0.4);
-    --bg-surface: #ffffff;
-    --bg-input: #f8fafc;
-    --bg-input-hover: #f1f5f9;
-    --bg-selection: rgba(196, 69, 54, 0.1);
-    --bg-hover: rgba(0, 0, 0, 0.03);
+    --bg-overlay: rgba(26, 20, 16, 0.45);
+
+    /* ═══════════════════════════════════════════════════════════════
+       TEXT COLORS — Rich, readable, warm
+       ═══════════════════════════════════════════════════════════════ */
 
     --text-dark: #1a1410;
-    --text-body: #3d342e;
-    --text-soft: #7a6e66;
-    --text-muted: #b5aaa2;
-    --text-dim: #d4ccc6;
+    --text-body: #2c241e;
+    --text-soft: #6b5f56;
+    --text-muted: #a8988e;
+    --text-dim: #c4b8b0;
+    --text-primary: #2c241e;
+    --text-secondary: #6b5f56;
+    --text-disabled: #c4b8b0;
+    --text-inverse: #f5f0eb;
 
-    --border-color: #e2e8f0;
-    --border-color-hover: #cbd5e1;
+    /* ═══════════════════════════════════════════════════════════════
+       BORDER COLORS
+       ═══════════════════════════════════════════════════════════════ */
 
-    /* ─── Role colors ─── */
-    --primary: #c44536;
-    --primary-dark: #a83528;
-    --primary-light: #e8c9c2;
-    --primary-glow: rgba(196, 69, 54, 0.12);
-    --primary-gradient: linear-gradient(135deg, #c44536, #a83528);
+    --border-light: #e8e0d8;
+    --border-medium: #d4c8be;
+    --border-dark: #b8a89e;
+    --border-focus: #b56576;
+    --border-error: #c45a4a;
+    --border-success: #3a7a5a;
 
-    --secondary: #2d6a4f;
-    --secondary-light: #d4e8df;
-    --secondary-glow: rgba(45, 106, 79, 0.12);
+    /* ═══════════════════════════════════════════════════════════════
+       ADMIN ROLE COLORS — Deep Burgundy/Navy
+       ═══════════════════════════════════════════════════════════════ */
 
-    --gold: #c99a3b;
+    --admin-primary: #2d1f3a;
+    --admin-secondary: #7a5a7a;
+    --admin-accent: #c9a84c;
+    --admin-light: rgba(45, 31, 58, 0.08);
+    --admin-gradient: linear-gradient(135deg, #2d1f3a, #4d2f4a);
+
+    /* ═══════════════════════════════════════════════════════════════
+       ACCOUNTANT ROLE COLORS — Teal/Sage
+       ═══════════════════════════════════════════════════════════════ */
+
+    --accountant-primary: #2d5a4a;
+    --accountant-secondary: #5a8a7a;
+    --accountant-accent: #c9a84c;
+    --accountant-light: rgba(45, 90, 74, 0.08);
+    --accountant-gradient: linear-gradient(135deg, #2d5a4a, #4d7a6a);
+
+    /* ═══════════════════════════════════════════════════════════════
+       TEACHER ROLE COLORS — Plum/Purple
+       ═══════════════════════════════════════════════════════════════ */
+
+    --teacher-primary: #4a2d5a;
+    --teacher-secondary: #8a5a9a;
+    --teacher-accent: #c9a84c;
+    --teacher-light: rgba(74, 45, 90, 0.08);
+    --teacher-gradient: linear-gradient(135deg, #4a2d5a, #6a3d7a);
+
+    /* ═══════════════════════════════════════════════════════════════
+       ACTIVE ROLE (OVERRIDDEN BY BODY CLASS)
+       ═══════════════════════════════════════════════════════════════ */
+
+    --role-primary: var(--admin-primary);
+    --role-secondary: var(--admin-secondary);
+    --role-accent: var(--admin-accent);
+    --role-light: var(--admin-light);
+    --role-gradient: var(--admin-gradient);
+
+    /* ═══════════════════════════════════════════════════════════════
+       SEMANTIC COLORS
+       ═══════════════════════════════════════════════════════════════ */
+
+    --success: #3a7a5a;
+    --success-bg: #dce8e0;
+    --success-border: #3a7a5a;
+    --warning: #b8983a;
+    --warning-bg: #f0e8d0;
+    --warning-border: #b8983a;
+    --danger: #c45a4a;
+    --danger-bg: #f0e0dc;
+    --danger-border: #c45a4a;
+    --info: #4a7a8a;
+    --info-bg: #dce8ec;
+    --info-border: #4a7a8a;
+
+    /* ═══════════════════════════════════════════════════════════════
+       ACCENT COLORS
+       ═══════════════════════════════════════════════════════════════ */
+
+    --gold: #c9a84c;
     --gold-light: #f5e6c8;
-    --gold-glow: rgba(201, 154, 59, 0.12);
-
+    --gold-glow: rgba(201, 154, 59, 0.10);
     --rose: #b56576;
     --rose-light: #f0dde2;
-    --rose-glow: rgba(181, 101, 118, 0.12);
-
+    --rose-glow: rgba(181, 101, 118, 0.10);
     --teal: #3a7d7a;
     --teal-light: #d4e8e7;
-    --teal-glow: rgba(58, 125, 122, 0.12);
-
+    --teal-glow: rgba(58, 125, 122, 0.10);
     --ink: #2c2c3a;
     --ink-light: #e8e6ed;
+    --purple: #7a5a9a;
+    --purple-light: #e8dcec;
+    --emerald: #3a8a6a;
+    --emerald-light: #dce8e0;
+    --cyan: #3a7a8a;
+    --cyan-light: #dce8ec;
 
-    --purple: #7c5cfc;
-    --purple-light: #e8e2fc;
+    /* ═══════════════════════════════════════════════════════════════
+       GRADE COLORS
+       ═══════════════════════════════════════════════════════════════ */
 
-    --emerald: #10b981;
-    --emerald-light: #6ee7b7;
+    --grade-aplus: #3a7a5a;
+    --grade-a: #5a9a7a;
+    --grade-b: #6a8aba;
+    --grade-c: #c9a84c;
+    --grade-d: #c48a3a;
+    --grade-f: #c45a4a;
 
-    --cyan: #06b6d4;
-    --cyan-light: #67e8f9;
+    /* ═══════════════════════════════════════════════════════════════
+       SHADOWS
+       ═══════════════════════════════════════════════════════════════ */
 
-    /* ─── Status colors ─── */
-    --success: #10b981;
-    --success-light: #d1fae5;
-    --warning: #f59e0b;
-    --warning-light: #fef3c7;
-    --danger: #ef4444;
-    --danger-light: #fee2e2;
-    --info: #0ea5e9;
-    --info-light: #dbeafe;
-
-    /* ─── Shadows ─── */
+    --shadow-none: none;
+    --shadow-sm: 0 1px 2px rgba(26, 20, 16, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(26, 20, 16, 0.08), 0 2px 4px -1px rgba(26, 20, 16, 0.04);
+    --shadow-lg: 0 10px 15px -3px rgba(26, 20, 16, 0.08), 0 4px 6px -2px rgba(26, 20, 16, 0.04);
+    --shadow-xl: 0 20px 25px -5px rgba(26, 20, 16, 0.08), 0 10px 10px -5px rgba(26, 20, 16, 0.04);
+    --shadow-2xl: 0 25px 50px -12px rgba(26, 20, 16, 0.15);
+    --shadow-inner: inset 0 2px 4px 0 rgba(26, 20, 16, 0.04);
+    --shadow-focus: 0 0 0 3px rgba(181, 101, 118, 0.12);
     --shadow-card: 0 2px 20px rgba(26, 20, 16, 0.06);
-    --shadow-hover: 0 8px 40px rgba(26, 20, 16, 0.10);
-    --shadow-overlay: 0 20px 60px rgba(0, 0, 0, 0.3);
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+    --shadow-hover: 0 8px 40px rgba(26, 20, 16, 0.08);
+    --shadow-overlay: 0 20px 60px rgba(10, 8, 6, 0.30);
 
-    /* ─── Radius ─── */
-    --radius-sm: 6px;
-    --radius: 12px;
-    --radius-lg: 16px;
-    --radius-xl: 24px;
-    --radius-full: 9999px;
+    /* ═══════════════════════════════════════════════════════════════
+       RADIUS
+       ═══════════════════════════════════════════════════════════════ */
 
-    /* ─── Spacing ─── */
-    --spacing-1: 4px;
-    --spacing-2: 8px;
-    --spacing-3: 12px;
-    --spacing-4: 16px;
-    --spacing-5: 20px;
-    --spacing-6: 24px;
-    --spacing-8: 32px;
-    --spacing-10: 40px;
-    --spacing-12: 48px;
-    --spacing-16: 64px;
+    --r-none: 0;
+    --r-sm: 6px;
+    --r-md: 10px;
+    --r-lg: 14px;
+    --r-xl: 18px;
+    --r-2xl: 22px;
+    --r-full: 9999px;
 
-    /* ─── Transitions ─── */
-    --transition: 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-    --transition-fast: 0.2s ease;
+    /* ═══════════════════════════════════════════════════════════════
+       SPACING SYSTEM (8px base)
+       ═══════════════════════════════════════════════════════════════ */
+
+    --xs: 4px;
+    --sm: 8px;
+    --md: 16px;
+    --lg: 24px;
+    --xl: 32px;
+    --xxl: 48px;
+    --xxxl: 64px;
+
+    /* ═══════════════════════════════════════════════════════════════
+       TRANSITIONS
+       ═══════════════════════════════════════════════════════════════ */
+
+    --transition-fast: 0.15s ease;
+    --transition: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     --transition-slow: 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    --transition-bounce: 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
-    /* ─── Z-Index ─── */
-    --z-base: 1;
-    --z-dropdown: 50;
-    --z-sticky: 100;
-    --z-overlay: 200;
-    --z-modal: 500;
-    --z-toast: 1000;
-    --z-loader: 2000;
+    /* ═══════════════════════════════════════════════════════════════
+       LAYOUT
+       ═══════════════════════════════════════════════════════════════ */
 
-    /* ─── Sidebar ─── */
     --sidebar-w: 272px;
-    --sidebar-collapsed-w: 72px;
-    --sidebar-bg: #ffffff;
-    --sidebar-border: #e2e8f0;
-    --sidebar-hover: #f1f5f9;
-    --sidebar-text: #1a1410;
-    --sidebar-text-muted: #7a6e66;
+    --sidebar-w-collapsed: 80px;
+    --topbar-h: 64px;
+    --topbar-h-mobile: 56px;
+    --footer-h: 60px;
+    --max-width: 1400px;
 
-    /* ─── Topbar ─── */
-    --topbar-bg: #ffffff;
-    --topbar-border: #e2e8f0;
-    --topbar-text: #1a1410;
-    --topbar-text-muted: #7a6e66;
-    --topbar-text-dim: #b5aaa2;
-    --topbar-hover: #f1f5f9;
+    /* ═══════════════════════════════════════════════════════════════
+       FONTS
+       ═══════════════════════════════════════════════════════════════ */
 
-    /* ─── Fonts ─── */
-    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-serif: 'Playfair Display', Georgia, serif;
-    --font-mono: 'DM Sans', 'Courier New', monospace;
+    --font-sans: 'DM Sans', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-serif: 'Playfair Display', 'Syne', Georgia, serif;
+    --font-mono: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
 
-    /* ─── Typography scale ─── */
-    --text-xs: 10px;
-    --text-sm: 12px;
-    --text-base: 14px;
-    --text-lg: 16px;
-    --text-xl: 18px;
-    --text-2xl: 22px;
-    --text-3xl: 28px;
-    --text-4xl: 34px;
-    --text-5xl: 42px;
+    /* ═══════════════════════════════════════════════════════════════
+       TYPOGRAPHY SCALE
+       ═══════════════════════════════════════════════════════════════ */
 
-    /* ─── Line heights ─── */
+    --text-xs: 0.75rem;
+    /* 12px */
+    --text-sm: 0.875rem;
+    /* 14px */
+    --text-base: 1rem;
+    /* 16px */
+    --text-lg: 1.125rem;
+    /* 18px */
+    --text-xl: 1.25rem;
+    /* 20px */
+    --text-2xl: 1.5rem;
+    /* 24px */
+    --text-3xl: 1.875rem;
+    /* 30px */
+    --text-4xl: 2.25rem;
+    /* 36px */
+    --text-5xl: 3rem;
+    /* 48px */
+
+    /* ═══════════════════════════════════════════════════════════════
+       LINE HEIGHTS
+       ═══════════════════════════════════════════════════════════════ */
+
     --lh-tight: 1.1;
     --lh-normal: 1.5;
     --lh-loose: 1.7;
 
-    /* ─── Scrollbar ─── */
-    --scrollbar-track: var(--bg-body);
-    --scrollbar-thumb: var(--text-muted);
+    /* ═══════════════════════════════════════════════════════════════
+       Z-INDEX
+       ═══════════════════════════════════════════════════════════════ */
+
+    --z-negative: -1;
+    --z-low: 10;
+    --z-medium: 100;
+    --z-high: 200;
+    --z-dropdown: 300;
+    --z-modal: 500;
+    --z-tooltip: 600;
+    --z-toast: 999;
+    --z-loader: 9999;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK THEME — Warm, deep, no pure black (#000000)
+   ═══════════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] {
+    /* ── Backgrounds ── */
+    --bg-body: #1a1410;
+    --bg-card: #241d18;
+    --bg-card-hover: #2a221c;
+    --bg-card-alt: #2a221c;
+    --bg-tertiary: #2a221c;
+    --bg-hover: #2a221c;
+    --bg-active: #332a24;
+    --bg-disabled: #2a221c;
+    --bg-surface: #241d18;
+    --bg-input: #2a221c;
+    --bg-input-hover: #332a24;
+    --bg-selection: rgba(181, 101, 118, 0.15);
+    --bg-accent-soft: #2a221c;
+    --bg-overlay: rgba(10, 8, 6, 0.65);
+
+    /* ── Text ── */
+    --text-dark: #f0ebe6;
+    --text-body: #d4ccc6;
+    --text-soft: #9a8e86;
+    --text-muted: #6b5f56;
+    --text-dim: #5a4e46;
+    --text-primary: #f0ebe6;
+    --text-secondary: #b8a89e;
+    --text-disabled: #6b5f56;
+    --text-inverse: #1a1410;
+
+    /* ── Borders ── */
+    --border-light: #332a24;
+    --border-medium: #4a3d35;
+    --border-dark: #6b5f56;
+    --border-focus: #c97586;
+    --border-error: #d46a5a;
+    --border-success: #5a9a7a;
+
+    /* ── Admin Role (Dark) ── */
+    --admin-primary: #4d2f4a;
+    --admin-secondary: #9a7a9a;
+    --admin-light: rgba(77, 47, 74, 0.20);
+
+    /* ── Accountant Role (Dark) ── */
+    --accountant-primary: #4d7a6a;
+    --accountant-secondary: #7a9a8a;
+    --accountant-light: rgba(77, 122, 106, 0.20);
+
+    /* ── Teacher Role (Dark) ── */
+    --teacher-primary: #6a3d7a;
+    --teacher-secondary: #9a6aaa;
+    --teacher-light: rgba(106, 61, 122, 0.20);
+
+    /* ── Role (Dark) ── */
+    --role-primary: var(--admin-primary);
+    --role-secondary: var(--admin-secondary);
+    --role-light: var(--admin-light);
+
+    /* ── Semantic (Dark) ── */
+    --success: #5a9a7a;
+    --success-bg: #1a3a2a;
+    --success-border: #5a9a7a;
+    --warning: #c9a84c;
+    --warning-bg: #3a2a10;
+    --warning-border: #c9a84c;
+    --danger: #d46a5a;
+    --danger-bg: #3a1a14;
+    --danger-border: #d46a5a;
+    --info: #6a9aaa;
+    --info-bg: #1a2a3a;
+    --info-border: #6a9aaa;
+
+    /* ── Grade (Dark) ── */
+    --grade-aplus: #5a9a7a;
+    --grade-a: #7aaa8a;
+    --grade-b: #8a9aba;
+    --grade-c: #c9a84c;
+    --grade-d: #c48a3a;
+    --grade-f: #d46a5a;
+
+    /* ── Accents (Dark) ── */
+    --gold: #c9a84c;
+    --gold-light: #3a2a10;
+    --rose: #c57586;
+    --rose-light: #3a2228;
+    --teal: #4a8d8a;
+    --teal-light: #1a3a38;
+    --purple: #8a6aaa;
+    --purple-light: #2a1a3a;
+    --emerald: #4a8a6a;
+    --emerald-light: #1a2a1a;
+    --cyan: #4a7a8a;
+    --cyan-light: #1a2a3a;
+
+    /* ── Shadows (Dark) ── */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.30);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.30), 0 2px 4px -1px rgba(0, 0, 0, 0.20);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.30), 0 4px 6px -2px rgba(0, 0, 0, 0.20);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.30), 0 10px 10px -5px rgba(0, 0, 0, 0.20);
+    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.40);
+    --shadow-card: 0 2px 20px rgba(0, 0, 0, 0.25);
+    --shadow-hover: 0 8px 40px rgba(0, 0, 0, 0.30);
+    --shadow-overlay: 0 20px 60px rgba(0, 0, 0, 0.40);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ROLE OVERRIDES — Applied via body class
+   ═══════════════════════════════════════════════════════════════════ */
+
+body.role-admin {
+    --role-primary: var(--admin-primary);
+    --role-secondary: var(--admin-secondary);
+    --role-accent: var(--admin-accent);
+    --role-light: var(--admin-light);
+    --role-gradient: var(--admin-gradient);
+}
+
+body.role-accountant {
+    --role-primary: var(--accountant-primary);
+    --role-secondary: var(--accountant-secondary);
+    --role-accent: var(--accountant-accent);
+    --role-light: var(--accountant-light);
+    --role-gradient: var(--accountant-gradient);
+}
+
+body.role-teacher {
+    --role-primary: var(--teacher-primary);
+    --role-secondary: var(--teacher-secondary);
+    --role-accent: var(--teacher-accent);
+    --role-light: var(--teacher-light);
+    --role-gradient: var(--teacher-gradient);
 }

@@ -1,11 +1,9 @@
-/* ═══════════════════════════════════════════════════════════════════
-   RESET — Minimal, opinionated CSS reset
-   ═══════════════════════════════════════════════════════════════════
-   Purpose: Normalize browser defaults and provide a consistent
-   foundation across all browsers.
-   ═══════════════════════════════════════════════════════════════════ */
+/* ============================================================
+   RESET — ECOLE LA FONTAINE
+   Clean slate, no pure white, no pure black.
+   Warm, rich foundation.
+   ============================================================ */
 
-/* ─── Box sizing ─── */
 *,
 *::before,
 *::after {
@@ -14,107 +12,198 @@
     box-sizing: border-box;
 }
 
-/* ─── HTML element defaults ─── */
 html {
+    font-size: 16px;
+    scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    text-size-adjust: 100%;
+}
+
+body {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: #f5f0eb;
+    color: #2c241e;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-    scroll-behavior: smooth;
 }
 
-/* ─── Body defaults ─── */
-body {
-    min-height: 100vh;
-    min-height: 100dvh;
-    /* Dynamic viewport height for mobile */
-    line-height: 1.5;
-    font-weight: 400;
-    overflow-x: hidden;
+/* ─── Headings ────────────────────────────────────────────────── */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+    color: #1e1713;
 }
 
-/* ─── Media elements ─── */
-img,
-picture,
-video,
-canvas,
-svg {
-    display: block;
-    max-width: 100%;
+h1 {
+    font-size: 2rem;
+    letter-spacing: -0.025em;
 }
 
-/* ─── Form elements ─── */
-input,
-button,
-textarea,
-select {
-    font: inherit;
-    color: inherit;
+h2 {
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
 }
 
-button {
-    cursor: pointer;
-    border: none;
-    background: none;
-    font-family: inherit;
+h3 {
+    font-size: 1.25rem;
+    letter-spacing: -0.015em;
 }
 
-/* ─── Links ─── */
+h4 {
+    font-size: 1.125rem;
+    letter-spacing: -0.01em;
+}
+
+h5 {
+    font-size: 1rem;
+}
+
+h6 {
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ─── Links ────────────────────────────────────────────────────── */
 a {
-    color: inherit;
+    color: #b56576;
     text-decoration: none;
+    transition: color 0.2s ease;
+    cursor: pointer;
 }
 
-/* ─── Lists ─── */
+a:hover {
+    color: #8a4b5a;
+    text-decoration: underline;
+}
+
+a:focus-visible {
+    outline: 2px solid #b56576;
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+
+/* ─── Lists ────────────────────────────────────────────────────── */
 ul,
 ol {
     list-style: none;
 }
 
-/* ─── Tables ─── */
-table {
-    border-collapse: collapse;
-    border-spacing: 0;
+/* ─── Media ────────────────────────────────────────────────────── */
+img,
+picture,
+video,
+canvas,
+svg {
+    max-width: 100%;
+    height: auto;
+    display: block;
 }
 
-/* ─── Horizontal rule ─── */
-hr {
+img {
+    object-fit: cover;
+}
+
+/* ─── Forms ────────────────────────────────────────────────────── */
+input,
+select,
+textarea,
+button {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    color: inherit;
+}
+
+button {
+    background: none;
     border: none;
-    border-top: 1px solid currentColor;
-    opacity: 0.1;
+    cursor: pointer;
 }
 
-/* ─── Remove number input spinners ─── */
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    opacity: 0.5;
 }
 
-input[type="number"] {
-    -moz-appearance: textfield;
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%239a8e86' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 20px;
 }
 
-/* ─── Focus styles for accessibility ─── */
+/* ─── Focus ────────────────────────────────────────────────────── */
 :focus-visible {
-    outline: 2px solid var(--primary);
+    outline: 2px solid #b56576;
     outline-offset: 2px;
+    border-radius: 6px;
 }
 
-/* ─── Selection styles ─── */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    border-color: #b56576;
+    box-shadow: 0 0 0 3px rgba(181, 101, 118, 0.12);
+}
+
+/* ─── Scrollbar ────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f0ebe6;
+    border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c4b8b0;
+    border-radius: 99px;
+    transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a89c94;
+}
+
+::-webkit-scrollbar-corner {
+    background: #f0ebe6;
+}
+
+/* ─── Selection ────────────────────────────────────────────────── */
 ::selection {
-    background: var(--primary);
-    color: #ffffff;
+    background: #b56576;
+    color: #f5f0eb;
 }
 
-/* ─── Hidden attribute ─── */
-[hidden] {
-    display: none !important;
+::-moz-selection {
+    background: #b56576;
+    color: #f5f0eb;
 }
 
-/* ─── Disabled state ─── */
+/* ─── Disabled ────────────────────────────────────────────────── */
 [disabled] {
     opacity: 0.5;
     cursor: not-allowed;
     pointer-events: none;
+}
+
+/* ─── Hidden ───────────────────────────────────────────────────── */
+[hidden] {
+    display: none !important;
 }

@@ -1,0 +1,508 @@
+/* ═══════════════════════════════════════════════════════════════════
+   BADGES & PILLS — css/components/badges.css
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: Standardized badge components for status indicators,
+   labels, grades, and categories. Includes all variants with
+   proper dark mode support.
+   No pure white (#FFFFFF), no pure black (#000000).
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   BASE BADGE
+   ═══════════════════════════════════════════════════════════════════ */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 10px;
+    border-radius: var(--r-full, 9999px);
+    font-size: 0.68rem;
+    font-weight: 600;
+    white-space: nowrap;
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+    border: 1px solid transparent;
+    transition: all var(--transition-fast, 0.15s ease);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BADGE SIZES
+   ═══════════════════════════════════════════════════════════════════ */
+
+.badge-xs {
+    padding: 1px 6px;
+    font-size: 0.6rem;
+    line-height: 1.3;
+}
+
+.badge-sm {
+    padding: 2px 8px;
+    font-size: 0.65rem;
+    line-height: 1.3;
+}
+
+.badge-lg {
+    padding: 4px 14px;
+    font-size: 0.78rem;
+    line-height: 1.5;
+}
+
+.badge-xl {
+    padding: 6px 18px;
+    font-size: 0.85rem;
+    line-height: 1.6;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BADGE VARIANTS — Semantic
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Success ──────────────────────────────────────────────────────── */
+
+.badge-success {
+    background: var(--success-bg, #dce8e0);
+    color: #2a5a3a;
+    border-color: rgba(58, 122, 90, 0.15);
+}
+
+[data-theme="dark"] .badge-success {
+    background: rgba(58, 122, 90, 0.15);
+    color: #86efac;
+    border-color: rgba(90, 154, 122, 0.20);
+}
+
+/* ── Warning ──────────────────────────────────────────────────────── */
+
+.badge-warning {
+    background: var(--warning-bg, #f0e8d0);
+    color: #7a5a1a;
+    border-color: rgba(184, 152, 58, 0.15);
+}
+
+[data-theme="dark"] .badge-warning {
+    background: rgba(184, 152, 58, 0.15);
+    color: #fcd34d;
+    border-color: rgba(201, 168, 76, 0.20);
+}
+
+/* ── Danger ───────────────────────────────────────────────────────── */
+
+.badge-danger {
+    background: var(--danger-bg, #f0e0dc);
+    color: #8a3a2a;
+    border-color: rgba(196, 90, 74, 0.15);
+}
+
+[data-theme="dark"] .badge-danger {
+    background: rgba(196, 90, 74, 0.15);
+    color: #fca5a5;
+    border-color: rgba(212, 106, 90, 0.20);
+}
+
+/* ── Info ─────────────────────────────────────────────────────────── */
+
+.badge-info {
+    background: var(--info-bg, #dce8ec);
+    color: #1a4a5a;
+    border-color: rgba(74, 122, 138, 0.15);
+}
+
+[data-theme="dark"] .badge-info {
+    background: rgba(74, 122, 138, 0.15);
+    color: #93c5fd;
+    border-color: rgba(106, 154, 170, 0.20);
+}
+
+/* ── Neutral ──────────────────────────────────────────────────────── */
+
+.badge-neutral {
+    background: var(--bg-tertiary, #f0ebe6);
+    color: var(--text-secondary, #6b5f56);
+    border-color: var(--border-light, #e8e0d8);
+}
+
+[data-theme="dark"] .badge-neutral {
+    background: rgba(240, 235, 230, 0.06);
+    color: var(--text-secondary, #b8a89e);
+    border-color: rgba(240, 235, 230, 0.08);
+}
+
+/* ── Primary (Role-based) ────────────────────────────────────────── */
+
+.badge-primary {
+    background: var(--role-light, rgba(45, 31, 58, 0.08));
+    color: var(--role-primary, #2d1f3a);
+    border-color: rgba(45, 31, 58, 0.12);
+}
+
+[data-theme="dark"] .badge-primary {
+    background: rgba(77, 47, 74, 0.15);
+    color: var(--role-primary, #4d2f4a);
+    border-color: rgba(77, 47, 74, 0.20);
+}
+
+/* ── Dark ─────────────────────────────────────────────────────────── */
+
+.badge-dark {
+    background: var(--text-primary, #2c241e);
+    color: var(--text-inverse, #f5f0eb);
+    border-color: var(--text-primary, #2c241e);
+}
+
+[data-theme="dark"] .badge-dark {
+    background: var(--text-primary, #f0ebe6);
+    color: var(--text-inverse, #1a1410);
+    border-color: var(--text-primary, #f0ebe6);
+}
+
+/* ── Light ────────────────────────────────────────────────────────── */
+
+.badge-light {
+    background: var(--bg-card, #fcfaf8);
+    color: var(--text-primary, #2c241e);
+    border-color: var(--border-light, #e8e0d8);
+}
+
+[data-theme="dark"] .badge-light {
+    background: rgba(26, 20, 16, 0.85);
+    color: var(--text-primary, #f0ebe6);
+    border-color: rgba(240, 235, 230, 0.08);
+}
+
+/* ── Outline Variants ────────────────────────────────────────────── */
+
+.badge-outline-success {
+    background: transparent;
+    color: var(--success, #3a7a5a);
+    border-color: var(--success, #3a7a5a);
+}
+
+[data-theme="dark"] .badge-outline-success {
+    color: #86efac;
+    border-color: rgba(90, 154, 122, 0.40);
+}
+
+.badge-outline-warning {
+    background: transparent;
+    color: var(--warning, #b8983a);
+    border-color: var(--warning, #b8983a);
+}
+
+[data-theme="dark"] .badge-outline-warning {
+    color: #fcd34d;
+    border-color: rgba(201, 168, 76, 0.40);
+}
+
+.badge-outline-danger {
+    background: transparent;
+    color: var(--danger, #c45a4a);
+    border-color: var(--danger, #c45a4a);
+}
+
+[data-theme="dark"] .badge-outline-danger {
+    color: #fca5a5;
+    border-color: rgba(212, 106, 90, 0.40);
+}
+
+.badge-outline-info {
+    background: transparent;
+    color: var(--info, #4a7a8a);
+    border-color: var(--info, #4a7a8a);
+}
+
+[data-theme="dark"] .badge-outline-info {
+    color: #93c5fd;
+    border-color: rgba(106, 154, 170, 0.40);
+}
+
+.badge-outline-primary {
+    background: transparent;
+    color: var(--role-primary, #2d1f3a);
+    border-color: var(--role-primary, #2d1f3a);
+}
+
+[data-theme="dark"] .badge-outline-primary {
+    color: var(--role-primary, #4d2f4a);
+    border-color: rgba(77, 47, 74, 0.40);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   GRADE BADGES
+   ═══════════════════════════════════════════════════════════════════ */
+
+.grade-Ap,
+.grade-A {
+    background: #dce8e0;
+    color: #1a4a2a;
+    border-color: rgba(58, 122, 90, 0.15);
+}
+
+[data-theme="dark"] .grade-Ap,
+[data-theme="dark"] .grade-A {
+    background: rgba(58, 122, 90, 0.15);
+    color: #86efac;
+    border-color: rgba(90, 154, 122, 0.20);
+}
+
+.grade-B {
+    background: #dce4ec;
+    color: #1a3a5a;
+    border-color: rgba(74, 122, 138, 0.15);
+}
+
+[data-theme="dark"] .grade-B {
+    background: rgba(74, 122, 138, 0.15);
+    color: #93c5fd;
+    border-color: rgba(106, 154, 170, 0.20);
+}
+
+.grade-C {
+    background: #f0e8d0;
+    color: #6a4a10;
+    border-color: rgba(184, 152, 58, 0.15);
+}
+
+[data-theme="dark"] .grade-C {
+    background: rgba(184, 152, 58, 0.15);
+    color: #fcd34d;
+    border-color: rgba(201, 168, 76, 0.20);
+}
+
+.grade-D {
+    background: #f0e0d0;
+    color: #7a3a1a;
+    border-color: rgba(196, 138, 58, 0.15);
+}
+
+[data-theme="dark"] .grade-D {
+    background: rgba(196, 138, 58, 0.15);
+    color: #fdba74;
+    border-color: rgba(201, 168, 76, 0.20);
+}
+
+.grade-F {
+    background: #f0dcd8;
+    color: #8a2a1a;
+    border-color: rgba(196, 90, 74, 0.15);
+}
+
+[data-theme="dark"] .grade-F {
+    background: rgba(196, 90, 74, 0.15);
+    color: #fca5a5;
+    border-color: rgba(212, 106, 90, 0.20);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BADGE WITH ICON
+   ═══════════════════════════════════════════════════════════════════ */
+
+.badge-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.badge-icon .icon {
+    font-size: 0.75em;
+    opacity: 0.8;
+}
+
+.badge-icon .icon-left {
+    order: -1;
+}
+
+.badge-icon .icon-right {
+    order: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   STATUS DOT BADGE
+   ═══════════════════════════════════════════════════════════════════ */
+
+.badge-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.badge-dot .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.badge-dot .dot-success {
+    background: var(--success, #3a7a5a);
+}
+
+.badge-dot .dot-warning {
+    background: var(--warning, #b8983a);
+}
+
+.badge-dot .dot-danger {
+    background: var(--danger, #c45a4a);
+}
+
+.badge-dot .dot-info {
+    background: var(--info, #4a7a8a);
+}
+
+.badge-dot .dot-neutral {
+    background: var(--text-muted, #a8988e);
+}
+
+.badge-dot .dot-primary {
+    background: var(--role-primary, #2d1f3a);
+}
+
+[data-theme="dark"] .badge-dot .dot-primary {
+    background: var(--role-primary, #4d2f4a);
+}
+
+/* ── Pulse animation for active dots ── */
+
+.badge-dot .dot.pulse {
+    animation: dotPulse 2s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(0.8);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BADGE GROUP
+   ═══════════════════════════════════════════════════════════════════ */
+
+.badge-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+}
+
+.badge-group .badge {
+    flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   COUNTER BADGE (Number badge)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.badge-counter {
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: var(--r-full, 9999px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1;
+    background: var(--danger, #c45a4a);
+    color: var(--text-inverse, #f5f0eb);
+}
+
+[data-theme="dark"] .badge-counter {
+    background: var(--danger, #d46a5a);
+    color: var(--text-inverse, #f5f0eb);
+}
+
+.badge-counter.success {
+    background: var(--success, #3a7a5a);
+}
+
+.badge-counter.warning {
+    background: var(--warning, #b8983a);
+}
+
+.badge-counter.info {
+    background: var(--info, #4a7a8a);
+}
+
+.badge-counter.neutral {
+    background: var(--text-muted, #a8988e);
+}
+
+.badge-counter.primary {
+    background: var(--role-primary, #2d1f3a);
+}
+
+[data-theme="dark"] .badge-counter.primary {
+    background: var(--role-primary, #4d2f4a);
+}
+
+.badge-counter-sm {
+    min-width: 16px;
+    height: 16px;
+    font-size: 0.55rem;
+    padding: 0 4px;
+}
+
+.badge-counter-lg {
+    min-width: 26px;
+    height: 26px;
+    font-size: 0.78rem;
+    padding: 0 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .badge {
+        font-size: 0.6rem;
+        padding: 1px 8px;
+    }
+
+    .badge-lg {
+        font-size: 0.7rem;
+        padding: 3px 10px;
+    }
+
+    .badge-xl {
+        font-size: 0.75rem;
+        padding: 4px 12px;
+    }
+
+    .badge-counter {
+        min-width: 16px;
+        height: 16px;
+        font-size: 0.55rem;
+        padding: 0 4px;
+    }
+
+    .badge-counter-lg {
+        min-width: 22px;
+        height: 22px;
+        font-size: 0.7rem;
+        padding: 0 6px;
+    }
+
+    .badge-group {
+        gap: 3px;
+    }
+
+    .grade-Ap,
+    .grade-A,
+    .grade-B,
+    .grade-C,
+    .grade-D,
+    .grade-F {
+        font-size: 0.6rem;
+        padding: 1px 8px;
+    }
+}

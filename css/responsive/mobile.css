@@ -1,0 +1,1463 @@
+/* ═══════════════════════════════════════════════════════════════════
+   MOBILE — Complete Mobile-First Responsive System
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: All mobile-specific styles, touch optimizations,
+   responsive breakpoints, and component adaptations.
+   No pure white (#FFFFFF), no pure black (#000000).
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   MOBILE BASE — Up to 768px
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    /* ─── Main Content ────────────────────────────────────────────── */
+
+    .main-content {
+        margin-left: 0;
+        padding: 0;
+    }
+
+    .container {
+        padding: 0 var(--sm, 8px);
+    }
+
+    /* ─── Stats Grid ───────────────────────────────────────────────── */
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--sm, 8px);
+    }
+
+    .stat-card {
+        padding: var(--md, 12px);
+    }
+
+    .stat-value {
+        font-size: 1.2rem;
+    }
+
+    .stat-icon {
+        font-size: 1.4rem;
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+    }
+
+    .stat-trend {
+        font-size: 0.6rem;
+    }
+
+    /* ─── Dashboard Cards ──────────────────────────────────────────── */
+
+    .dash-card-header {
+        padding: var(--sm, 8px) var(--md, 12px);
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .dash-card-body {
+        padding: var(--md, 12px);
+    }
+
+    .dash-card-title {
+        font-size: 0.85rem;
+    }
+
+    /* ─── Charts ───────────────────────────────────────────────────── */
+
+    .chart-container {
+        min-height: 200px;
+    }
+
+    .chart-wrapper canvas {
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    /* ─── Two Column Layout ────────────────────────────────────────── */
+
+    .two-col {
+        grid-template-columns: 1fr;
+        gap: var(--md, 12px);
+    }
+
+    .three-col {
+        grid-template-columns: 1fr;
+        gap: var(--md, 12px);
+    }
+
+    /* ─── Quick Actions ────────────────────────────────────────────── */
+
+    .quick-actions {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--sm, 8px);
+    }
+
+    .quick-btn {
+        padding: var(--md, 12px);
+    }
+
+    .quick-btn .qb-icon {
+        font-size: 1.5rem;
+    }
+
+    .quick-btn .qb-title {
+        font-size: 0.75rem;
+    }
+
+    .quick-btn .qb-sub {
+        font-size: 0.65rem;
+    }
+
+    /* ─── Forms ────────────────────────────────────────────────────── */
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: var(--sm, 8px);
+    }
+
+    .form-group label {
+        font-size: 0.75rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+        min-height: 36px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: var(--sm, 8px);
+    }
+
+    .form-row-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .form-row-4 {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        gap: var(--sm, 8px);
+    }
+
+    .form-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .form-actions .btn:last-child {
+        margin-left: 0;
+    }
+
+    /* ─── Filters Bar ───────────────────────────────────────────────── */
+
+    .filters-bar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: var(--sm, 8px);
+        gap: var(--sm, 8px);
+    }
+
+    .filters-bar select,
+    .filters-bar input {
+        width: 100%;
+        min-width: 0;
+        font-size: 0.8rem;
+        padding: 6px 10px;
+    }
+
+    .filters-bar .flex-1 {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .filters-bar .result-count {
+        margin-left: 0;
+        text-align: center;
+        font-size: 0.7rem;
+    }
+
+    .filters-bar .filter-actions {
+        justify-content: center;
+    }
+
+    /* ─── Tables ───────────────────────────────────────────────────── */
+
+    .data-table {
+        font-size: 0.75rem;
+        min-width: 600px;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 6px 8px;
+        white-space: nowrap;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 -8px;
+        padding: 0 8px;
+    }
+
+    /* ─── Buttons ──────────────────────────────────────────────────── */
+
+    .btn-group {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .btn {
+        flex: 1 1 auto;
+        min-width: 0;
+        font-size: 0.75rem;
+        padding: 6px 12px;
+        white-space: nowrap;
+        min-height: 36px;
+    }
+
+    .btn-sm {
+        font-size: 0.68rem;
+        padding: 4px 10px;
+        min-height: 30px;
+    }
+
+    .btn-lg {
+        font-size: 0.85rem;
+        padding: 8px 16px;
+        min-height: 40px;
+    }
+
+    .btn-icon {
+        width: 32px;
+        height: 32px;
+        padding: 6px;
+    }
+
+    .btn-icon.btn-sm {
+        width: 26px;
+        height: 26px;
+        padding: 4px;
+    }
+
+    .btn-icon.btn-lg {
+        width: 38px;
+        height: 38px;
+        padding: 10px;
+    }
+
+    /* ─── Pagination ────────────────────────────────────────────────── */
+
+    .pagination {
+        gap: 2px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .page-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 0.7rem;
+    }
+
+    /* ─── Badges ───────────────────────────────────────────────────── */
+
+    .badge {
+        font-size: 0.6rem;
+        padding: 1px 6px;
+    }
+
+    /* ─── Modals ────────────────────────────────────────────────────── */
+
+    .modal-overlay {
+        padding: var(--sm, 8px);
+        align-items: flex-end;
+    }
+
+    .modal {
+        border-radius: var(--r-xl, 18px) var(--r-xl, 18px) 0 0;
+        max-height: 85vh;
+        max-width: 100%;
+    }
+
+    .modal-header {
+        padding: var(--md, 12px);
+    }
+
+    .modal-body {
+        padding: var(--md, 12px);
+    }
+
+    .modal-footer {
+        padding: var(--sm, 8px) var(--md, 12px);
+        flex-wrap: wrap;
+    }
+
+    .modal-footer .btn {
+        flex: 1;
+    }
+
+    .modal-sm {
+        max-width: 100%;
+    }
+
+    .modal-lg {
+        max-width: 100%;
+    }
+
+    /* ─── Toasts ───────────────────────────────────────────────────── */
+
+    #toast-container {
+        bottom: var(--md, 12px);
+        right: var(--md, 12px);
+        left: var(--md, 12px);
+        max-width: 100%;
+    }
+
+    .toast {
+        max-width: 100%;
+        font-size: 0.8rem;
+        padding: var(--sm, 8px) var(--md, 12px);
+    }
+
+    /* ─── Dropdowns ────────────────────────────────────────────────── */
+
+    .dropdown-menu {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        border-radius: var(--r-xl, 18px) var(--r-xl, 18px) 0 0;
+        max-height: 60vh;
+        width: 100%;
+        transform: translateY(100%);
+        transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .dropdown-menu.open {
+        transform: translateY(0);
+    }
+
+    .dropdown-menu .dropdown-item {
+        padding: 12px 16px;
+        min-height: 44px;
+    }
+
+    /* ─── Empty States ─────────────────────────────────────────────── */
+
+    .empty-state {
+        padding: var(--lg, 20px);
+    }
+
+    .empty-state-icon {
+        font-size: 3rem;
+    }
+
+    .empty-state-title {
+        font-size: 0.9rem;
+    }
+
+    .empty-state-message {
+        font-size: 0.75rem;
+    }
+
+    /* ─── Input Marks ──────────────────────────────────────────────── */
+
+    .marks-input {
+        width: 55px;
+        padding: 4px 2px;
+        font-size: 0.7rem;
+        min-height: 28px;
+    }
+
+    /* ─── Assessment Cards ────────────────────────────────────────── */
+
+    .assessment-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--xs, 4px);
+        padding: var(--sm, 8px) var(--md, 12px);
+    }
+
+    .assessment-card-body {
+        padding: var(--sm, 8px);
+        overflow-x: auto;
+    }
+
+    /* ─── Timetable ────────────────────────────────────────────────── */
+
+    .timetable-table {
+        font-size: 0.65rem;
+        min-width: 600px;
+    }
+
+    .timetable-table th,
+    .timetable-table td {
+        padding: 4px 6px;
+    }
+
+    .timetable-slot {
+        font-size: 0.6rem;
+        padding: 2px 4px;
+    }
+
+    /* ─── Teacher Cards ───────────────────────────────────────────── */
+
+    .teacher-card {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: var(--md, 12px);
+    }
+
+    .teacher-avatar {
+        width: 48px;
+        height: 48px;
+        font-size: 1.4rem;
+    }
+
+    .teacher-details {
+        flex-direction: column;
+        gap: var(--xs, 4px);
+    }
+
+    /* ─── Fee Cards ────────────────────────────────────────────────── */
+
+    .fee-summary-cards {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--sm, 8px);
+    }
+
+    .fee-card {
+        padding: var(--sm, 8px);
+    }
+
+    .fee-card-amount {
+        font-size: 1.1rem;
+    }
+
+    /* ─── Payment Form ────────────────────────────────────────────── */
+
+    .payment-category-select {
+        grid-template-columns: 1fr;
+    }
+
+    .payment-category-item {
+        padding: var(--sm, 8px);
+    }
+
+    /* ─── Report Cards ────────────────────────────────────────────── */
+
+    .report-card {
+        padding: var(--md, 12px);
+    }
+
+    .report-header {
+        flex-direction: column;
+        text-align: center;
+        padding: var(--md, 12px);
+    }
+
+    .report-logo {
+        width: 48px;
+        height: 48px;
+        font-size: 1.2rem;
+    }
+
+    .report-info {
+        grid-template-columns: 1fr;
+    }
+
+    .report-info-item {
+        padding: 6px 12px;
+    }
+
+    .report-subjects {
+        font-size: 0.7rem;
+    }
+
+    .report-subjects th,
+    .report-subjects td {
+        padding: 4px 6px;
+    }
+
+    .report-summary {
+        grid-template-columns: repeat(2, 1fr);
+        padding: var(--sm, 8px) var(--md, 12px);
+    }
+
+    .summary-value {
+        font-size: 0.9rem;
+    }
+
+    .report-footer {
+        font-size: 0.7rem;
+        padding: var(--sm, 8px);
+    }
+
+    .report-qr-block {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: var(--sm, 8px);
+    }
+
+    .report-qr-block img {
+        width: 64px;
+        height: 64px;
+    }
+
+    /* ─── Receipt ──────────────────────────────────────────────────── */
+
+    .receipt-container {
+        padding: var(--sm, 8px);
+    }
+
+    .receipt-header {
+        flex-direction: column;
+        text-align: center;
+        padding: var(--sm, 8px);
+    }
+
+    .receipt-body {
+        padding: var(--sm, 8px);
+    }
+
+    .receipt-footer {
+        font-size: 0.7rem;
+        padding: var(--sm, 8px);
+    }
+
+    /* ─── Settings ────────────────────────────────────────────────── */
+
+    .settings-tabs {
+        flex-wrap: wrap;
+        gap: 2px;
+        border-bottom: 1px solid var(--border-light, #e8e0d8);
+    }
+
+    [data-theme="dark"] .settings-tabs {
+        border-bottom-color: rgba(240, 235, 230, 0.06);
+    }
+
+    .settings-tabs .tab-btn {
+        padding: 6px 12px;
+        font-size: 0.7rem;
+        flex: 1;
+        text-align: center;
+        min-height: 36px;
+    }
+
+    .setting-card {
+        padding: var(--md, 12px);
+    }
+
+    .setting-card .setting-icon {
+        font-size: 1.5rem;
+    }
+
+    .setting-card .setting-title {
+        font-size: 0.85rem;
+    }
+
+    .setting-card .setting-desc {
+        font-size: 0.7rem;
+    }
+
+    /* ─── Backup ──────────────────────────────────────────────────── */
+
+    .backup-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--xs, 4px);
+        padding: var(--sm, 8px);
+    }
+
+    .backup-info {
+        flex-wrap: wrap;
+        gap: var(--xs, 4px);
+        font-size: 0.7rem;
+    }
+
+    /* ─── System Logs ─────────────────────────────────────────────── */
+
+    .logs-table {
+        font-size: 0.65rem;
+        min-width: 500px;
+    }
+
+    .logs-table td,
+    .logs-table th {
+        padding: 4px 6px;
+    }
+
+    /* ─── Analytics ────────────────────────────────────────────────── */
+
+    .analytics-filters {
+        flex-direction: column;
+        gap: var(--sm, 8px);
+        padding: var(--sm, 8px);
+    }
+
+    .analytics-chart-container {
+        padding: var(--sm, 8px);
+    }
+
+    .analytics-chart-title {
+        font-size: 0.8rem;
+    }
+
+    /* ─── Notifications ───────────────────────────────────────────── */
+
+    .notification-item {
+        padding: var(--sm, 8px);
+    }
+
+    .notification-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--xs, 4px);
+        padding: var(--sm, 8px);
+    }
+
+    .notification-body {
+        padding: var(--sm, 8px);
+        font-size: 0.75rem;
+    }
+
+    .notification-actions {
+        padding: var(--xs, 4px) var(--sm, 8px);
+        flex-wrap: wrap;
+    }
+
+    /* ─── Announcements ───────────────────────────────────────────── */
+
+    .announcement-form {
+        padding: var(--sm, 8px);
+    }
+
+    .announcement-preview {
+        padding: var(--sm, 8px);
+        font-size: 0.75rem;
+    }
+
+    /* ─── Reminders ────────────────────────────────────────────────── */
+
+    .reminder-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--xs, 4px);
+        padding: var(--sm, 8px);
+    }
+
+    .reminder-item .reminder-actions {
+        width: 100%;
+        display: flex;
+        gap: var(--xs, 4px);
+    }
+
+    /* ─── Skeleton Loaders ────────────────────────────────────────── */
+
+    .skeleton-grid {
+        grid-template-columns: 1fr;
+        gap: var(--sm, 8px);
+    }
+
+    .skeleton-card {
+        padding: var(--sm, 8px);
+    }
+
+    .skeleton-chart {
+        height: 180px;
+    }
+
+    /* ─── Login ────────────────────────────────────────────────────── */
+
+    .login-card-wrap {
+        width: 100%;
+        max-width: 400px;
+        padding: var(--md, 12px);
+    }
+
+    .login-card {
+        padding: var(--lg, 20px);
+    }
+
+    .login-logo {
+        width: 56px;
+        height: 56px;
+        font-size: 1.5rem;
+    }
+
+    .login-title {
+        font-size: 1.2rem;
+    }
+
+    .login-subtitle {
+        font-size: 0.75rem;
+    }
+
+    .login-field input,
+    .login-field select {
+        font-size: 0.85rem;
+        padding: 10px 14px;
+        min-height: 44px;
+    }
+
+    .login-btn {
+        font-size: 0.85rem;
+        padding: 12px;
+        min-height: 44px;
+    }
+
+    .login-alert {
+        font-size: 0.75rem;
+        padding: 8px 12px;
+    }
+
+    /* ─── 404 ──────────────────────────────────────────────────────── */
+
+    .error-page {
+        padding: var(--lg, 20px);
+    }
+
+    .error-code {
+        font-size: 4rem;
+    }
+
+    .error-title {
+        font-size: 1.2rem;
+    }
+
+    .error-message {
+        font-size: 0.85rem;
+    }
+
+    /* ─── Loader Overlay ──────────────────────────────────────────── */
+
+    .loader-overlay .loader-container {
+        padding: var(--md, 12px);
+    }
+
+    .loader-overlay .loader-label {
+        font-size: 0.75rem;
+    }
+
+    .loader-overlay .loader-sub {
+        font-size: 0.65rem;
+    }
+
+    .loader-overlay .loader-progress {
+        width: 100px;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TOUCH OPTIMIZATIONS — All touch devices
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    /* ─── Larger touch targets ────────────────────────────────────── */
+
+    button,
+    .btn,
+    .nav-item,
+    .tab-btn,
+    .page-btn,
+    .modal-close,
+    .dropdown-item,
+    .quick-btn,
+    .class-tab,
+    .badge-pill,
+    .icon-btn,
+    .hamburger-btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .btn-sm {
+        min-height: 36px;
+        min-width: 36px;
+    }
+
+    .btn-xs {
+        min-height: 28px;
+        min-width: 28px;
+    }
+
+    /* ─── Prevent zoom on input focus (iOS) ──────────────────────── */
+
+    input,
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+
+    /* ─── Larger checkboxes and radios ────────────────────────────── */
+
+    input[type="checkbox"],
+    input[type="radio"] {
+        width: 20px;
+        height: 20px;
+        transform: scale(1.2);
+        margin-right: 8px;
+    }
+
+    /* ─── Remove hover effects on touch ───────────────────────────── */
+
+    .btn:hover,
+    .nav-item:hover,
+    .quick-btn:hover,
+    .module-card:hover,
+    .stat-card:hover,
+    .card:hover {
+        transform: none;
+    }
+
+    /* ─── Active state for touch feedback ────────────────────────── */
+
+    .btn:active,
+    .nav-item:active,
+    .quick-btn:active,
+    .card:active {
+        opacity: 0.7;
+        transition: opacity 0.05s;
+    }
+
+    /* ─── Scrollable containers ───────────────────────────────────── */
+
+    .sidebar-nav,
+    .modal-body,
+    .table-wrapper,
+    .tabs-scrollable,
+    .dropdown-menu {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* ─── Disable pull-to-refresh on modals ───────────────────────── */
+
+    .modal-body {
+        overscroll-behavior: contain;
+    }
+
+    /* ─── Smooth scroll snapping ──────────────────────────────────── */
+
+    .scroll-snap {
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .scroll-snap .snap-item {
+        scroll-snap-align: start;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SMALL MOBILE — Up to 480px
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    /* ─── Stats Grid ───────────────────────────────────────────────── */
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: var(--sm, 6px);
+    }
+
+    .stat-card {
+        padding: var(--sm, 8px) var(--md, 10px);
+    }
+
+    .stat-value {
+        font-size: 1rem;
+    }
+
+    .stat-icon {
+        font-size: 1.2rem;
+    }
+
+    /* ─── Quick Actions ────────────────────────────────────────────── */
+
+    .quick-actions {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--xs, 4px);
+    }
+
+    .quick-btn {
+        padding: var(--sm, 8px);
+    }
+
+    .quick-btn .qb-icon {
+        font-size: 1.2rem;
+    }
+
+    .quick-btn .qb-title {
+        font-size: 0.7rem;
+    }
+
+    .quick-btn .qb-sub {
+        font-size: 0.6rem;
+    }
+
+    /* ─── Tables ───────────────────────────────────────────────────── */
+
+    .data-table {
+        font-size: 0.68rem;
+        min-width: 500px;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 4px 6px;
+    }
+
+    /* ─── Buttons ──────────────────────────────────────────────────── */
+
+    .btn {
+        font-size: 0.7rem;
+        padding: 4px 10px;
+        min-height: 32px;
+    }
+
+    .btn-group {
+        gap: 4px;
+    }
+
+    .btn-group .btn {
+        font-size: 0.65rem;
+        padding: 4px 8px;
+    }
+
+    .btn-sm {
+        font-size: 0.62rem;
+        padding: 3px 8px;
+        min-height: 26px;
+    }
+
+    .btn-lg {
+        font-size: 0.78rem;
+        padding: 6px 12px;
+        min-height: 34px;
+    }
+
+    .btn-icon {
+        width: 28px;
+        height: 28px;
+        padding: 4px;
+    }
+
+    .btn-icon.btn-sm {
+        width: 22px;
+        height: 22px;
+        padding: 3px;
+    }
+
+    .btn-icon.btn-lg {
+        width: 34px;
+        height: 34px;
+        padding: 8px;
+    }
+
+    /* ─── Forms ────────────────────────────────────────────────────── */
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-size: 0.75rem;
+        padding: 6px 10px;
+        min-height: 32px;
+    }
+
+    .form-row-4 {
+        grid-template-columns: 1fr;
+    }
+
+    .filters-bar select,
+    .filters-bar input {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        min-height: 32px;
+    }
+
+    /* ─── Modals ────────────────────────────────────────────────────── */
+
+    .modal-header {
+        padding: var(--sm, 8px) var(--md, 12px);
+    }
+
+    .modal-header h3,
+    .modal-header h2,
+    .modal-header h4 {
+        font-size: 1rem;
+    }
+
+    .modal-body {
+        padding: var(--sm, 8px);
+    }
+
+    .modal-footer {
+        padding: var(--xs, 4px) var(--sm, 8px);
+        flex-direction: column;
+    }
+
+    .modal-footer .btn {
+        width: 100%;
+    }
+
+    /* ─── Pagination ────────────────────────────────────────────────── */
+
+    .pagination {
+        gap: 1px;
+    }
+
+    .page-btn {
+        width: 26px;
+        height: 26px;
+        font-size: 0.6rem;
+    }
+
+    /* ─── Badges ───────────────────────────────────────────────────── */
+
+    .badge {
+        font-size: 0.55rem;
+        padding: 1px 4px;
+    }
+
+    /* ─── Tabs ──────────────────────────────────────────────────────── */
+
+    .tab-btn {
+        font-size: 0.65rem;
+        padding: 4px 8px;
+        min-height: 30px;
+    }
+
+    .tabs-pill .tab-btn {
+        font-size: 0.65rem;
+        padding: 2px 8px;
+    }
+
+    .tabs-bordered .tab-btn {
+        font-size: 0.65rem;
+        padding: 3px 6px;
+        min-height: 28px;
+    }
+
+    /* ─── Report Cards ────────────────────────────────────────────── */
+
+    .report-card {
+        padding: var(--sm, 8px);
+    }
+
+    .report-header {
+        padding: var(--sm, 8px);
+    }
+
+    .report-logo {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+
+    .report-info-item {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+    }
+
+    .report-subjects {
+        font-size: 0.6rem;
+    }
+
+    .report-subjects th,
+    .report-subjects td {
+        padding: 3px 4px;
+    }
+
+    .report-summary {
+        grid-template-columns: 1fr 1fr;
+        padding: var(--xs, 4px) var(--sm, 8px);
+        gap: var(--xs, 4px);
+    }
+
+    .summary-value {
+        font-size: 0.8rem;
+    }
+
+    .report-footer {
+        font-size: 0.6rem;
+        padding: var(--xs, 4px) var(--sm, 8px);
+    }
+
+    .report-qr-block img {
+        width: 48px;
+        height: 48px;
+    }
+
+    /* ─── Fee Cards ────────────────────────────────────────────────── */
+
+    .fee-summary-cards {
+        grid-template-columns: 1fr;
+    }
+
+    /* ─── Loaders ──────────────────────────────────────────────────── */
+
+    .boot-loader__frame {
+        width: 140px;
+        height: 140px;
+    }
+
+    .boot-loader__label {
+        font-size: 0.7rem;
+        gap: 6px;
+    }
+
+    .boot-loader__progress {
+        width: 140px;
+    }
+
+    .task-loader__stage {
+        width: 64px;
+        height: 64px;
+    }
+
+    .task-loader__label {
+        font-size: 0.7rem;
+    }
+
+    .task-loader__sub {
+        font-size: 0.65rem;
+        margin-top: -6px;
+    }
+
+    .task-loader__progress {
+        width: 100px;
+    }
+
+    /* ─── Toast ────────────────────────────────────────────────────── */
+
+    #toast-container {
+        bottom: var(--sm, 8px);
+        right: var(--sm, 8px);
+        left: var(--sm, 8px);
+    }
+
+    .toast {
+        font-size: 0.7rem;
+        padding: var(--xs, 4px) var(--sm, 8px);
+        border-radius: var(--r-md, 8px);
+    }
+
+    .toast-icon-wrap {
+        width: 24px;
+        height: 24px;
+        font-size: 0.8rem;
+    }
+
+    .toast-title {
+        font-size: 0.75rem;
+    }
+
+    .toast-msg {
+        font-size: 0.65rem;
+    }
+
+    /* ─── Empty States ─────────────────────────────────────────────── */
+
+    .empty-state-icon {
+        font-size: 2.5rem;
+    }
+
+    .empty-state-title {
+        font-size: 0.8rem;
+    }
+
+    .empty-state-message {
+        font-size: 0.7rem;
+    }
+
+    /* ─── 404 ──────────────────────────────────────────────────────── */
+
+    .error-code {
+        font-size: 3rem;
+    }
+
+    .error-title {
+        font-size: 1rem;
+    }
+
+    .error-message {
+        font-size: 0.75rem;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   EXTRA SMALL MOBILE — Up to 380px
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 380px) {
+    /* ─── Stats Grid ───────────────────────────────────────────────── */
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: var(--xs, 4px);
+    }
+
+    .stat-card {
+        padding: var(--xs, 4px) var(--sm, 6px);
+    }
+
+    .stat-value {
+        font-size: 0.9rem;
+    }
+
+    .stat-label {
+        font-size: 0.6rem;
+    }
+
+    /* ─── Quick Actions ────────────────────────────────────────────── */
+
+    .quick-actions {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--xs, 4px);
+    }
+
+    .quick-btn {
+        padding: var(--xs, 4px) var(--sm, 6px);
+    }
+
+    .quick-btn .qb-icon {
+        font-size: 1rem;
+    }
+
+    .quick-btn .qb-title {
+        font-size: 0.65rem;
+    }
+
+    .quick-btn .qb-sub {
+        font-size: 0.55rem;
+    }
+
+    /* ─── Buttons ──────────────────────────────────────────────────── */
+
+    .btn {
+        font-size: 0.65rem;
+        padding: 3px 8px;
+        min-height: 28px;
+    }
+
+    .btn-sm {
+        font-size: 0.58rem;
+        padding: 2px 6px;
+        min-height: 24px;
+    }
+
+    .btn-lg {
+        font-size: 0.72rem;
+        padding: 4px 10px;
+        min-height: 30px;
+    }
+
+    .btn-icon {
+        width: 24px;
+        height: 24px;
+        padding: 3px;
+    }
+
+    .btn-icon.btn-sm {
+        width: 20px;
+        height: 20px;
+        padding: 2px;
+    }
+
+    .btn-icon.btn-lg {
+        width: 30px;
+        height: 30px;
+        padding: 6px;
+    }
+
+    /* ─── Tables ───────────────────────────────────────────────────── */
+
+    .data-table {
+        font-size: 0.6rem;
+        min-width: 400px;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 3px 4px;
+    }
+
+    /* ─── Tabs ──────────────────────────────────────────────────────── */
+
+    .tab-btn {
+        font-size: 0.6rem;
+        padding: 3px 6px;
+        min-height: 26px;
+    }
+
+    .tabs-pill .tab-btn {
+        font-size: 0.6rem;
+        padding: 2px 6px;
+    }
+
+    .tabs-bordered .tab-btn {
+        font-size: 0.6rem;
+        padding: 2px 4px;
+        min-height: 24px;
+    }
+
+    /* ─── Modals ────────────────────────────────────────────────────── */
+
+    .modal-header h3,
+    .modal-header h2,
+    .modal-header h4 {
+        font-size: 0.85rem;
+    }
+
+    .modal-body {
+        padding: var(--xs, 4px) var(--sm, 6px);
+        font-size: 0.75rem;
+    }
+
+    /* ─── Pagination ────────────────────────────────────────────────── */
+
+    .page-btn {
+        width: 22px;
+        height: 22px;
+        font-size: 0.55rem;
+    }
+
+    /* ─── Report Cards ────────────────────────────────────────────── */
+
+    .report-card {
+        padding: var(--xs, 4px);
+    }
+
+    .report-subjects {
+        font-size: 0.55rem;
+    }
+
+    .report-subjects th,
+    .report-subjects td {
+        padding: 2px 3px;
+    }
+
+    .report-summary {
+        grid-template-columns: 1fr 1fr;
+        padding: var(--xs, 4px);
+        gap: var(--xs, 2px);
+    }
+
+    .summary-value {
+        font-size: 0.7rem;
+    }
+
+    /* ─── Toast ────────────────────────────────────────────────────── */
+
+    .toast {
+        font-size: 0.65rem;
+        padding: var(--xs, 4px) var(--sm, 6px);
+    }
+
+    .toast-title {
+        font-size: 0.7rem;
+    }
+
+    .toast-msg {
+        font-size: 0.6rem;
+    }
+
+    /* ─── Loaders ──────────────────────────────────────────────────── */
+
+    .boot-loader__frame {
+        width: 100px;
+        height: 100px;
+    }
+
+    .boot-loader__label {
+        font-size: 0.6rem;
+    }
+
+    .boot-loader__progress {
+        width: 100px;
+        height: 2px;
+    }
+
+    .task-loader__stage {
+        width: 48px;
+        height: 48px;
+    }
+
+    .task-loader__label {
+        font-size: 0.65rem;
+    }
+
+    .task-loader__sub {
+        font-size: 0.55rem;
+    }
+
+    .task-loader__progress {
+        width: 80px;
+        height: 2px;
+    }
+
+    /* ─── Login ────────────────────────────────────────────────────── */
+
+    .login-card {
+        padding: var(--md, 12px);
+    }
+
+    .login-logo {
+        width: 44px;
+        height: 44px;
+        font-size: 1.2rem;
+    }
+
+    .login-title {
+        font-size: 1rem;
+    }
+
+    .login-subtitle {
+        font-size: 0.65rem;
+    }
+
+    .login-field input,
+    .login-field select {
+        font-size: 0.7rem;
+        padding: 5px 8px;
+        min-height: 30px;
+    }
+
+    .login-btn {
+        font-size: 0.72rem;
+        padding: 8px;
+        min-height: 34px;
+    }
+
+    .login-alert {
+        font-size: 0.65rem;
+        padding: 5px 8px;
+    }
+
+    /* ─── 404 ──────────────────────────────────────────────────────── */
+
+    .error-code {
+        font-size: 2.4rem;
+    }
+
+    .error-title {
+        font-size: 0.9rem;
+    }
+
+    .error-message {
+        font-size: 0.65rem;
+    }
+}

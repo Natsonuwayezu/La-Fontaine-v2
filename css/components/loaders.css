@@ -1,24 +1,43 @@
 /* ═══════════════════════════════════════════════════════════════════
-   LOADERS — Loading indicators and spinners
+   LOADERS — css/components/loaders.css
    ═══════════════════════════════════════════════════════════════════
-   Purpose: Various loading animation styles for different
-   contexts (full page, inline, buttons).
+   Three tiers, in this file:
+   1. Base primitives   — spinner, dots, skeleton, progress bar, inline
+                          loader, button loader. Used everywhere.
+   2. Boot loader        — the one-time emblem shown on first load after
+                          login while initial dashboard data streams in.
+                          Markup lives in index.html (#boot-loader).
+   3. Task loader system — reusable full-screen overlay for long-running
+                          module actions (save, payment, report
+                          generation, etc). Markup is injected at runtime
+                          by js/ui/loaders.js into #task-loader-overlay.
+
+   No pure white (#FFFFFF), no pure black (#000000).
    ═══════════════════════════════════════════════════════════════════ */
 
-/* ─── Spinner ring ─── */
+/* ─────────────────────────────────────────────────────────────────
+   1. BASE PRIMITIVES
+   ───────────────────────────────────────────────────────────────── */
+
+/* ── Spinner ring ── */
 .spinner {
     display: inline-block;
     width: 40px;
     height: 40px;
-    border: 3px solid var(--bg-accent-soft);
+    border: 3px solid var(--border-light, #e8e0d8);
+    border-top-color: var(--role-primary, #2d1f3a);
     border-radius: 50%;
-    border-top-color: var(--primary);
-    animation: spinnerRotate 0.8s linear infinite;
+    animation: loaderSpin 0.8s linear infinite;
+}
+
+[data-theme="dark"] .spinner {
+    border-color: rgba(240, 235, 230, 0.08);
+    border-top-color: var(--role-primary, #4d2f4a);
 }
 
 .spinner-sm {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     border-width: 2px;
 }
 
@@ -28,25 +47,30 @@
     border-width: 4px;
 }
 
-@keyframes spinnerRotate {
-    to {
-        transform: rotate(360deg);
-    }
+.spinner-xl {
+    width: 80px;
+    height: 80px;
+    border-width: 5px;
 }
 
-/* ─── Spinner dots ─── */
+/* ── Dot spinner ── */
 .spinner-dots {
     display: flex;
-    gap: var(--spacing-1);
+    gap: var(--sm, 8px);
     align-items: center;
+    justify-content: center;
 }
 
 .spinner-dots .dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--primary);
-    animation: dotPulse 1.4s ease-in-out infinite;
+    background: var(--role-primary, #2d1f3a);
+    animation: loaderDotPulse 1.4s ease-in-out infinite;
+}
+
+[data-theme="dark"] .spinner-dots .dot {
+    background: var(--role-primary, #4d2f4a);
 }
 
 .spinner-dots .dot:nth-child(2) {
@@ -57,41 +81,47 @@
     animation-delay: 0.4s;
 }
 
-@keyframes dotPulse {
-
-    0%,
-    80%,
-    100% {
-        transform: scale(0.5);
-        opacity: 0.3;
-    }
-
-    40% {
-        transform: scale(1);
-        opacity: 1;
-    }
+.spinner-dots-sm .dot {
+    width: 5px;
+    height: 5px;
 }
 
-/* ─── Skeleton loading ─── */
+.spinner-dots-lg .dot {
+    width: 11px;
+    height: 11px;
+}
+
+/* ── Skeleton placeholders ── */
 .skeleton {
-    background: var(--bg-accent-soft);
-    border-radius: var(--radius-sm);
-    animation: skeletonPulse 1.5s ease-in-out infinite;
+    position: relative;
+    background: var(--bg-tertiary, #f0ebe6);
+    border-radius: var(--r-sm, 6px);
+    overflow: hidden;
 }
 
-@keyframes skeletonPulse {
-
-    0%,
-    100% {
-        opacity: 0.6;
-    }
-
-    50% {
-        opacity: 1;
-    }
+[data-theme="dark"] .skeleton {
+    background: rgba(240, 235, 230, 0.04);
 }
 
-/* ─── Skeleton variants ─── */
+.skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(240, 235, 230, 0.08),
+            transparent);
+    animation: loaderShimmer 1.6s ease-in-out infinite;
+}
+
+[data-theme="dark"] .skeleton::after {
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(240, 235, 230, 0.04),
+            transparent);
+}
+
 .skeleton-text {
     height: 12px;
     width: 100%;
@@ -115,94 +145,1059 @@
 .skeleton-card {
     height: 120px;
     width: 100%;
-    border-radius: var(--radius);
+    border-radius: var(--r-md, 10px);
 }
 
 .skeleton-thumb {
     width: 60px;
     height: 60px;
-    border-radius: var(--radius-sm);
+    border-radius: var(--r-sm, 6px);
 }
 
-/* ─── Full page loader ─── */
-.full-page-loader {
-    position: fixed;
-    inset: 0;
-    z-index: var(--z-loader);
-    background: var(--bg-overlay);
-    backdrop-filter: blur(8px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: var(--spacing-4);
-}
-
-.full-page-loader .loader-text {
-    font-size: var(--text-base);
-    font-weight: 500;
-    color: var(--text-dark);
-}
-
-.full-page-loader .loader-sub {
-    font-size: var(--text-sm);
-    color: var(--text-soft);
-}
-
-/* ─── Inline loader ─── */
-.inline-loader {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--spacing-2);
-    font-size: var(--text-sm);
-    color: var(--text-soft);
-}
-
-/* ─── Progress bar ─── */
+/* ── Progress bar — determinate ── */
 .progress-bar {
     width: 100%;
     height: 6px;
-    background: var(--bg-accent-soft);
-    border-radius: var(--radius-full);
+    background: var(--bg-tertiary, #f0ebe6);
+    border-radius: var(--r-full, 9999px);
     overflow: hidden;
+}
+
+[data-theme="dark"] .progress-bar {
+    background: rgba(240, 235, 230, 0.06);
 }
 
 .progress-bar .progress-fill {
     height: 100%;
-    border-radius: var(--radius-full);
-    background: var(--primary);
-    transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    width: 0%;
+    border-radius: var(--r-full, 9999px);
+    background: var(--role-primary, #2d1f3a);
+    transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-theme="dark"] .progress-bar .progress-fill {
+    background: var(--role-primary, #4d2f4a);
 }
 
 .progress-bar.success .progress-fill {
-    background: var(--success);
+    background: var(--success, #3a7a5a);
 }
 
 .progress-bar.warning .progress-fill {
-    background: var(--warning);
+    background: var(--warning, #b8983a);
 }
 
 .progress-bar.danger .progress-fill {
-    background: var(--danger);
+    background: var(--danger, #c45a4a);
 }
 
-/* ─── Container loader ─── */
-.loader-container {
+/* ── Progress bar — indeterminate ── */
+.progress-bar.indeterminate .progress-fill {
+    position: relative;
+    width: 40% !important;
+    background: linear-gradient(90deg, var(--role-primary, #2d1f3a), var(--role-secondary, #7a5a7a));
+    animation: loaderIndeterminate 1.4s ease-in-out infinite;
+}
+
+[data-theme="dark"] .progress-bar.indeterminate .progress-fill {
+    background: linear-gradient(90deg, var(--role-primary, #4d2f4a), var(--role-secondary, #9a7a9a));
+}
+
+/* ── Inline loader ── */
+.inline-loader {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sm, 8px);
+    font-size: 0.875rem;
+    color: var(--text-muted, #a8988e);
+}
+
+[data-theme="dark"] .inline-loader {
+    color: var(--text-muted, #6b5f56);
+}
+
+.inline-loader .spinner {
+    width: 14px;
+    height: 14px;
+    border-width: 2px;
+}
+
+/* ── Button loader ── */
+.btn .btn-loader {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn .btn-loader .spinner {
+    width: 15px;
+    height: 15px;
+    border-width: 2px;
+    border-color: rgba(240, 235, 230, 0.20);
+    border-top-color: var(--text-inverse, #f5f0eb);
+}
+
+[data-theme="dark"] .btn .btn-loader .spinner {
+    border-color: rgba(240, 235, 230, 0.10);
+    border-top-color: var(--text-inverse, #f5f0eb);
+}
+
+.btn-outline .btn-loader .spinner,
+.btn-ghost .btn-loader .spinner {
+    border-color: var(--border-light, #e8e0d8);
+    border-top-color: var(--role-primary, #2d1f3a);
+}
+
+[data-theme="dark"] .btn-outline .btn-loader .spinner,
+[data-theme="dark"] .btn-ghost .btn-loader .spinner {
+    border-color: rgba(240, 235, 230, 0.10);
+    border-top-color: var(--role-primary, #4d2f4a);
+}
+
+.btn.is-loading {
+    pointer-events: none;
+    opacity: 0.85;
+}
+
+/* ── Keyframes ── */
+@keyframes loaderSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes loaderDotPulse {
+
+    0%,
+    80%,
+    100% {
+        transform: scale(0.5);
+        opacity: 0.35;
+    }
+
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes loaderShimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes loaderIndeterminate {
+    0% {
+        margin-left: -40%;
+    }
+
+    100% {
+        margin-left: 100%;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   2. BOOT LOADER
+   ═══════════════════════════════════════════════════════════════════ */
+
+.boot-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    background: var(--bg-body, #f5f0eb);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-4);
-    padding: var(--spacing-8);
+    gap: 28px;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
 }
 
-/* ─── Button loader (replaces content) ─── */
-.btn-loader {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
+[data-theme="dark"] .boot-loader {
+    background: var(--bg-body, #1a1410);
+}
+
+.boot-loader.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* ── Emblem frame ── */
+.boot-loader__frame {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    perspective: 900px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.boot-loader__emblem {
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    animation: bootEmblemBreathe 4s ease-in-out infinite;
+}
+
+/* ── Emblem SVG layers ── */
+.boot-loader__emblem .emblem-ring-outer {
+    fill: none;
+    stroke: var(--border-light, #e8e0d8);
+    stroke-width: 2;
+}
+
+[data-theme="dark"] .boot-loader__emblem .emblem-ring-outer {
+    stroke: rgba(240, 235, 230, 0.08);
+}
+
+.boot-loader__emblem .emblem-ring-active {
+    fill: none;
+    stroke: var(--role-primary, #2d1f3a);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-dasharray: 300;
+    stroke-dashoffset: 220;
+    transform-origin: center;
+    animation: bootRingRotate 2.6s linear infinite;
+    filter: drop-shadow(0 0 6px rgba(45, 31, 58, 0.15));
+}
+
+[data-theme="dark"] .boot-loader__emblem .emblem-ring-active {
+    stroke: var(--role-primary, #4d2f4a);
+    filter: drop-shadow(0 0 8px rgba(77, 47, 74, 0.20));
+}
+
+.boot-loader__emblem .emblem-ring-secondary {
+    fill: none;
+    stroke: var(--role-secondary, #7a5a7a);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-dasharray: 140;
+    stroke-dashoffset: 60;
+    opacity: 0.5;
+    transform-origin: center;
+    animation: bootRingRotate 3.6s linear infinite reverse;
+}
+
+[data-theme="dark"] .boot-loader__emblem .emblem-ring-secondary {
+    stroke: var(--role-secondary, #9a7a9a);
+}
+
+.boot-loader__emblem .emblem-mark {
+    fill: var(--role-primary, #2d1f3a);
+    --mark-glow: rgba(45, 31, 58, 0.15);
+    animation: bootMarkPulse 2s ease-in-out infinite;
+    transform-origin: center;
+}
+
+[data-theme="dark"] .boot-loader__emblem .emblem-mark {
+    fill: var(--role-primary, #4d2f4a);
+    --mark-glow: rgba(77, 47, 74, 0.20);
+}
+
+.boot-loader__emblem .emblem-orbit-dot {
+    fill: var(--role-secondary, #7a5a7a);
+    transform-origin: 100px 100px;
+    animation: bootOrbit 2.6s linear infinite;
+}
+
+[data-theme="dark"] .boot-loader__emblem .emblem-orbit-dot {
+    fill: var(--role-secondary, #9a7a9a);
+}
+
+/* ── Boot loader label ── */
+.boot-loader__label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted, #a8988e);
+}
+
+[data-theme="dark"] .boot-loader__label {
+    color: var(--text-muted, #6b5f56);
+}
+
+.boot-loader__label .spinner-dots .dot {
+    width: 4px;
+    height: 4px;
+}
+
+/* ── Boot loader progress ── */
+.boot-loader__progress {
+    width: 180px;
+    height: 3px;
+    background: var(--bg-tertiary, #f0ebe6);
+    border-radius: var(--r-full, 9999px);
+    overflow: hidden;
+}
+
+[data-theme="dark"] .boot-loader__progress {
+    background: rgba(240, 235, 230, 0.06);
+}
+
+.boot-loader__progress .progress-fill {
+    background: linear-gradient(90deg, var(--role-primary, #2d1f3a), var(--role-secondary, #7a5a7a));
+}
+
+[data-theme="dark"] .boot-loader__progress .progress-fill {
+    background: linear-gradient(90deg, var(--role-primary, #4d2f4a), var(--role-secondary, #9a7a9a));
+}
+
+/* ── Boot loader keyframes ── */
+@keyframes bootEmblemBreathe {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.035);
+    }
+}
+
+@keyframes bootRingRotate {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes bootMarkPulse {
+
+    0%,
+    100% {
+        opacity: 0.85;
+    }
+
+    50% {
+        opacity: 1;
+        filter: drop-shadow(0 0 5px rgba(45, 31, 58, 0.15));
+    }
+}
+
+[data-theme="dark"] .boot-loader__emblem .emblem-mark {
+    fill: var(--role-primary, #4d2f4a);
+    --mark-glow: rgba(77, 47, 74, 0.20);
+}
+
+@keyframes bootMarkPulse {
+
+    0%,
+    100% {
+        opacity: 0.85;
+    }
+
+    50% {
+        opacity: 1;
+        filter: drop-shadow(0 0 8px var(--mark-glow));
+    }
+}
+
+@keyframes bootOrbit {
+    from {
+        transform: rotate(0deg) translateX(78px) rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg) translateX(78px) rotate(-360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .boot-loader__emblem,
+    .boot-loader__emblem * {
+        animation-duration: 3s !important;
+    }
+
+    .boot-loader__frame {
+        perspective: none;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   3. TASK LOADER SYSTEM
+   ═══════════════════════════════════════════════════════════════════ */
+
+.task-loader-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99000;
+    background: rgba(26, 20, 16, 0.65);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+[data-theme="dark"] .task-loader-overlay {
+    background: rgba(10, 8, 6, 0.75);
+}
+
+.task-loader-overlay.is-visible {
+    display: flex;
+    opacity: 1;
+}
+
+.task-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding: 8px;
+    --loader-accent: var(--role-primary, #2d1f3a);
+}
+
+[data-theme="dark"] .task-loader {
+    --loader-accent: var(--role-primary, #4d2f4a);
+}
+
+/* ── Module accent overrides ── */
+.task-loader[data-family="academics"] {
+    --loader-accent: #6a3d7a;
+}
+
+.task-loader[data-family="finance"] {
+    --loader-accent: #2d5a4a;
+}
+
+.task-loader[data-family="attendance"] {
+    --loader-accent: #b8983a;
+}
+
+.task-loader[data-family="students"] {
+    --loader-accent: #3a7a8a;
+}
+
+.task-loader[data-family="staff"] {
+    --loader-accent: #b56576;
+}
+
+.task-loader[data-family="analytics"] {
+    --loader-accent: #3a7d7a;
+}
+
+.task-loader[data-family="system"] {
+    --loader-accent: var(--role-primary, #2d1f3a);
+}
+
+[data-theme="dark"] .task-loader[data-family="academics"] {
+    --loader-accent: #8a5a9a;
+}
+
+[data-theme="dark"] .task-loader[data-family="finance"] {
+    --loader-accent: #4d7a6a;
+}
+
+[data-theme="dark"] .task-loader[data-family="attendance"] {
+    --loader-accent: #c9a84c;
+}
+
+[data-theme="dark"] .task-loader[data-family="students"] {
+    --loader-accent: #4a8a9a;
+}
+
+[data-theme="dark"] .task-loader[data-family="staff"] {
+    --loader-accent: #c57586;
+}
+
+[data-theme="dark"] .task-loader[data-family="analytics"] {
+    --loader-accent: #4a8d8a;
+}
+
+/* ── Task loader stage ── */
+.task-loader__stage {
+    position: relative;
+    width: 84px;
+    height: 84px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── Task loader label ── */
+.task-loader__label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-primary, #2c241e);
+    text-align: center;
+}
+
+[data-theme="dark"] .task-loader__label {
+    color: var(--text-primary, #f0ebe6);
+}
+
+.task-loader__sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    color: var(--text-muted, #a8988e);
+    text-align: center;
+    margin-top: -10px;
+}
+
+[data-theme="dark"] .task-loader__sub {
+    color: var(--text-muted, #6b5f56);
+}
+
+/* ── Task loader progress ── */
+.task-loader__progress {
+    width: 140px;
+    height: 3px;
+    background: rgba(26, 20, 16, 0.06);
+    border-radius: var(--r-full, 9999px);
+    overflow: hidden;
+}
+
+[data-theme="dark"] .task-loader__progress {
+    background: rgba(240, 235, 230, 0.06);
+}
+
+.task-loader__progress .progress-fill {
+    background: linear-gradient(90deg, var(--loader-accent), var(--role-secondary, #7a5a7a));
+}
+
+/* ── Task: Book (academics) ── */
+.task-loader--book {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.task-loader--book .book-page {
+    position: absolute;
+    width: 44px;
+    height: 54px;
+    background: rgba(106, 61, 122, 0.08);
+    border: 1.5px solid rgba(106, 61, 122, 0.16);
+    border-radius: 2px 8px 8px 2px;
+    transform-origin: left center;
+    animation: taskBookFlip 2.2s ease-in-out infinite;
+}
+
+[data-theme="dark"] .task-loader--book .book-page {
+    background: rgba(138, 90, 154, 0.10);
+    border-color: rgba(138, 90, 154, 0.20);
+}
+
+.task-loader--book .book-page:nth-child(2) {
+    animation-delay: 0.35s;
+}
+
+.task-loader--book .book-page:nth-child(3) {
+    animation-delay: 0.7s;
+}
+
+@keyframes taskBookFlip {
+
+    0%,
+    100% {
+        transform: perspective(400px) rotateY(0deg) scaleX(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: perspective(400px) rotateY(-75deg) scaleX(0.3);
+        opacity: 0.25;
+    }
+}
+
+/* ── Task: Coin (finance) ── */
+.task-loader--coin .coin-ring {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
-    border-top-color: #ffffff;
-    animation: spinnerRotate 0.8s linear infinite;
+    border: 1.5px solid rgba(45, 90, 74, 0.15);
+    animation: taskRingPulse 2s ease-in-out infinite;
+}
+
+[data-theme="dark"] .task-loader--coin .coin-ring {
+    border-color: rgba(77, 122, 106, 0.20);
+}
+
+.task-loader--coin .coin-ring:nth-child(2) {
+    animation-delay: 0.5s;
+    width: 74px;
+    height: 74px;
+}
+
+.task-loader--coin .coin-disc {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, var(--loader-accent), #1a3a2a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: taskCoinFlip 1.8s ease-in-out infinite;
+    box-shadow: 0 0 30px rgba(45, 90, 74, 0.15);
+}
+
+[data-theme="dark"] .task-loader--coin .coin-disc {
+    background: radial-gradient(circle at 35% 35%, var(--loader-accent), #0a1a12);
+    box-shadow: 0 0 30px rgba(77, 122, 106, 0.20);
+}
+
+.task-loader--coin .coin-disc svg {
+    width: 22px;
+    height: 22px;
+    stroke: rgba(245, 240, 235, 0.85);
+}
+
+@keyframes taskCoinFlip {
+
+    0%,
+    100% {
+        transform: rotateY(0deg) scale(1);
+    }
+
+    50% {
+        transform: rotateY(180deg) scale(1.04);
+    }
+}
+
+@keyframes taskRingPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: scale(1.2);
+        opacity: 0;
+    }
+}
+
+/* ── Task: Check (attendance) ── */
+.task-loader--check .check-circle {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    border-radius: 50%;
+    border: 2px solid rgba(184, 152, 58, 0.15);
+    animation: taskCheckPulse 2s ease-out infinite;
+}
+
+[data-theme="dark"] .task-loader--check .check-circle {
+    border-color: rgba(201, 168, 76, 0.20);
+}
+
+.task-loader--check .check-circle.c1 {
+    width: 68px;
+    height: 68px;
+}
+
+.task-loader--check .check-circle.c2 {
+    width: 52px;
+    height: 52px;
+    animation-delay: 0.4s;
+}
+
+.task-loader--check .check-circle.c3 {
+    width: 36px;
+    height: 36px;
+    animation-delay: 0.8s;
+}
+
+.task-loader--check .check-icon {
+    position: relative;
+    z-index: 1;
+    animation: taskCheckPop 1.4s ease-in-out infinite;
+}
+
+.task-loader--check .check-icon svg {
+    width: 28px;
+    height: 28px;
+    stroke: var(--loader-accent);
+}
+
+@keyframes taskCheckPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: scale(1.35);
+        opacity: 0;
+    }
+}
+
+@keyframes taskCheckPop {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.35;
+    }
+
+    50% {
+        transform: scale(1.15);
+        opacity: 1;
+    }
+}
+
+/* ── Task: Document (reports) ── */
+.task-loader--doc .doc-page {
+    position: absolute;
+    width: 40px;
+    height: 50px;
+    background: rgba(106, 61, 122, 0.06);
+    border: 1px solid rgba(106, 61, 122, 0.10);
+    border-radius: 3px;
+    transform-origin: bottom left;
+    animation: taskDocFold 2.6s ease-in-out infinite;
+}
+
+[data-theme="dark"] .task-loader--doc .doc-page {
+    background: rgba(138, 90, 154, 0.08);
+    border-color: rgba(138, 90, 154, 0.14);
+}
+
+.task-loader--doc .doc-page:nth-child(1) {
+    bottom: 12px;
+    left: 12px;
+}
+
+.task-loader--doc .doc-page:nth-child(2) {
+    bottom: 16px;
+    left: 18px;
+    animation-delay: 0.35s;
+}
+
+.task-loader--doc .doc-page:nth-child(3) {
+    bottom: 20px;
+    left: 24px;
+    animation-delay: 0.7s;
+}
+
+.task-loader--doc .doc-icon {
+    position: relative;
+    z-index: 2;
+}
+
+.task-loader--doc .doc-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke: var(--loader-accent);
+}
+
+@keyframes taskDocFold {
+
+    0%,
+    100% {
+        transform: perspective(400px) rotateX(0deg) scale(1);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: perspective(400px) rotateX(-16deg) scale(0.88);
+        opacity: 1;
+    }
+}
+
+/* ── Task: Gear (settings) ── */
+.task-loader--gear svg {
+    animation: taskGearSpin 2.6s linear infinite;
+}
+
+.task-loader--gear svg:nth-child(1) {
+    width: 44px;
+    height: 44px;
+    stroke: var(--loader-accent);
+}
+
+.task-loader--gear svg:nth-child(2) {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    stroke: var(--role-secondary, #7a5a7a);
+    opacity: 0.5;
+    animation-direction: reverse;
+    animation-duration: 1.8s;
+    top: 6px;
+    left: 6px;
+}
+
+[data-theme="dark"] .task-loader--gear svg:nth-child(2) {
+    stroke: var(--role-secondary, #9a7a9a);
+}
+
+@keyframes taskGearSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Task: Save ── */
+.task-loader--save .save-ring {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    border-radius: 50%;
+    border: 2px solid rgba(45, 90, 74, 0.10);
+    animation: taskRingPulse 1.6s ease-in-out infinite;
+}
+
+[data-theme="dark"] .task-loader--save .save-ring {
+    border-color: rgba(77, 122, 106, 0.14);
+}
+
+.task-loader--save .save-ring.r1 {
+    width: 56px;
+    height: 56px;
+}
+
+.task-loader--save .save-ring.r2 {
+    width: 70px;
+    height: 70px;
+    animation-delay: 0.3s;
+}
+
+.task-loader--save .save-icon {
+    position: relative;
+    z-index: 1;
+    animation: taskSavePulse 1.6s ease-in-out infinite;
+}
+
+.task-loader--save .save-icon svg {
+    width: 26px;
+    height: 26px;
+    stroke: var(--loader-accent);
+}
+
+@keyframes taskSavePulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.55;
+    }
+
+    50% {
+        transform: scale(1.08);
+        opacity: 1;
+    }
+}
+
+/* ── Task: Clock (timetable) ── */
+.task-loader--clock .clock-face {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 2px solid rgba(45, 90, 74, 0.10);
+}
+
+[data-theme="dark"] .task-loader--clock .clock-face {
+    border-color: rgba(77, 122, 106, 0.14);
+}
+
+.task-loader--clock .clock-hand {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    transform-origin: bottom center;
+    border-radius: 2px;
+}
+
+.task-loader--clock .clock-hand.hour {
+    width: 2.5px;
+    height: 15px;
+    background: var(--loader-accent);
+    animation: taskClockSpin 6s linear infinite;
+}
+
+.task-loader--clock .clock-hand.minute {
+    width: 1.5px;
+    height: 20px;
+    background: var(--role-secondary, #7a5a7a);
+    animation: taskClockSpin 1s linear infinite;
+}
+
+[data-theme="dark"] .task-loader--clock .clock-hand.minute {
+    background: var(--role-secondary, #9a7a9a);
+}
+
+.task-loader--clock .clock-dot {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--loader-accent);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes taskClockSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Task: Chart (analytics) ── */
+.task-loader--chart {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 5px;
+    padding-bottom: 2px;
+}
+
+.task-loader--chart .bar {
+    width: 7px;
+    border-radius: 4px 4px 0 0;
+    background: rgba(58, 125, 122, 0.25);
+    animation: taskChartGrow 1.4s ease-in-out infinite;
+}
+
+[data-theme="dark"] .task-loader--chart .bar {
+    background: rgba(74, 141, 138, 0.25);
+}
+
+.task-loader--chart .bar:nth-child(1) {
+    height: 26px;
+    animation-delay: 0s;
+}
+
+.task-loader--chart .bar:nth-child(2) {
+    height: 44px;
+    animation-delay: 0.15s;
+}
+
+.task-loader--chart .bar:nth-child(3) {
+    height: 60px;
+    animation-delay: 0.3s;
+}
+
+.task-loader--chart .bar:nth-child(4) {
+    height: 36px;
+    animation-delay: 0.45s;
+}
+
+.task-loader--chart .bar:nth-child(5) {
+    height: 52px;
+    animation-delay: 0.6s;
+}
+
+@keyframes taskChartGrow {
+
+    0%,
+    100% {
+        transform: scaleY(0.4);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: scaleY(1);
+        opacity: 1;
+    }
+}
+
+/* ── Task: Students ── */
+.task-loader--students {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 6px;
+}
+
+.task-loader--students .student {
+    width: 13px;
+    border-radius: 6px 6px 3px 3px;
+    background: rgba(58, 122, 138, 0.15);
+    position: relative;
+    animation: taskStudentBounce 1.2s ease-in-out infinite;
+}
+
+[data-theme="dark"] .task-loader--students .student {
+    background: rgba(74, 138, 154, 0.18);
+}
+
+.task-loader--students .student::before {
+    content: '';
+    position: absolute;
+    top: -9px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: rgba(58, 122, 138, 0.15);
+}
+
+[data-theme="dark"] .task-loader--students .student::before {
+    background: rgba(74, 138, 154, 0.18);
+}
+
+.task-loader--students .student:nth-child(1) {
+    height: 24px;
+    animation-delay: 0s;
+}
+
+.task-loader--students .student:nth-child(2) {
+    height: 28px;
+    animation-delay: 0.2s;
+}
+
+.task-loader--students .student:nth-child(3) {
+    height: 20px;
+    animation-delay: 0.4s;
+}
+
+.task-loader--students .student:nth-child(4) {
+    height: 26px;
+    animation-delay: 0.6s;
+}
+
+@keyframes taskStudentBounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+/* ── Task: Fallback ring ── */
+.task-loader--ring .ring {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 3px solid rgba(26, 20, 16, 0.06);
+    border-top-color: var(--loader-accent);
+    animation: loaderSpin 0.8s linear infinite;
+}
+
+[data-theme="dark"] .task-loader--ring .ring {
+    border-color: rgba(240, 235, 230, 0.06);
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+    .task-loader * {
+        animation-duration: 2.4s !important;
+    }
 }

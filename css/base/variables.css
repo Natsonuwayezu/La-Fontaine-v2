@@ -1,190 +1,158 @@
-/* ==================================================================
-   VARIABLES — Complete Design System
-   ================================================================== */
+/* ═══════════════════════════════════════════════════════════════════
+   VARIABLES — All design tokens (Light theme default)
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: Centralize all design decisions. Any change here
+   propagates throughout the entire application.
+   ═══════════════════════════════════════════════════════════════════ */
 
 :root {
-    /* ── BACKGROUND COLORS ── */
-    --bg-primary: #eef2f5;
-    --bg-secondary: #ffffff;
-    --bg-tertiary: #f4f7fa;
-    --bg-hover: #f8fafc;
-    --bg-active: #e2e8f0;
-    --bg-disabled: #f1f5f9;
+    /* ─── Colors — Light theme (default) ─── */
+    --bg-body: #f5f0eb;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f8fafc;
+    --bg-card-alt: #faf7f4;
+    --bg-accent-soft: #f0ebe6;
+    --bg-overlay: rgba(0, 0, 0, 0.4);
+    --bg-surface: #ffffff;
+    --bg-input: #f8fafc;
+    --bg-input-hover: #f1f5f9;
+    --bg-selection: rgba(196, 69, 54, 0.1);
+    --bg-hover: rgba(0, 0, 0, 0.03);
 
-    /* ── TEXT COLORS ── */
-    --text-primary: #1e293b;
-    --text-secondary: #475569;
-    --text-muted: #94a3b8;
-    --text-disabled: #cbd5e1;
-    --text-inverse: #ffffff;
+    --text-dark: #1a1410;
+    --text-body: #3d342e;
+    --text-soft: #7a6e66;
+    --text-muted: #b5aaa2;
+    --text-dim: #d4ccc6;
 
-    /* ── BORDER COLORS ── */
-    --border-light: #e2e8f0;
-    --border-medium: #cbd5e1;
-    --border-dark: #94a3b8;
-    --border-focus: #3b82f6;
-    --border-error: #ef4444;
-    --border-success: #10b981;
+    --border-color: #e2e8f0;
+    --border-color-hover: #cbd5e1;
 
-    /* ── ADMIN ROLE COLORS ── */
-    --admin-primary: #1a3a5c;
-    --admin-secondary: #3b82f6;
-    --admin-accent: #c9a84c;
-    --admin-light: rgba(26, 58, 92, 0.08);
-    --admin-gradient: linear-gradient(135deg, #1a3a5c, #2d5a8e);
+    /* ─── Role colors ─── */
+    --primary: #c44536;
+    --primary-dark: #a83528;
+    --primary-light: #e8c9c2;
+    --primary-glow: rgba(196, 69, 54, 0.12);
+    --primary-gradient: linear-gradient(135deg, #c44536, #a83528);
 
-    /* ── ACCOUNTANT ROLE COLORS ── */
-    --accountant-primary: #0d9488;
-    --accountant-secondary: #14b8a6;
-    --accountant-accent: #f59e0b;
-    --accountant-light: rgba(13, 148, 136, 0.08);
-    --accountant-gradient: linear-gradient(135deg, #0d9488, #14b8a6);
+    --secondary: #2d6a4f;
+    --secondary-light: #d4e8df;
+    --secondary-glow: rgba(45, 106, 79, 0.12);
 
-    /* ── TEACHER ROLE COLORS ── */
-    --teacher-primary: #7c3aed;
-    --teacher-secondary: #8b5cf6;
-    --teacher-accent: #ec4899;
-    --teacher-light: rgba(124, 58, 237, 0.08);
-    --teacher-gradient: linear-gradient(135deg, #7c3aed, #8b5cf6);
+    --gold: #c99a3b;
+    --gold-light: #f5e6c8;
+    --gold-glow: rgba(201, 154, 59, 0.12);
 
-    /* ── ACTIVE ROLE (OVERRIDDEN BY BODY CLASS) ── */
-    --role-primary: var(--admin-primary);
-    --role-secondary: var(--admin-secondary);
-    --role-accent: var(--admin-accent);
-    --role-light: var(--admin-light);
-    --role-gradient: var(--admin-gradient);
+    --rose: #b56576;
+    --rose-light: #f0dde2;
+    --rose-glow: rgba(181, 101, 118, 0.12);
 
-    /* ── SEMANTIC COLORS ── */
+    --teal: #3a7d7a;
+    --teal-light: #d4e8e7;
+    --teal-glow: rgba(58, 125, 122, 0.12);
+
+    --ink: #2c2c3a;
+    --ink-light: #e8e6ed;
+
+    --purple: #7c5cfc;
+    --purple-light: #e8e2fc;
+
+    --emerald: #10b981;
+    --emerald-light: #6ee7b7;
+
+    --cyan: #06b6d4;
+    --cyan-light: #67e8f9;
+
+    /* ─── Status colors ─── */
     --success: #10b981;
-    --success-bg: #d1fae5;
-    --success-border: #10b981;
+    --success-light: #d1fae5;
     --warning: #f59e0b;
-    --warning-bg: #fef3c7;
-    --warning-border: #f59e0b;
+    --warning-light: #fef3c7;
     --danger: #ef4444;
-    --danger-bg: #fee2e2;
-    --danger-border: #ef4444;
-    --info: #3b82f6;
-    --info-bg: #dbeafe;
-    --info-border: #3b82f6;
+    --danger-light: #fee2e2;
+    --info: #0ea5e9;
+    --info-light: #dbeafe;
 
-    /* ── GRADE COLORS ── */
-    --grade-aplus: #10b981;
-    --grade-a: #34d399;
-    --grade-b: #60a5fa;
-    --grade-c: #fbbf24;
-    --grade-d: #f97316;
-    --grade-f: #ef4444;
+    /* ─── Shadows ─── */
+    --shadow-card: 0 2px 20px rgba(26, 20, 16, 0.06);
+    --shadow-hover: 0 8px 40px rgba(26, 20, 16, 0.10);
+    --shadow-overlay: 0 20px 60px rgba(0, 0, 0, 0.3);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
 
-    /* ── SPACING SYSTEM (8px base) ── */
-    --xs: 4px;
-    --sm: 8px;
-    --md: 16px;
-    --lg: 24px;
-    --xl: 32px;
-    --xxl: 48px;
-    --xxxl: 64px;
+    /* ─── Radius ─── */
+    --radius-sm: 6px;
+    --radius: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-full: 9999px;
 
-    /* ── BORDER RADIUS ── */
-    --r-none: 0;
-    --r-sm: 8px;
-    --r-md: 12px;
-    --r-lg: 16px;
-    --r-xl: 20px;
-    --r-2xl: 24px;
-    --r-full: 9999px;
+    /* ─── Spacing ─── */
+    --spacing-1: 4px;
+    --spacing-2: 8px;
+    --spacing-3: 12px;
+    --spacing-4: 16px;
+    --spacing-5: 20px;
+    --spacing-6: 24px;
+    --spacing-8: 32px;
+    --spacing-10: 40px;
+    --spacing-12: 48px;
+    --spacing-16: 64px;
 
-    /* ── SHADOWS ── */
-    --shadow-none: none;
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, .1), 0 2px 4px -1px rgba(0, 0, 0, .06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, .1), 0 10px 10px -5px rgba(0, 0, 0, .04);
-    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, .25);
-    --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, .05);
-    --shadow-focus: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    /* ─── Transitions ─── */
+    --transition: 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    --transition-fast: 0.2s ease;
+    --transition-slow: 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 
-    /* ── TRANSITIONS ── */
-    --transition-fast: 0.15s ease;
-    --transition: 0.2s ease;
-    --transition-slow: 0.3s ease;
-    --transition-bounce: 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    /* ─── Z-Index ─── */
+    --z-base: 1;
+    --z-dropdown: 50;
+    --z-sticky: 100;
+    --z-overlay: 200;
+    --z-modal: 500;
+    --z-toast: 1000;
+    --z-loader: 2000;
 
-    /* ── LAYOUT ── */
-    --sidebar-w: 280px;
-    --sidebar-w-collapsed: 80px;
-    --topbar-h: 64px;
-    --topbar-h-mobile: 56px;
-    --footer-h: 60px;
-    --max-width: 1400px;
+    /* ─── Sidebar ─── */
+    --sidebar-w: 272px;
+    --sidebar-collapsed-w: 72px;
+    --sidebar-bg: #ffffff;
+    --sidebar-border: #e2e8f0;
+    --sidebar-hover: #f1f5f9;
+    --sidebar-text: #1a1410;
+    --sidebar-text-muted: #7a6e66;
 
-    /* ── Z-INDEX ── */
-    --z-negative: -1;
-    --z-low: 10;
-    --z-medium: 100;
-    --z-high: 200;
-    --z-modal: 1000;
-    --z-modal-content: 1010;
-    --z-dropdown: 1100;
-    --z-tooltip: 1200;
-    --z-toast: 9999;
-    --z-max: 99999;
-}
+    /* ─── Topbar ─── */
+    --topbar-bg: #ffffff;
+    --topbar-border: #e2e8f0;
+    --topbar-text: #1a1410;
+    --topbar-text-muted: #7a6e66;
+    --topbar-text-dim: #b5aaa2;
+    --topbar-hover: #f1f5f9;
 
-/* ── DARK THEME ── */
-[data-theme="dark"] {
-    --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --bg-tertiary: #334155;
-    --bg-hover: #334155;
-    --bg-active: #475569;
-    --bg-disabled: #1e293b;
+    /* ─── Fonts ─── */
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-serif: 'Playfair Display', Georgia, serif;
+    --font-mono: 'DM Sans', 'Courier New', monospace;
 
-    --text-primary: #f1f5f9;
-    --text-secondary: #cbd5e1;
-    --text-muted: #94a3b8;
-    --text-disabled: #64748b;
-    --text-inverse: #0f172a;
+    /* ─── Typography scale ─── */
+    --text-xs: 10px;
+    --text-sm: 12px;
+    --text-base: 14px;
+    --text-lg: 16px;
+    --text-xl: 18px;
+    --text-2xl: 22px;
+    --text-3xl: 28px;
+    --text-4xl: 34px;
+    --text-5xl: 42px;
 
-    --border-light: #334155;
-    --border-medium: #475569;
-    --border-dark: #64748b;
-    --border-focus: #60a5fa;
+    /* ─── Line heights ─── */
+    --lh-tight: 1.1;
+    --lh-normal: 1.5;
+    --lh-loose: 1.7;
 
-    --admin-primary: #2d5a8e;
-    --admin-secondary: #60a5fa;
-    --accountant-primary: #14b8a6;
-    --accountant-secondary: #2dd4bf;
-    --teacher-primary: #a78bfa;
-    --teacher-secondary: #c4b5fd;
-
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .3);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, .3), 0 2px 4px -1px rgba(0, 0, 0, .2);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, .3), 0 4px 6px -2px rgba(0, 0, 0, .2);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, .3), 0 10px 10px -5px rgba(0, 0, 0, .2);
-}
-
-/* ── ROLE OVERRIDES ── */
-body.role-admin {
-    --role-primary: var(--admin-primary);
-    --role-secondary: var(--admin-secondary);
-    --role-accent: var(--admin-accent);
-    --role-light: var(--admin-light);
-    --role-gradient: var(--admin-gradient);
-}
-
-body.role-accountant {
-    --role-primary: var(--accountant-primary);
-    --role-secondary: var(--accountant-secondary);
-    --role-accent: var(--accountant-accent);
-    --role-light: var(--accountant-light);
-    --role-gradient: var(--accountant-gradient);
-}
-
-body.role-teacher {
-    --role-primary: var(--teacher-primary);
-    --role-secondary: var(--teacher-secondary);
-    --role-accent: var(--teacher-accent);
-    --role-light: var(--teacher-light);
-    --role-gradient: var(--teacher-gradient);
+    /* ─── Scrollbar ─── */
+    --scrollbar-track: var(--bg-body);
+    --scrollbar-thumb: var(--text-muted);
 }

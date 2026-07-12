@@ -1,239 +1,102 @@
-/* ==================================================================
-   LIGHT THEME — Default Light Mode Overrides
-   ================================================================== */
+/* ═══════════════════════════════════════════════════════════════════
+   LIGHT THEME
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: Explicit light mode overrides. Applied when
+   data-theme="light" is set on the HTML element.
+   ═══════════════════════════════════════════════════════════════════ */
 
 [data-theme="light"] {
-    /* ── Backgrounds ── */
-    --bg-primary: #eef2f5;
-    --bg-secondary: #ffffff;
-    --bg-tertiary: #f4f7fa;
-    --bg-hover: #f8fafc;
-    --bg-active: #e2e8f0;
-    --bg-disabled: #f1f5f9;
+    /* ─── Colors ─── */
+    --bg-body: #f5f0eb;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f8fafc;
+    --bg-card-alt: #faf7f4;
+    --bg-accent-soft: #f0ebe6;
+    --bg-overlay: rgba(0, 0, 0, 0.4);
+    --bg-surface: #ffffff;
+    --bg-input: #f8fafc;
+    --bg-input-hover: #f1f5f9;
+    --bg-selection: rgba(196, 69, 54, 0.1);
+    --bg-hover: rgba(0, 0, 0, 0.03);
 
-    /* ── Text ── */
-    --text-primary: #1e293b;
-    --text-secondary: #475569;
-    --text-muted: #94a3b8;
-    --text-disabled: #cbd5e1;
-    --text-inverse: #ffffff;
+    --text-dark: #1a1410;
+    --text-body: #3d342e;
+    --text-soft: #7a6e66;
+    --text-muted: #b5aaa2;
+    --text-dim: #d4ccc6;
 
-    /* ── Borders ── */
-    --border-light: #e2e8f0;
-    --border-medium: #cbd5e1;
-    --border-dark: #94a3b8;
-    --border-focus: #3b82f6;
+    --border-color: #e2e8f0;
+    --border-color-hover: #cbd5e1;
 
-    /* ── Shadows ── */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, .1), 0 2px 4px -1px rgba(0, 0, 0, .06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, .1), 0 4px 6px -2px rgba(0, 0, 0, .05);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, .1), 0 10px 10px -5px rgba(0, 0, 0, .04);
-    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, .25);
+    /* ─── Role colors ─── */
+    --primary: #c44536;
+    --primary-dark: #a83528;
+    --primary-light: #e8c9c2;
+    --primary-glow: rgba(196, 69, 54, 0.12);
+    --primary-gradient: linear-gradient(135deg, #c44536, #a83528);
 
-    /* ── Cards ── */
-    .stat-card,
-    .dash-card {
-        background: #ffffff;
-        border-color: #e2e8f0;
-    }
+    --secondary: #2d6a4f;
+    --secondary-light: #d4e8df;
+    --secondary-glow: rgba(45, 106, 79, 0.12);
 
-    .stat-card::before {
-        background: var(--role-primary);
-    }
+    --gold: #c99a3b;
+    --gold-light: #f5e6c8;
+    --gold-glow: rgba(201, 154, 59, 0.12);
 
-    /* ── Tables ── */
-    .data-table thead tr {
-        background: #f1f5f9;
-    }
+    --rose: #b56576;
+    --rose-light: #f0dde2;
+    --rose-glow: rgba(181, 101, 118, 0.12);
 
-    .data-table th {
-        color: #475569;
-        border-bottom-color: #e2e8f0;
-    }
+    --teal: #3a7d7a;
+    --teal-light: #d4e8e7;
+    --teal-glow: rgba(58, 125, 122, 0.12);
 
-    .data-table td {
-        border-bottom-color: #e2e8f0;
-    }
+    --ink: #2c2c3a;
+    --ink-light: #e8e6ed;
 
-    .data-table tbody tr:hover {
-        background: #f8fafc;
-    }
+    --purple: #7c5cfc;
+    --purple-light: #e8e2fc;
 
-    /* ── Forms ── */
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        background: #ffffff;
-        border-color: #cbd5e1;
-        color: #1e293b;
-    }
+    --emerald: #10b981;
+    --emerald-light: #6ee7b7;
 
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-        border-color: var(--role-primary);
-        box-shadow: var(--shadow-focus);
-    }
+    --cyan: #06b6d4;
+    --cyan-light: #67e8f9;
 
-    /* ── Modals ── */
-    .modal-overlay {
-        background: rgba(0, 0, 0, 0.5);
-    }
+    /* ─── Status colors ─── */
+    --success: #10b981;
+    --success-light: #d1fae5;
+    --warning: #f59e0b;
+    --warning-light: #fef3c7;
+    --danger: #ef4444;
+    --danger-light: #fee2e2;
+    --info: #0ea5e9;
+    --info-light: #dbeafe;
 
-    .modal {
-        background: #ffffff;
-        border-color: #e2e8f0;
-    }
+    /* ─── Shadows ─── */
+    --shadow-card: 0 2px 20px rgba(26, 20, 16, 0.06);
+    --shadow-hover: 0 8px 40px rgba(26, 20, 16, 0.10);
+    --shadow-overlay: 0 20px 60px rgba(0, 0, 0, 0.3);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
 
-    .modal-header {
-        border-bottom-color: #e2e8f0;
-    }
+    /* ─── Sidebar ─── */
+    --sidebar-bg: #ffffff;
+    --sidebar-border: #e2e8f0;
+    --sidebar-hover: #f1f5f9;
+    --sidebar-text: #1a1410;
+    --sidebar-text-muted: #7a6e66;
 
-    .modal-footer {
-        border-top-color: #e2e8f0;
-    }
+    /* ─── Topbar ─── */
+    --topbar-bg: #ffffff;
+    --topbar-border: #e2e8f0;
+    --topbar-text: #1a1410;
+    --topbar-text-muted: #7a6e66;
+    --topbar-text-dim: #b5aaa2;
+    --topbar-hover: #f1f5f9;
 
-    /* ── Dropdowns ── */
-    .dropdown-menu {
-        background: #ffffff;
-        border-color: #e2e8f0;
-    }
-
-    .dropdown-item:hover {
-        background: #f8fafc;
-    }
-
-    /* ── Toasts ── */
-    .toast {
-        background: #ffffff;
-        border-color: #e2e8f0;
-    }
-
-    /* ── Sidebar ── */
-    .sidebar {
-        background: #ffffff;
-        border-right-color: #e2e8f0;
-    }
-
-    .sidebar-header {
-        border-bottom-color: #e2e8f0;
-    }
-
-    .sidebar-footer {
-        border-top-color: #e2e8f0;
-    }
-
-    .nav-item:hover {
-        background: #f8fafc;
-    }
-
-    .nav-item.active {
-        background: var(--role-light);
-        color: var(--role-primary);
-    }
-
-    /* ── Topbar ── */
-    .topbar {
-        background: #ffffff;
-        border-bottom-color: #e2e8f0;
-    }
-
-    .user-dropdown {
-        background: #ffffff;
-        border-color: #e2e8f0;
-    }
-
-    /* ── Login ── */
-    .login-card {
-        background: rgba(255, 255, 255, 0.88);
-        border-color: rgba(200, 212, 220, 0.5);
-    }
-
-    .login-field input,
-    .login-field select {
-        background: rgba(255, 255, 255, 0.7);
-        border-color: rgba(200, 212, 220, 0.5);
-        color: #1e293b;
-    }
-
-    /* ── Badges ── */
-    .badge-neutral {
-        background: #f1f5f9;
-        color: #475569;
-    }
-
-    .badge-light {
-        background: #ffffff;
-        color: #1e293b;
-        border-color: #e2e8f0;
-    }
-
-    /* ── Alerts ── */
-    .alert-info {
-        background: #dbeafe;
-        border-color: #3b82f6;
-        color: #1e40af;
-    }
-
-    .alert-success {
-        background: #d1fae5;
-        border-color: #10b981;
-        color: #065f46;
-    }
-
-    .alert-warning {
-        background: #fef3c7;
-        border-color: #f59e0b;
-        color: #92400e;
-    }
-
-    .alert-danger {
-        background: #fee2e2;
-        border-color: #ef4444;
-        color: #991b1b;
-    }
-
-    /* ── Skeleton ── */
-    .skeleton {
-        background: linear-gradient(90deg, #f1f5f9 25%, #ffffff 50%, #f1f5f9 75%);
-        background-size: 200% 100%;
-    }
-
-    .skeleton-line {
-        background: #f1f5f9;
-    }
-
-    .skeleton-avatar {
-        background: #f1f5f9;
-    }
-
-    .skeleton-card {
-        background: #ffffff;
-        border-color: #e2e8f0;
-    }
-
-    /* ── Scrollbar ── */
-    ::-webkit-scrollbar-track {
-        background: #f1f5f9;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
-    }
-
-    /* ── Selection ── */
-    ::selection {
-        background: var(--role-primary);
-        color: white;
-    }
-
-    ::-moz-selection {
-        background: var(--role-primary);
-        color: white;
-    }
+    /* ─── Scrollbar ─── */
+    --scrollbar-track: #f5f0eb;
+    --scrollbar-thumb: #b5aaa2;
 }

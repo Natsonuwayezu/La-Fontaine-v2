@@ -1,575 +1,102 @@
-/* ==================================================================
-   DARK THEME — Complete Dark Mode Overrides
-   ================================================================== */
+/* ═══════════════════════════════════════════════════════════════════
+   DARK THEME
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: Dark mode overrides. Applied when data-theme="dark"
+   is set on the HTML element.
+   ═══════════════════════════════════════════════════════════════════ */
 
 [data-theme="dark"] {
-    /* ── Backgrounds ── */
-    --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --bg-tertiary: #334155;
-    --bg-hover: #334155;
-    --bg-active: #475569;
-    --bg-disabled: #1e293b;
-
-    /* ── Text ── */
-    --text-primary: #f1f5f9;
-    --text-secondary: #cbd5e1;
-    --text-muted: #94a3b8;
-    --text-disabled: #64748b;
-    --text-inverse: #0f172a;
-
-    /* ── Borders ── */
-    --border-light: #334155;
-    --border-medium: #475569;
-    --border-dark: #64748b;
-    --border-focus: #60a5fa;
-
-    /* ── Role Colors ── */
-    --admin-primary: #2d5a8e;
-    --admin-secondary: #60a5fa;
-    --accountant-primary: #14b8a6;
-    --accountant-secondary: #2dd4bf;
-    --teacher-primary: #a78bfa;
-    --teacher-secondary: #c4b5fd;
-
-    /* ── Shadows ── */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .3);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, .3), 0 2px 4px -1px rgba(0, 0, 0, .2);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, .3), 0 4px 6px -2px rgba(0, 0, 0, .2);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, .3), 0 10px 10px -5px rgba(0, 0, 0, .2);
-    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, .3);
-
-    /* ── Cards ── */
-    .stat-card,
-    .dash-card {
-        background: #1e293b;
-        border-color: #334155;
-    }
-
-    .stat-card:hover {
-        box-shadow: var(--shadow-md);
-    }
-
-    .stat-value {
-        color: #f1f5f9;
-    }
-
-    /* ── Tables ── */
-    .data-table thead tr {
-        background: #334155;
-    }
-
-    .data-table th {
-        color: #cbd5e1;
-        border-bottom-color: #334155;
-    }
-
-    .data-table td {
-        border-bottom-color: #334155;
-        color: #f1f5f9;
-    }
-
-    .data-table tbody tr:hover {
-        background: #334155;
-    }
-
-    /* ── Forms ── */
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        background: #1e293b;
-        border-color: #475569;
-        color: #f1f5f9;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-        border-color: var(--role-primary);
-        box-shadow: var(--shadow-focus);
-    }
-
-    .form-group label {
-        color: #cbd5e1;
-    }
-
-    /* ── Modals ── */
-    .modal-overlay {
-        background: rgba(0, 0, 0, 0.7);
-    }
-
-    .modal {
-        background: #1e293b;
-        border-color: #334155;
-    }
-
-    .modal-header {
-        border-bottom-color: #334155;
-    }
-
-    .modal-header h3,
-    .modal-header h2,
-    .modal-header h4 {
-        color: #f1f5f9;
-    }
-
-    .modal-footer {
-        border-top-color: #334155;
-    }
-
-    .modal-close {
-        color: #94a3b8;
-    }
-
-    .modal-close:hover {
-        color: #f1f5f9;
-        background: #334155;
-    }
-
-    /* ── Dropdowns ── */
-    .dropdown-menu {
-        background: #1e293b;
-        border-color: #334155;
-    }
-
-    .dropdown-item {
-        color: #cbd5e1;
-    }
-
-    .dropdown-item:hover {
-        background: #334155;
-        color: #f1f5f9;
-    }
-
-    .dropdown-header {
-        background: #334155;
-        color: #94a3b8;
-    }
-
-    /* ── Toasts ── */
-    .toast {
-        background: #1e293b;
-        border-color: #334155;
-        color: #f1f5f9;
-    }
-
-    /* ── Sidebar ── */
-    .sidebar {
-        background: #1e293b;
-        border-right-color: #334155;
-    }
-
-    .sidebar-header {
-        border-bottom-color: #334155;
-    }
-
-    .sidebar-school-name {
-        color: #f1f5f9;
-    }
-
-    .sidebar-school-name small {
-        color: #94a3b8;
-    }
-
-    .sidebar-footer {
-        border-top-color: #334155;
-    }
-
-    .sidebar-user-name {
-        color: #f1f5f9;
-    }
-
-    .sidebar-user-role {
-        color: #94a3b8;
-    }
-
-    .nav-item {
-        color: #cbd5e1;
-    }
-
-    .nav-item:hover {
-        background: #334155;
-        color: #f1f5f9;
-    }
-
-    .nav-item.active {
-        background: var(--role-light);
-        color: var(--role-primary);
-    }
-
-    .nav-section-title {
-        color: #94a3b8;
-    }
-
-    .nav-section-title:hover {
-        color: #cbd5e1;
-    }
-
-    /* ── Topbar ── */
-    .topbar {
-        background: #1e293b;
-        border-bottom-color: #334155;
-    }
-
-    .page-title {
-        color: #f1f5f9;
-    }
-
-    .user-dropdown {
-        background: #1e293b;
-        border-color: #334155;
-    }
-
-    .user-name {
-        color: #f1f5f9;
-    }
-
-    .menu-toggle {
-        color: #94a3b8;
-    }
-
-    .menu-toggle:hover {
-        background: #334155;
-        color: #f1f5f9;
-    }
-
-    .term-progress-bar {
-        background: #1e293b;
-        border-bottom-color: #334155;
-    }
-
-    .progress-label {
-        color: #94a3b8;
-    }
-
-    .progress-label strong {
-        color: #f1f5f9;
-    }
-
-    .progress-track {
-        background: #334155;
-    }
-
-    .progress-text {
-        color: #94a3b8;
-    }
-
-    .progress-days {
-        color: #94a3b8;
-    }
-
-    /* ── Login ── */
-    .login-card {
-        background: rgba(25, 35, 50, 0.92);
-        border-color: rgba(70, 90, 110, 0.4);
-    }
-
-    .login-field input,
-    .login-field select {
-        background: rgba(35, 45, 60, 0.7);
-        border-color: rgba(70, 90, 110, 0.5);
-        color: #f1f5f9;
-    }
-
-    .login-field input:focus,
-    .login-field select:focus {
-        border-color: #00b4d8;
-        box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.12);
-    }
-
-    .login-subtitle {
-        color: #94a3b8;
-    }
-
-    .login-alert {
-        background: rgba(239, 68, 68, 0.2);
-        color: #fca5a5;
-    }
-
-    /* ── Badges ── */
-    .badge-neutral {
-        background: #334155;
-        color: #cbd5e1;
-    }
-
-    .badge-light {
-        background: #1e293b;
-        color: #f1f5f9;
-        border-color: #334155;
-    }
-
-    .badge-success {
-        background: rgba(16, 185, 129, 0.2);
-        color: #86efac;
-    }
-
-    .badge-warning {
-        background: rgba(245, 158, 11, 0.2);
-        color: #fcd34d;
-    }
-
-    .badge-danger {
-        background: rgba(239, 68, 68, 0.2);
-        color: #fca5a5;
-    }
-
-    .badge-info {
-        background: rgba(59, 130, 246, 0.2);
-        color: #93c5fd;
-    }
-
-    /* ── Grade Badges ── */
-    .grade-Ap,
-    .grade-A {
-        background: rgba(16, 185, 129, 0.2);
-        color: #86efac;
-    }
-
-    .grade-B {
-        background: rgba(96, 165, 250, 0.2);
-        color: #93c5fd;
-    }
-
-    .grade-C {
-        background: rgba(251, 191, 36, 0.2);
-        color: #fcd34d;
-    }
-
-    .grade-D {
-        background: rgba(251, 146, 60, 0.2);
-        color: #fdba74;
-    }
-
-    .grade-F {
-        background: rgba(239, 68, 68, 0.2);
-        color: #fca5a5;
-    }
-
-    /* ── Alerts ── */
-    .alert-info {
-        background: rgba(59, 130, 246, 0.15);
-        border-color: #3b82f6;
-        color: #93c5fd;
-    }
-
-    .alert-success {
-        background: rgba(16, 185, 129, 0.15);
-        border-color: #10b981;
-        color: #86efac;
-    }
-
-    .alert-warning {
-        background: rgba(245, 158, 11, 0.15);
-        border-color: #f59e0b;
-        color: #fcd34d;
-    }
-
-    .alert-danger {
-        background: rgba(239, 68, 68, 0.15);
-        border-color: #ef4444;
-        color: #fca5a5;
-    }
-
-    /* ── Skeleton ── */
-    .skeleton {
-        background: linear-gradient(90deg, #334155 25%, #1e293b 50%, #334155 75%);
-        background-size: 200% 100%;
-    }
-
-    .skeleton-dark {
-        background: linear-gradient(90deg, #2d3748 25%, #4a5568 50%, #2d3748 75%);
-        background-size: 200% 100%;
-    }
-
-    .skeleton-line {
-        background: #334155;
-    }
-
-    .skeleton-avatar {
-        background: #334155;
-    }
-
-    .skeleton-card {
-        background: #1e293b;
-        border-color: #334155;
-    }
-
-    .skeleton-grid-item {
-        background: #1e293b;
-        border-color: #334155;
-    }
-
-    .skeleton-list-item {
-        background: #1e293b;
-        border-color: #334155;
-    }
-
-    .skeleton-chart {
-        background: #334155;
-    }
-
-    /* ── Scrollbar ── */
-    ::-webkit-scrollbar-track {
-        background: #334155;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background: #475569;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-        background: #64748b;
-    }
-
-    /* ── Selection ── */
-    ::selection {
-        background: var(--role-primary);
-        color: white;
-    }
-
-    ::-moz-selection {
-        background: var(--role-primary);
-        color: white;
-    }
-
-    /* ── Quick Actions ── */
-    .quick-btn {
-        background: #334155;
-        border-color: #475569;
-    }
-
-    .quick-btn:hover {
-        background: var(--role-light);
-        border-color: var(--role-primary);
-    }
-
-    .quick-btn .qb-title {
-        color: #f1f5f9;
-    }
-
-    /* ── Dashboard Greeting ── */
-    .dashboard-greeting {
-        background: var(--role-light);
-    }
-
-    .dashboard-greeting h2 {
-        color: #f1f5f9;
-    }
-
-    /* ── Attendance ── */
-    .attendance-summary-card {
-        background: #1e293b;
-        border-color: #334155;
-    }
-
-    .attendance-date-picker input[type="date"] {
-        background: #1e293b;
-        border-color: #475569;
-        color: #f1f5f9;
-    }
-
-    /* ── Fee Cards ── */
-    .fee-card {
-        background: #1e293b;
-        border-color: #334155;
-    }
-
-    .fee-card-amount {
-        color: var(--role-primary);
-    }
-
-    /* ── Payment Form ── */
-    .payment-form {
-        background: #334155;
-    }
-
-    .payment-category-item {
-        background: #1e293b;
-        border-color: #334155;
-    }
-
-    .payment-category-item.selected {
-        border-color: var(--role-primary);
-        background: var(--role-light);
-    }
-
-    /* ── Settings ── */
-    .setting-card {
-        background: #1e293b;
-        border-color: #334155;
-    }
-
-    .setting-card:hover {
-        border-color: var(--role-primary);
-    }
-
-    .setting-card .setting-desc {
-        color: #94a3b8;
-    }
-
-    .logo-preview {
-        background: #334155;
-        border-color: #475569;
-    }
-
-    /* ── Report Cards (print override for dark mode) ── */
-    .report-card {
-        background: #1e293b;
-        border-color: #334155;
-    }
-
-    .report-info-item strong {
-        color: #94a3b8;
-    }
-
-    .report-info-item span {
-        color: #f1f5f9;
-    }
-
-    .report-subjects th {
-        background: #334155;
-        color: #f1f5f9;
-        border-color: #475569;
-    }
-
-    .report-subjects td {
-        border-color: #334155;
-        color: #f1f5f9;
-    }
-
-    .report-footer {
-        background: #334155;
-        color: #94a3b8;
-    }
-
-    .report-footer .decision-banner.pass {
-        background: rgba(16, 185, 129, 0.2);
-        color: #86efac;
-    }
-
-    .report-footer .decision-banner.remedial {
-        background: rgba(245, 158, 11, 0.2);
-        color: #fcd34d;
-    }
-
-    .report-footer .decision-banner.fail {
-        background: rgba(239, 68, 68, 0.2);
-        color: #fca5a5;
-    }
-
-    .report-qr-block {
-        background: #334155;
-        border-top-color: #475569;
-    }
-
-    .report-qr-block img {
-        border-color: #475569;
-    }
-
-    /* ── Receipt Preview ── */
-    .receipt-preview {
-        background: #1e293b;
-        border-color: #334155;
-        color: #f1f5f9;
-    }
+    /* ─── Colors ─── */
+    --bg-body: #0f0a08;
+    --bg-card: #1a1410;
+    --bg-card-hover: #241d18;
+    --bg-card-alt: #241d18;
+    --bg-accent-soft: #2a221c;
+    --bg-overlay: rgba(0, 0, 0, 0.7);
+    --bg-surface: #1a1410;
+    --bg-input: #2a221c;
+    --bg-input-hover: #332a24;
+    --bg-selection: rgba(232, 85, 68, 0.2);
+    --bg-hover: rgba(255, 255, 255, 0.04);
+
+    --text-dark: #f5f0eb;
+    --text-body: #d4ccc6;
+    --text-soft: #9a8e86;
+    --text-muted: #5a4e46;
+    --text-dim: #3a322c;
+
+    --border-color: rgba(255, 255, 255, 0.06);
+    --border-color-hover: rgba(255, 255, 255, 0.12);
+
+    /* ─── Role colors (brighter for dark mode) ─── */
+    --primary: #e85544;
+    --primary-dark: #c44536;
+    --primary-light: #4a2218;
+    --primary-glow: rgba(232, 85, 68, 0.15);
+    --primary-gradient: linear-gradient(135deg, #e85544, #c44536);
+
+    --secondary: #3d8a6a;
+    --secondary-light: #1a3a2e;
+    --secondary-glow: rgba(61, 138, 106, 0.15);
+
+    --gold: #d9aa4b;
+    --gold-light: #3a2e18;
+    --gold-glow: rgba(217, 170, 75, 0.15);
+
+    --rose: #c57586;
+    --rose-light: #3a2228;
+    --rose-glow: rgba(197, 117, 134, 0.15);
+
+    --teal: #4a8d8a;
+    --teal-light: #1a3a38;
+    --teal-glow: rgba(74, 141, 138, 0.15);
+
+    --ink: #5a5a6a;
+    --ink-light: #2a2a3a;
+
+    --purple: #a78bfa;
+    --purple-light: #2a1a4a;
+
+    --emerald: #10b981;
+    --emerald-light: #1a3a2e;
+
+    --cyan: #06b6d4;
+    --cyan-light: #1a3a38;
+
+    /* ─── Status colors ─── */
+    --success: #10b981;
+    --success-light: #064e3b;
+    --warning: #f59e0b;
+    --warning-light: #78350f;
+    --danger: #ef4444;
+    --danger-light: #7f1d1d;
+    --info: #0ea5e9;
+    --info-light: #1e3a5f;
+
+    /* ─── Shadows (darker for dark mode) ─── */
+    --shadow-card: 0 2px 20px rgba(0, 0, 0, 0.3);
+    --shadow-hover: 0 8px 40px rgba(0, 0, 0, 0.4);
+    --shadow-overlay: 0 20px 60px rgba(0, 0, 0, 0.5);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+    /* ─── Sidebar ─── */
+    --sidebar-bg: #0f0a08;
+    --sidebar-border: rgba(255, 255, 255, 0.06);
+    --sidebar-hover: rgba(255, 255, 255, 0.04);
+    --sidebar-text: #f5f0eb;
+    --sidebar-text-muted: #9a8e86;
+
+    /* ─── Topbar ─── */
+    --topbar-bg: #1a1410;
+    --topbar-border: rgba(255, 255, 255, 0.06);
+    --topbar-text: #f5f0eb;
+    --topbar-text-muted: #9a8e86;
+    --topbar-text-dim: #5a4e46;
+    --topbar-hover: rgba(255, 255, 255, 0.04);
+
+    /* ─── Scrollbar ─── */
+    --scrollbar-track: #0f0a08;
+    --scrollbar-thumb: #5a4e46;
 }

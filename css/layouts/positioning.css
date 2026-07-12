@@ -1,12 +1,10 @@
-/* ==================================================================
-   POSITIONING & DISPLAY UTILITIES
-   ================================================================== */
+/* ═══════════════════════════════════════════════════════════════════
+   POSITIONING — Position, z-index, overflow utilities
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: Control element positioning and overflow behavior.
+   ═══════════════════════════════════════════════════════════════════ */
 
-/* ── Position Types ── */
-.static {
-    position: static;
-}
-
+/* ─── Position ─── */
 .relative {
     position: relative;
 }
@@ -23,7 +21,11 @@
     position: sticky;
 }
 
-/* ── Position Insets ── */
+.static {
+    position: static;
+}
+
+/* ─── Insets ─── */
 .inset-0 {
     top: 0;
     right: 0;
@@ -41,73 +43,37 @@
     bottom: 0;
 }
 
-.inset-auto {
-    inset: auto;
-}
-
 .top-0 {
     top: 0;
-}
-
-.top-auto {
-    top: auto;
 }
 
 .right-0 {
     right: 0;
 }
 
-.right-auto {
-    right: auto;
-}
-
 .bottom-0 {
     bottom: 0;
-}
-
-.bottom-auto {
-    bottom: auto;
 }
 
 .left-0 {
     left: 0;
 }
 
-.left-auto {
-    left: auto;
-}
-
-/* ── Z-Index ── */
-.z-0 {
-    z-index: 0;
-}
-
-.z-10 {
-    z-index: 10;
-}
-
-.z-20 {
-    z-index: 20;
-}
-
-.z-30 {
-    z-index: 30;
-}
-
-.z-40 {
-    z-index: 40;
-}
-
-.z-50 {
-    z-index: 50;
-}
-
-.z-auto {
-    z-index: auto;
+/* ─── Z-Index ─── */
+.z-base {
+    z-index: var(--z-base);
 }
 
 .z-dropdown {
     z-index: var(--z-dropdown);
+}
+
+.z-sticky {
+    z-index: var(--z-sticky);
+}
+
+.z-overlay {
+    z-index: var(--z-overlay);
 }
 
 .z-modal {
@@ -118,38 +84,17 @@
     z-index: var(--z-toast);
 }
 
-/* ── Display ── */
-.block {
-    display: block;
+.z-loader {
+    z-index: var(--z-loader);
 }
 
-.inline-block {
-    display: inline-block;
-}
-
-.inline {
-    display: inline;
-}
-
-.hidden {
-    display: none;
-}
-
-.visible {
-    visibility: visible;
-}
-
-.invisible {
-    visibility: hidden;
-}
-
-/* ── Overflow ── */
-.overflow-auto {
-    overflow: auto;
-}
-
+/* ─── Overflow ─── */
 .overflow-hidden {
     overflow: hidden;
+}
+
+.overflow-auto {
+    overflow: auto;
 }
 
 .overflow-visible {
@@ -176,15 +121,7 @@
     overflow-y: hidden;
 }
 
-.overflow-x-scroll {
-    overflow-x: scroll;
-}
-
-.overflow-y-scroll {
-    overflow-y: scroll;
-}
-
-/* ── Pointer Events ── */
+/* ─── Pointer Events ─── */
 .pointer-events-none {
     pointer-events: none;
 }
@@ -193,155 +130,16 @@
     pointer-events: auto;
 }
 
-/* ── Backdrop Filter ── */
-.backdrop-blur-sm {
-    backdrop-filter: blur(4px);
+/* ─── Visibility ─── */
+.visible {
+    visibility: visible;
 }
 
-.backdrop-blur-md {
-    backdrop-filter: blur(8px);
+.invisible {
+    visibility: hidden;
 }
 
-.backdrop-blur-lg {
-    backdrop-filter: blur(12px);
-}
-
-.backdrop-blur-xl {
-    backdrop-filter: blur(16px);
-}
-
-/* ── Transforms ── */
-.transform {
-    transform: translateZ(0);
-}
-
-.scale-95 {
-    transform: scale(0.95);
-}
-
-.scale-100 {
-    transform: scale(1);
-}
-
-.scale-105 {
-    transform: scale(1.05);
-}
-
-.rotate-90 {
-    transform: rotate(90deg);
-}
-
-.rotate-180 {
-    transform: rotate(180deg);
-}
-
-.rotate-270 {
-    transform: rotate(270deg);
-}
-
-/* ── Transitions ── */
-.transition-all {
-    transition: all var(--transition);
-}
-
-.transition-colors {
-    transition: background-color var(--transition),
-        border-color var(--transition),
-        color var(--transition);
-}
-
-.transition-opacity {
-    transition: opacity var(--transition);
-}
-
-.transition-transform {
-    transition: transform var(--transition);
-}
-
-.transition-shadow {
-    transition: box-shadow var(--transition);
-}
-
-/* ── Cursor ── */
-.cursor-auto {
-    cursor: auto;
-}
-
-.cursor-default {
-    cursor: default;
-}
-
-.cursor-pointer {
-    cursor: pointer;
-}
-
-.cursor-wait {
-    cursor: wait;
-}
-
-.cursor-text {
-    cursor: text;
-}
-
-.cursor-move {
-    cursor: move;
-}
-
-.cursor-not-allowed {
-    cursor: not-allowed;
-}
-
-.cursor-grab {
-    cursor: grab;
-}
-
-.cursor-grabbing {
-    cursor: grabbing;
-}
-
-.cursor-zoom-in {
-    cursor: zoom-in;
-}
-
-.cursor-zoom-out {
-    cursor: zoom-out;
-}
-
-/* ── User Select ── */
-.select-none {
-    user-select: none;
-}
-
-.select-text {
-    user-select: text;
-}
-
-.select-all {
-    user-select: all;
-}
-
-.select-auto {
-    user-select: auto;
-}
-
-/* ── Aspect Ratio ── */
-.aspect-square {
-    aspect-ratio: 1 / 1;
-}
-
-.aspect-video {
-    aspect-ratio: 16 / 9;
-}
-
-.aspect-portrait {
-    aspect-ratio: 3 / 4;
-}
-
-.aspect-landscape {
-    aspect-ratio: 4 / 3;
-}
-
-/* ── Object Fit ── */
+/* ─── Object Fit ─── */
 .object-cover {
     object-fit: cover;
 }
@@ -358,6 +156,99 @@
     object-fit: none;
 }
 
-.object-scale-down {
-    object-fit: scale-down;
+/* ─── Object Position ─── */
+.object-top {
+    object-position: top;
+}
+
+.object-bottom {
+    object-position: bottom;
+}
+
+.object-center {
+    object-position: center;
+}
+
+.object-left {
+    object-position: left;
+}
+
+.object-right {
+    object-position: right;
+}
+
+/* ─── Width ─── */
+.w-full {
+    width: 100%;
+}
+
+.w-auto {
+    width: auto;
+}
+
+.w-screen {
+    width: 100vw;
+}
+
+.w-min {
+    width: min-content;
+}
+
+.w-max {
+    width: max-content;
+}
+
+.w-fit {
+    width: fit-content;
+}
+
+/* ─── Height ─── */
+.h-full {
+    height: 100%;
+}
+
+.h-auto {
+    height: auto;
+}
+
+.h-screen {
+    height: 100vh;
+}
+
+.h-min {
+    height: min-content;
+}
+
+.h-max {
+    height: max-content;
+}
+
+.h-fit {
+    height: fit-content;
+}
+
+/* ─── Min/Max sizes ─── */
+.min-w-full {
+    min-width: 100%;
+}
+
+.min-h-screen {
+    min-height: 100vh;
+}
+
+.max-w-full {
+    max-width: 100%;
+}
+
+.max-h-full {
+    max-height: 100%;
+}
+
+/* ─── Scroll behavior ─── */
+.scroll-smooth {
+    scroll-behavior: smooth;
+}
+
+.scroll-auto {
+    scroll-behavior: auto;
 }

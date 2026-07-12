@@ -1,173 +1,258 @@
-/* ==================================================================
-   FORMS — Complete Form Styles
-   ================================================================== */
+/* ═══════════════════════════════════════════════════════════════════
+   FORMS — All form elements
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: Consistent form element styling including inputs,
+   selects, checkboxes, radios, and toggles.
+   ═══════════════════════════════════════════════════════════════════ */
 
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: var(--md);
-}
-
+/* ─── Form group ─── */
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: var(--spacing-1);
 }
 
 .form-group label {
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
     font-weight: 600;
-    color: var(--text-secondary);
-    margin-bottom: 2px;
+    color: var(--text-soft);
+    letter-spacing: 0.3px;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
-    padding: 10px 14px;
-    border-radius: var(--r-md);
-    border: 1px solid var(--border-medium);
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    font-size: 0.875rem;
-    transition: all var(--transition);
-    width: 100%;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-    border-color: var(--role-primary);
-    outline: none;
-    box-shadow: var(--shadow-focus);
-}
-
-.form-group input:disabled,
-.form-group select:disabled,
-.form-group textarea:disabled {
-    background: var(--bg-disabled);
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-
-.form-group textarea {
-    resize: vertical;
-    min-height: 80px;
-}
-
-.form-group.full {
-    grid-column: 1 / -1;
-}
-
-/* ── Validation States ── */
-.form-group .is-invalid {
-    border-color: var(--danger);
-}
-
-.form-group .is-invalid:focus {
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-}
-
-.invalid-feedback {
+.form-group label .required {
     color: var(--danger);
-    font-size: 0.75rem;
-    margin-top: 4px;
+    margin-left: 2px;
 }
 
-.form-group .is-valid {
-    border-color: var(--success);
-}
-
-.form-group .is-valid:focus {
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-.valid-feedback {
-    color: var(--success);
-    font-size: 0.75rem;
-    margin-top: 4px;
-}
-
-.field-hint {
-    font-size: 0.7rem;
+.form-group .hint {
+    font-size: var(--text-xs);
     color: var(--text-muted);
     margin-top: 2px;
 }
 
-/* ── Password Field ── */
-.pw-field {
-    position: relative;
-    display: flex;
-    align-items: center;
+.form-group .error {
+    font-size: var(--text-xs);
+    color: var(--danger);
+    margin-top: 2px;
 }
 
-.pw-field input {
-    flex: 1;
-    padding-right: 40px;
+/* ─── Inputs ─── */
+.input,
+select,
+textarea {
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-input);
+    color: var(--text-dark);
+    font-size: var(--text-base);
+    font-family: inherit;
+    transition: all var(--transition-fast);
+    width: 100%;
+    outline: none;
+    min-height: 40px;
 }
 
-.pw-field .toggle-pw {
-    position: absolute;
-    right: 10px;
-    background: none;
-    border: none;
+.input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+    background: var(--bg-input-hover);
+}
+
+.input:disabled,
+select:disabled,
+textarea:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.input::placeholder,
+textarea::placeholder {
+    color: var(--text-muted);
+}
+
+.input.error,
+select.error,
+textarea.error {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+}
+
+.input.success,
+select.success,
+textarea.success {
+    border-color: var(--success);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+}
+
+/* ─── Textarea ─── */
+textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+textarea.no-resize {
+    resize: none;
+}
+
+/* ─── Select ─── */
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a6e66' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
     cursor: pointer;
-    font-size: 1rem;
-    color: var(--text-muted);
-    padding: 4px;
 }
 
-.pw-field .toggle-pw:hover {
-    color: var(--text-primary);
+select option {
+    background: var(--bg-surface);
+    color: var(--text-dark);
 }
 
-/* ── Filters Bar ── */
-.filters-bar {
+select optgroup {
+    background: var(--bg-surface);
+    color: var(--text-soft);
+    font-weight: 600;
+}
+
+/* ─── Checkbox ─── */
+.checkbox {
     display: flex;
-    gap: var(--md);
-    flex-wrap: wrap;
     align-items: center;
-    margin-bottom: var(--lg);
-    padding: var(--md);
-    background: var(--bg-tertiary);
-    border-radius: var(--r-lg);
+    gap: var(--spacing-2);
+    cursor: pointer;
 }
 
-.filters-bar select,
-.filters-bar input {
-    padding: 8px 14px;
-    border-radius: var(--r-md);
-    border: 1px solid var(--border-medium);
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    font-size: 0.875rem;
-    min-width: 120px;
+.checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+    cursor: pointer;
+    flex-shrink: 0;
 }
 
-.filters-bar .flex-1 {
-    flex: 1;
-    min-width: 200px;
+.checkbox .checkbox-label {
+    font-size: var(--text-sm);
+    color: var(--text-body);
+    cursor: pointer;
 }
 
-.result-count {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin-left: auto;
-    white-space: nowrap;
+/* ─── Radio ─── */
+.radio {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    cursor: pointer;
+}
+
+.radio input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.radio .radio-label {
+    font-size: var(--text-sm);
+    color: var(--text-body);
+    cursor: pointer;
+}
+
+/* ─── Toggle switch ─── */
+.toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.toggle .toggle-track {
+    position: absolute;
+    inset: 0;
+    background: var(--bg-accent-soft);
+    border-radius: var(--radius-full);
+    transition: all var(--transition-fast);
+}
+
+.toggle .toggle-track::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: var(--text-soft);
+    border-radius: 50%;
+    transition: all var(--transition-fast);
+}
+
+.toggle input:checked+.toggle-track {
+    background: var(--primary);
+}
+
+.toggle input:checked+.toggle-track::after {
+    transform: translateX(20px);
+    background: #ffffff;
+}
+
+/* ─── Form row ─── */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-3);
+}
+
+.form-row-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.form-row-4 {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+/* ─── Form actions ─── */
+.form-actions {
+    display: flex;
+    gap: var(--spacing-2);
+    flex-wrap: wrap;
+    margin-top: var(--spacing-4);
+    padding-top: var(--spacing-3);
+    border-top: 1px solid var(--border-color);
+}
+
+.form-actions .btn {
+    min-width: 100px;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 1024px) {
+    .form-row-4 {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
 @media (max-width: 768px) {
-    .filters-bar {
-        flex-direction: column;
-        align-items: stretch;
+    .form-row {
+        grid-template-columns: 1fr;
     }
 
-    .filters-bar .flex-1 {
-        width: 100%;
+    .form-row-3 {
+        grid-template-columns: 1fr;
     }
 
-    .result-count {
-        margin-left: 0;
-        text-align: center;
+    .form-row-4 {
+        grid-template-columns: 1fr;
     }
 }

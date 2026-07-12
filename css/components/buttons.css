@@ -1,203 +1,275 @@
-/* ==================================================================
-   BUTTONS — Complete Variants
-   ================================================================== */
+/* ═══════════════════════════════════════════════════════════════════
+   BUTTONS — All button variants
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: Comprehensive button styles including all variants,
+   sizes, states, and groups.
+   ═══════════════════════════════════════════════════════════════════ */
 
+/* ─── Base button ─── */
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: var(--sm) var(--lg);
-    border-radius: var(--r-md);
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--transition);
-    border: none;
+    gap: var(--spacing-2);
+    padding: 8px 18px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: var(--text-sm);
     font-family: inherit;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border: 1px solid transparent;
+    background: var(--bg-card);
+    color: var(--text-body);
+    text-decoration: none;
+    min-height: 36px;
+    user-select: none;
+    position: relative;
     white-space: nowrap;
-    line-height: 1.2;
 }
 
 .btn:active {
-    transform: scale(0.98);
+    transform: scale(0.97);
 }
 
-/* ── Sizes ── */
-.btn-xs {
-    padding: 2px 8px;
-    font-size: 0.7rem;
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
-.btn-sm {
-    padding: 4px var(--md);
-    font-size: 0.78rem;
+.btn i,
+.btn svg {
+    font-size: 14px;
+    flex-shrink: 0;
 }
 
-.btn-lg {
-    padding: var(--md) var(--xl);
-    font-size: 1rem;
-}
-
-.btn-xl {
-    padding: var(--lg) var(--xxl);
-    font-size: 1.125rem;
-}
-
-/* ── Variants ── */
+/* ─── Variants ─── */
 .btn-primary {
-    background: var(--role-primary);
-    color: white;
+    background: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
 }
 
 .btn-primary:hover {
-    background: var(--role-primary);
-    filter: brightness(1.05);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+    box-shadow: 0 4px 16px var(--primary-glow);
 }
 
 .btn-secondary {
-    background: var(--role-secondary);
-    color: white;
+    background: var(--secondary);
+    color: #ffffff;
+    border-color: var(--secondary);
 }
 
 .btn-secondary:hover {
-    filter: brightness(1.05);
-    transform: translateY(-1px);
+    background: var(--secondary);
+    opacity: 0.85;
 }
 
 .btn-success {
     background: var(--success);
-    color: white;
+    color: #ffffff;
+    border-color: var(--success);
 }
 
 .btn-success:hover {
-    background: #059669;
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+    background: var(--success);
+    opacity: 0.85;
 }
 
 .btn-danger {
     background: var(--danger);
-    color: white;
+    color: #ffffff;
+    border-color: var(--danger);
 }
 
 .btn-danger:hover {
-    background: #dc2626;
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+    background: var(--danger);
+    opacity: 0.85;
 }
 
 .btn-warning {
     background: var(--warning);
-    color: white;
+    color: #ffffff;
+    border-color: var(--warning);
 }
 
 .btn-warning:hover {
-    background: #d97706;
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+    background: var(--warning);
+    opacity: 0.85;
 }
 
 .btn-info {
     background: var(--info);
-    color: white;
+    color: #ffffff;
+    border-color: var(--info);
 }
 
 .btn-info:hover {
-    background: #2563eb;
-    transform: translateY(-1px);
-}
-
-.btn-outline {
-    background: transparent;
-    border: 1px solid var(--border-medium);
-    color: var(--text-primary);
-}
-
-.btn-outline:hover {
-    background: var(--bg-tertiary);
-    border-color: var(--role-primary);
-    transform: translateY(-1px);
-}
-
-.btn-outline-primary {
-    background: transparent;
-    border: 1px solid var(--role-primary);
-    color: var(--role-primary);
-}
-
-.btn-outline-primary:hover {
-    background: var(--role-light);
-    transform: translateY(-1px);
-}
-
-.btn-outline-success {
-    background: transparent;
-    border: 1px solid var(--success);
-    color: var(--success);
-}
-
-.btn-outline-success:hover {
-    background: var(--success-bg);
-    transform: translateY(-1px);
-}
-
-.btn-outline-danger {
-    background: transparent;
-    border: 1px solid var(--danger);
-    color: var(--danger);
-}
-
-.btn-outline-danger:hover {
-    background: var(--danger-bg);
-    transform: translateY(-1px);
+    background: var(--info);
+    opacity: 0.85;
 }
 
 .btn-ghost {
     background: transparent;
-    color: var(--text-secondary);
+    color: var(--text-soft);
+    border-color: var(--border-color);
 }
 
 .btn-ghost:hover {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
+    background: var(--bg-accent-soft);
+    color: var(--text-dark);
+    border-color: var(--border-color-hover);
 }
 
-.btn:disabled,
-.btn.disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none !important;
+.btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-outline:hover {
+    background: var(--primary);
+    color: #ffffff;
+}
+
+/* ─── Sizes ─── */
+.btn-sm {
+    padding: 4px 12px;
+    font-size: var(--text-xs);
+    min-height: 28px;
+}
+
+.btn-sm i,
+.btn-sm svg {
+    font-size: 12px;
+}
+
+.btn-lg {
+    padding: 12px 28px;
+    font-size: var(--text-base);
+    min-height: 44px;
+}
+
+.btn-lg i,
+.btn-lg svg {
+    font-size: 16px;
+}
+
+.btn-icon {
+    padding: 8px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+}
+
+.btn-icon i,
+.btn-icon svg {
+    font-size: 16px;
+}
+
+.btn-icon.btn-sm {
+    padding: 4px;
+    width: 28px;
+    height: 28px;
+}
+
+.btn-icon.btn-sm i,
+.btn-icon.btn-sm svg {
+    font-size: 12px;
+}
+
+.btn-icon.btn-lg {
+    padding: 12px;
+    width: 44px;
+    height: 44px;
+}
+
+.btn-icon.btn-lg i,
+.btn-icon.btn-lg svg {
+    font-size: 20px;
+}
+
+/* ─── Full width ─── */
+.btn-block {
+    width: 100%;
+    justify-content: center;
+}
+
+/* ─── Loading state ─── */
+.btn.loading {
+    color: transparent !important;
     pointer-events: none;
 }
 
-/* ── Button Groups ── */
+.btn.loading::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+.btn.loading.btn-ghost::after {
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-top-color: var(--text-dark);
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ─── Button group ─── */
 .btn-group {
-    display: flex;
-    gap: var(--sm);
-    flex-wrap: wrap;
-    align-items: center;
+    display: inline-flex;
+    gap: 0;
+}
+
+.btn-group .btn {
+    border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+.btn-group .btn:last-child {
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.btn-group .btn:not(:first-child) {
+    border-left: none;
+}
+
+.btn-group .btn:not(:first-child):not(:last-child) {
+    border-radius: 0;
 }
 
 .btn-group-vertical {
-    display: flex;
+    display: inline-flex;
     flex-direction: column;
-    gap: var(--sm);
+    gap: 0;
 }
 
-/* ── Responsive ── */
-@media (max-width: 480px) {
-    .btn-group {
-        gap: 6px;
-    }
+.btn-group-vertical .btn {
+    border-radius: 0;
+}
 
-    .btn {
-        flex: 1 1 auto;
-        min-width: 0;
-        font-size: 0.78rem;
-        padding: 6px 10px;
-        white-space: nowrap;
-    }
+.btn-group-vertical .btn:first-child {
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.btn-group-vertical .btn:last-child {
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+
+.btn-group-vertical .btn:not(:first-child) {
+    border-top: none;
 }

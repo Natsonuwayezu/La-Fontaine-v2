@@ -1,0 +1,395 @@
+/* ═══════════════════════════════════════════════════════════════════
+   MARKS — css/modules/marks.css
+   ═══════════════════════════════════════════════════════════════════
+   Marks entry grid (with the custom 3-choice validation popup, never
+   a native prompt), the marks database browser, and the phase tabs
+   shared by both (Pre-Midterm / Post-Midterm / Annual). Accent color
+   is the academics violet (Section 2.4).
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  --academics-accent: #8b5cf6;
+}
+
+/* ── Toolbar shared by marks entry + database ── */
+.marks-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 18px;
+  background: var(--card-bg, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+  border-radius: var(--radius, 10px);
+  margin-bottom: 16px;
+}
+
+.marks-toolbar__select {
+  min-width: 160px;
+}
+
+.marks-toolbar__spacer {
+  flex: 1;
+}
+
+/* ── Phase tabs (Pre-Midterm / Post-Midterm / Annual) ── */
+.phase-tabs {
+  display: flex;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.phase-tab {
+  padding: 7px 16px;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--card-text-muted, #475569);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.phase-tab:hover {
+  color: var(--card-text, #e2e8f0);
+}
+
+.phase-tab.active {
+  background: var(--academics-accent);
+  color: var(--text-inverse, #f1f5f9);
+  box-shadow: 0 2px 10px rgba(139, 92, 246, 0.3);
+}
+
+/* ── Assessment lock indicator ── */
+.assessment-lock-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 99px;
+}
+
+.assessment-lock-badge.locked {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--warning);
+}
+
+.assessment-lock-badge.open {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--success);
+}
+
+.assessment-lock-badge svg {
+  width: 11px;
+  height: 11px;
+}
+
+/* ── Marks entry grid ── */
+.marks-entry-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius, 10px);
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+}
+
+.marks-entry-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+
+.marks-entry-table thead th {
+  background: rgba(139, 92, 246, 0.08);
+  color: var(--card-text, #e2e8f0);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 10px 12px;
+  text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  border-bottom: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+}
+
+.marks-entry-table thead th.col-num {
+  text-align: center;
+  width: 90px;
+}
+
+.marks-entry-table td {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--card-border, rgba(255, 255, 255, 0.05));
+  font-size: 0.85rem;
+  color: var(--card-text, #e2e8f0);
+}
+
+.marks-entry-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.marks-entry-table td.student-name-cell {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.marks-entry-table td.student-num-cell {
+  color: var(--card-text-muted, #475569);
+  font-size: 0.75rem;
+}
+
+.marks-input {
+  width: 64px;
+  padding: 6px 4px;
+  text-align: center;
+  border-radius: 6px;
+  border: 1.5px solid var(--card-border, rgba(255, 255, 255, 0.09));
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--card-text, #e2e8f0);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  transition: all 0.15s;
+}
+
+.marks-input:focus {
+  outline: none;
+  border-color: var(--academics-accent);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+}
+
+.marks-input.mark-pass {
+  border-color: rgba(16, 185, 129, 0.4);
+  color: var(--success);
+}
+
+.marks-input.mark-fail {
+  border-color: rgba(239, 68, 68, 0.4);
+  color: var(--danger);
+}
+
+.marks-input.mark-borderline {
+  border-color: rgba(245, 158, 11, 0.4);
+  color: var(--warning);
+}
+
+.marks-input.mark-empty {
+  border-style: dashed;
+}
+
+.marks-input.mark-saving {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ── 3-choice inline validation popup (replaces native prompt/confirm) ── */
+.mark-validation-popup {
+  position: absolute;
+  z-index: 60;
+  min-width: 220px;
+  background: var(--dropdown-bg, #0f1f33);
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.09));
+  border-radius: 10px;
+  box-shadow: var(--shadow, 0 8px 32px rgba(0, 0, 0, 0.3));
+  padding: 10px;
+  animation: markPopupIn 0.15s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes markPopupIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.mark-validation-popup__msg {
+  font-size: 0.75rem;
+  color: var(--card-text-muted, #475569);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.mark-validation-popup__msg strong {
+  color: var(--warning);
+}
+
+.mark-validation-popup__choices {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mark-validation-popup__choice {
+  text-align: left;
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+  color: var(--card-text, #e2e8f0);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.mark-validation-popup__choice:hover {
+  background: rgba(139, 92, 246, 0.15);
+}
+
+.mark-validation-popup__choice.primary {
+  background: var(--academics-accent);
+  color: var(--text-inverse, #f1f5f9);
+}
+
+.mark-validation-popup__choice.primary:hover {
+  background: #7c3aed;
+}
+
+.mark-validation-popup__choice.cancel {
+  color: var(--card-text-muted, #475569);
+}
+
+/* ── Batch save bar (sticky bottom while entering marks) ── */
+.marks-save-bar {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+  background: var(--dropdown-bg, #0f1f33);
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.09));
+  border-radius: var(--radius, 10px);
+  margin-top: 12px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.marks-save-bar__status {
+  font-size: 0.8rem;
+  color: var(--card-text-muted, #475569);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.marks-save-bar__status.dirty {
+  color: var(--warning);
+}
+
+.marks-save-bar__status.saved {
+  color: var(--success);
+}
+
+/* ── Marks database browser ── */
+.marks-db-filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.marks-db-table td.grade-cell {
+  font-weight: 700;
+  text-align: center;
+}
+
+.grade-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.grade-pill.grade-a {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success);
+}
+
+.grade-pill.grade-b {
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--accent-light, #60a5fa);
+}
+
+.grade-pill.grade-c {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--warning);
+}
+
+.grade-pill.grade-d,
+.grade-pill.grade-f {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--danger);
+}
+
+/* ── Subject color chips (from SUBJECT_COLOR_PALETTE, applied inline via style) ── */
+.subject-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 99px;
+}
+
+.subject-chip__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Statistics summary strip (per-subject averages atop the grid) ── */
+.marks-stat-strip {
+  display: flex;
+  gap: 16px;
+  padding: 10px 18px;
+  overflow-x: auto;
+}
+
+.marks-stat-strip__item {
+  text-align: center;
+  min-width: 70px;
+}
+
+.marks-stat-strip__value {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--card-text, #e2e8f0);
+}
+
+.marks-stat-strip__label {
+  font-size: 0.6rem;
+  color: var(--card-text-muted, #475569);
+  text-transform: uppercase;
+}
+
+@media (max-width: 768px) {
+  .marks-toolbar {
+    padding: 10px 12px;
+  }
+
+  .marks-entry-table td,
+  .marks-entry-table th {
+    padding: 6px 8px;
+    font-size: 0.75rem;
+  }
+
+  .marks-input {
+    width: 48px;
+    font-size: 0.75rem;
+  }
+}

@@ -1,0 +1,543 @@
+/* ═══════════════════════════════════════════════════════════════════
+   DASHBOARD — css/modules/dashboard.css
+   ═══════════════════════════════════════════════════════════════════
+   Covers all three role dashboards (admin, accountant, teacher) plus
+   the shared widgets they're built from: stat cards, quick actions,
+   multi-column layouts, activity feeds, and mini chart wrappers.
+   Relies on .card/.btn/.badge/.progress-bar from css/components/.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.dashboard-page {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Welcome banner ── */
+.welcome-banner {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.06));
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+  border-radius: var(--radius, 10px);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.welcome-banner__title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--card-text, #e2e8f0);
+}
+
+.welcome-banner__subtitle {
+  font-size: 0.85rem;
+  color: var(--card-text-muted, #475569);
+  margin-top: 2px;
+}
+
+.welcome-banner__meta {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.welcome-banner__meta-item {
+  text-align: right;
+}
+
+.welcome-banner__meta-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent-light, #60a5fa);
+}
+
+.welcome-banner__meta-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--card-text-muted, #475569);
+}
+
+/* ── Stat card grid ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.stat-card {
+  background: var(--card-bg, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+  border-radius: var(--radius, 10px);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform var(--transition, 0.3s cubic-bezier(0.22, 1, 0.36, 1)), box-shadow var(--transition, 0.3s cubic-bezier(0.22, 1, 0.36, 1));
+  animation: statCardIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2);
+}
+
+.stats-grid .stat-card:nth-child(1) {
+  animation-delay: 0.02s;
+}
+
+.stats-grid .stat-card:nth-child(2) {
+  animation-delay: 0.06s;
+}
+
+.stats-grid .stat-card:nth-child(3) {
+  animation-delay: 0.1s;
+}
+
+.stats-grid .stat-card:nth-child(4) {
+  animation-delay: 0.14s;
+}
+
+.stats-grid .stat-card:nth-child(5) {
+  animation-delay: 0.18s;
+}
+
+@keyframes statCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stat-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.stat-card__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.stat-card__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.stat-card__trend {
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+.stat-card__trend.up {
+  color: var(--success);
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.stat-card__trend.down {
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.stat-card__trend.flat {
+  color: var(--card-text-muted, #475569);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.stat-card__value {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: var(--card-text, #e2e8f0);
+  line-height: 1.1;
+}
+
+.stat-card__label {
+  font-size: 0.75rem;
+  color: var(--card-text-muted, #475569);
+}
+
+.stat-card--academics .stat-card__icon {
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--academics-accent, #8b5cf6);
+}
+
+.stat-card--finance .stat-card__icon {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--finance-accent, #10b981);
+}
+
+.stat-card--attendance .stat-card__icon {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--attendance-accent, #f59e0b);
+}
+
+.stat-card--students .stat-card__icon {
+  background: rgba(6, 182, 212, 0.15);
+  color: var(--students-accent, #06b6d4);
+}
+
+.stat-card--staff .stat-card__icon {
+  background: rgba(244, 63, 94, 0.15);
+  color: var(--staff-accent, #f43f5e);
+}
+
+.stat-card--analytics .stat-card__icon {
+  background: rgba(20, 184, 166, 0.15);
+  color: var(--analytics-accent, #14b8a6);
+}
+
+/* ── Layout grids ── */
+.two-col {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+
+.two-col-even {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.three-col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* ── Dashboard widget card ── */
+.dash-card {
+  background: var(--card-bg, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+  border-radius: var(--radius, 10px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.dash-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+}
+
+.dash-card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--card-text, #e2e8f0);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dash-card-title svg {
+  width: 16px;
+  height: 16px;
+  color: var(--accent-light, #60a5fa);
+}
+
+.dash-card-action {
+  font-size: 0.75rem;
+  color: var(--accent-light, #60a5fa);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.dash-card-action:hover {
+  text-decoration: underline;
+}
+
+.dash-card-body {
+  padding: 18px;
+  flex: 1;
+}
+
+.dash-card-body.no-padding {
+  padding: 0;
+}
+
+/* ── Chart container ── */
+.chart-container {
+  min-height: 260px;
+  position: relative;
+}
+
+.chart-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.chart-legend {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  justify-content: center;
+}
+
+.chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--card-text-muted, #475569);
+}
+
+.chart-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Quick actions ── */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.quick-btn {
+  background: var(--card-bg, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+  border-radius: var(--radius, 10px);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quick-btn:hover {
+  background: var(--card-hover, rgba(59, 130, 246, 0.08));
+  border-color: var(--accent-glow, rgba(59, 130, 246, 0.18));
+  transform: translateY(-2px);
+}
+
+.quick-btn .qb-icon {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  font-size: 1.1rem;
+}
+
+.quick-btn .qb-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.quick-btn .qb-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--card-text, #e2e8f0);
+}
+
+.quick-btn .qb-sub {
+  font-size: 0.65rem;
+  color: var(--card-text-muted, #475569);
+}
+
+/* ── Activity feed ── */
+.activity-feed {
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--card-border, rgba(255, 255, 255, 0.06));
+  transition: background 0.15s;
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.activity-item:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.activity-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+}
+
+.activity-icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.activity-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-text {
+  font-size: 0.8rem;
+  color: var(--card-text, #e2e8f0);
+  line-height: 1.4;
+}
+
+.activity-text strong {
+  font-weight: 600;
+}
+
+.activity-time {
+  font-size: 0.65rem;
+  color: var(--card-text-muted, #475569);
+  margin-top: 2px;
+}
+
+/* ── Pending-list rows (e.g. "students without marks", "overdue fees") ── */
+.pending-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pending-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.06));
+}
+
+.pending-row__name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--card-text, #e2e8f0);
+}
+
+.pending-row__meta {
+  font-size: 0.7rem;
+  color: var(--card-text-muted, #475569);
+}
+
+/* ── Class/subject summary tiles (teacher dashboard "my classes") ── */
+.class-tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.class-tile {
+  border-radius: var(--radius, 10px);
+  padding: 14px;
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+  background: var(--card-bg, rgba(255, 255, 255, 0.03));
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.class-tile:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-glow, rgba(59, 130, 246, 0.18));
+}
+
+.class-tile__name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--card-text, #e2e8f0);
+}
+
+.class-tile__subject {
+  font-size: 0.7rem;
+  color: var(--card-text-muted, #475569);
+  margin-top: 2px;
+}
+
+.class-tile__count {
+  font-size: 0.65rem;
+  margin-top: 8px;
+  color: var(--academics-accent, #8b5cf6);
+  font-weight: 600;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+
+  .two-col,
+  .two-col-even,
+  .three-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-page {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 12px;
+  }
+
+  .stat-card__value {
+    font-size: 1.2rem;
+  }
+
+  .welcome-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .quick-actions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

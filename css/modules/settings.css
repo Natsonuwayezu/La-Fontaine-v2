@@ -1,0 +1,323 @@
+/* ═══════════════════════════════════════════════════════════════════
+   SETTINGS — css/modules/settings.css
+   ═══════════════════════════════════════════════════════════════════
+   Tabbed settings shell, setting cards (link out to sub-pages),
+   backup/restore list, system logs table, grading-scale editor rows,
+   and academic-calendar term editor.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.settings-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+.settings-tabs .tab-btn {
+  padding: 10px 16px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--card-text-muted, #475569);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.settings-tabs .tab-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.settings-tabs .tab-btn:hover {
+  color: var(--card-text, #e2e8f0);
+}
+
+.settings-tabs .tab-btn.active {
+  color: var(--accent-light, #60a5fa);
+  border-bottom-color: var(--accent);
+}
+
+/* ── Setting card grid (top-level settings menu) ── */
+.setting-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.setting-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: var(--card-bg, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+  border-radius: var(--radius, 10px);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.setting-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-glow, rgba(59, 130, 246, 0.18));
+}
+
+.setting-card .setting-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--accent-light, #60a5fa);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.setting-card .setting-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.setting-card .setting-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--card-text, #e2e8f0);
+}
+
+.setting-card .setting-desc {
+  font-size: 0.72rem;
+  color: var(--card-text-muted, #475569);
+  margin-top: 3px;
+}
+
+/* ── Settings form section ── */
+.settings-section {
+  background: var(--card-bg, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+  border-radius: var(--radius, 10px);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.settings-section__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--card-text, #e2e8f0);
+  margin-bottom: 4px;
+}
+
+.settings-section__desc {
+  font-size: 0.75rem;
+  color: var(--card-text-muted, #475569);
+  margin-bottom: 16px;
+}
+
+/* ── Backup & restore ── */
+.backup-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.06));
+  margin-bottom: 8px;
+}
+
+.backup-info {
+  display: flex;
+  gap: 14px;
+  font-size: 0.75rem;
+  color: var(--card-text-muted, #475569);
+  flex-wrap: wrap;
+}
+
+.backup-info strong {
+  color: var(--card-text, #e2e8f0);
+}
+
+.backup-type-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 99px;
+  text-transform: uppercase;
+}
+
+.backup-type-badge.auto {
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--accent-light, #60a5fa);
+}
+
+.backup-type-badge.manual {
+  background: rgba(139, 92, 246, 0.12);
+  color: var(--academics-accent, #8b5cf6);
+}
+
+.backup-type-badge.emergency {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--danger);
+}
+
+/* ── System logs ── */
+.logs-table-wrap {
+  overflow-x: auto;
+}
+
+.logs-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+
+.logs-table th {
+  text-align: left;
+  font-size: 0.7rem;
+  color: var(--card-text-muted, #475569);
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.logs-table td {
+  padding: 8px 10px;
+  font-size: 0.78rem;
+  color: var(--card-text, #e2e8f0);
+  border-bottom: 1px solid var(--card-border, rgba(255, 255, 255, 0.05));
+}
+
+.log-action-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.log-action-badge.create {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--success);
+}
+
+.log-action-badge.update {
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--accent-light, #60a5fa);
+}
+
+.log-action-badge.delete {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--danger);
+}
+
+.log-action-badge.login {
+  background: rgba(139, 92, 246, 0.12);
+  color: var(--academics-accent, #8b5cf6);
+}
+
+/* ── Grading scale editor ── */
+.grade-band-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 1fr 40px 40px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--card-border, rgba(255, 255, 255, 0.05));
+}
+
+.grade-band-row__letter {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: var(--text-inverse, #f1f5f9);
+}
+
+.grade-band-color-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.pass-mark-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+}
+
+/* ── Academic calendar / term editor ── */
+.term-editor-row {
+  display: grid;
+  grid-template-columns: 100px 1fr 1fr 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.06));
+  margin-bottom: 8px;
+}
+
+.term-editor-row__label {
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--card-text, #e2e8f0);
+}
+
+/* ── System health ── */
+.health-check-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--card-border, rgba(255, 255, 255, 0.05));
+}
+
+.health-status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.health-status-dot.ok {
+  background: var(--success);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+
+.health-status-dot.warn {
+  background: var(--warning);
+}
+
+.health-status-dot.error {
+  background: var(--danger);
+}
+
+@media (max-width: 768px) {
+  .setting-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .grade-band-row,
+  .term-editor-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .logs-table th,
+  .logs-table td {
+    font-size: 0.68rem;
+    padding: 6px 8px;
+  }
+}

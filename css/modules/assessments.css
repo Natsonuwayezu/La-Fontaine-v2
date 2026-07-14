@@ -1,0 +1,235 @@
+/* ═══════════════════════════════════════════════════════════════════
+   ASSESSMENTS — css/modules/assessments.css
+   ═══════════════════════════════════════════════════════════════════
+   Create/list/lock assessments by class, subject, and term/phase.
+   Locking an assessment freezes marks entry for it (Section 3.2).
+   ═══════════════════════════════════════════════════════════════════ */
+
+.assessment-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.assessment-toolbar__spacer {
+  flex: 1;
+}
+
+.assessment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.assessment-card {
+  background: var(--card-bg, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+  border-radius: var(--radius, 10px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.assessment-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(139, 92, 246, 0.25);
+}
+
+.assessment-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--card-border, rgba(255, 255, 255, 0.06));
+}
+
+.assessment-card-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--card-text, #e2e8f0);
+}
+
+.assessment-card-sub {
+  font-size: 0.72rem;
+  color: var(--card-text-muted, #475569);
+  margin-top: 2px;
+}
+
+.assessment-card-body {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.assessment-meta-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+}
+
+.assessment-meta-row .k {
+  color: var(--card-text-muted, #475569);
+}
+
+.assessment-meta-row .v {
+  color: var(--card-text, #e2e8f0);
+  font-weight: 600;
+}
+
+.assessment-completion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.assessment-completion .progress-bar {
+  flex: 1;
+}
+
+.assessment-completion__pct {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--academics-accent, #8b5cf6);
+  min-width: 32px;
+  text-align: right;
+}
+
+.assessment-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-top: 1px solid var(--card-border, rgba(255, 255, 255, 0.06));
+  background: rgba(255, 255, 255, 0.015);
+}
+
+/* ── Lock toggle switch ── */
+.lock-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.lock-toggle__track {
+  width: 36px;
+  height: 20px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.1);
+  position: relative;
+  transition: background 0.2s;
+}
+
+.lock-toggle__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--card-text-muted, #94a3b8);
+  transition: transform 0.2s, background 0.2s;
+}
+
+.lock-toggle.locked .lock-toggle__track {
+  background: rgba(245, 158, 11, 0.3);
+}
+
+.lock-toggle.locked .lock-toggle__thumb {
+  transform: translateX(16px);
+  background: var(--warning);
+}
+
+.lock-toggle__label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--card-text-muted, #475569);
+}
+
+.lock-toggle.locked .lock-toggle__label {
+  color: var(--warning);
+}
+
+/* ── Assessment type badges ── */
+.assessment-type-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 99px;
+  text-transform: uppercase;
+}
+
+.assessment-type-badge.quiz {
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--accent-light, #60a5fa);
+}
+
+.assessment-type-badge.exam {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--danger);
+}
+
+.assessment-type-badge.homework {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--success);
+}
+
+.assessment-type-badge.project {
+  background: rgba(139, 92, 246, 0.12);
+  color: var(--academics-accent, #8b5cf6);
+}
+
+/* ── Creation form (in a modal — see components/modals.css) ── */
+.assessment-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.assessment-form-grid .span-2 {
+  grid-column: 1 / -1;
+}
+
+.phase-chip-select {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.phase-chip {
+  padding: 6px 14px;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.09));
+  color: var(--card-text-muted, #475569);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.phase-chip:hover {
+  border-color: var(--academics-accent, #8b5cf6);
+}
+
+.phase-chip.selected {
+  background: var(--academics-accent, #8b5cf6);
+  border-color: var(--academics-accent, #8b5cf6);
+  color: var(--text-inverse, #f1f5f9);
+}
+
+@media (max-width: 640px) {
+  .assessment-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .assessment-form-grid {
+    grid-template-columns: 1fr;
+  }
+}

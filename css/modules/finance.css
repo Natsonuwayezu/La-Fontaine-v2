@@ -1,0 +1,465 @@
+/* ═══════════════════════════════════════════════════════════════════
+   FINANCE — css/modules/finance.css
+   ═══════════════════════════════════════════════════════════════════
+   Fee summary cards, the record-payment checkbox+amount pattern
+   (Section 3.3 — not checkbox-only: each fee row has a checkbox AND an
+   amount field for partial balances, with a live running total),
+   receipts, overdue severity buckets, waivers, and family fee summary.
+   Accent is finance emerald (Section 2.4).
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  --finance-accent: #10b981;
+}
+
+/* ── Fee summary cards ── */
+.fee-summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.fee-card {
+  background: var(--card-bg, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+  border-radius: var(--radius, 10px);
+  padding: 16px;
+}
+
+.fee-card-label {
+  font-size: 0.72rem;
+  color: var(--card-text-muted, #475569);
+  margin-bottom: 6px;
+}
+
+.fee-card-amount {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--card-text, #e2e8f0);
+}
+
+.fee-card-amount .rwf {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--card-text-muted, #475569);
+  margin-left: 3px;
+}
+
+.fee-card.total .fee-card-amount {
+  color: var(--accent-light, #60a5fa);
+}
+
+.fee-card.paid .fee-card-amount {
+  color: var(--success);
+}
+
+.fee-card.balance .fee-card-amount {
+  color: var(--warning);
+}
+
+.fee-card.overdue .fee-card-amount {
+  color: var(--danger);
+}
+
+/* ── Overdue severity badges ── */
+.overdue-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 99px;
+}
+
+.overdue-badge.critical {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--danger);
+}
+
+.overdue-badge.warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--warning);
+}
+
+.overdue-badge.mild {
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--accent-light, #60a5fa);
+}
+
+/* ── Student fee status chips ── */
+.fee-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 99px;
+}
+
+.fee-status-chip.paid {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--success);
+}
+
+.fee-status-chip.partial {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--warning);
+}
+
+.fee-status-chip.unpaid {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--danger);
+}
+
+.fee-status-chip.credit {
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--accent-light, #60a5fa);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RECORD PAYMENT — checkbox + amount-per-fee pattern
+   ═══════════════════════════════════════════════════════════════════ */
+
+.payment-category-select {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.payment-category-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+  background: rgba(255, 255, 255, 0.02);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.payment-category-item.checked {
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.payment-category-item__checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  border: 2px solid var(--card-border, rgba(255, 255, 255, 0.15));
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  transition: all 0.15s;
+}
+
+.payment-category-item__checkbox:checked {
+  background: var(--finance-accent);
+  border-color: var(--finance-accent);
+}
+
+.payment-category-item__checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid var(--text-inverse, #f1f5f9);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.payment-category-item__info {
+  min-width: 0;
+}
+
+.payment-category-item__name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--card-text, #e2e8f0);
+}
+
+.payment-category-item__balance {
+  font-size: 0.7rem;
+  color: var(--card-text-muted, #475569);
+}
+
+.payment-category-item__balance strong {
+  color: var(--warning);
+}
+
+/* The amount box — this is the important bit: NOT checkbox-only,
+   each row gets its own partial-amount input that feeds the running
+   total at the bottom (Section 3.3). Disabled until its checkbox is
+   checked. */
+.payment-category-item__amount-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.09));
+  border-radius: 8px;
+  padding: 4px 8px;
+  transition: border-color 0.15s, opacity 0.15s;
+}
+
+.payment-category-item__amount-wrap.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.payment-category-item__amount-wrap:focus-within {
+  border-color: var(--finance-accent);
+}
+
+.payment-category-item__amount-input {
+  width: 90px;
+  border: none;
+  background: transparent;
+  color: var(--card-text, #e2e8f0);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.payment-category-item__amount-input:focus {
+  outline: none;
+}
+
+.payment-category-item__currency {
+  font-size: 0.68rem;
+  color: var(--card-text-muted, #475569);
+  font-weight: 600;
+}
+
+.payment-category-item__max-btn {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--finance-accent);
+  cursor: pointer;
+  white-space: nowrap;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.payment-category-item__max-btn:hover {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+/* ── Running total bar ── */
+.payment-total-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-radius: var(--radius, 10px);
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  margin-top: 14px;
+}
+
+.payment-total-bar__label {
+  font-size: 0.8rem;
+  color: var(--card-text-muted, #475569);
+}
+
+.payment-total-bar__value {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--success);
+}
+
+/* ── Payment method selector ── */
+.payment-method-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.payment-method-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.09));
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--card-text-muted, #475569);
+  transition: all 0.15s;
+}
+
+.payment-method-chip:hover {
+  border-color: var(--finance-accent);
+}
+
+.payment-method-chip.selected {
+  background: var(--finance-accent);
+  border-color: var(--finance-accent);
+  color: var(--text-inverse, #f1f5f9);
+}
+
+.payment-method-chip svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* ── Receipt document ── */
+.receipt-container {
+  background: #fdfcfb;
+  color: #1e293b;
+  border-radius: 12px;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+
+.receipt-header {
+  text-align: center;
+  padding-bottom: 12px;
+  border-bottom: 2px dashed #cbd5e1;
+}
+
+.receipt-header__school {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.receipt-header__title {
+  font-size: 0.75rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+.receipt-body {
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+}
+
+.receipt-row .k {
+  color: #64748b;
+}
+
+.receipt-row .v {
+  font-weight: 700;
+}
+
+.receipt-row.total {
+  border-top: 1px dashed #cbd5e1;
+  padding-top: 8px;
+  margin-top: 4px;
+  font-size: 0.95rem;
+}
+
+.receipt-row.total .v {
+  color: #059669;
+}
+
+.receipt-footer {
+  text-align: center;
+  padding-top: 12px;
+  border-top: 2px dashed #cbd5e1;
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+
+/* ── Thermal receipt variant (58/80mm printer width) ── */
+.receipt-container.thermal {
+  max-width: 280px;
+  padding: 10px;
+  font-family: 'DM Sans', monospace;
+}
+
+.receipt-container.thermal .receipt-header__school {
+  font-size: 0.85rem;
+}
+
+.receipt-container.thermal .receipt-row {
+  font-size: 0.7rem;
+}
+
+/* ── Waiver / discount form ── */
+.waiver-type-row {
+  display: flex;
+  gap: 8px;
+}
+
+.waiver-type-chip {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.09));
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--card-text-muted, #475569);
+}
+
+.waiver-type-chip.selected {
+  border-color: var(--finance-accent);
+  background: rgba(16, 185, 129, 0.08);
+  color: var(--finance-accent);
+}
+
+/* ── Family fee summary ── */
+.family-summary-card {
+  background: var(--card-bg, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+  border-radius: var(--radius, 10px);
+  padding: 16px;
+}
+
+.family-summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.family-summary-header__name {
+  font-weight: 700;
+  color: var(--card-text, #e2e8f0);
+}
+
+.family-member-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 0.8rem;
+  border-top: 1px solid var(--card-border, rgba(255, 255, 255, 0.05));
+}
+
+@media (max-width: 640px) {
+  .payment-category-item {
+    grid-template-columns: auto 1fr;
+  }
+
+  .payment-category-item__amount-wrap {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+
+  .fee-summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

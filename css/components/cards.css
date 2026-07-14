@@ -784,6 +784,210 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
+   CARD ANIMATIONS — CSS-only
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Entrance Animation ───────────────────────────────────────────── */
+
+.card-enter {
+    opacity: 0;
+    transform: translateY(30px) scale(0.97);
+    animation: cardEnter 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.card-enter.entered {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+@keyframes cardEnter {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.97);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ─── Staggered Delay ──────────────────────────────────────────────── */
+
+.card-enter:nth-child(1) {
+    animation-delay: 0ms;
+}
+
+.card-enter:nth-child(2) {
+    animation-delay: 60ms;
+}
+
+.card-enter:nth-child(3) {
+    animation-delay: 120ms;
+}
+
+.card-enter:nth-child(4) {
+    animation-delay: 180ms;
+}
+
+.card-enter:nth-child(5) {
+    animation-delay: 240ms;
+}
+
+.card-enter:nth-child(6) {
+    animation-delay: 300ms;
+}
+
+.card-enter:nth-child(7) {
+    animation-delay: 360ms;
+}
+
+.card-enter:nth-child(8) {
+    animation-delay: 420ms;
+}
+
+/* ─── Progress Bar Animation ───────────────────────────────────────── */
+
+.stat-card__progress-fill.animate {
+    width: 0%;
+    transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.stat-card__progress-fill.animating {
+    width: var(--target, 0%);
+    transition-delay: var(--delay, 0s);
+}
+
+/* ─── Counter Animation ────────────────────────────────────────────── */
+
+.counter-value {
+    display: inline-block;
+}
+
+/* ─── Ripple Effect ─────────────────────────────────────────────────── */
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--card-glow, rgba(106, 138, 186, 0.15));
+    transform: scale(0);
+    animation: rippleAnim 0.6s ease-out forwards;
+    pointer-events: none;
+    z-index: 2;
+}
+
+@keyframes rippleAnim {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* ─── Expandable Card ───────────────────────────────────────────────── */
+
+.card-expandable {
+    position: relative;
+}
+
+.card-expand-toggle {
+    display: block;
+    width: 100%;
+    padding: 8px 16px;
+    margin-top: 12px;
+    border: none;
+    background: transparent;
+    color: var(--text-soft, #6b5f56);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    text-align: center;
+    font-family: inherit;
+}
+
+.card-expand-toggle:hover {
+    color: var(--role-primary, #2d1f3a);
+}
+
+.card-expand-toggle::after {
+    content: ' ▾';
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.card-expandable.expanded .card-expand-toggle::after {
+    transform: rotate(180deg);
+}
+
+/* ─── Stat Card Trend ───────────────────────────────────────────────── */
+
+.stat-card__trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 20px;
+}
+
+.stat-card__trend.up {
+    color: var(--success, #3a7a5a);
+    background: var(--success-bg, #dce8e0);
+}
+
+.stat-card__trend.down {
+    color: var(--danger, #c45a4a);
+    background: var(--danger-bg, #f0e0dc);
+}
+
+.stat-card__trend.neutral {
+    color: var(--text-soft, #6b5f56);
+    background: var(--bg-tertiary, #f0ebe6);
+}
+
+.stat-card__trend-arrow {
+    display: inline-block;
+}
+
+.stat-card__trend.up .stat-card__trend-arrow {
+    animation: bounceUp 2s ease-in-out infinite;
+}
+
+.stat-card__trend.down .stat-card__trend-arrow {
+    animation: bounceDown 2s ease-in-out infinite;
+}
+
+@keyframes bounceUp {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+@keyframes bounceDown {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(3px);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
    RESPONSIVE
    ═══════════════════════════════════════════════════════════════════ */
 

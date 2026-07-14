@@ -5,7 +5,7 @@
 # Last updated: 2026-07-12
 # ─────────────────────────────────────────────────────────────
 
-La-Fontaine/
+La-Fontaine/ 
 │
 ├── index.html                          # App shell only: <head>, sidebar slot, topbar slot, #app, CDN links
 ├── offline.html                        # Shown by SW when fully offline with no cache

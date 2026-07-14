@@ -1,0 +1,230 @@
+/* ═══════════════════════════════════════════════════════════════════
+   TIMETABLE — css/modules/timetable.css
+   ═══════════════════════════════════════════════════════════════════
+   Master timetable grid, per-class and per-teacher views, subject/
+   teacher color coding (from the palettes defined in
+   js/config/constants.js), and conflict highlighting.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.timetable-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.timetable-toolbar__spacer {
+  flex: 1;
+}
+
+.timetable-view-tabs {
+  display: flex;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.timetable-view-tab {
+  padding: 7px 16px;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--card-text-muted, #475569);
+  cursor: pointer;
+}
+
+.timetable-view-tab.active {
+  background: var(--staff-accent, #f43f5e);
+  color: var(--text-inverse, #f1f5f9);
+}
+
+.timetable-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius, 10px);
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+}
+
+.timetable-table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 720px;
+  table-layout: fixed;
+}
+
+.timetable-table th,
+.timetable-table td {
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.06));
+  padding: 4px;
+  vertical-align: top;
+}
+
+.timetable-table thead th {
+  background: rgba(244, 63, 94, 0.08);
+  color: var(--card-text, #e2e8f0);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 8px;
+  text-align: center;
+}
+
+.timetable-table td.time-col {
+  width: 74px;
+  text-align: center;
+  font-size: 0.68rem;
+  color: var(--card-text-muted, #475569);
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.02);
+  vertical-align: middle;
+}
+
+.timetable-table td.break-row {
+  background: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.02) 6px, transparent 6px, transparent 12px);
+  text-align: center;
+  font-size: 0.65rem;
+  color: var(--card-text-muted, #475569);
+}
+
+/* ── Timetable slot (colored by subject or teacher, via inline style
+     background/border pulling from the rotating palette) ── */
+.timetable-slot {
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 0.68rem;
+  min-height: 52px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.timetable-slot:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  z-index: 2;
+  position: relative;
+}
+
+.timetable-slot__subject {
+  font-weight: 700;
+}
+
+.timetable-slot__teacher {
+  opacity: 0.85;
+  font-size: 0.62rem;
+}
+
+.timetable-slot__room {
+  opacity: 0.7;
+  font-size: 0.6rem;
+}
+
+.timetable-slot.empty {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+}
+
+.timetable-slot.empty:hover {
+  border-color: var(--staff-accent, #f43f5e);
+}
+
+.timetable-slot.conflict {
+  outline: 2px solid var(--danger);
+  outline-offset: -2px;
+}
+
+.timetable-slot.conflict::after {
+  content: '\26A0';
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 0.6rem;
+  color: var(--danger);
+}
+
+/* ── Legend (subject/teacher colors) ── */
+.timetable-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 4px;
+}
+
+.timetable-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: var(--card-text-muted, #475569);
+}
+
+.timetable-legend-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* ── Conflict panel ── */
+.conflict-panel {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: var(--radius, 10px);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.conflict-panel__title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--danger);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.conflict-panel__list {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.conflict-panel__item {
+  font-size: 0.78rem;
+  color: var(--card-text, #e2e8f0);
+  padding-left: 20px;
+  position: relative;
+}
+
+.conflict-panel__item::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 8px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--danger);
+}
+
+@media (max-width: 768px) {
+
+  .timetable-table th,
+  .timetable-table td {
+    font-size: 0.6rem;
+  }
+
+  .timetable-slot {
+    min-height: 40px;
+    font-size: 0.6rem;
+    padding: 4px 5px;
+  }
+
+  .timetable-table td.time-col {
+    width: 50px;
+  }
+}

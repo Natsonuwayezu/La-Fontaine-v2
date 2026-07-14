@@ -1,0 +1,174 @@
+/* ═══════════════════════════════════════════════════════════════════
+   CLASS REGISTER — css/modules/class-register.css
+   ═══════════════════════════════════════════════════════════════════
+   The class register supports 6 layout variants: {Nursery, Primary} x
+   {Pre-Midterm, Post-Midterm, Annual}. Nursery uses French column
+   labels, Primary uses English, per the project's bilingual
+   convention. Screen styling here; print-specific overrides live in
+   css/print/marksheets-print.css and reuse these same class names.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.register-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 18px;
+  background: var(--card-bg, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+  border-radius: var(--radius, 10px);
+  margin-bottom: 16px;
+}
+
+.register-toolbar__spacer {
+  flex: 1;
+}
+
+.register-layout-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 99px;
+  background: rgba(139, 92, 246, 0.12);
+  color: var(--academics-accent, #8b5cf6);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.register-wrap {
+  overflow-x: auto;
+  background: #fdfcfb;
+  border-radius: var(--radius, 10px);
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.07));
+}
+
+/* Register sheet is deliberately rendered on a light "paper" surface
+   even in dark mode — it mirrors the printed document and improves
+   legibility of the dense grid; text inside uses dark ink tones. */
+.register-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+  background: #f8f7f5;
+  color: #1e293b;
+}
+
+.register-table th,
+.register-table td {
+  border: 1px solid #d8d4cf;
+  padding: 6px 8px;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.register-table thead th {
+  background: #ede9fe;
+  color: #4c1d95;
+  font-weight: 700;
+  position: sticky;
+  top: 0;
+}
+
+.register-table td.reg-name-cell {
+  text-align: left;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.register-table td.reg-num-cell {
+  color: #64748b;
+  font-size: 0.65rem;
+}
+
+.register-table tbody tr:nth-child(even) {
+  background: rgba(139, 92, 246, 0.04);
+}
+
+/* Group header row spanning subject columns per phase */
+.register-table th.group-header {
+  background: #ddd6fe;
+}
+
+/* Computed columns (MG/EX/TOT/Position/Decision) get a subtle divider */
+.register-table td.computed-col,
+.register-table th.computed-col {
+  border-left: 2px solid #a78bfa;
+  font-weight: 700;
+}
+
+.register-decision-cell.pass {
+  color: #059669;
+}
+
+.register-decision-cell.fail {
+  color: #dc2626;
+}
+
+.register-decision-cell.remedial {
+  color: #d97706;
+}
+
+/* ── Nursery variant tweaks (French labels, simpler columns) ── */
+.register-table.register--nursery thead th {
+  background: #cffafe;
+  color: #155e75;
+}
+
+.register-table.register--nursery td.computed-col,
+.register-table.register--nursery th.computed-col {
+  border-left-color: #22d3ee;
+}
+
+/* ── Annual layout — wider, includes both terms + cumulative ── */
+.register-table.register--annual {
+  min-width: 1200px;
+}
+
+.register-table.register--annual th.term-divider,
+.register-table.register--annual td.term-divider {
+  border-left: 2px solid #94a3b8;
+}
+
+/* ── Legend ── */
+.register-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 10px 4px;
+  font-size: 0.7rem;
+  color: var(--card-text-muted, #475569);
+}
+
+.register-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.register-legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ── Export/print action row ── */
+.register-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+@media (max-width: 768px) {
+
+  .register-table th,
+  .register-table td {
+    padding: 4px 6px;
+    font-size: 0.62rem;
+  }
+
+  .register-toolbar {
+    padding: 10px 12px;
+  }
+}

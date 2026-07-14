@@ -13,6 +13,56 @@
 
 'use strict';
 
+// ─── DEPENDENCIES ──────────────────────────────────────────────────
+// These must be available from formulas.js
+import { getGrade, isPassing, rankStudents } from './formulas.js';
+
+// ─── CONSTANTS ────────────────────────────────────────────────────
+// Assessment types for MG (continuous assessment)
+const MG_TYPES = ['Quiz', 'Assignment', 'Observation', 'Midterm'];
+
+// Assessment types for EX (exam)
+const EX_TYPES = ['Exam', 'Final Exam'];
+
+// Annual maximum totals per level
+const ANNUAL_MAX = {
+    primary: 1980,   // 3 × 660 (per term max)
+    nursery: 2400    // 3 × 800 (per term max)
+};
+
+// ─── FALLBACK HELPERS (in case formulas.js isn't loaded) ──────
+function getGradeFallback(pct) {
+    if (pct === null || pct === undefined) return { grade: '—', color: 'neutral' };
+    if (pct >= 90) return { grade: 'A+', color: '#10b981' };
+    if (pct >= 80) return { grade: 'A', color: '#34d399' };
+    if (pct >= 70) return { grade: 'B', color: '#60a5fa' };
+    if (pct >= 60) return { grade: 'C', color: '#fbbf24' };
+    if (pct >= 50) return { grade: 'D', color: '#f97316' };
+    return { grade: 'F', color: '#ef4444' };
+}
+
+function isPassingFallback(pct) {
+    if (pct === null || pct === undefined) return false;
+    return pct >= 50;
+}
+
+// Use available functions or fallback
+const getGradeFn = (typeof getGrade !== 'undefined') ? getGrade : getGradeFallback;
+const isPassingFn = (typeof isPassing !== 'undefined') ? isPassing : isPassingFallback;
+const rankStudentsFn = (typeof rankStudents !== 'undefined') ? rankStudents : null;
+
+// ─── HELPERS ──────────────────────────────────────────────────────
+function scoreToPercent(score, max) {
+    if (score === null || score === undefined || !max || max <= 0) return null;
+    return Math.round((score / max) * 1000) / 10;
+}
+
+function getStudentRank(classRankedRows, studentId) {
+    if (!classRankedRows || !Array.isArray(classRankedRows)) return null;
+    const found = classRankedRows.find(r => r.id === studentId);
+    return found?.rank ?? null;
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    1. DENOMINATOR RULE  (Part 4.3)
    ═══════════════════════════════════════════════════════════════════
@@ -114,6 +164,28 @@ function calcMG(studentId, mgAssessments, marks, mgMax) {
    Returns null if no exam assessments have marks.
    EX-type assessments only exist in the post-midterm phase.
    ═══════════════════════════════════════════════════════════════════ */
+/**
+* ═══════════════════════════════════════════════════════════════════
+* IMPORTANT: ABSENCE HANDLING
+* ═══════════════════════════════════════════════════════════════════
+* 
+* When a student is absent for an assessment (is_absent = true):
+* 
+* 1. The assessment still counts in the denominator (the assessment
+*    still exists and has a max score)
+* 
+* 2. The student receives a score of 0 for that assessment
+* 
+* 3. The denominator is the SAME for ALL students in the class
+* 
+* 4. This penalizes absences appropriately and encourages attendance
+* 
+* Example: 3 quizzes × 50 max = 150 denominator
+*          Student with 2 quizzes = 100/150 = 66.7%
+*          Student with 3 quizzes = 150/150 = 100%
+*          (Not 100/100 vs 150/150)
+* ═══════════════════════════════════════════════════════════════════
+*/
 
 /**
  * Compute the EX (exam) score for one student on one subject.

@@ -305,6 +305,33 @@ const USER_ROLES = ['admin', 'accountant', 'teacher'];
 // name without it being defined anywhere — same set of roles as USER_ROLES.
 const TEACHER_ROLES = USER_ROLES;
 
+// Used by core/logger.js's logX() convenience wrappers (logCreateStudent,
+// logUpdateTimetable, etc.), which referenced LOG_ACTIONS.X in 20 places
+// without this constant being defined anywhere — every one of those wrappers
+// would have thrown ReferenceError on first call.
+const LOG_ACTIONS = {
+  LOGIN: 'LOGIN',
+  LOGOUT: 'LOGOUT',
+  CREATE_STUDENT: 'CREATE_STUDENT',
+  UPDATE_STUDENT: 'UPDATE_STUDENT',
+  ARCHIVE_STUDENT: 'ARCHIVE_STUDENT',
+  PROMOTE_BATCH: 'PROMOTE_BATCH',
+  SAVE_MARKS: 'SAVE_MARKS',
+  LOCK_ASSESSMENT: 'LOCK_ASSESSMENT',
+  UNLOCK_ASSESSMENT: 'UNLOCK_ASSESSMENT',
+  CREATE_PAYMENT: 'CREATE_PAYMENT',
+  REVERSE_PAYMENT: 'REVERSE_PAYMENT',
+  WAIVE_FEE: 'WAIVE_FEE',
+  CREATE_TEACHER: 'CREATE_TEACHER',
+  UPDATE_TEACHER: 'UPDATE_TEACHER',
+  UPDATE_SETTINGS: 'UPDATE_SETTINGS',
+  UPDATE_GRADING: 'UPDATE_GRADING',
+  BACKUP: 'BACKUP',
+  RESTORE: 'RESTORE',
+  UPDATE_TIMETABLE: 'UPDATE_TIMETABLE',
+  CREATE_ANNOUNCEMENT: 'CREATE_ANNOUNCEMENT',
+};
+
 const USER_ROLE_LABELS = {
   admin: 'Administrator',
   accountant: 'Accountant',

@@ -3,9 +3,16 @@
    ═══════════════════════════════════════════════════════════════════
    Purpose : Progressive Web App support.
              Service Worker registration, install-to-homescreen
-             prompt, update detection and notification, and the
-             full list of files pre-cached for offline use.
+             prompt, update detection and notification, dynamic
+             manifest generation, offline page caching, the
+             back-to-top button, and the full list of files
+             pre-cached for offline use.
    Load order: AFTER error-handler.js — one of the last core files.
+   Note: js/ui/pwa.js was a second, overlapping PWA implementation
+   (duplicate service-worker registration and install-prompt handling)
+   that was never actually loaded by index.html. It has been merged
+   into this file — generateManifest(), cacheOfflinePage(), and
+   initBackToTop() came from there — and can be deleted from the repo.
    ═══════════════════════════════════════════════════════════════════ */
 
 'use strict';
@@ -359,6 +366,93 @@ function isInstalledPWA() {
 }
 
 /* ─────────────────────────────────────────────────────────────────
+   DYNAMIC MANIFEST
+   ───────────────────────────────────────────────────────────────── */
+/* Merged in from js/ui/pwa.js — builds the web app manifest at runtime
+   from the school's own branding (name, motto, logo) in
+   state.schoolSettings, instead of a static manifest file. Should be
+   called once during app init (from boot.js, once written). */
+
+function generateManifest() {
+    const settings = (typeof state !== 'undefined' && state.schoolSettings) || {};
+    const schoolName = settings.school_name || 'ECOLE LA FONTAINE';
+    const motto = settings.school_motto || 'School Management System';
+    const logo = settings.school_logo || '';
+
+    // Fallback icon if no logo is set
+    const fallbackIcon = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232d1f3a'/%3E%3Ctext x='50' y='70' font-size='60' text-anchor='middle' fill='%23f0ebe6'%3E%F0%9F%8F%AB%3C/text%3E%3C/svg%3E";
+
+    const iconSrc = (logo && (logo.startsWith('data:') || logo.startsWith('http'))) ? logo : fallbackIcon;
+
+    const manifest = {
+        name: schoolName,
+        short_name: schoolName.substring(0, 12),
+        description: motto,
+        start_url: '/',
+        display: 'standalone',
+        theme_color: '#2d1f3a',
+        background_color: '#1a1410',
+        icons: [
+            { src: iconSrc, sizes: '192x192', type: 'image/png' },
+            { src: iconSrc, sizes: '512x512', type: 'image/png' }
+        ]
+    };
+
+    // Inject the manifest into the page
+    const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    let link = document.querySelector('link[rel="manifest"]');
+    if (!link) {
+        link = document.createElement('link');
+        link.rel = 'manifest';
+        document.head.appendChild(link);
+    }
+    link.href = url;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   OFFLINE PAGE CACHING
+   ───────────────────────────────────────────────────────────────── */
+/* Merged in from js/ui/pwa.js — immediately caches offline.html on init,
+   as a fallback alongside the service worker's own install-time caching
+   (offline.html is also listed in PWA_CACHE_FILES below). */
+
+async function cacheOfflinePage() {
+    if (!('caches' in window)) return;
+
+    try {
+        const cache = await caches.open('ecole-cache-v1');
+        await cache.add('/offline.html');
+        console.log('[PWA] Offline page cached');
+    } catch (err) {
+        console.warn('[PWA] Could not cache offline page:', err.message);
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   BACK TO TOP BUTTON
+   ───────────────────────────────────────────────────────────────── */
+/* Merged in from js/ui/pwa.js — the only UI-facing feature that file had
+   which this one didn't. Expects an element with id="back-to-top" in the
+   page shell. Should be called once during app init. */
+
+function initBackToTop() {
+    const btn = document.getElementById('back-to-top');
+    if (!btn) return;
+
+    // Show/hide based on scroll position
+    window.addEventListener('scroll', () => {
+        btn.style.display = window.scrollY > 300 ? 'flex' : 'none';
+    }, { passive: true });
+
+    // Scroll to top on click
+    btn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+}
+
+/* ─────────────────────────────────────────────────────────────────
    SW MESSAGE PASSING
    ───────────────────────────────────────────────────────────────── */
 
@@ -420,7 +514,11 @@ window.applyPWAUpdate = applyPWAUpdate;
 window.registerServiceWorker = registerServiceWorker;
 window.getPWADisplayMode = getPWADisplayMode;
 window.isInstalledPWA = isInstalledPWA;
+window.isStandalone = isInstalledPWA; // alias — js/ui/pwa.js (now merged in) called this isStandalone()
 window.sendSWMessage = sendSWMessage;
 window.forceSWUpdate = forceSWUpdate;
 window.getSWStatus = getSWStatus;
 window.PWA_CACHE_FILES = PWA_CACHE_FILES;
+window.generateManifest = generateManifest;
+window.cacheOfflinePage = cacheOfflinePage;
+window.initBackToTop = initBackToTop;

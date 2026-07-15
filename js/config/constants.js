@@ -301,6 +301,10 @@ const FAMILY_CODE_PREFIX = 'FAM';
 
 const USER_ROLES = ['admin', 'accountant', 'teacher'];
 
+// Alias used by validators.js's validateTeacherForm(), which referenced this
+// name without it being defined anywhere — same set of roles as USER_ROLES.
+const TEACHER_ROLES = USER_ROLES;
+
 const USER_ROLE_LABELS = {
   admin: 'Administrator',
   accountant: 'Accountant',

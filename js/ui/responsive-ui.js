@@ -343,5 +343,3 @@ const ResponsiveUI = (() => {
 
 // ─── EXPOSE TO WINDOW ───────────────────────────────────────────────
 window.ResponsiveUI = ResponsiveUI;
-
-export default ResponsiveUI;

@@ -16,7 +16,7 @@
    Last updated: 2026-07-14
    ═══════════════════════════════════════════════════════════════════ */
 
-import { esc } from '../../core/utils.js';
+// esc is a plain-script global defined in core/utils.js, loaded earlier in index.html.
 
 // ─── MOCK DATA ─────────────────────────────────────────────────────
 
@@ -440,5 +440,5 @@ function destroyMarksDatabase() {
 
 // ─── EXPOSE ──────────────────────────────────────────────────────────
 
-export { renderMarksDatabase, destroyMarksDatabase };
-export default renderMarksDatabase;
+window.renderMarksDatabase = renderMarksDatabase;
+window.destroyMarksDatabase = destroyMarksDatabase;

@@ -828,11 +828,4 @@ function updateClock() {
 
 // ─── EXPOSE ─────────────────────────────────────────────────────────
 
-export {
-  renderTeacherDashboard,
-  animateBars,
-  updateClock
-};
-
-// Default export for router compatibility
-export default renderTeacherDashboard;
+window.renderTeacherDashboard = renderTeacherDashboard;

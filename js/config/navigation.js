@@ -238,12 +238,10 @@ function getDefaultModule(role) {
 
 // ─── EXPORTS ────────────────────────────────────────────────────────
 
-export {
-  NAV_SECTIONS,
-  NAV_MODULE_INDEX,
-  getNavSection,
-  getNavItems,
-  findNavModule,
-  getNavLabel,
-  getDefaultModule
-};
+window.NAV_SECTIONS = NAV_SECTIONS;
+window.NAV_MODULE_INDEX = NAV_MODULE_INDEX;
+window.getNavSection = getNavSection;
+window.getNavItems = getNavItems;
+window.findNavModule = findNavModule;
+window.getNavLabel = getNavLabel;
+window.getDefaultModule = getDefaultModule;

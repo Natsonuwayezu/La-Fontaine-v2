@@ -312,13 +312,3 @@ if (document.readyState === 'loading') {
 } else {
   TouchOptimizations.init();
 }
-
-export default TouchOptimizations;
-export const {
-  isTouchDevice,
-  isMobileDevice,
-  markDevice,
-  clearStickyHover,
-  fastTapOnInteractive,
-  init
-} = TouchOptimizations;

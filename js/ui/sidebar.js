@@ -16,8 +16,11 @@
    Last updated: 2026-07-14
    ═══════════════════════════════════════════════════════════════════ */
 
-import { NAV_SECTIONS, NAV_MODULE_INDEX, getNavLabel } from '../config/navigation.js';
-import { canAccessModule, canAccessDashboard } from '../config/role-permissions.js';
+// NAV_SECTIONS, NAV_MODULE_INDEX, getNavLabel (config/navigation.js) and
+// canAccess, canAccessDashboard (config/role-permissions.js) are plain-script
+// globals, both loaded earlier in index.html — no import needed.
+// NOTE: this file previously called a function named canAccessModule(), which
+// doesn't exist in role-permissions.js — fixed below to use the real function, canAccess().
 
 // ─── MOCK DATA ──────────────────────────────────────────────────────
 // Replace with real data from core/data-loader.js
@@ -149,7 +152,7 @@ function filterNavByRole() {
   Object.entries(NAV_SECTIONS).forEach(([sectionId, section]) => {
     const visibleItems = section.items.filter(item => {
       // Check if the role can access this module
-      return canAccessModule(state.role, item.id);
+      return canAccess(state.role, item.id);
     });
 
     if (visibleItems.length > 0) {
@@ -383,7 +386,7 @@ function openHub(sectionId) {
   if (!sec) return;
 
   // Filter items by role
-  const visibleItems = sec.items.filter(item => canAccessModule(state.role, item.id));
+  const visibleItems = sec.items.filter(item => canAccess(state.role, item.id));
   if (visibleItems.length === 0) return;
 
   ensureHubOverlay();
@@ -668,5 +671,3 @@ if (document.readyState === 'loading') {
 // ─── EXPOSE ─────────────────────────────────────────────────────────
 
 window.Sidebar = Sidebar;
-
-export default Sidebar;

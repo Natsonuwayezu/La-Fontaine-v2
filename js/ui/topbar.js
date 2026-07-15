@@ -562,5 +562,3 @@ if (document.readyState === 'loading') {
 
 // ─── EXPOSE TO WINDOW ───────────────────────────────────────────────
 window.Topbar = Topbar;
-
-export default Topbar;

@@ -454,16 +454,3 @@ if (document.readyState === 'loading') {
 } else {
   Cards.init();
 }
-
-export default Cards;
-export const {
-  renderStatCards,
-  animateProgressBars,
-  animateCounters,
-  bindExpandable,
-  bindAllExpandable,
-  setupRippleEffect,
-  setCardTheme,
-  triggerEntranceAnimation,
-  init
-} = Cards;

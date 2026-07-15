@@ -406,5 +406,3 @@ const EmptyStates = (() => {
 
 // ─── EXPOSE TO WINDOW ───────────────────────────────────────────────
 window.EmptyStates = EmptyStates;
-
-export default EmptyStates;

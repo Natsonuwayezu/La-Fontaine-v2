@@ -256,6 +256,3 @@ const MobileNavigation = (() => {
 // ─── EXPOSE TO WINDOW ────────────────────────────────────────────────
 
 window.MobileNavigation = MobileNavigation;
-
-export default MobileNavigation;
-export const { setActive, syncVisibility, render, init, isMobile } = MobileNavigation;

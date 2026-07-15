@@ -7,9 +7,11 @@
    Last updated: 2026-07-14
    ═══════════════════════════════════════════════════════════════════ */
 
-import { getFullStudentBalance, getStudentCreditBalance } from '../../core/finance-formulas.js';
-import { formatCurrency, fmtDate, esc } from '../../core/utils.js';
-import { OVERDUE_THRESHOLDS_DEFAULT } from '../../config/constants.js';
+// formatCurrency, fmtDate, esc (core/utils.js) and OVERDUE_THRESHOLDS (config/constants.js)
+// are plain-script globals loaded earlier in index.html — no import needed.
+// NOTE: getFullStudentBalance / getStudentCreditBalance were imported here previously but
+// don't exist in core/finance-formulas.js and were never called in this file — removed as dead code.
+const OVERDUE_THRESHOLDS_DEFAULT = OVERDUE_THRESHOLDS;
 
 // ─── MOCK DATA (will be replaced with real API calls) ──────────────────
 
@@ -182,7 +184,7 @@ const MODULE_ACCENTS = {
 
 // ─── RENDER FUNCTION ─────────────────────────────────────────────────
 
-export function renderAccountantDashboard(container) {
+function renderAccountantDashboard(container) {
   if (!container) {
     console.warn('[AccountantDashboard] No container provided');
     return;

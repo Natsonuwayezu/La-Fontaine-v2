@@ -14,8 +14,8 @@
 'use strict';
 
 // ─── DEPENDENCIES ──────────────────────────────────────────────────
-// These must be available from formulas.js
-import { getGrade, isPassing, rankStudents } from './formulas.js';
+// getGrade, isPassing, rankStudents are plain-script globals defined in
+// core/formulas.js, which loads immediately before this file in index.html.
 
 // ─── CONSTANTS ────────────────────────────────────────────────────
 // Assessment types for MG (continuous assessment)

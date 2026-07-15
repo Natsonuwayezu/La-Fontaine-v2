@@ -78,7 +78,7 @@ const DEFAULT_CONFIG = {
  * @param {function} options.onClose - Called when modal closes
  * @returns {string} The modal ID (for programmatic closing)
  */
-export function showModal(content, options = {}) {
+function showModal(content, options = {}) {
     const config = { ...DEFAULT_CONFIG, ...options };
     const id = `modal-${++modalIdCounter}`;
 
@@ -170,7 +170,7 @@ export function showModal(content, options = {}) {
  * @param {string} id - The modal ID to close
  * @param {boolean} skipAnimation - Skip close animation
  */
-export function closeModal(id, skipAnimation = false) {
+function closeModal(id, skipAnimation = false) {
     if (!id) {
         // Close the topmost modal
         if (modalStack.length === 0) return;
@@ -233,7 +233,7 @@ function removeModal(id) {
  * Close all open modals
  * @param {boolean} skipAnimation - Skip close animations
  */
-export function closeAllModals(skipAnimation = false) {
+function closeAllModals(skipAnimation = false) {
     const ids = [...modalStack];
     for (const id of ids) {
         closeModal(id, skipAnimation);
@@ -244,7 +244,7 @@ export function closeAllModals(skipAnimation = false) {
  * Get the currently active modal ID
  * @returns {string|null} The active modal ID or null
  */
-export function getActiveModal() {
+function getActiveModal() {
     return activeModalId;
 }
 
@@ -252,7 +252,7 @@ export function getActiveModal() {
  * Check if a modal is currently open
  * @returns {boolean} True if any modal is open
  */
-export function isModalOpen() {
+function isModalOpen() {
     return modalStack.length > 0;
 }
 
@@ -261,7 +261,7 @@ export function isModalOpen() {
  * @param {string} id - The modal ID
  * @returns {HTMLElement|null} The modal element or null
  */
-export function getModalElement(id) {
+function getModalElement(id) {
     return document.getElementById(id);
 }
 
@@ -270,7 +270,7 @@ export function getModalElement(id) {
  * @param {string} id - The modal ID
  * @param {string} content - New HTML content
  */
-export function updateModalContent(id, content) {
+function updateModalContent(id, content) {
     const modalEl = document.getElementById(id);
     if (!modalEl) return;
 
@@ -285,7 +285,7 @@ export function updateModalContent(id, content) {
  * @param {string} id - The modal ID
  * @param {string} title - New title
  */
-export function updateModalTitle(id, title) {
+function updateModalTitle(id, title) {
     const modalEl = document.getElementById(id);
     if (!modalEl) return;
 
@@ -300,7 +300,7 @@ export function updateModalTitle(id, title) {
  * @param {string} id - The modal ID
  * @param {string} footer - New footer HTML
  */
-export function updateModalFooter(id, footer) {
+function updateModalFooter(id, footer) {
     const modalEl = document.getElementById(id);
     if (!modalEl) return;
 
@@ -325,7 +325,7 @@ export function updateModalFooter(id, footer) {
  * @param {string} options.size - Modal size
  * @returns {Promise<boolean>} True if confirmed, false if cancelled
  */
-export function confirmDialog(message, title = 'Confirm', options = {}) {
+function confirmDialog(message, title = 'Confirm', options = {}) {
     return new Promise((resolve, reject) => {
         const {
             confirmText = 'Confirm',
@@ -406,7 +406,7 @@ export function confirmDialog(message, title = 'Confirm', options = {}) {
  * @param {string} options.size - Modal size
  * @returns {Promise<void>}
  */
-export function alertDialog(message, title = 'Alert', options = {}) {
+function alertDialog(message, title = 'Alert', options = {}) {
     return new Promise((resolve) => {
         const {
             buttonText = 'OK',
@@ -479,35 +479,3 @@ window.confirmDialog = confirmDialog;
 window.alertDialog = alertDialog;
 window.isModalOpen = isModalOpen;
 window.getActiveModal = getActiveModal;
-
-/* ═══════════════════════════════════════════════════════════════════
-   EXPORTS
-   ═══════════════════════════════════════════════════════════════════ */
-
-export default {
-    showModal,
-    closeModal,
-    closeAllModals,
-    confirmDialog,
-    alertDialog,
-    getActiveModal,
-    isModalOpen,
-    getModalElement,
-    updateModalContent,
-    updateModalTitle,
-    updateModalFooter
-};
-
-export {
-    showModal,
-    closeModal,
-    closeAllModals,
-    confirmDialog,
-    alertDialog,
-    getActiveModal,
-    isModalOpen,
-    getModalElement,
-    updateModalContent,
-    updateModalTitle,
-    updateModalFooter
-};

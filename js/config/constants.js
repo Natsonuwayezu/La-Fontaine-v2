@@ -13,7 +13,7 @@
 // APP CONFIGURATION
 // ──────────────────────────────────────────────────────────────────────
 
-export const APP_CONFIG = {
+const APP_CONFIG = {
   name: 'ECOLE LA FONTAINE',
   version: '9.0.0',
   sessionDuration: 60 * 60 * 1000,          // 1 hour
@@ -37,7 +37,7 @@ export const APP_CONFIG = {
 // SCHOOL METADATA
 // ──────────────────────────────────────────────────────────────────────
 
-export const APP_META = {
+const APP_META = {
   schoolName: 'ECOLE LA FONTAINE',
   schoolLocation: 'Rubavu, Rwanda',
   schoolPhone: '+250788534320',
@@ -55,7 +55,7 @@ export const APP_META = {
 // CURRENCY SETTINGS
 // ──────────────────────────────────────────────────────────────────────
 
-export const CURRENCY = {
+const CURRENCY = {
   code: 'RWF',
   symbol: 'RWF',
   locale: 'en-RW',
@@ -70,12 +70,12 @@ export const CURRENCY = {
 // CLASS LEVELS
 // ──────────────────────────────────────────────────────────────────────
 
-export const CLASS_LEVELS = {
+const CLASS_LEVELS = {
   nursery: ['NURSERY 1', 'NURSERY 2', 'NURSERY 3'],
   primary: ['PRIMARY 1', 'PRIMARY 2', 'PRIMARY 3', 'PRIMARY 4', 'PRIMARY 5', 'PRIMARY 6']
 };
 
-export const ALL_CLASS_NAMES = [
+const ALL_CLASS_NAMES = [
   ...CLASS_LEVELS.nursery,
   ...CLASS_LEVELS.primary
 ];
@@ -84,7 +84,7 @@ export const ALL_CLASS_NAMES = [
    CLASS LIST  (sort_order mirrors DB sort_order column)
    ───────────────────────────────────────────────────────────────── */
 
-export const CLASS_LIST = [
+const CLASS_LIST = [
   { code: 'N1', name: 'NURSERY 1', level: 'nursery', sort_order: 1 },
   { code: 'N2', name: 'NURSERY 2', level: 'nursery', sort_order: 2 },
   { code: 'N3', name: 'NURSERY 3', level: 'nursery', sort_order: 3 },
@@ -101,7 +101,7 @@ export const CLASS_LIST = [
    NURSERY CLASS LABELS IN FRENCH  (used on French report cards)
    ───────────────────────────────────────────────────────────────── */
 
-export const NURSERY_FR_LABELS = {
+const NURSERY_FR_LABELS = {
   'NURSERY 1': 'MATERNELLE 1',
   'NURSERY 2': 'MATERNELLE 2',
   'NURSERY 3': 'MATERNELLE 3',
@@ -112,7 +112,7 @@ export const NURSERY_FR_LABELS = {
    Mirrors Part 2.6 exactly.
    ───────────────────────────────────────────────────────────────── */
 
-export const NURSERY_SUBJECTS = [
+const NURSERY_SUBJECTS = [
   { code: 'PCALC', name: 'Pré-Calculé', mg_max: 50, ex_max: 50, appears_only_post_midterm: false, sort_order: 1 },
   { code: 'ESENV', name: 'Education Santé Env.', mg_max: 50, ex_max: 50, appears_only_post_midterm: false, sort_order: 2 },
   { code: 'FREC', name: 'Français Écriture', mg_max: 50, ex_max: 50, appears_only_post_midterm: false, sort_order: 3 },
@@ -123,7 +123,7 @@ export const NURSERY_SUBJECTS = [
   { code: 'DEVSOC', name: 'Développement Social', mg_max: 50, ex_max: 50, appears_only_post_midterm: true, sort_order: 8 },
 ];
 
-export const PRIMARY_SUBJECTS = [
+const PRIMARY_SUBJECTS = [
   { code: 'MATH', name: 'Mathematics', mg_max: 50, ex_max: 50, appears_only_post_midterm: false, sort_order: 1 },
   { code: 'ENG', name: 'English', mg_max: 50, ex_max: 50, appears_only_post_midterm: false, sort_order: 2 },
   { code: 'KIN', name: 'Kinyarwanda', mg_max: 50, ex_max: 50, appears_only_post_midterm: false, sort_order: 3 },
@@ -136,7 +136,7 @@ export const PRIMARY_SUBJECTS = [
 ];
 
 // Annual max totals (Part 4.5)
-export const ANNUAL_MAX = {
+const ANNUAL_MAX = {
   primary: 1980,
   nursery: 2400,
 };
@@ -145,7 +145,7 @@ export const ANNUAL_MAX = {
 // ACADEMIC CONSTANTS
 // ──────────────────────────────────────────────────────────────────────
 
-export const DEFAULT_GRADES = [
+const DEFAULT_GRADES = [
   { grade: 'A+', min: 90, max: 100, desc: 'Excellent', color: '#3a7a5a', sort_order: 1 },
   { grade: 'A', min: 80, max: 89, desc: 'Very Good', color: '#5a9a7a', sort_order: 2 },
   { grade: 'B', min: 70, max: 79, desc: 'Good', color: '#6a8aba', sort_order: 3 },
@@ -154,16 +154,16 @@ export const DEFAULT_GRADES = [
   { grade: 'F', min: 0, max: 49, desc: 'Fail', color: '#c45a4a', sort_order: 6 },
 ];
 
-export const DEFAULT_PASS_MARK = 50;
+const DEFAULT_PASS_MARK = 50;
 
-export const ACADEMIC_PHASES = ['pre-midterm', 'post-midterm', 'annual'];
-export const TERMS = ['Term 1', 'Term 2', 'Term 3'];
+const ACADEMIC_PHASES = ['pre-midterm', 'post-midterm', 'annual'];
+const TERMS = ['Term 1', 'Term 2', 'Term 3'];
 
 // ──────────────────────────────────────────────────────────────────────
 // PROMOTION RULES
 // ──────────────────────────────────────────────────────────────────────
 
-export const PROMOTION_RULES = [
+const PROMOTION_RULES = [
   { from: 'NURSERY 1', to: 'NURSERY 2' },
   { from: 'NURSERY 2', to: 'NURSERY 3' },
   { from: 'NURSERY 3', to: 'PRIMARY 1' },
@@ -175,7 +175,7 @@ export const PROMOTION_RULES = [
   { from: 'PRIMARY 6', to: 'GRADUATED' },
 ];
 
-export const PROMOTION_MAP = Object.fromEntries(
+const PROMOTION_MAP = Object.fromEntries(
   PROMOTION_RULES.map(r => [r.from, r.to])
 );
 
@@ -183,9 +183,9 @@ export const PROMOTION_MAP = Object.fromEntries(
 // TIMETABLE CONSTANTS
 // ──────────────────────────────────────────────────────────────────────
 
-export const TIMETABLE_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+const TIMETABLE_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
-export const TIMETABLE_TIME_SLOTS = [
+const TIMETABLE_TIME_SLOTS = [
   '08:20-09:00',
   '09:00-09:40',
   '09:40-10:20',
@@ -201,13 +201,13 @@ export const TIMETABLE_TIME_SLOTS = [
   '16:00-16:40',
 ];
 
-export const BREAK_SLOTS = new Set(['10:20-10:40', '12:00-13:00', '15:00-15:20']);
+const BREAK_SLOTS = new Set(['10:20-10:40', '12:00-13:00', '15:00-15:20']);
 
-export function isBreakSlot(timeSlot) {
+function isBreakSlot(timeSlot) {
   return BREAK_SLOTS.has(timeSlot);
 }
 
-export function getBreakIcon(timeSlot) {
+function getBreakIcon(timeSlot) {
   if (timeSlot === '10:20-10:40') return '☕';
   if (timeSlot === '12:00-13:00') return '🍽️';
   if (timeSlot === '15:00-15:20') return '☕';
@@ -218,40 +218,40 @@ export function getBreakIcon(timeSlot) {
 // ASSESSMENT CONSTANTS
 // ──────────────────────────────────────────────────────────────────────
 
-export const ASSESSMENT_TYPES = ['Quiz', 'Assignment', 'Mid-term', 'Exam', 'Final Exam'];
+const ASSESSMENT_TYPES = ['Quiz', 'Assignment', 'Mid-term', 'Exam', 'Final Exam'];
 
-export const PRE_MIDTERM_TYPES = ['Quiz', 'Assignment', 'Mid-term'];
+const PRE_MIDTERM_TYPES = ['Quiz', 'Assignment', 'Mid-term'];
 
-export const POST_MIDTERM_TYPES = ['Quiz', 'Assignment', 'Mid-term', 'Exam', 'Final Exam'];
+const POST_MIDTERM_TYPES = ['Quiz', 'Assignment', 'Mid-term', 'Exam', 'Final Exam'];
 
 // ──────────────────────────────────────────────────────────────────────
 // FINANCE CONSTANTS
 // ──────────────────────────────────────────────────────────────────────
 
 // overdue severity thresholds in days  (Part 4.12)
-export const OVERDUE_SEVERITY = {
+const OVERDUE_SEVERITY = {
   CRITICAL: 30,
   WARNING: 15,
   MILD: 7,
   RECENT: 1,
 };
 // Receipt number format: RCP-YYYYMMDD-NNN  (Part 9)
-export const RECEIPT_PREFIX = 'RCP';
+const RECEIPT_PREFIX = 'RCP';
 
 /* ─────────────────────────────────────────────────────────────────
    FEE RESET FREQUENCIES
    ───────────────────────────────────────────────────────────────── */
 
-export const FEE_APPLY_TO = ['all', 'class', 'student'];
-export const WAIVER_TYPES = ['full', 'partial', 'percentage'];
+const FEE_APPLY_TO = ['all', 'class', 'student'];
+const WAIVER_TYPES = ['full', 'partial', 'percentage'];
 
-export const PAYMENT_METHODS = ['Cash', 'Mobile-Money', 'Bank Transfer', 'Cheque'];
+const PAYMENT_METHODS = ['Cash', 'Mobile-Money', 'Bank Transfer', 'Cheque'];
 
-export const FEE_FREQUENCIES = ['monthly', 'termly', 'annual', 'one_time'];
+const FEE_FREQUENCIES = ['monthly', 'termly', 'annual', 'one_time'];
 
-export const FEE_TYPES = ['standard', 'transport', 'activity', 'one-time'];
+const FEE_TYPES = ['standard', 'transport', 'activity', 'one-time'];
 
-export const FEE_CATEGORIES_DEFAULT = [
+const FEE_CATEGORIES_DEFAULT = [
   'Tuition',
   'Transport',
   'Uniform',
@@ -261,21 +261,21 @@ export const FEE_CATEGORIES_DEFAULT = [
   'Holiday Occupation'
 ];
 
-export const OVERDUE_THRESHOLDS = { mild: 7, warning: 21, critical: 45 };
+const OVERDUE_THRESHOLDS = { mild: 7, warning: 21, critical: 45 };
 
 /* ─────────────────────────────────────────────────────────────────
    ATTENDANCE STATUS CODES
    ───────────────────────────────────────────────────────────────── */
 
 // P = Present, A = Absent, L = Late, E = Excused
-export const ATTENDANCE_CODES = ['P', 'A', 'L', 'E'];
-export const ATTENDANCE_LABELS = { P: 'Present', A: 'Absent', L: 'Late', E: 'Excused' };
+const ATTENDANCE_CODES = ['P', 'A', 'L', 'E'];
+const ATTENDANCE_LABELS = { P: 'Present', A: 'Absent', L: 'Late', E: 'Excused' };
 
 // Late counts as 0.5 days for rate calculation  (Part 4.8)
-export const LATE_WEIGHT = 0.5;
+const LATE_WEIGHT = 0.5;
 
 // At-risk thresholds
-export const ATTENDANCE_THRESHOLDS = {
+const ATTENDANCE_THRESHOLDS = {
   AT_RISK: 75,  // below this → red alert
   WARNING: 85,  // below this → yellow warning
 };
@@ -284,24 +284,24 @@ export const ATTENDANCE_THRESHOLDS = {
 // STUDENT CONSTANTS
 // ──────────────────────────────────────────────────────────────────────
 
-export const STUDENT_STATUSES = ['Active', 'Inactive', 'Transferred', 'Graduated'];
+const STUDENT_STATUSES = ['Active', 'Inactive', 'Transferred', 'Graduated'];
 
-export const GENDER_OPTIONS = ['Male', 'Female'];
+const GENDER_OPTIONS = ['Male', 'Female'];
 
 /* ─────────────────────────────────────────────────────────────────
    FAMILY
    ───────────────────────────────────────────────────────────────── */
 
 // Family code format: FAM-NNN
-export const FAMILY_CODE_PREFIX = 'FAM';
+const FAMILY_CODE_PREFIX = 'FAM';
 
 // ──────────────────────────────────────────────────────────────────────
 // USER CONSTANTS
 // ──────────────────────────────────────────────────────────────────────
 
-export const USER_ROLES = ['admin', 'accountant', 'teacher'];
+const USER_ROLES = ['admin', 'accountant', 'teacher'];
 
-export const USER_ROLE_LABELS = {
+const USER_ROLE_LABELS = {
   admin: 'Administrator',
   accountant: 'Accountant',
   teacher: 'Teacher',
@@ -325,7 +325,7 @@ export const USER_ROLE_LABELS = {
    - Not all students attend holiday programs — only enrolled ones.
    ───────────────────────────────────────────────────────────────── */
  
-export const HOLIDAY_CONFIG = {
+const HOLIDAY_CONFIG = {
     // localStorage key to persist holiday session state
     sessionKey       : 'lf_holiday_session',
     // Banner text shown during holiday mode
@@ -344,7 +344,7 @@ export const HOLIDAY_CONFIG = {
    REPORT CARD STRINGS  (Part 7)
    ───────────────────────────────────────────────────────────────── */
  
-export const REPORT_STRINGS = {
+const REPORT_STRINGS = {
     nursery: {
         pre_midterm  : 'RÉSULTATS DES TESTS DEMI-TRIMESTRE',
         post_midterm : 'RÉSULTATS DE FIN DE TRIMESTRE',
@@ -383,7 +383,7 @@ export const REPORT_STRINGS = {
    CELL COLOR THRESHOLDS (class register)  (Part 8, last paragraph)
    ───────────────────────────────────────────────────────────────── */
  
-export const CELL_COLORS = [
+const CELL_COLORS = [
     { min: 80,  max: 100, bg: '#d1fae5', text: '#065f46', cls: 'cell-high'   },
     { min: 60,  max: 79,  bg: '#fef3c7', text: '#92400e', cls: 'cell-medium' },
     { min: 50,  max: 59,  bg: '#ffedd5', text: '#9a3412', cls: 'cell-low'    },
@@ -395,7 +395,7 @@ export const CELL_COLORS = [
    ───────────────────────────────────────────────────────────────── */
  
 // DB stores 1=Mon … 5=Fri  (Part 2.9)
-export const DAYS_OF_WEEK = [
+const DAYS_OF_WEEK = [
     { id: 1, name: 'Monday',    short: 'Mon' },
     { id: 2, name: 'Tuesday',   short: 'Tue' },
     { id: 3, name: 'Wednesday', short: 'Wed' },
@@ -407,15 +407,15 @@ export const DAYS_OF_WEEK = [
    ANNOUNCEMENT TYPES  (Part 2.22)
    ───────────────────────────────────────────────────────────────── */
  
-export const ANNOUNCEMENT_TYPES      = ['general', 'urgent', 'event'];
-export const ANNOUNCEMENT_RECIPIENTS = ['all', 'teachers', 'accountants', 'specific'];
-export const ANNOUNCEMENT_CHANNELS   = ['in_app', 'email', 'sms'];
+const ANNOUNCEMENT_TYPES      = ['general', 'urgent', 'event'];
+const ANNOUNCEMENT_RECIPIENTS = ['all', 'teachers', 'accountants', 'specific'];
+const ANNOUNCEMENT_CHANNELS   = ['in_app', 'email', 'sms'];
  
 /* ─────────────────────────────────────────────────────────────────
    QR CODE CONFIG  (Part 7.3)
    ───────────────────────────────────────────────────────────────── */
  
-export const QR_CONFIG = {
+const QR_CONFIG = {
     // Base URL of the standalone QR verify page
     // Change this to the deployed domain before production
     verifyBaseUrl : window.location.origin + '/qr-verify.html',
@@ -431,7 +431,7 @@ export const QR_CONFIG = {
    ROLE THEMING  (Part 10.3)
    ───────────────────────────────────────────────────────────────── */
  
-export const ROLE_THEME = {
+const ROLE_THEME = {
     admin      : { primary: '#1a3a5c', gradient: 'linear-gradient(135deg,#1a3a5c,#2d5a8e)', bodyClass: 'role-admin'      },
     accountant : { primary: '#0d9488', gradient: 'linear-gradient(135deg,#0d9488,#14b8a6)', bodyClass: 'role-accountant' },
     teacher    : { primary: '#7c3aed', gradient: 'linear-gradient(135deg,#7c3aed,#8b5cf6)', bodyClass: 'role-teacher'    },
@@ -441,32 +441,32 @@ export const ROLE_THEME = {
    ASCII CHART CONFIG  (Part 10.2)
    ───────────────────────────────────────────────────────────────── */
  
-export const ASCII_BAR_WIDTH    = 20;   // default character width of horizontal bars
-export const ASCII_FILL_CHAR    = '█';
-export const ASCII_EMPTY_CHAR   = '░';
+const ASCII_BAR_WIDTH    = 20;   // default character width of horizontal bars
+const ASCII_FILL_CHAR    = '█';
+const ASCII_EMPTY_CHAR   = '░';
  
 /* ─────────────────────────────────────────────────────────────────
    PAGINATION
    ───────────────────────────────────────────────────────────────── */
  
-export const DEFAULT_PAGE_SIZE  = 25;
-export const PAGE_SIZE_OPTIONS  = [10, 25, 50, 100, 'All'];
+const DEFAULT_PAGE_SIZE  = 25;
+const PAGE_SIZE_OPTIONS  = [10, 25, 50, 100, 'All'];
  
 /* ─────────────────────────────────────────────────────────────────
    DEBOUNCE DELAYS
    ───────────────────────────────────────────────────────────────── */
  
-export const DEBOUNCE_SEARCH    = 300;  // ms
-export const DEBOUNCE_SAVE      = 500;  // ms
-export const DEBOUNCE_RESIZE    = 150;  // ms
+const DEBOUNCE_SEARCH    = 300;  // ms
+const DEBOUNCE_SAVE      = 500;  // ms
+const DEBOUNCE_RESIZE    = 150;  // ms
  
 /* ─────────────────────────────────────────────────────────────────
    OFFLINE / INDEXEDDB CONFIG  (Part 12)
    ───────────────────────────────────────────────────────────────── */
  
-export const IDB_NAME    = 'ecole_la_fontaine_offline';
-export const IDB_VERSION = 1;
-export const IDB_STORES  = {
+const IDB_NAME    = 'ecole_la_fontaine_offline';
+const IDB_VERSION = 1;
+const IDB_STORES  = {
     pendingMarks    : 'pending_marks',
     pendingPayments : 'pending_payments',
     cachedStudents  : 'cached_students',
@@ -476,8 +476,8 @@ export const IDB_STORES  = {
    BACKUP CONFIG  (Part 5.11)
    ───────────────────────────────────────────────────────────────── */
  
-export const BACKUP_FILENAME_PREFIX = 'backup_ECOLE_';
-export const BACKUP_ALL_TABLES = [
+const BACKUP_FILENAME_PREFIX = 'backup_ECOLE_';
+const BACKUP_ALL_TABLES = [
     'school_settings', 'academic_years', 'terms', 'holidays',
     'classes', 'subjects', 'teachers', 'teacher_assignments',
     'timetable_slots', 'families', 'students', 'assessments',
@@ -493,20 +493,20 @@ export const BACKUP_ALL_TABLES = [
    TERM STATUS OPTIONS  (Part 2.3)
    ───────────────────────────────────────────────────────────────── */
  
-export const TERM_STATUSES = ['upcoming', 'in_progress', 'completed'];
+const TERM_STATUSES = ['upcoming', 'in_progress', 'completed'];
  
 /* ─────────────────────────────────────────────────────────────────
    HOLIDAY TYPE OPTIONS  (Part 2.4)
    ───────────────────────────────────────────────────────────────── */
  
-export const HOLIDAY_TYPES = ['Public Holiday', 'Vacation', 'Event'];
+const HOLIDAY_TYPES = ['Public Holiday', 'Vacation', 'Event'];
  
 /* ─────────────────────────────────────────────────────────────────
    RWANDA PUBLIC HOLIDAYS  (recurring, by MM-DD)
    Used by importRwandaHolidays() in settings/holidays.js
    ───────────────────────────────────────────────────────────────── */
  
-export const RWANDA_PUBLIC_HOLIDAYS = [
+const RWANDA_PUBLIC_HOLIDAYS = [
     { name: 'New Year\'s Day',            month: 1,  day: 1  },
     { name: 'Heroes\' Day',               month: 2,  day: 1  },
     { name: 'International Women\'s Day', month: 3,  day: 8  },
@@ -525,7 +525,7 @@ export const RWANDA_PUBLIC_HOLIDAYS = [
 // COLOR PALETTES
 // ──────────────────────────────────────────────────────────────────────
 
-export const SUBJECT_COLOR_PALETTE = [
+const SUBJECT_COLOR_PALETTE = [
   '#6a8aba',   // Blue
   '#8a6aaa',   // Purple
   '#5a8a6a',   // Green
@@ -540,7 +540,7 @@ export const SUBJECT_COLOR_PALETTE = [
   '#6a7a9a',   // Slate
 ];
 
-export const TEACHER_COLOR_PALETTE = [
+const TEACHER_COLOR_PALETTE = [
   '#8a9aba',   // Light blue
   '#9a7aba',   // Light purple
   '#7aaa8a',   // Light green
@@ -559,7 +559,7 @@ export const TEACHER_COLOR_PALETTE = [
 // MODULE ACCENT COLORS
 // ──────────────────────────────────────────────────────────────────────
 
-export const MODULE_ACCENTS = {
+const MODULE_ACCENTS = {
   dashboard: '#6a8aba',
   academics: '#8a6aaa',
   finance: '#5a8a6a',
@@ -578,7 +578,7 @@ export const MODULE_ACCENTS = {
 // NOTIFICATION TYPES
 // ──────────────────────────────────────────────────────────────────────
 
-export const NOTIFICATION_TYPES = {
+const NOTIFICATION_TYPES = {
   PAYMENT: 'payment',
   MARKS: 'marks',
   ATTENDANCE: 'attendance',
@@ -592,7 +592,7 @@ export const NOTIFICATION_TYPES = {
   INFO: 'info',
 };
 
-export const NOTIFICATION_PRIORITY = {
+const NOTIFICATION_PRIORITY = {
   CRITICAL: 'critical',
   HIGH: 'high',
   MEDIUM: 'medium',
@@ -603,14 +603,14 @@ export const NOTIFICATION_PRIORITY = {
 // ERROR CONSTANTS
 // ──────────────────────────────────────────────────────────────────────
 
-export const ERROR_SEVERITY = {
+const ERROR_SEVERITY = {
   LOW: 'low',
   MEDIUM: 'medium',
   HIGH: 'high',
   CRITICAL: 'critical',
 };
 
-export const ERROR_CATEGORIES = {
+const ERROR_CATEGORIES = {
   NETWORK: 'network',
   DATABASE: 'database',
   AUTH: 'auth',
@@ -623,7 +623,7 @@ export const ERROR_CATEGORIES = {
 // Z-INDEX LAYERS
 // ──────────────────────────────────────────────────────────────────────
 
-export const Z_INDEX = {
+const Z_INDEX = {
   NEGATIVE: -1,
   LOW: 10,
   MEDIUM: 100,
@@ -640,7 +640,7 @@ export const Z_INDEX = {
 // STORAGE KEYS
 // ──────────────────────────────────────────────────────────────────────
 
-export const STORAGE_KEYS = {
+const STORAGE_KEYS = {
   USER: 'elf_user',
   EXPIRY: 'elf_expiry',
   THEME: 'elf_theme',
@@ -686,14 +686,14 @@ export const STORAGE_KEYS = {
 // FILE UPLOAD
 // ──────────────────────────────────────────────────────────────────────
 
-export const MAX_UPLOAD_SIZE_MB = 10;
-export const SUPPORTED_IMPORT_FORMATS = ['.xlsx', '.xls', '.csv'];
+const MAX_UPLOAD_SIZE_MB = 10;
+const SUPPORTED_IMPORT_FORMATS = ['.xlsx', '.xls', '.csv'];
 
 // ──────────────────────────────────────────────────────────────────────
 // HELP CENTER
 // ──────────────────────────────────────────────────────────────────────
 
-export const HELP_CONFIG = {
+const HELP_CONFIG = {
   maxRecentItems: 10,
   searchDebounce: 200,
   shortcuts: {
@@ -706,7 +706,7 @@ export const HELP_CONFIG = {
 // LANGUAGE HELPERS
 // ──────────────────────────────────────────────────────────────────────
 
-export const CLASS_LEVEL_NAMES = {
+const CLASS_LEVEL_NAMES = {
   nursery: ['NURSERY 1', 'NURSERY 2', 'NURSERY 3'],
   primary: ['PRIMARY 1', 'PRIMARY 2', 'PRIMARY 3', 'PRIMARY 4', 'PRIMARY 5', 'PRIMARY 6']
 };
@@ -715,7 +715,7 @@ export const CLASS_LEVEL_NAMES = {
  * Determine language for a class level
  * Nursery → French (fr), Primary → English (en)
  */
-export function languageForClassLevel(className) {
+function languageForClassLevel(className) {
   if (!className) return 'en';
   const upper = className.toUpperCase();
   if (CLASS_LEVEL_NAMES.nursery.some(n => n === upper)) return 'fr';
@@ -725,7 +725,7 @@ export function languageForClassLevel(className) {
 /**
  * Check if a class is Nursery level
  */
-export function isNurseryClass(className) {
+function isNurseryClass(className) {
   if (!className) return false;
   const upper = className.toUpperCase();
   return CLASS_LEVEL_NAMES.nursery.some(n => n === upper);
@@ -734,7 +734,7 @@ export function isNurseryClass(className) {
 /**
  * Check if a class is Primary level
  */
-export function isPrimaryClass(className) {
+function isPrimaryClass(className) {
   if (!className) return false;
   const upper = className.toUpperCase();
   return CLASS_LEVEL_NAMES.primary.some(n => n === upper);

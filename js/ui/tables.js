@@ -629,5 +629,3 @@ const DataTable = (() => {
 
 // ─── EXPOSE TO WINDOW ───────────────────────────────────────────────
 window.DataTable = DataTable;
-
-export default DataTable;

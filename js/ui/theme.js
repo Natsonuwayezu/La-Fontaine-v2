@@ -43,7 +43,7 @@ const LABELS = {
  * Get the current theme from the document
  * @returns {string} 'light' or 'dark'
  */
-export function getCurrentTheme() {
+function getCurrentTheme() {
     return document.documentElement.getAttribute('data-theme') || THEMES.LIGHT;
 }
 
@@ -51,7 +51,7 @@ export function getCurrentTheme() {
  * Get the saved theme from localStorage
  * @returns {string} 'light' or 'dark'
  */
-export function getSavedTheme() {
+function getSavedTheme() {
     try {
         return localStorage.getItem(THEME_KEY) || THEMES.LIGHT;
     } catch (_) {
@@ -64,7 +64,7 @@ export function getSavedTheme() {
  * @param {string} theme - 'light' or 'dark'
  * @param {boolean} shouldSave - Whether to save to localStorage (default: true)
  */
-export function applyTheme(theme, shouldSave = true) {
+function applyTheme(theme, shouldSave = true) {
     const validTheme = theme === THEMES.DARK ? THEMES.DARK : THEMES.LIGHT;
 
     document.documentElement.setAttribute('data-theme', validTheme);
@@ -89,7 +89,7 @@ export function applyTheme(theme, shouldSave = true) {
  * Detects saved preference, falls back to system preference
  * @param {boolean} skipSystemPreference - Force use saved or default
  */
-export function initTheme(skipSystemPreference = false) {
+function initTheme(skipSystemPreference = false) {
     const savedTheme = getSavedTheme();
 
     let theme = savedTheme;
@@ -110,7 +110,7 @@ export function initTheme(skipSystemPreference = false) {
  * @param {boolean} showToast - Whether to show a toast notification
  * @returns {string} The new theme
  */
-export function toggleTheme(showToast = true) {
+function toggleTheme(showToast = true) {
     const current = getCurrentTheme();
     const next = current === THEMES.DARK ? THEMES.LIGHT : THEMES.DARK;
 
@@ -130,7 +130,7 @@ export function toggleTheme(showToast = true) {
  * Check if dark mode is currently active
  * @returns {boolean} True if dark mode is active
  */
-export function isDarkMode() {
+function isDarkMode() {
     return getCurrentTheme() === THEMES.DARK;
 }
 
@@ -138,7 +138,7 @@ export function isDarkMode() {
  * Check if dark mode is currently active
  * @returns {boolean} True if light mode is active
  */
-export function isLightMode() {
+function isLightMode() {
     return getCurrentTheme() === THEMES.LIGHT;
 }
 
@@ -203,7 +203,7 @@ function updateThemeMeta(theme) {
  * @param {string} logoData - base64 string or URL
  * @param {string} selector - CSS selector for logo elements (optional)
  */
-export function applySchoolLogo(logoData, selector = '.school-logo, #school-logo, #login-logo-img, .logo-box') {
+function applySchoolLogo(logoData, selector = '.school-logo, #school-logo, #login-logo-img, .logo-box') {
     if (!logoData) return;
 
     const targets = document.querySelectorAll(selector);
@@ -245,7 +245,7 @@ export function applySchoolLogo(logoData, selector = '.school-logo, #school-logo
  * Watch for system preference changes and update theme accordingly
  * @param {boolean} autoSwitch - Whether to auto-switch when system changes
  */
-export function watchSystemTheme(autoSwitch = true) {
+function watchSystemTheme(autoSwitch = true) {
     const media = window.matchMedia('(prefers-color-scheme: dark)');
 
     const handler = (e) => {
@@ -276,7 +276,7 @@ export function watchSystemTheme(autoSwitch = true) {
  * Reset theme to system preference or default
  * @param {boolean} useSystemPreference - Use system preference or default to light
  */
-export function resetTheme(useSystemPreference = true) {
+function resetTheme(useSystemPreference = true) {
     let theme = THEMES.LIGHT;
 
     if (useSystemPreference) {
@@ -291,7 +291,7 @@ export function resetTheme(useSystemPreference = true) {
 /**
  * Clear saved theme preference (will use system preference on next load)
  */
-export function clearSavedTheme() {
+function clearSavedTheme() {
     try {
         localStorage.removeItem(THEME_KEY);
         console.log('[Theme] Saved preference cleared');
@@ -310,22 +310,3 @@ window.isDarkMode = isDarkMode;
 window.isLightMode = isLightMode;
 window.applySchoolLogo = applySchoolLogo;
 window.resetTheme = resetTheme;
-
-/* ═══════════════════════════════════════════════════════════════════
-   EXPORTS
-   ═══════════════════════════════════════════════════════════════════ */
-
-export default {
-    THEMES,
-    getCurrentTheme,
-    getSavedTheme,
-    applyTheme,
-    initTheme,
-    toggleTheme,
-    isDarkMode,
-    isLightMode,
-    applySchoolLogo,
-    watchSystemTheme,
-    resetTheme,
-    clearSavedTheme
-};

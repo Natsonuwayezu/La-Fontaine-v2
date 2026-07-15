@@ -211,6 +211,3 @@ const Gestures = (() => {
 // ─── EXPOSE TO WINDOW ────────────────────────────────────────────────
 
 window.Gestures = Gestures;
-
-export default Gestures;
-export const { onSwipe, onEdgeSwipeRight, onModalSwipeDown } = Gestures;

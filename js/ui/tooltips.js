@@ -478,5 +478,3 @@ const Tooltips = (() => {
 
 // ─── EXPOSE TO WINDOW ───────────────────────────────────────────────
 window.Tooltips = Tooltips;
-
-export default Tooltips;

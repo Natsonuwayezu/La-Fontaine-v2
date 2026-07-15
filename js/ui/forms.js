@@ -36,7 +36,7 @@ const FOCUSABLE_SELECTORS = 'input:not([type="hidden"]), select, textarea, butto
  * @param {string} options.nullValue - Value to use for empty fields (default: null)
  * @returns {object} Key-value pairs of form data
  */
-export function serializeForm(form, options = {}) {
+function serializeForm(form, options = {}) {
     if (!form || !(form instanceof HTMLFormElement)) {
         console.warn('[Forms] serializeForm: Invalid form element');
         return {};
@@ -116,7 +116,7 @@ export function serializeForm(form, options = {}) {
  * @param {object} options - Same as serializeForm options
  * @returns {string} URL-encoded form data
  */
-export function serializeFormEncoded(form, options = {}) {
+function serializeFormEncoded(form, options = {}) {
     const data = serializeForm(form, options);
     return Object.entries(data)
         .filter(([_, value]) => value !== null && value !== undefined)
@@ -139,7 +139,7 @@ export function serializeFormEncoded(form, options = {}) {
  * @param {object} customRules - Custom validation rules { fieldName: (value) => true|string }
  * @returns {object} { valid: boolean, errors: { field: message } }
  */
-export function validateForm(form, customRules = {}) {
+function validateForm(form, customRules = {}) {
     if (!form || !(form instanceof HTMLFormElement)) {
         console.warn('[Forms] validateForm: Invalid form element');
         return { valid: false, errors: { _form: 'Invalid form element' } };
@@ -203,7 +203,7 @@ export function validateForm(form, customRules = {}) {
  * @param {object} validationResult - Result from validateForm
  * @returns {string} Formatted error messages
  */
-export function formatValidationErrors(validationResult) {
+function formatValidationErrors(validationResult) {
     if (validationResult.valid) return '';
 
     const messages = Object.entries(validationResult.errors)
@@ -217,7 +217,7 @@ export function formatValidationErrors(validationResult) {
  * @param {HTMLFormElement} form - The form element
  * @param {object} errors - Error object from validateForm
  */
-export function showValidationErrors(form, errors) {
+function showValidationErrors(form, errors) {
     if (!form) return;
 
     // Clear previous errors
@@ -250,7 +250,7 @@ export function showValidationErrors(form, errors) {
  * Clear validation errors from a form
  * @param {HTMLFormElement} form - The form element
  */
-export function clearValidationErrors(form) {
+function clearValidationErrors(form) {
     if (!form) return;
 
     // Remove error classes
@@ -276,7 +276,7 @@ export function clearValidationErrors(form) {
  * @param {boolean} options.clearHidden - Clear hidden inputs (default: false)
  * @param {*} options.defaultValue - Default value for empty fields
  */
-export function clearForm(form, options = {}) {
+function clearForm(form, options = {}) {
     if (!form || !(form instanceof HTMLFormElement)) {
         console.warn('[Forms] clearForm: Invalid form element');
         return;
@@ -345,7 +345,7 @@ export function clearForm(form, options = {}) {
  * Reset form to its initial state (using form.reset())
  * @param {HTMLFormElement} form - The form element
  */
-export function resetForm(form) {
+function resetForm(form) {
     if (!form || !(form instanceof HTMLFormElement)) {
         console.warn('[Forms] resetForm: Invalid form element');
         return;
@@ -379,7 +379,7 @@ export function resetForm(form) {
  * @param {object} config.attrs - Additional HTML attributes
  * @returns {string} HTML string
  */
-export function buildField(config) {
+function buildField(config) {
     const {
         type = 'text',
         name,
@@ -528,7 +528,7 @@ export function buildField(config) {
  * @param {array} fields - Array of field configurations
  * @returns {string} Combined HTML string
  */
-export function buildFields(fields) {
+function buildFields(fields) {
     return fields.map(field => buildField(field)).join('');
 }
 
@@ -542,7 +542,7 @@ export function buildFields(fields) {
  * @param {string} name - Field name
  * @returns {*} Field value
  */
-export function getFieldValue(form, name) {
+function getFieldValue(form, name) {
     if (!form) return null;
 
     const el = form.querySelector(`[name="${name}"]`) || form.querySelector(`#${name}`);
@@ -566,7 +566,7 @@ export function getFieldValue(form, name) {
  * @param {string} name - Field name
  * @param {*} value - New value
  */
-export function setFieldValue(form, name, value) {
+function setFieldValue(form, name, value) {
     if (!form) return;
 
     const el = form.querySelector(`[name="${name}"]`) || form.querySelector(`#${name}`);
@@ -595,7 +595,7 @@ export function setFieldValue(form, name, value) {
  * @param {HTMLFormElement} form - The form element
  * @param {object} data - Key-value pairs of field values
  */
-export function setFormValues(form, data) {
+function setFormValues(form, data) {
     if (!form || !data) return;
 
     for (const [name, value] of Object.entries(data)) {
@@ -612,7 +612,7 @@ export function setFormValues(form, data) {
  * @param {HTMLFormElement} form - The form element
  * @returns {HTMLElement|null} The focused element
  */
-export function focusFirstField(form) {
+function focusFirstField(form) {
     if (!form) return null;
 
     const first = form.querySelector(FOCUSABLE_SELECTORS);
@@ -633,7 +633,7 @@ export function focusFirstField(form) {
  * @param {string} currentName - Current field name
  * @returns {HTMLElement|null} The next focused element
  */
-export function focusNextField(form, currentName) {
+function focusNextField(form, currentName) {
     if (!form) return null;
 
     const fields = Array.from(form.querySelectorAll(FOCUSABLE_SELECTORS));
@@ -660,7 +660,7 @@ export function focusNextField(form, currentName) {
  * @param {HTMLFormElement} form - The form element
  * @returns {boolean} True if the form has changed
  */
-export function isFormDirty(form) {
+function isFormDirty(form) {
     if (!form) return false;
 
     // Check if any field value differs from default
@@ -689,7 +689,7 @@ export function isFormDirty(form) {
  * @param {HTMLFormElement} form - The form element
  * @param {boolean} disabled - Whether to disable or enable
  */
-export function setFormDisabled(form, disabled = true) {
+function setFormDisabled(form, disabled = true) {
     if (!form) return;
 
     const elements = form.querySelectorAll(INPUT_SELECTORS);
@@ -703,7 +703,7 @@ export function setFormDisabled(form, disabled = true) {
  * @param {HTMLFormElement} form - The form element
  * @returns {boolean} True if the form is valid
  */
-export function isFormValid(form) {
+function isFormValid(form) {
     if (!form) return false;
     return form.checkValidity();
 }
@@ -726,41 +726,3 @@ window.focusFirstField = focusFirstField;
 window.isFormDirty = isFormDirty;
 window.setFormDisabled = setFormDisabled;
 window.isFormValid = isFormValid;
-
-/* ═══════════════════════════════════════════════════════════════════
-   EXPORTS
-   ═══════════════════════════════════════════════════════════════════ */
-
-export default {
-    // Serialization
-    serializeForm,
-    serializeFormEncoded,
-
-    // Validation
-    validateForm,
-    formatValidationErrors,
-    showValidationErrors,
-    clearValidationErrors,
-
-    // Clearing
-    clearForm,
-    resetForm,
-
-    // Building
-    buildField,
-    buildFields,
-
-    // Field helpers
-    getFieldValue,
-    setFieldValue,
-    setFormValues,
-
-    // Focus
-    focusFirstField,
-    focusNextField,
-
-    // State
-    isFormDirty,
-    setFormDisabled,
-    isFormValid
-};

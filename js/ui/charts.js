@@ -33,9 +33,10 @@
    Last updated: 2026-07-14
    ═══════════════════════════════════════════════════════════════════ */
 
-import { state, getCurrentUser, getCurrentTerm, getCurrentYear } from '../core/state.js';
-import { getGrade } from '../core/formulas.js';
-import { esc } from '../core/utils.js';
+// state and getGrade are plain-script globals from core/state.js and core/formulas.js,
+// both loaded earlier in index.html — no import needed.
+// (getCurrentUser, getCurrentTerm, getCurrentYear, esc were imported here previously
+// but never used in this file — removed as dead code.)
 
 /* ═══════════════════════════════════════════════════════════════════
    COLOR PALETTE — Warm, rich, no pure white, no pure black
@@ -94,7 +95,7 @@ function formatPct(value, decimals = 1) {
  * @param {string} emptyChar - Character for empty portion
  * @returns {string} HTML string
  */
-export function asciiHorizontalBar(data, maxWidth = 30, filledChar = '█', emptyChar = '░') {
+function asciiHorizontalBar(data, maxWidth = 30, filledChar = '█', emptyChar = '░') {
   if (!data || !data.length) {
     return '<div style="text-align:center;padding:20px;color:var(--text-muted);">No data available</div>';
   }
@@ -122,7 +123,7 @@ export function asciiHorizontalBar(data, maxWidth = 30, filledChar = '█', empt
  * @param {string} barChar - Character for bars
  * @returns {string} HTML string
  */
-export function asciiVerticalBar(data, maxHeight = 8, barChar = '▓') {
+function asciiVerticalBar(data, maxHeight = 8, barChar = '▓') {
   if (!data || !data.length) {
     return '<div style="text-align:center;padding:20px;color:var(--text-muted);">No data available</div>';
   }
@@ -155,7 +156,7 @@ export function asciiVerticalBar(data, maxHeight = 8, barChar = '▓') {
  * @param {number} maxWidth - Maximum width of bars
  * @returns {string} HTML string
  */
-export function gradeDistributionChart(distribution = null, maxWidth = 25) {
+function gradeDistributionChart(distribution = null, maxWidth = 25) {
   if (!distribution) {
     distribution = calculateGradeDistribution();
   }
@@ -196,7 +197,7 @@ export function gradeDistributionChart(distribution = null, maxWidth = 25) {
  * @param {string} color - Optional color
  * @returns {string} HTML string
  */
-export function progressBar(pct, width = 20, color = '') {
+function progressBar(pct, width = 20, color = '') {
   const filled = Math.round((pct / 100) * width);
   const bar = '█'.repeat(Math.max(0, filled)) + '░'.repeat(Math.max(0, width - filled));
   const colorStyle = color ? `style="color:${color};"` : '';
@@ -208,7 +209,7 @@ export function progressBar(pct, width = 20, color = '') {
  * @param {number} change - Change in percentage
  * @returns {string} HTML string
  */
-export function trendIndicator(change) {
+function trendIndicator(change) {
   if (change > 0) {
     return `<span style="color:var(--success, #5a9a7a);">↑ ${change.toFixed(1)}%</span>`;
   }
@@ -231,7 +232,7 @@ export function trendIndicator(change) {
  * @param {number} opts.height - Chart height (default: 220)
  * @param {Function} opts.yFormat - Format function for y-axis labels
  */
-export function line(container, opts) {
+function line(container, opts) {
   const {
     series = [],
     width = container.clientWidth || 480,
@@ -371,7 +372,7 @@ export function line(container, opts) {
  * @param {number} opts.height - Chart height (default: 220)
  * @param {boolean} opts.stacked - Stack bars (default: false)
  */
-export function bar(container, opts) {
+function bar(container, opts) {
   const {
     labels = [],
     series = [],
@@ -471,7 +472,7 @@ export function bar(container, opts) {
  * @param {number} opts.thickness - Ring thickness (default: 24)
  * @param {string} opts.centerLabel - Center label (default: total)
  */
-export function donut(container, opts) {
+function donut(container, opts) {
   const {
     segments = [],
     size = 180,
@@ -592,7 +593,7 @@ function appendLegend(container, items) {
  * @param {object} options - Chart options
  * @returns {object|null} Chart instance or null
  */
-export function createChart(canvasId, type, data, options = {}) {
+function createChart(canvasId, type, data, options = {}) {
   if (typeof Chart === 'undefined') {
     console.warn('[Charts] Chart.js not loaded');
     return null;
@@ -672,7 +673,7 @@ export function createChart(canvasId, type, data, options = {}) {
  * @param {Array} colors - Optional colors
  * @returns {object|null} Chart instance
  */
-export function createBarChart(canvasId, labels, dataset, label = 'Value', colors = null) {
+function createBarChart(canvasId, labels, dataset, label = 'Value', colors = null) {
   const bgColors = colors || labels.map((_, i) => PALETTE[i % PALETTE.length]);
   const borderColors = bgColors.map(c => c);
 
@@ -696,7 +697,7 @@ export function createBarChart(canvasId, labels, dataset, label = 'Value', color
  * @param {Array} datasets - Dataset array [{ label, data, color, fill }]
  * @returns {object|null} Chart instance
  */
-export function createLineChart(canvasId, labels, datasets) {
+function createLineChart(canvasId, labels, datasets) {
   const chartData = {
     labels: labels,
     datasets: datasets.map(ds => ({
@@ -723,7 +724,7 @@ export function createLineChart(canvasId, labels, datasets) {
  * @param {number} cutout - Cutout percentage (default: 60)
  * @returns {object|null} Chart instance
  */
-export function createDoughnutChart(canvasId, labels, data, colors = null, cutout = 60) {
+function createDoughnutChart(canvasId, labels, data, colors = null, cutout = 60) {
   const bgColors = colors || labels.map((_, i) => PALETTE[i % PALETTE.length]);
 
   return createChart(canvasId, 'doughnut', {
@@ -757,7 +758,7 @@ export function createDoughnutChart(canvasId, labels, data, colors = null, cutou
  * @param {Array} colors - Optional colors
  * @returns {object|null} Chart instance
  */
-export function createPieChart(canvasId, labels, data, colors = null) {
+function createPieChart(canvasId, labels, data, colors = null) {
   const bgColors = colors || labels.map((_, i) => PALETTE[i % PALETTE.length]);
 
   return createChart(canvasId, 'pie', {
@@ -791,7 +792,7 @@ export function createPieChart(canvasId, labels, data, colors = null) {
  * @param {number} yearId - Optional academic year ID
  * @returns {Object} Grade distribution { 'A+': count, 'A': count, ... }
  */
-export function calculateGradeDistribution(yearId = null) {
+function calculateGradeDistribution(yearId = null) {
   const distribution = { 'A+': 0, 'A': 0, 'B': 0, 'C': 0, 'D': 0, 'F': 0 };
   const marks = state.marks || [];
   const assessments = state.assessments || [];
@@ -819,7 +820,7 @@ export function calculateGradeDistribution(yearId = null) {
  * @param {number} yearId - Optional academic year ID
  * @returns {Array} Array of { label, value, color, students }
  */
-export function getClassPerformanceData(yearId = null) {
+function getClassPerformanceData(yearId = null) {
   const classes = (state.classes || []).filter(c => c.is_active !== false);
   const students = (state.students || []).filter(s => s.status === 'Active');
   const marks = (state.marks || []);
@@ -866,7 +867,7 @@ export function getClassPerformanceData(yearId = null) {
  * @param {number} yearId - Optional academic year ID
  * @returns {Array} Array of { label, value, color, expected, collected }
  */
-export function getFeeCollectionData(yearId = null) {
+function getFeeCollectionData(yearId = null) {
   const classes = (state.classes || []).filter(c => c.is_active !== false);
   const studentFees = (state.studentFees || []).filter(f => !f.is_waived && !f.is_credit);
 
@@ -900,7 +901,7 @@ export function getFeeCollectionData(yearId = null) {
  * Get payment method distribution
  * @returns {Array} Array of { label, value, amount }
  */
-export function getPaymentMethodData() {
+function getPaymentMethodData() {
   const payments = (state.payments || []).filter(p => !p.is_reversed);
   const methods = {};
 
@@ -925,7 +926,7 @@ export function getPaymentMethodData() {
  * @param {number} yearId - Academic year ID (optional)
  * @returns {string} Wrapped chart HTML
  */
-export function chartWithYear(title, chartHtml, yearId = null) {
+function chartWithYear(title, chartHtml, yearId = null) {
   const year = getYearLabel(yearId);
   const yearLabel = year ? ` — ${year}` : '';
   const isActive = yearId ? (state.academicYears || []).find(y => y.id === yearId)?.is_active : true;
@@ -967,7 +968,7 @@ const liveCharts = new Map();
  * @param {HTMLElement} container - Container element
  * @param {Function} renderFn - Render function to call on resize
  */
-export function registerLive(container, renderFn) {
+function registerLive(container, renderFn) {
   liveCharts.set(container, renderFn);
 }
 
@@ -999,42 +1000,3 @@ window.getClassPerformanceData = getClassPerformanceData;
 window.getFeeCollectionData = getFeeCollectionData;
 window.getPaymentMethodData = getPaymentMethodData;
 window.chartWithYear = chartWithYear;
-
-/* ═══════════════════════════════════════════════════════════════════
-   EXPORTS
-   ═══════════════════════════════════════════════════════════════════ */
-
-export default {
-  // ASCII Charts
-  asciiHorizontalBar,
-  asciiVerticalBar,
-  gradeDistributionChart,
-  progressBar,
-  trendIndicator,
-
-  // SVG Charts
-  line,
-  bar,
-  donut,
-
-  // Chart.js Wrappers
-  createChart,
-  createBarChart,
-  createLineChart,
-  createDoughnutChart,
-  createPieChart,
-
-  // Data Helpers
-  calculateGradeDistribution,
-  getClassPerformanceData,
-  getFeeCollectionData,
-  getPaymentMethodData,
-  chartWithYear,
-
-  // Live Resize
-  registerLive,
-
-  // Palette
-  PALETTE,
-  GRADE_COLORS,
-};

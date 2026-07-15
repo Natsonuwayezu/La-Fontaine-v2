@@ -846,5 +846,3 @@ const AdminDashboard = (() => {
    ═══════════════════════════════════════════════════════════════════ */
 
 window.AdminDashboard = AdminDashboard;
-
-export default AdminDashboard;

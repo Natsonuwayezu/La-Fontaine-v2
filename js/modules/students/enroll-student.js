@@ -4,23 +4,17 @@
    Four-step enrollment wizard with fee assignment and payment
    recording. Renders into the main content container.
 
-   Dependencies:
+   Dependencies (all plain-script globals loaded earlier in index.html, no import needed):
    - utils.js: esc, fmtCurrency, debounce
-   - api.js: insert, get, update
+   - api.js: insert, update  ('get' was imported previously but never used — removed)
    - toast.js: showToast
-   - router.js: navigateTo
+   - router.js: navigateTo (NOTE: core/router.js is currently an empty file —
+     navigateTo() will be undefined until it's written; not part of this fix)
    - modals.js: confirmDialog
-   - loaders.js: buttonLoader
+   - loaders.js: window.Loaders.button.start/stop (see fix below —
+     this file previously called a non-existent buttonLoader() function)
    - state.js: state
    ═══════════════════════════════════════════════════════════════════ */
-
-import { esc, fmtCurrency, debounce } from '../../core/utils.js';
-import { insert, get, update } from '../../core/api.js';
-import { showToast } from '../../ui/toast.js';
-import { navigateTo } from '../../core/router.js';
-import { confirmDialog } from '../../ui/modals.js';
-import { buttonLoader } from '../../ui/loaders.js';
-import { state } from '../../core/state.js';
 
 /* ─── Constants ───────────────────────────────────────────────────── */
 
@@ -105,7 +99,7 @@ const STEP_LABELS = [
 
 /* ─── Main Render ──────────────────────────────────────────────────── */
 
-export function renderEnrollStudent(container) {
+function renderEnrollStudent(container) {
     if (!container) return;
     enrollState.step = 1;
     enrollState.data = {
@@ -827,7 +821,7 @@ function renderStep4(panel, container) {
 
     panel.querySelector('#enroll-step4-confirm').addEventListener('click', async () => {
         const btn = panel.querySelector('#enroll-step4-confirm');
-        const loader = buttonLoader(btn, 'Enrolling...');
+        window.Loaders.button.start(btn, 'Enrolling...');
 
         try {
             // 1. Create student record
@@ -950,15 +944,16 @@ function renderStep4(panel, container) {
             console.error('[EnrollStudent] Error:', error);
             showToast('Enrollment failed', 'error', error.message || 'Please try again.');
         } finally {
-            loader.stop();
+            window.Loaders.button.stop(btn);
         }
     });
 }
 
 /* ─── Export ───────────────────────────────────────────────────────── */
 
-export function render(container) {
+function render(container) {
     renderEnrollStudent(container);
 }
 
-export default { render };
+window.renderEnrollStudent = renderEnrollStudent;
+window.EnrollStudent = { render };

@@ -614,31 +614,3 @@ window.currentRole = currentRole;
 window.currentUserId = currentUserId;
 window.isClassTeacher = isClassTeacher;
 
-/* ═══════════════════════════════════════════════════════════════════
-   EXPORTS (for ES module usage)
-   ═══════════════════════════════════════════════════════════════════ */
-
-export {
-  ADMIN_BLOCKED_MODULES,
-  TEACHER_BLOCKED_MODULES,
-  ACCOUNTANT_BLOCKED_MODULES,
-  CLASS_TEACHER_EXTRA_ACCESS,
-  ROLE_PERMISSIONS,
-  PERMISSIONS,
-  canAccess,
-  can,
-  canEdit,
-  canDelete,
-  canCreate,
-  canRead,
-  canAccessDashboard,
-  canPerformAction,
-  getAccessibleModules,
-  getDashboardModules,
-  isAdmin,
-  isTeacher,
-  isAccountant,
-  currentRole,
-  currentUserId,
-  isClassTeacher
-};

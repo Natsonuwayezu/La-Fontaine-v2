@@ -614,5 +614,3 @@ const Dropdown = (() => {
 
 // ─── EXPOSE TO WINDOW ───────────────────────────────────────────────
 window.Dropdown = Dropdown;
-
-export default Dropdown;

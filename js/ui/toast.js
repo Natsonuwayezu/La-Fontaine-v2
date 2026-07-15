@@ -118,7 +118,7 @@ function esc(str) {
  * @param {boolean} options.silent - If true, don't show toast (for internal use)
  * @returns {string} The toast element ID (for manual dismissal)
  */
-export function showToast(message, type = 'info', options = {}) {
+function showToast(message, type = 'info', options = {}) {
     const {
         title = null,
         duration = 4000,
@@ -215,14 +215,14 @@ function dismissToast(id) {
  * Dismiss a toast by ID (exposed globally for onclick handlers)
  * @param {string} id - The toast element ID
  */
-export function dismissToastById(id) {
+function dismissToastById(id) {
     dismissToast(id);
 }
 
 /**
  * Clear all active toasts
  */
-export function clearAllToasts() {
+function clearAllToasts() {
     const container = getToastContainer();
     const toasts = container.querySelectorAll('.toast:not(.hiding)');
 
@@ -269,7 +269,7 @@ function updateCounter() {
  * @param {string} message - The message
  * @param {object} options - Toast options
  */
-export function toastSuccess(message, options = {}) {
+function toastSuccess(message, options = {}) {
     return showToast(message, 'success', options);
 }
 
@@ -278,7 +278,7 @@ export function toastSuccess(message, options = {}) {
  * @param {string} message - The message
  * @param {object} options - Toast options
  */
-export function toastError(message, options = {}) {
+function toastError(message, options = {}) {
     return showToast(message, 'error', options);
 }
 
@@ -287,7 +287,7 @@ export function toastError(message, options = {}) {
  * @param {string} message - The message
  * @param {object} options - Toast options
  */
-export function toastWarning(message, options = {}) {
+function toastWarning(message, options = {}) {
     return showToast(message, 'warning', options);
 }
 
@@ -296,7 +296,7 @@ export function toastWarning(message, options = {}) {
  * @param {string} message - The message
  * @param {object} options - Toast options
  */
-export function toastInfo(message, options = {}) {
+function toastInfo(message, options = {}) {
     return showToast(message, 'info', options);
 }
 
@@ -305,7 +305,7 @@ export function toastInfo(message, options = {}) {
  * @param {string} message - The message
  * @param {object} options - Toast options
  */
-export function toastReminder(message, options = {}) {
+function toastReminder(message, options = {}) {
     return showToast(message, 'reminder', options);
 }
 
@@ -314,7 +314,7 @@ export function toastReminder(message, options = {}) {
  * @param {string} message - The message
  * @param {object} options - Toast options
  */
-export function toastNotification(message, options = {}) {
+function toastNotification(message, options = {}) {
     return showToast(message, 'notification', options);
 }
 
@@ -325,20 +325,3 @@ export function toastNotification(message, options = {}) {
 window.showToast = showToast;
 window._dismissToast = dismissToastById;
 window.clearAllToasts = clearAllToasts;
-
-
-/* ═══════════════════════════════════════════════════════════════════
-   EXPORTS
-   ═══════════════════════════════════════════════════════════════════ */
-
-export default {
-    showToast,
-    dismissToastById,
-    clearAllToasts,
-    toastSuccess,
-    toastError,
-    toastWarning,
-    toastInfo,
-    toastReminder,
-    toastNotification
-};

@@ -150,42 +150,11 @@ window.SUPABASE_KEY = getSupabaseKey();
 window.SUPABASE_DEFAULT_URL = DEFAULT_SUPABASE_URL;
 window.SUPABASE_DEFAULT_KEY = DEFAULT_SUPABASE_KEY;
 window.supabaseClient = supabaseClient;
-
-/* ═══════════════════════════════════════════════════════════════════
-   EXPORTS
-   ═══════════════════════════════════════════════════════════════════ */
-
-export {
-  // Client
-  supabaseClient,
-  getSupabaseClient,
-  initSupabase,
-  isSupabaseConfigured,
-
-  // Credentials
-  DEFAULT_SUPABASE_URL,
-  DEFAULT_SUPABASE_KEY,
-  getSupabaseUrl,
-  getSupabaseKey,
-  getSupabaseCredentials,
-  setSupabaseCredentials,
-  resetSupabaseCredentials,
-
-  // Window exports (for convenience)
-  window as __window
-};
-
-// Also export a default object for convenience
-export default {
-  client: supabaseClient,
-  getClient: getSupabaseClient,
-  init: initSupabase,
-  isConfigured: isSupabaseConfigured,
-  getUrl: getSupabaseUrl,
-  getKey: getSupabaseKey,
-  getCredentials: getSupabaseCredentials,
-  setCredentials: setSupabaseCredentials,
-  resetCredentials: resetSupabaseCredentials,
-  defaultUrl: DEFAULT_SUPABASE_URL,
-  defaultKey: DEFAULT_SUPABASE_KEY
-};
+window.getSupabaseClient = getSupabaseClient;
+window.initSupabase = initSupabase;
+window.isSupabaseConfigured = isSupabaseConfigured;
+window.getSupabaseUrl = getSupabaseUrl;
+window.getSupabaseKey = getSupabaseKey;
+window.getSupabaseCredentials = getSupabaseCredentials;
+window.setSupabaseCredentials = setSupabaseCredentials;
+window.resetSupabaseCredentials = resetSupabaseCredentials;

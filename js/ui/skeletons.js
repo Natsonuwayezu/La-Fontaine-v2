@@ -308,5 +308,3 @@ const Skeletons = (() => {
 
 // ─── EXPOSE TO WINDOW ───────────────────────────────────────────────
 window.Skeletons = Skeletons;
-
-export default Skeletons;

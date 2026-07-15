@@ -391,4 +391,13 @@ const Loaders = (() => {
 // Note: Final window exposure happens in core/window-exposure.js.
 // This is just a convenience for immediate use.
 
-export default Loaders;
+/* ═══════════════════════════════════════════════════════════════════
+   EXPOSE TO WINDOW
+   ═══════════════════════════════════════════════════════════════════
+   NOTE: core/window-exposure.js (referenced in this file's header
+   comment as the intended place for this) is currently an empty file,
+   so this exposes itself directly for now. Safe to leave here even
+   after window-exposure.js is written — re-assignment is harmless.
+   ═══════════════════════════════════════════════════════════════════ */
+
+window.Loaders = Loaders;

@@ -447,5 +447,3 @@ const Pagination = (() => {
 
 // ─── EXPOSE TO WINDOW ───────────────────────────────────────────────
 window.Pagination = Pagination;
-
-export default Pagination;

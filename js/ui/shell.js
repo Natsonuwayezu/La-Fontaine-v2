@@ -180,5 +180,3 @@ const Shell = (() => {
 
 // ─── EXPOSE TO WINDOW ───────────────────────────────────────────────
 window.Shell = Shell;
-
-export default Shell;

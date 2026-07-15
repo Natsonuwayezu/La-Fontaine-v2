@@ -13,8 +13,10 @@
    Last updated: 2026-07-14
    ═══════════════════════════════════════════════════════════════════ */
 
-import { state } from '../core/state.js';
-import { showToast } from './toast.js';
+// state (core/state.js) and showToast (ui/toast.js) are plain-script globals,
+// both loaded earlier in index.html — no import needed.
+// NOTE: this file is not currently wired into index.html — see project notes;
+// js/core/pwa.js already handles service-worker registration and is loaded instead.
 
 /* ═══════════════════════════════════════════════════════════════════
    PWA — Service Worker & Installation
@@ -25,7 +27,7 @@ let deferredPrompt = null;
 /**
  * Initialize PWA support
  */
-export function initPWA() {
+function initPWA() {
     // Service worker registration
     registerServiceWorker();
 
@@ -168,7 +170,7 @@ async function cacheOfflinePage() {
  * Check if the app is running in standalone (installed PWA) mode
  * @returns {boolean} True if running as a standalone PWA
  */
-export function isStandalone() {
+function isStandalone() {
     return window.matchMedia('(display-mode: standalone)').matches ||
         window.navigator.standalone === true;
 }
@@ -176,7 +178,7 @@ export function isStandalone() {
 /**
  * Trigger the PWA install prompt
  */
-export async function installPWA() {
+async function installPWA() {
     if (!deferredPrompt) {
         showToast('App is already installed or cannot be installed in this browser.', 'info');
         return;
@@ -201,7 +203,7 @@ export async function installPWA() {
 /**
  * Initialize the back-to-top button
  */
-export function initBackToTop() {
+function initBackToTop() {
     const btn = document.getElementById('back-to-top');
     if (!btn) return;
 
@@ -221,10 +223,6 @@ export function initBackToTop() {
    ═══════════════════════════════════════════════════════════════════ */
 
 window.installPWA = installPWA;
-
-export default {
-    initPWA,
-    installPWA,
-    isStandalone,
-    initBackToTop
-};
+window.initPWA = initPWA;
+window.isStandalone = isStandalone;
+window.initBackToTop = initBackToTop;

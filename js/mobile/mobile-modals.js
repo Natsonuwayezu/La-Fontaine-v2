@@ -225,5 +225,3 @@ const MobileModals = (() => {
 // ─── EXPOSE TO WINDOW ────────────────────────────────────────────────
 
 window.MobileModals = MobileModals;
-
-export default MobileModals;

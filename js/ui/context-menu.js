@@ -510,5 +510,3 @@ const ContextMenu = (() => {
 
 // ─── EXPOSE TO WINDOW ───────────────────────────────────────────────
 window.ContextMenu = ContextMenu;
-
-export default ContextMenu;

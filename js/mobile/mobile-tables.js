@@ -245,6 +245,3 @@ const MobileTables = (() => {
 // ─── EXPOSE TO WINDOW ────────────────────────────────────────────────
 
 window.MobileTables = MobileTables;
-
-export default MobileTables;
-export const { applyStackedState, annotate, refreshAll, shouldStack, init } = MobileTables;

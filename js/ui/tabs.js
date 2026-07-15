@@ -435,5 +435,3 @@ const Tabs = (() => {
 
 // ─── EXPOSE TO WINDOW ───────────────────────────────────────────────
 window.Tabs = Tabs;
-
-export default Tabs;

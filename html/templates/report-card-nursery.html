@@ -1,0 +1,717 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+   REPORT CARD — NURSERY (French)
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: Nursery report card template (French).
+   Used by report-cards.js for pre-midterm, post-midterm, and annual.
+   No emojis — Font Awesome icons only.
+   ═══════════════════════════════════════════════════════════════════ -->
+
+<div class="report-card nursery-report" id="reportCardContainer">
+    <!-- Header -->
+    <div class="report-header">
+        <div class="report-logo" id="reportLogo">
+            <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div class="report-header-text">
+            <h2 class="report-school-name" id="reportSchoolName">ECOLE LA FONTAINE</h2>
+            <p class="report-school-address" id="reportSchoolAddress">Rubavu, Rwanda</p>
+            <h3 class="report-title" id="reportTitle">RÉSULTATS DE FIN DE TRIMESTRE</h3>
+            <p class="report-subtitle" id="reportSubtitle">Troisième Trimestre · 2025-2026</p>
+        </div>
+    </div>
+
+    <!-- Student Info -->
+    <div class="report-info-grid">
+        <div class="report-info-item">
+            <span class="report-info-label">
+                <i class="fa-regular fa-user"></i> Élève
+            </span>
+            <span class="report-info-value" id="reportStudentName">—</span>
+        </div>
+        <div class="report-info-item">
+            <span class="report-info-label">
+                <i class="fa-regular fa-id-card"></i> Code
+            </span>
+            <span class="report-info-value" id="reportStudentCode">—</span>
+        </div>
+        <div class="report-info-item">
+            <span class="report-info-label">
+                <i class="fa-regular fa-building"></i> Classe
+            </span>
+            <span class="report-info-value" id="reportClassName">—</span>
+        </div>
+        <div class="report-info-item">
+            <span class="report-info-label">
+                <i class="fa-regular fa-calendar"></i> Date
+            </span>
+            <span class="report-info-value" id="reportDate">—</span>
+        </div>
+        <div class="report-info-item">
+            <span class="report-info-label">
+                <i class="fa-regular fa-flag"></i> Genre
+            </span>
+            <span class="report-info-value" id="reportGender">—</span>
+        </div>
+        <div class="report-info-item">
+            <span class="report-info-label">
+                <i class="fa-regular fa-calendar-plus"></i> Année
+            </span>
+            <span class="report-info-value" id="reportAcademicYear">—</span>
+        </div>
+    </div>
+
+    <!-- Subjects Table -->
+    <div class="report-table-wrapper">
+        <table class="report-subjects-table">
+            <thead>
+                <tr>
+                    <th class="report-subject-col">MATIÈRES</th>
+                    <th class="report-score-col">NOTE</th>
+                    <th class="report-grade-col">COTE</th>
+                </tr>
+            </thead>
+            <tbody id="reportSubjectRows">
+                <tr>
+                    <td colspan="3" class="report-empty-row">Aucune note disponible</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Summary -->
+    <div class="report-summary-grid">
+        <div class="report-summary-item">
+            <span class="report-summary-label">
+                <i class="fa-regular fa-star"></i> TOTAL DES POINTS
+            </span>
+            <span class="report-summary-value" id="reportTotalScore">—</span>
+        </div>
+        <div class="report-summary-item">
+            <span class="report-summary-label">
+                <i class="fa-regular fa-chart-bar"></i> MOYENNE
+            </span>
+            <span class="report-summary-value" id="reportAverage">—</span>
+        </div>
+        <div class="report-summary-item">
+            <span class="report-summary-label">
+                <i class="fa-regular fa-award"></i> COTE
+            </span>
+            <span class="report-summary-value" id="reportGrade">—</span>
+        </div>
+        <div class="report-summary-item">
+            <span class="report-summary-label">
+                <i class="fa-regular fa-ranking-star"></i> RANG
+            </span>
+            <span class="report-summary-value" id="reportRank">—</span>
+        </div>
+    </div>
+
+    <!-- Decision Banner -->
+    <div class="report-decision" id="reportDecision">
+        <div class="report-decision-content">
+            <i class="fa-regular fa-circle-check" id="reportDecisionIcon"></i>
+            <span id="reportDecisionText">—</span>
+        </div>
+    </div>
+
+    <!-- QR Code -->
+    <div class="report-qr-section">
+        <div class="report-qr-container" id="reportQRContainer">
+            <div class="report-qr-placeholder">
+                <i class="fa-solid fa-qrcode"></i>
+            </div>
+        </div>
+        <div class="report-qr-text">
+            <span class="report-qr-label">
+                <i class="fa-regular fa-shield-check"></i> Vérifier
+            </span>
+            <span class="report-qr-code" id="reportQRCode">—</span>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="report-footer">
+        <div class="report-footer-line" id="reportFooterLine1">
+            Fait à ECOLE LA FONTAINE, Le <span id="reportFooterDate">—</span>
+        </div>
+        <div class="report-footer-line" id="reportFooterLine2">
+            UWAYO GANZA Eugene · Direction
+        </div>
+        <div class="report-footer-signatures">
+            <div class="report-signature">
+                <span class="report-signature-label">
+                    <i class="fa-regular fa-pen-to-square"></i> Signature de l'enseignant(e)
+                </span>
+                <div class="report-signature-line"></div>
+            </div>
+            <div class="report-signature">
+                <span class="report-signature-label">
+                    <i class="fa-regular fa-stamp"></i> Cachet de l'école
+                </span>
+                <div class="report-signature-line"></div>
+            </div>
+            <div class="report-signature">
+                <span class="report-signature-label">
+                    <i class="fa-regular fa-pen-to-square"></i> Signature du directeur
+                </span>
+                <div class="report-signature-line"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    /* ─── Report Card Container ───────────────────────────────────────── */
+    .report-card {
+        max-width: 780px;
+        margin: 0 auto;
+        background: var(--bg-card, #fcfaf8);
+        border-radius: var(--r-lg, 14px);
+        overflow: hidden;
+        border: 1px solid var(--border-light, #e8e0d8);
+        box-shadow: var(--shadow-card, 0 2px 20px rgba(26, 20, 16, 0.06));
+        font-family: 'DM Sans', 'Plus Jakarta Sans', sans-serif;
+    }
+
+    /* ─── Header ───────────────────────────────────────────────────────── */
+    .report-header {
+        background: var(--role-gradient, linear-gradient(135deg, #2d1f3a, #4d2f4a));
+        color: var(--text-inverse, #f5f0eb);
+        padding: 24px 28px;
+        display: flex;
+        gap: 18px;
+        align-items: center;
+    }
+
+    .report-logo {
+        width: 64px;
+        height: 64px;
+        border-radius: var(--r-md, 10px);
+        background: rgba(255, 255, 255, 0.10);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+
+    .report-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: var(--r-md, 10px);
+    }
+
+    .report-header-text {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .report-school-name {
+        font-family: 'Syne', 'Playfair Display', serif;
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0 0 2px;
+        color: var(--text-inverse, #f5f0eb);
+    }
+
+    .report-school-address {
+        font-size: 12px;
+        opacity: 0.75;
+        margin: 0;
+        color: var(--text-inverse, #f5f0eb);
+    }
+
+    .report-title {
+        font-family: 'Syne', 'Playfair Display', serif;
+        font-size: 16px;
+        font-weight: 700;
+        margin: 8px 0 2px;
+        letter-spacing: 0.5px;
+        color: var(--text-inverse, #f5f0eb);
+    }
+
+    .report-subtitle {
+        font-size: 12px;
+        opacity: 0.75;
+        margin: 0;
+        color: var(--text-inverse, #f5f0eb);
+    }
+
+    /* ─── Info Grid ────────────────────────────────────────────────────── */
+    .report-info-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        border-bottom: 1px solid var(--border-light, #e8e0d8);
+    }
+
+    .report-info-item {
+        padding: 10px 18px;
+        border-right: 1px solid var(--border-light, #e8e0d8);
+        border-bottom: 1px solid var(--border-light, #e8e0d8);
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .report-info-item:nth-child(3n) {
+        border-right: none;
+    }
+
+    .report-info-label {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted, #a8988e);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .report-info-label i {
+        font-size: 11px;
+        opacity: 0.6;
+    }
+
+    .report-info-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-dark, #1a1410);
+    }
+
+    /* ─── Subjects Table ───────────────────────────────────────────────── */
+    .report-table-wrapper {
+        padding: 0;
+        overflow-x: auto;
+    }
+
+    .report-subjects-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    .report-subjects-table thead {
+        background: var(--bg-tertiary, #f0ebe6);
+    }
+
+    .report-subjects-table th {
+        padding: 10px 14px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-secondary, #6b5f56);
+        text-align: center;
+        border-bottom: 2px solid var(--border-light, #e8e0d8);
+    }
+
+    .report-subject-col {
+        text-align: left !important;
+    }
+
+    .report-score-col,
+    .report-grade-col {
+        text-align: center !important;
+    }
+
+    .report-subjects-table td {
+        padding: 8px 14px;
+        border-bottom: 1px solid var(--border-light, #e8e0d8);
+        text-align: center;
+        color: var(--text-body, #2c241e);
+    }
+
+    .report-subjects-table td:first-child {
+        text-align: left;
+        font-weight: 600;
+    }
+
+    .report-subjects-table tbody tr:hover {
+        background: var(--bg-hover, #f5f0eb);
+    }
+
+    .report-subjects-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .report-empty-row {
+        text-align: center !important;
+        padding: 24px 0 !important;
+        color: var(--text-muted, #a8988e) !important;
+        font-weight: 400 !important;
+    }
+
+    /* ─── Grade Badge ──────────────────────────────────────────────────── */
+    .report-grade-badge {
+        display: inline-block;
+        padding: 2px 12px;
+        border-radius: var(--r-full, 9999px);
+        font-size: 12px;
+        font-weight: 700;
+        min-width: 32px;
+    }
+
+    .report-grade-badge.Aplus { background: var(--grade-aplus, #3a7a5a); color: var(--text-inverse, #f5f0eb); }
+    .report-grade-badge.A { background: var(--grade-a, #5a9a7a); color: var(--text-inverse, #f5f0eb); }
+    .report-grade-badge.B { background: var(--grade-b, #6a8aba); color: var(--text-inverse, #f5f0eb); }
+    .report-grade-badge.C { background: var(--grade-c, #c9a84c); color: var(--text-inverse, #f5f0eb); }
+    .report-grade-badge.D { background: var(--grade-d, #c48a3a); color: var(--text-inverse, #f5f0eb); }
+    .report-grade-badge.F { background: var(--grade-f, #c45a4a); color: var(--text-inverse, #f5f0eb); }
+
+    /* ─── Summary Grid ─────────────────────────────────────────────────── */
+    .report-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0;
+        background: var(--role-gradient, linear-gradient(135deg, #2d1f3a, #4d2f4a));
+        color: var(--text-inverse, #f5f0eb);
+        padding: 14px 20px;
+        text-align: center;
+    }
+
+    .report-summary-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding: 0 8px;
+        border-right: 1px solid rgba(255, 255, 255, 0.10);
+    }
+
+    .report-summary-item:last-child {
+        border-right: none;
+    }
+
+    .report-summary-label {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .report-summary-label i {
+        font-size: 11px;
+    }
+
+    .report-summary-value {
+        font-size: 18px;
+        font-weight: 700;
+        font-family: 'Syne', 'Playfair Display', serif;
+    }
+
+    /* ─── Decision Banner ─────────────────────────────────────────────── */
+    .report-decision {
+        padding: 12px 20px;
+        border-bottom: 1px solid var(--border-light, #e8e0d8);
+    }
+
+    .report-decision-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 10px 16px;
+        border-radius: var(--r-md, 10px);
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .report-decision.pass .report-decision-content {
+        background: var(--success-bg, #dce8e0);
+        color: #065f46;
+    }
+
+    .report-decision.remedial .report-decision-content {
+        background: var(--warning-bg, #f0e8d0);
+        color: #92400e;
+    }
+
+    .report-decision.fail .report-decision-content {
+        background: var(--danger-bg, #f0e0dc);
+        color: #991b1b;
+    }
+
+    .report-decision-content i {
+        font-size: 18px;
+    }
+
+    /* ─── QR Section ───────────────────────────────────────────────────── */
+    .report-qr-section {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 14px;
+        padding: 12px 20px;
+        background: var(--bg-tertiary, #f0ebe6);
+        border-bottom: 1px solid var(--border-light, #e8e0d8);
+    }
+
+    .report-qr-container {
+        width: 64px;
+        height: 64px;
+        flex-shrink: 0;
+        background: var(--bg-card, #fcfaf8);
+        border: 1px solid var(--border-light, #e8e0d8);
+        border-radius: var(--r-sm, 6px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .report-qr-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .report-qr-placeholder {
+        font-size: 32px;
+        color: var(--text-muted, #a8988e);
+        opacity: 0.3;
+    }
+
+    .report-qr-text {
+        display: flex;
+        flex-direction: column;
+        font-size: 11px;
+        color: var(--text-soft, #6b5f56);
+        text-align: right;
+    }
+
+    .report-qr-label {
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        justify-content: flex-end;
+    }
+
+    .report-qr-label i {
+        font-size: 13px;
+        color: var(--success, #3a7a5a);
+    }
+
+    .report-qr-code {
+        font-family: monospace;
+        font-size: 10px;
+        color: var(--text-muted, #a8988e);
+        word-break: break-all;
+    }
+
+    /* ─── Footer ───────────────────────────────────────────────────────── */
+    .report-footer {
+        padding: 14px 20px;
+        text-align: center;
+        font-size: 12px;
+        color: var(--text-soft, #6b5f56);
+        background: var(--bg-tertiary, #f0ebe6);
+    }
+
+    .report-footer-line {
+        margin-bottom: 4px;
+    }
+
+    .report-footer-line:last-child {
+        margin-bottom: 0;
+    }
+
+    .report-footer-signatures {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 1px solid var(--border-light, #e8e0d8);
+    }
+
+    .report-signature {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .report-signature-label {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        color: var(--text-muted, #a8988e);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .report-signature-label i {
+        font-size: 11px;
+    }
+
+    .report-signature-line {
+        width: 100%;
+        max-width: 140px;
+        height: 1px;
+        border-bottom: 1px solid var(--text-muted, #a8988e);
+        margin-top: 4px;
+    }
+
+    /* ─── Responsive ───────────────────────────────────────────────────── */
+    @media (max-width: 640px) {
+        .report-header {
+            padding: 18px 16px;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .report-logo {
+            width: 48px;
+            height: 48px;
+            font-size: 22px;
+        }
+
+        .report-school-name {
+            font-size: 15px;
+        }
+
+        .report-title {
+            font-size: 13px;
+        }
+
+        .report-info-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .report-info-item {
+            padding: 8px 12px;
+        }
+
+        .report-info-item:nth-child(3n) {
+            border-right: 1px solid var(--border-light, #e8e0d8);
+        }
+
+        .report-info-item:nth-child(2n) {
+            border-right: none;
+        }
+
+        .report-info-value {
+            font-size: 12px;
+        }
+
+        .report-summary-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            padding: 12px 16px;
+        }
+
+        .report-summary-item {
+            border-right: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 6px;
+        }
+
+        .report-summary-item:nth-child(3),
+        .report-summary-item:nth-child(4) {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .report-summary-value {
+            font-size: 15px;
+        }
+
+        .report-subjects-table {
+            font-size: 11px;
+        }
+
+        .report-subjects-table th,
+        .report-subjects-table td {
+            padding: 6px 10px;
+        }
+
+        .report-footer-signatures {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .report-signature-line {
+            max-width: 100px;
+        }
+
+        .report-qr-section {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .report-qr-text {
+            text-align: center;
+        }
+
+        .report-qr-label {
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .report-info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .report-info-item {
+            border-right: none !important;
+        }
+
+        .report-summary-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .report-decision-content {
+            font-size: 12px;
+            padding: 8px 12px;
+        }
+    }
+
+    /* ─── Print ────────────────────────────────────────────────────────── */
+    @media print {
+        .report-card {
+            box-shadow: none;
+            border: 1px solid #d4c8be;
+            margin: 0;
+            page-break-after: avoid;
+            border-radius: 0;
+        }
+
+        .report-header {
+            background: #2d1f3a !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .report-summary-grid {
+            background: #2d1f3a !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .report-decision.pass .report-decision-content {
+            background: #dce8e0 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .report-grade-badge.Aplus { background: #3a7a5a !important; color: white !important; }
+        .report-grade-badge.A { background: #5a9a7a !important; color: white !important; }
+        .report-grade-badge.B { background: #6a8aba !important; color: white !important; }
+        .report-grade-badge.C { background: #c9a84c !important; color: white !important; }
+        .report-grade-badge.D { background: #c48a3a !important; color: white !important; }
+        .report-grade-badge.F { background: #c45a4a !important; color: white !important; }
+    }
+</style>

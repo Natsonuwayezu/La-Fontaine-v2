@@ -1,0 +1,559 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+   RECEIPT THERMAL — 80mm Thermal Receipt
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: 80mm thermal printer receipt format.
+   Uses Font Awesome icons only — no emojis.
+   Optimized for 80mm paper width (≈ 72mm printable area).
+   No pure white, no pure black.
+   ═══════════════════════════════════════════════════════════════════ -->
+
+<div class="receipt-thermal" id="receiptThermal">
+
+    <!-- School header -->
+    <div class="receipt-thermal-header">
+        <div class="receipt-thermal-brand">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span class="receipt-thermal-school">ECOLE LA FONTAINE</span>
+        </div>
+        <div class="receipt-thermal-address">Rubavu, Rwanda</div>
+        <div class="receipt-thermal-contact">
+            <i class="fa-solid fa-phone"></i> +250 788 534 320
+            <span class="receipt-thermal-separator">·</span>
+            <i class="fa-solid fa-envelope"></i> info@ecolelafontaine.rw
+        </div>
+        <div class="receipt-thermal-divider"></div>
+        <div class="receipt-thermal-title">PAYMENT RECEIPT</div>
+        <div class="receipt-thermal-receipt"># <span id="thermalReceiptNumber">RCP-2026-0001</span></div>
+    </div>
+
+    <!-- Receipt meta -->
+    <div class="receipt-thermal-meta">
+        <div class="receipt-thermal-row">
+            <span class="receipt-thermal-label">Date</span>
+            <span class="receipt-thermal-value" id="thermalDate">26 Jun 2026</span>
+        </div>
+        <div class="receipt-thermal-row">
+            <span class="receipt-thermal-label">Time</span>
+            <span class="receipt-thermal-value" id="thermalTime">14:30</span>
+        </div>
+        <div class="receipt-thermal-row">
+            <span class="receipt-thermal-label">Term</span>
+            <span class="receipt-thermal-value" id="thermalTerm">Term 3 · 2025-2026</span>
+        </div>
+        <div class="receipt-thermal-row">
+            <span class="receipt-thermal-label">Method</span>
+            <span class="receipt-thermal-value" id="thermalMethod">Cash</span>
+        </div>
+        <div class="receipt-thermal-row">
+            <span class="receipt-thermal-label">Reference</span>
+            <span class="receipt-thermal-value" id="thermalReference">TRX-2026-001</span>
+        </div>
+    </div>
+
+    <div class="receipt-thermal-divider"></div>
+
+    <!-- Student info -->
+    <div class="receipt-thermal-student">
+        <div class="receipt-thermal-row">
+            <span class="receipt-thermal-label">Student</span>
+            <span class="receipt-thermal-value" id="thermalStudent">GANZA KING</span>
+        </div>
+        <div class="receipt-thermal-row">
+            <span class="receipt-thermal-label">Code</span>
+            <span class="receipt-thermal-value" id="thermalStudentCode">STU-001</span>
+        </div>
+        <div class="receipt-thermal-row">
+            <span class="receipt-thermal-label">Class</span>
+            <span class="receipt-thermal-value" id="thermalClass">Primary 4A</span>
+        </div>
+        <div class="receipt-thermal-row">
+            <span class="receipt-thermal-label">Guardian</span>
+            <span class="receipt-thermal-value" id="thermalGuardian">HABIMANA Grace</span>
+        </div>
+    </div>
+
+    <div class="receipt-thermal-divider"></div>
+
+    <!-- Fee breakdown -->
+    <div class="receipt-thermal-fees">
+        <div class="receipt-thermal-fee-header">
+            <span class="receipt-thermal-fee-name">Fee Category</span>
+            <span class="receipt-thermal-fee-amount">Amount</span>
+            <span class="receipt-thermal-fee-status">Status</span>
+        </div>
+        <div class="receipt-thermal-fee-row" id="thermalFeeRows">
+            <span class="receipt-thermal-fee-name">School Fees</span>
+            <span class="receipt-thermal-fee-amount">50,000 RWF</span>
+            <span class="receipt-thermal-fee-status">Paid</span>
+        </div>
+        <div class="receipt-thermal-fee-row">
+            <span class="receipt-thermal-fee-name">Transport</span>
+            <span class="receipt-thermal-fee-amount">30,000 RWF</span>
+            <span class="receipt-thermal-fee-status">Paid</span>
+        </div>
+        <div class="receipt-thermal-fee-row">
+            <span class="receipt-thermal-fee-name">Activity Fee</span>
+            <span class="receipt-thermal-fee-amount">15,000 RWF</span>
+            <span class="receipt-thermal-fee-status">Paid</span>
+        </div>
+        <div class="receipt-thermal-fee-row">
+            <span class="receipt-thermal-fee-name">Library Fee</span>
+            <span class="receipt-thermal-fee-amount">10,000 RWF</span>
+            <span class="receipt-thermal-fee-status">Pending</span>
+        </div>
+    </div>
+
+    <div class="receipt-thermal-divider"></div>
+
+    <!-- Totals -->
+    <div class="receipt-thermal-totals">
+        <div class="receipt-thermal-row">
+            <span class="receipt-thermal-label">Total Fees</span>
+            <span class="receipt-thermal-value" id="thermalTotalFees">105,000 RWF</span>
+        </div>
+        <div class="receipt-thermal-row receipt-thermal-total-paid">
+            <span class="receipt-thermal-label">Amount Paid</span>
+            <span class="receipt-thermal-value" id="thermalAmountPaid">95,000 RWF</span>
+        </div>
+        <div class="receipt-thermal-row receipt-thermal-total-balance">
+            <span class="receipt-thermal-label">Balance</span>
+            <span class="receipt-thermal-value" id="thermalBalance">10,000 RWF</span>
+        </div>
+    </div>
+
+    <div class="receipt-thermal-divider"></div>
+
+    <!-- Amount in words -->
+    <div class="receipt-thermal-words">
+        <span class="receipt-thermal-words-label">Amount in words:</span>
+        <span class="receipt-thermal-words-value" id="thermalAmountWords">Ninety Five Thousand Rwandan Francs
+            Only</span>
+    </div>
+
+    <div class="receipt-thermal-divider"></div>
+
+    <!-- Footer -->
+    <div class="receipt-thermal-footer">
+        <div class="receipt-thermal-signature">
+            <div class="receipt-thermal-signature-line">
+                <span>Received by:</span>
+                <span class="receipt-thermal-signature-name" id="thermalReceivedBy">UWAYO GANZA Eugene</span>
+            </div>
+            <div class="receipt-thermal-signature-line">
+                <span>Approved by:</span>
+                <span class="receipt-thermal-signature-name">UWAYO GANZA Eugene</span>
+            </div>
+        </div>
+        <div class="receipt-thermal-divider"></div>
+        <div class="receipt-thermal-thanks">Thank you for your payment</div>
+        <div class="receipt-thermal-verify">
+            <i class="fa-solid fa-qrcode"></i>
+            Scan to verify · www.ecolelafontaine.rw/verify
+        </div>
+        <div class="receipt-thermal-generated">
+            Generated: <span id="thermalGenerated">26 Jun 2026 14:30:45</span>
+        </div>
+        <div class="receipt-thermal-divider"></div>
+        <div class="receipt-thermal-watermark">ECOLE LA FONTAINE</div>
+    </div>
+
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
+   THERMAL RECEIPT STYLES (embedded for self-containment)
+   ═══════════════════════════════════════════════════════════════════ -->
+
+<style>
+    /* ─── Container ────────────────────────────────────────────────────── */
+    .receipt-thermal {
+        max-width: 280px;
+        margin: 0 auto;
+        padding: 8px 10px;
+        background: #fcfaf8;
+        font-family: 'Courier New', 'DM Sans', monospace;
+        font-size: 10px;
+        line-height: 1.4;
+        color: #2c241e;
+        border: 1px solid #e8e0d8;
+        border-radius: 4px;
+        box-shadow: 0 2px 12px rgba(26, 20, 16, 0.06);
+    }
+
+    /* ─── Header ───────────────────────────────────────────────────────── */
+    .receipt-thermal-header {
+        text-align: center;
+        padding-bottom: 6px;
+    }
+
+    .receipt-thermal-brand {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #1a1410;
+        font-family: 'Syne', 'Playfair Display', serif;
+        letter-spacing: 0.5px;
+    }
+
+    .receipt-thermal-brand i {
+        font-size: 16px;
+        color: var(--role-primary, #2d1f3a);
+    }
+
+    .receipt-thermal-school {
+        letter-spacing: 1px;
+    }
+
+    .receipt-thermal-address {
+        font-size: 8px;
+        color: #6b5f56;
+        margin-top: 1px;
+    }
+
+    .receipt-thermal-contact {
+        font-size: 7px;
+        color: #6b5f56;
+        margin-top: 2px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        flex-wrap: wrap;
+    }
+
+    .receipt-thermal-contact i {
+        font-size: 7px;
+        color: #6b5f56;
+    }
+
+    .receipt-thermal-separator {
+        color: #a8988e;
+    }
+
+    .receipt-thermal-title {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: #1a1410;
+        margin-top: 4px;
+        text-transform: uppercase;
+    }
+
+    .receipt-thermal-receipt {
+        font-size: 9px;
+        color: #6b5f56;
+        margin-top: 2px;
+        font-weight: 600;
+    }
+
+    /* ─── Divider ──────────────────────────────────────────────────────── */
+    .receipt-thermal-divider {
+        border: none;
+        border-top: 1px dashed #d4c8be;
+        margin: 6px 0;
+        height: 1px;
+        background: transparent;
+        position: relative;
+    }
+
+    .receipt-thermal-divider::before {
+        content: '• • • • • • • • • • • • • • • • • • • •';
+        position: absolute;
+        top: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #d4c8be;
+        font-size: 6px;
+        letter-spacing: 2px;
+        background: #fcfaf8;
+        padding: 0 4px;
+    }
+
+    /* ─── Meta / Rows ──────────────────────────────────────────────────── */
+    .receipt-thermal-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 2px 0;
+        font-size: 9px;
+    }
+
+    .receipt-thermal-label {
+        color: #6b5f56;
+        font-weight: 500;
+    }
+
+    .receipt-thermal-value {
+        color: #1a1410;
+        font-weight: 600;
+        text-align: right;
+    }
+
+    /* ─── Meta section ────────────────────────────────────────────────── */
+    .receipt-thermal-meta {
+        padding: 2px 0;
+    }
+
+    .receipt-thermal-meta .receipt-thermal-row {
+        font-size: 8.5px;
+        padding: 1px 0;
+    }
+
+    /* ─── Student section ─────────────────────────────────────────────── */
+    .receipt-thermal-student {
+        padding: 2px 0;
+    }
+
+    .receipt-thermal-student .receipt-thermal-row {
+        font-size: 8.5px;
+        padding: 1px 0;
+    }
+
+    .receipt-thermal-student .receipt-thermal-value {
+        font-weight: 600;
+    }
+
+    /* ─── Fees section ────────────────────────────────────────────────── */
+    .receipt-thermal-fees {
+        padding: 2px 0;
+    }
+
+    .receipt-thermal-fee-header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 7.5px;
+        font-weight: 700;
+        color: #6b5f56;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding-bottom: 3px;
+        border-bottom: 1px solid #e8e0d8;
+        margin-bottom: 3px;
+    }
+
+    .receipt-thermal-fee-name {
+        flex: 1;
+        font-size: 8.5px;
+        color: #2c241e;
+    }
+
+    .receipt-thermal-fee-amount {
+        font-size: 8.5px;
+        color: #1a1410;
+        font-weight: 600;
+        text-align: right;
+        padding-right: 8px;
+        min-width: 60px;
+    }
+
+    .receipt-thermal-fee-status {
+        font-size: 7.5px;
+        font-weight: 600;
+        text-align: right;
+        min-width: 40px;
+    }
+
+    .receipt-thermal-fee-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 2px 0;
+        font-size: 8.5px;
+        border-bottom: 1px solid #f0ebe6;
+    }
+
+    .receipt-thermal-fee-row:last-child {
+        border-bottom: none;
+    }
+
+    .receipt-thermal-fee-status {
+        color: var(--success, #3a7a5a);
+    }
+
+    .receipt-thermal-fee-status.pending {
+        color: var(--warning, #b8983a);
+    }
+
+    .receipt-thermal-fee-status.overdue {
+        color: var(--danger, #c45a4a);
+    }
+
+    /* ─── Totals ───────────────────────────────────────────────────────── */
+    .receipt-thermal-totals {
+        padding: 4px 0 2px;
+    }
+
+    .receipt-thermal-totals .receipt-thermal-row {
+        font-size: 9px;
+        padding: 2px 0;
+        border-bottom: 1px solid #f0ebe6;
+    }
+
+    .receipt-thermal-totals .receipt-thermal-row:last-child {
+        border-bottom: none;
+    }
+
+    .receipt-thermal-total-paid .receipt-thermal-value {
+        color: var(--success, #3a7a5a);
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .receipt-thermal-total-balance .receipt-thermal-value {
+        color: var(--danger, #c45a4a);
+        font-weight: 700;
+    }
+
+    /* ─── Amount in words ────────────────────────────────────────────── */
+    .receipt-thermal-words {
+        padding: 4px 0;
+        text-align: center;
+    }
+
+    .receipt-thermal-words-label {
+        font-size: 7px;
+        color: #6b5f56;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: block;
+    }
+
+    .receipt-thermal-words-value {
+        font-size: 8.5px;
+        color: #1a1410;
+        font-weight: 600;
+        display: block;
+        margin-top: 1px;
+        text-transform: capitalize;
+    }
+
+    /* ─── Footer ───────────────────────────────────────────────────────── */
+    .receipt-thermal-footer {
+        text-align: center;
+        padding-top: 4px;
+    }
+
+    .receipt-thermal-signature {
+        font-size: 8px;
+        color: #6b5f56;
+        padding: 4px 0;
+    }
+
+    .receipt-thermal-signature-line {
+        display: flex;
+        justify-content: space-between;
+        padding: 1px 0;
+    }
+
+    .receipt-thermal-signature-name {
+        color: #1a1410;
+        font-weight: 600;
+    }
+
+    .receipt-thermal-thanks {
+        font-size: 9px;
+        font-weight: 700;
+        color: #1a1410;
+        padding: 4px 0;
+        letter-spacing: 0.5px;
+    }
+
+    .receipt-thermal-verify {
+        font-size: 7px;
+        color: #6b5f56;
+        padding: 2px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+    }
+
+    .receipt-thermal-verify i {
+        font-size: 9px;
+        color: #6b5f56;
+    }
+
+    .receipt-thermal-generated {
+        font-size: 6.5px;
+        color: #a8988e;
+        padding: 2px 0;
+    }
+
+    .receipt-thermal-watermark {
+        font-size: 6px;
+        color: #d4c8be;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        padding: 4px 0 2px;
+        opacity: 0.5;
+    }
+
+    /* ─── Status color helpers ───────────────────────────────────────── */
+    .receipt-thermal-status-paid {
+        color: var(--success, #3a7a5a);
+    }
+
+    .receipt-thermal-status-pending {
+        color: var(--warning, #b8983a);
+    }
+
+    .receipt-thermal-status-overdue {
+        color: var(--danger, #c45a4a);
+    }
+
+    /* ─── Print styles ────────────────────────────────────────────────── */
+    @media print {
+        .receipt-thermal {
+            max-width: 100%;
+            margin: 0;
+            padding: 4px 6px;
+            border: none;
+            box-shadow: none;
+            border-radius: 0;
+            background: #fcfaf8;
+        }
+
+        .receipt-thermal-divider::before {
+            background: #fcfaf8;
+        }
+
+        .receipt-thermal-watermark {
+            opacity: 0.3;
+        }
+
+        .receipt-thermal-verify {
+            color: #6b5f56;
+        }
+    }
+
+    /* ─── 80mm thermal specific ───────────────────────────────────────── */
+    @media (max-width: 80mm) {
+        .receipt-thermal {
+            max-width: 100%;
+            padding: 4px 4px;
+            font-size: 9px;
+        }
+
+        .receipt-thermal-brand {
+            font-size: 12px;
+        }
+
+        .receipt-thermal-title {
+            font-size: 10px;
+        }
+
+        .receipt-thermal-total-paid .receipt-thermal-value {
+            font-size: 10px;
+        }
+
+        .receipt-thermal-fee-name {
+            font-size: 7.5px;
+        }
+
+        .receipt-thermal-fee-amount {
+            font-size: 7.5px;
+            min-width: 50px;
+        }
+    }
+</style>

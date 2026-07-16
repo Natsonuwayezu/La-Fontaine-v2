@@ -1,0 +1,770 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+   RECEIPT — STANDARD (A4)
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: Full-page A4 receipt template.
+   Used by receipts.js for official payment receipts.
+   No emojis — Font Awesome icons only.
+   ═══════════════════════════════════════════════════════════════════ -->
+
+<div class="receipt-container standard-receipt" id="receiptContainer">
+    <!-- Header -->
+    <div class="receipt-header">
+        <div class="receipt-logo" id="receiptLogo">
+            <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div class="receipt-header-text">
+            <h1 class="receipt-school-name" id="receiptSchoolName">ECOLE LA FONTAINE</h1>
+            <p class="receipt-school-address" id="receiptSchoolAddress">Rubavu, Rwanda</p>
+            <p class="receipt-school-contact" id="receiptSchoolContact">
+                <i class="fa-solid fa-phone"></i> +250 788 534 320
+                <span class="receipt-contact-divider">·</span>
+                <i class="fa-regular fa-envelope"></i> info@ecolelafontaine.rw
+            </p>
+            <h2 class="receipt-title">OFFICIAL PAYMENT RECEIPT</h2>
+        </div>
+    </div>
+
+    <!-- Receipt Info -->
+    <div class="receipt-info-grid">
+        <div class="receipt-info-item">
+            <span class="receipt-info-label">
+                <i class="fa-regular fa-receipt"></i> Receipt Number
+            </span>
+            <span class="receipt-info-value" id="receiptNumber">—</span>
+        </div>
+        <div class="receipt-info-item">
+            <span class="receipt-info-label">
+                <i class="fa-regular fa-calendar"></i> Date
+            </span>
+            <span class="receipt-info-value" id="receiptDate">—</span>
+        </div>
+        <div class="receipt-info-item">
+            <span class="receipt-info-label">
+                <i class="fa-regular fa-user"></i> Student
+            </span>
+            <span class="receipt-info-value" id="receiptStudent">—</span>
+        </div>
+        <div class="receipt-info-item">
+            <span class="receipt-info-label">
+                <i class="fa-regular fa-id-card"></i> Student Code
+            </span>
+            <span class="receipt-info-value" id="receiptStudentCode">—</span>
+        </div>
+        <div class="receipt-info-item">
+            <span class="receipt-info-label">
+                <i class="fa-regular fa-building"></i> Class
+            </span>
+            <span class="receipt-info-value" id="receiptClass">—</span>
+        </div>
+        <div class="receipt-info-item">
+            <span class="receipt-info-label">
+                <i class="fa-regular fa-calendar-plus"></i> Term
+            </span>
+            <span class="receipt-info-value" id="receiptTerm">—</span>
+        </div>
+        <div class="receipt-info-item">
+            <span class="receipt-info-label">
+                <i class="fa-regular fa-credit-card"></i> Payment Method
+            </span>
+            <span class="receipt-info-value" id="receiptMethod">—</span>
+        </div>
+        <div class="receipt-info-item">
+            <span class="receipt-info-label">
+                <i class="fa-regular fa-hashtag"></i> Reference
+            </span>
+            <span class="receipt-info-value" id="receiptReference">—</span>
+        </div>
+    </div>
+
+    <!-- Fee Breakdown Table -->
+    <div class="receipt-table-wrapper">
+        <table class="receipt-fee-table">
+            <thead>
+                <tr>
+                    <th class="receipt-fee-col">Fee Category</th>
+                    <th class="receipt-amount-col">Amount (RWF)</th>
+                    <th class="receipt-paid-col">Paid (RWF)</th>
+                    <th class="receipt-balance-col">Balance (RWF)</th>
+                    <th class="receipt-status-col">Status</th>
+                </tr>
+            </thead>
+            <tbody id="receiptFeeRows">
+                <tr>
+                    <td colspan="5" class="receipt-empty-row">No fees recorded</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr class="receipt-total-row">
+                    <td class="receipt-total-label">TOTAL</td>
+                    <td class="receipt-total-amount" id="receiptTotalAmount">—</td>
+                    <td class="receipt-total-paid" id="receiptTotalPaid">—</td>
+                    <td class="receipt-total-balance" id="receiptTotalBalance">—</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Amount in Words -->
+    <div class="receipt-amount-words">
+        <span class="receipt-words-label">
+            <i class="fa-regular fa-pen-to-square"></i> Amount in Words:
+        </span>
+        <span class="receipt-words-value" id="receiptAmountWords">—</span>
+    </div>
+
+    <!-- Payment Summary -->
+    <div class="receipt-summary-grid">
+        <div class="receipt-summary-item">
+            <span class="receipt-summary-label">
+                <i class="fa-regular fa-money-bill-1"></i> Amount Paid
+            </span>
+            <span class="receipt-summary-value" id="receiptAmountPaid">—</span>
+        </div>
+        <div class="receipt-summary-item">
+            <span class="receipt-summary-label">
+                <i class="fa-regular fa-circle-check"></i> Status
+            </span>
+            <span class="receipt-summary-value" id="receiptPaymentStatus">—</span>
+        </div>
+        <div class="receipt-summary-item">
+            <span class="receipt-summary-label">
+                <i class="fa-regular fa-user"></i> Received By
+            </span>
+            <span class="receipt-summary-value" id="receiptReceivedBy">—</span>
+        </div>
+        <div class="receipt-summary-item">
+            <span class="receipt-summary-label">
+                <i class="fa-regular fa-stamp"></i> Approved By
+            </span>
+            <span class="receipt-summary-value" id="receiptApprovedBy">—</span>
+        </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="receipt-notes" id="receiptNotes" style="display:none;">
+        <span class="receipt-notes-label">
+            <i class="fa-regular fa-message"></i> Notes:
+        </span>
+        <span class="receipt-notes-value" id="receiptNotesText">—</span>
+    </div>
+
+    <!-- Footer -->
+    <div class="receipt-footer">
+        <p class="receipt-footer-text">
+            <i class="fa-regular fa-shield-check"></i>
+            This receipt is electronically generated and valid without signature.
+        </p>
+        <p class="receipt-footer-verify">
+            For verification, scan the QR code or visit
+            <span class="receipt-verify-link" id="receiptVerifyLink">www.ecolelafontaine.rw/verify</span>
+        </p>
+        <p class="receipt-footer-generated">
+            <i class="fa-regular fa-clock"></i>
+            Generated: <span id="receiptGenerated">—</span>
+        </p>
+    </div>
+</div>
+
+
+<style>
+    /* ─── Receipt Container ───────────────────────────────────────────── */
+    .receipt-container {
+        max-width: 780px;
+        margin: 0 auto;
+        background: var(--bg-card, #fcfaf8);
+        border-radius: var(--r-lg, 14px);
+        overflow: hidden;
+        border: 1px solid var(--border-light, #e8e0d8);
+        box-shadow: var(--shadow-card, 0 2px 20px rgba(26, 20, 16, 0.06));
+        font-family: 'DM Sans', 'Plus Jakarta Sans', sans-serif;
+    }
+
+    /* ─── Header ───────────────────────────────────────────────────────── */
+    .receipt-header {
+        background: var(--role-gradient, linear-gradient(135deg, #2d1f3a, #4d2f4a));
+        color: var(--text-inverse, #f5f0eb);
+        padding: 24px 28px;
+        display: flex;
+        gap: 18px;
+        align-items: center;
+    }
+
+    .receipt-logo {
+        width: 64px;
+        height: 64px;
+        border-radius: var(--r-md, 10px);
+        background: rgba(255, 255, 255, 0.10);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+
+    .receipt-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: var(--r-md, 10px);
+    }
+
+    .receipt-header-text {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .receipt-school-name {
+        font-family: 'Syne', 'Playfair Display', serif;
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0;
+        color: var(--text-inverse, #f5f0eb);
+        letter-spacing: 0.5px;
+    }
+
+    .receipt-school-address {
+        font-size: 12px;
+        opacity: 0.75;
+        margin: 2px 0 0;
+        color: var(--text-inverse, #f5f0eb);
+    }
+
+    .receipt-school-contact {
+        font-size: 11px;
+        opacity: 0.7;
+        margin: 2px 0 8px;
+        color: var(--text-inverse, #f5f0eb);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .receipt-school-contact i {
+        font-size: 11px;
+    }
+
+    .receipt-contact-divider {
+        opacity: 0.3;
+    }
+
+    .receipt-title {
+        font-family: 'Syne', 'Playfair Display', serif;
+        font-size: 16px;
+        font-weight: 700;
+        margin: 0;
+        letter-spacing: 1px;
+        color: var(--text-inverse, #f5f0eb);
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+        padding-top: 8px;
+    }
+
+    /* ─── Info Grid ────────────────────────────────────────────────────── */
+    .receipt-info-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        border-bottom: 1px solid var(--border-light, #e8e0d8);
+    }
+
+    .receipt-info-item {
+        padding: 10px 14px;
+        border-right: 1px solid var(--border-light, #e8e0d8);
+        border-bottom: 1px solid var(--border-light, #e8e0d8);
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .receipt-info-item:nth-child(4n) {
+        border-right: none;
+    }
+
+    .receipt-info-label {
+        font-size: 9px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted, #a8988e);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .receipt-info-label i {
+        font-size: 10px;
+        opacity: 0.6;
+    }
+
+    .receipt-info-value {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-dark, #1a1410);
+    }
+
+    /* ─── Fee Table ────────────────────────────────────────────────────── */
+    .receipt-table-wrapper {
+        padding: 0;
+        overflow-x: auto;
+    }
+
+    .receipt-fee-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    .receipt-fee-table thead {
+        background: var(--bg-tertiary, #f0ebe6);
+    }
+
+    .receipt-fee-table th {
+        padding: 10px 14px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-secondary, #6b5f56);
+        text-align: right;
+        border-bottom: 2px solid var(--border-light, #e8e0d8);
+    }
+
+    .receipt-fee-col {
+        text-align: left !important;
+    }
+
+    .receipt-fee-table td {
+        padding: 8px 14px;
+        border-bottom: 1px solid var(--border-light, #e8e0d8);
+        text-align: right;
+        color: var(--text-body, #2c241e);
+    }
+
+    .receipt-fee-table td:first-child {
+        text-align: left;
+        font-weight: 500;
+    }
+
+    .receipt-fee-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .receipt-empty-row {
+        text-align: center !important;
+        padding: 24px 0 !important;
+        color: var(--text-muted, #a8988e) !important;
+        font-weight: 400 !important;
+    }
+
+    /* ─── Fee Status Badge ────────────────────────────────────────────── */
+    .receipt-status-badge {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: var(--r-full, 9999px);
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+    .receipt-status-badge.paid {
+        background: var(--success-bg, #dce8e0);
+        color: #065f46;
+    }
+
+    .receipt-status-badge.partial {
+        background: var(--warning-bg, #f0e8d0);
+        color: #92400e;
+    }
+
+    .receipt-status-badge.due {
+        background: var(--danger-bg, #f0e0dc);
+        color: #991b1b;
+    }
+
+    .receipt-status-badge.waived {
+        background: var(--bg-tertiary, #f0ebe6);
+        color: var(--text-soft, #6b5f56);
+    }
+
+    /* ─── Total Row ────────────────────────────────────────────────────── */
+    .receipt-total-row {
+        background: var(--bg-tertiary, #f0ebe6);
+        font-weight: 700;
+        border-top: 2px solid var(--border-medium, #d4c8be);
+    }
+
+    .receipt-total-row td {
+        padding: 10px 14px;
+        font-size: 14px;
+        color: var(--text-dark, #1a1410);
+    }
+
+    .receipt-total-label {
+        text-align: left !important;
+        font-size: 13px !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-secondary, #6b5f56) !important;
+    }
+
+    .receipt-total-amount,
+    .receipt-total-paid,
+    .receipt-total-balance {
+        font-size: 14px !important;
+        font-weight: 700 !important;
+    }
+
+    .receipt-total-balance {
+        color: var(--danger, #c45a4a);
+    }
+
+    .receipt-total-balance.zero {
+        color: var(--success, #3a7a5a);
+    }
+
+    /* ─── Amount in Words ──────────────────────────────────────────────── */
+    .receipt-amount-words {
+        padding: 12px 20px;
+        background: var(--bg-tertiary, #f0ebe6);
+        border-top: 1px solid var(--border-light, #e8e0d8);
+        border-bottom: 1px solid var(--border-light, #e8e0d8);
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .receipt-words-label {
+        font-weight: 600;
+        color: var(--text-secondary, #6b5f56);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .receipt-words-label i {
+        font-size: 13px;
+        opacity: 0.6;
+    }
+
+    .receipt-words-value {
+        font-weight: 500;
+        color: var(--text-dark, #1a1410);
+        font-style: italic;
+    }
+
+    /* ─── Summary Grid ─────────────────────────────────────────────────── */
+    .receipt-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0;
+        padding: 14px 20px;
+        background: var(--role-gradient, linear-gradient(135deg, #2d1f3a, #4d2f4a));
+        color: var(--text-inverse, #f5f0eb);
+        text-align: center;
+    }
+
+    .receipt-summary-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding: 0 8px;
+        border-right: 1px solid rgba(255, 255, 255, 0.10);
+    }
+
+    .receipt-summary-item:last-child {
+        border-right: none;
+    }
+
+    .receipt-summary-label {
+        font-size: 9px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    .receipt-summary-label i {
+        font-size: 10px;
+    }
+
+    .receipt-summary-value {
+        font-size: 16px;
+        font-weight: 700;
+        font-family: 'Syne', 'Playfair Display', serif;
+    }
+
+    .receipt-summary-value .status-paid {
+        color: #86efac;
+    }
+
+    .receipt-summary-value .status-partial {
+        color: #fcd34d;
+    }
+
+    .receipt-summary-value .status-due {
+        color: #fca5a5;
+    }
+
+    /* ─── Notes ────────────────────────────────────────────────────────── */
+    .receipt-notes {
+        padding: 10px 20px;
+        background: var(--bg-tertiary, #f0ebe6);
+        border-bottom: 1px solid var(--border-light, #e8e0d8);
+        font-size: 12px;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .receipt-notes-label {
+        font-weight: 600;
+        color: var(--text-secondary, #6b5f56);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex-shrink: 0;
+    }
+
+    .receipt-notes-label i {
+        font-size: 12px;
+        opacity: 0.6;
+    }
+
+    .receipt-notes-value {
+        color: var(--text-body, #2c241e);
+        word-break: break-word;
+    }
+
+    /* ─── Footer ───────────────────────────────────────────────────────── */
+    .receipt-footer {
+        padding: 14px 20px;
+        text-align: center;
+        font-size: 11px;
+        color: var(--text-soft, #6b5f56);
+        background: var(--bg-tertiary, #f0ebe6);
+        border-top: 1px solid var(--border-light, #e8e0d8);
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .receipt-footer-text {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .receipt-footer-text i {
+        font-size: 12px;
+        color: var(--success, #3a7a5a);
+    }
+
+    .receipt-footer-verify {
+        margin: 0;
+        font-size: 10px;
+        color: var(--text-muted, #a8988e);
+    }
+
+    .receipt-verify-link {
+        color: var(--role-primary, #2d1f3a);
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .receipt-verify-link:hover {
+        text-decoration: underline;
+    }
+
+    .receipt-footer-generated {
+        margin: 4px 0 0;
+        font-size: 10px;
+        color: var(--text-muted, #a8988e);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .receipt-footer-generated i {
+        font-size: 10px;
+        opacity: 0.5;
+    }
+
+    /* ─── Responsive ───────────────────────────────────────────────────── */
+    @media (max-width: 640px) {
+        .receipt-header {
+            padding: 18px 16px;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .receipt-logo {
+            width: 48px;
+            height: 48px;
+            font-size: 22px;
+        }
+
+        .receipt-school-name {
+            font-size: 17px;
+        }
+
+        .receipt-title {
+            font-size: 14px;
+        }
+
+        .receipt-school-contact {
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        .receipt-info-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .receipt-info-item {
+            padding: 8px 12px;
+        }
+
+        .receipt-info-item:nth-child(4n) {
+            border-right: 1px solid var(--border-light, #e8e0d8);
+        }
+
+        .receipt-info-item:nth-child(2n) {
+            border-right: none;
+        }
+
+        .receipt-info-value {
+            font-size: 12px;
+        }
+
+        .receipt-fee-table {
+            font-size: 11px;
+        }
+
+        .receipt-fee-table th,
+        .receipt-fee-table td {
+            padding: 6px 10px;
+        }
+
+        .receipt-summary-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            padding: 12px 16px;
+        }
+
+        .receipt-summary-item {
+            border-right: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 6px;
+        }
+
+        .receipt-summary-item:nth-child(3),
+        .receipt-summary-item:nth-child(4) {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .receipt-summary-value {
+            font-size: 14px;
+        }
+
+        .receipt-amount-words {
+            font-size: 12px;
+            padding: 10px 16px;
+        }
+
+        .receipt-words-value {
+            font-size: 12px;
+        }
+
+        .receipt-footer {
+            font-size: 10px;
+            padding: 12px 16px;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .receipt-info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .receipt-info-item {
+            border-right: none !important;
+        }
+
+        .receipt-summary-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .receipt-fee-table {
+            font-size: 10px;
+        }
+
+        .receipt-fee-table th,
+        .receipt-fee-table td {
+            padding: 4px 6px;
+        }
+
+        .receipt-status-badge {
+            font-size: 8px;
+            padding: 1px 6px;
+        }
+    }
+
+    /* ─── Print ────────────────────────────────────────────────────────── */
+    @media print {
+        .receipt-container {
+            box-shadow: none;
+            border: 1px solid #d4c8be;
+            margin: 0;
+            border-radius: 0;
+        }
+
+        .receipt-header {
+            background: #2d1f3a !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .receipt-summary-grid {
+            background: #2d1f3a !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .receipt-status-badge.paid {
+            background: #dce8e0 !important;
+            color: #065f46 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .receipt-status-badge.partial {
+            background: #f0e8d0 !important;
+            color: #92400e !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .receipt-status-badge.due {
+            background: #f0e0dc !important;
+            color: #991b1b !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .receipt-total-row {
+            background: #f0ebe6 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+</style>

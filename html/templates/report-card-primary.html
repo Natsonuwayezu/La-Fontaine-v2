@@ -1,0 +1,313 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+   REPORT CARD — PRIMARY (English)
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: Primary report card template (English).
+   Used by report-cards.js for pre-midterm, post-midterm, and annual.
+   No emojis — Font Awesome icons only.
+   ═══════════════════════════════════════════════════════════════════ -->
+
+<div class="report-card primary-report" id="reportCardContainer">
+    <!-- Header -->
+    <div class="report-header">
+        <div class="report-logo" id="reportLogo">
+            <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div class="report-header-text">
+            <h2 class="report-school-name" id="reportSchoolName">ECOLE LA FONTAINE</h2>
+            <p class="report-school-address" id="reportSchoolAddress">Rubavu, Rwanda</p>
+            <h3 class="report-title" id="reportTitle">END OF TERM EXAMINATIONS RESULTS</h3>
+            <p class="report-subtitle" id="reportSubtitle">Term 3 · 2025-2026</p>
+        </div>
+    </div>
+
+    <!-- Student Info -->
+    <div class="report-info-grid">
+        <div class="report-info-item">
+            <span class="report-info-label">
+                <i class="fa-regular fa-user"></i> Student
+            </span>
+            <span class="report-info-value" id="reportStudentName">—</span>
+        </div>
+        <div class="report-info-item">
+            <span class="report-info-label">
+                <i class="fa-regular fa-id-card"></i> Code
+            </span>
+            <span class="report-info-value" id="reportStudentCode">—</span>
+        </div>
+        <div class="report-info-item">
+            <span class="report-info-label">
+                <i class="fa-regular fa-building"></i> Class
+            </span>
+            <span class="report-info-value" id="reportClassName">—</span>
+        </div>
+        <div class="report-info-item">
+            <span class="report-info-label">
+                <i class="fa-regular fa-calendar"></i> Date
+            </span>
+            <span class="report-info-value" id="reportDate">—</span>
+        </div>
+        <div class="report-info-item">
+            <span class="report-info-label">
+                <i class="fa-regular fa-flag"></i> Gender
+            </span>
+            <span class="report-info-value" id="reportGender">—</span>
+        </div>
+        <div class="report-info-item">
+            <span class="report-info-label">
+                <i class="fa-regular fa-calendar-plus"></i> Academic Year
+            </span>
+            <span class="report-info-value" id="reportAcademicYear">—</span>
+        </div>
+    </div>
+
+    <!-- Subjects Table -->
+    <div class="report-table-wrapper">
+        <table class="report-subjects-table">
+            <thead>
+                <tr>
+                    <th class="report-subject-col">SUBJECT</th>
+                    <th class="report-mg-col">MG</th>
+                    <th class="report-ex-col">EX</th>
+                    <th class="report-total-col">TOTAL</th>
+                    <th class="report-max-col">MAX</th>
+                    <th class="report-pct-col">%</th>
+                    <th class="report-grade-col">GRADE</th>
+                </tr>
+            </thead>
+            <tbody id="reportSubjectRows">
+                <tr>
+                    <td colspan="7" class="report-empty-row">No marks available</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Summary -->
+    <div class="report-summary-grid">
+        <div class="report-summary-item">
+            <span class="report-summary-label">
+                <i class="fa-regular fa-star"></i> TOTAL SCORE
+            </span>
+            <span class="report-summary-value" id="reportTotalScore">—</span>
+        </div>
+        <div class="report-summary-item">
+            <span class="report-summary-label">
+                <i class="fa-regular fa-chart-bar"></i> AVERAGE
+            </span>
+            <span class="report-summary-value" id="reportAverage">—</span>
+        </div>
+        <div class="report-summary-item">
+            <span class="report-summary-label">
+                <i class="fa-regular fa-award"></i> GRADE
+            </span>
+            <span class="report-summary-value" id="reportGrade">—</span>
+        </div>
+        <div class="report-summary-item">
+            <span class="report-summary-label">
+                <i class="fa-regular fa-ranking-star"></i> RANK
+            </span>
+            <span class="report-summary-value" id="reportRank">—</span>
+        </div>
+    </div>
+
+    <!-- Decision Banner -->
+    <div class="report-decision" id="reportDecision">
+        <div class="report-decision-content">
+            <i class="fa-regular fa-circle-check" id="reportDecisionIcon"></i>
+            <span id="reportDecisionText">—</span>
+        </div>
+    </div>
+
+    <!-- QR Code -->
+    <div class="report-qr-section">
+        <div class="report-qr-container" id="reportQRContainer">
+            <div class="report-qr-placeholder">
+                <i class="fa-solid fa-qrcode"></i>
+            </div>
+        </div>
+        <div class="report-qr-text">
+            <span class="report-qr-label">
+                <i class="fa-regular fa-shield-check"></i> Verify
+            </span>
+            <span class="report-qr-code" id="reportQRCode">—</span>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="report-footer">
+        <div class="report-footer-line" id="reportFooterLine1">
+            Done at ECOLE LA FONTAINE, ON <span id="reportFooterDate">—</span>
+        </div>
+        <div class="report-footer-line" id="reportFooterLine2">
+            UWAYO GANZA Eugene · Head of School
+        </div>
+        <div class="report-footer-signatures">
+            <div class="report-signature">
+                <span class="report-signature-label">
+                    <i class="fa-regular fa-pen-to-square"></i> Teacher Signature
+                </span>
+                <div class="report-signature-line"></div>
+            </div>
+            <div class="report-signature">
+                <span class="report-signature-label">
+                    <i class="fa-regular fa-stamp"></i> School Stamp
+                </span>
+                <div class="report-signature-line"></div>
+            </div>
+            <div class="report-signature">
+                <span class="report-signature-label">
+                    <i class="fa-regular fa-pen-to-square"></i> Head Teacher Signature
+                </span>
+                <div class="report-signature-line"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    /* ─── Primary Report Card Specific Overrides ──────────────────────── */
+    .primary-report .report-subjects-table th {
+        font-size: 10px;
+    }
+
+    .primary-report .report-subject-col {
+        min-width: 120px;
+    }
+
+    .primary-report .report-mg-col,
+    .primary-report .report-ex-col,
+    .primary-report .report-total-col,
+    .primary-report .report-max-col,
+    .primary-report .report-pct-col,
+    .primary-report .report-grade-col {
+        min-width: 48px;
+        text-align: center;
+    }
+
+    .primary-report .report-subjects-table td {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+
+    .primary-report .report-subjects-table td:first-child {
+        font-weight: 600;
+    }
+
+    .primary-report .report-empty-row {
+        text-align: center !important;
+        padding: 24px 0 !important;
+        color: var(--text-muted, #a8988e) !important;
+        font-weight: 400 !important;
+    }
+
+    /* ─── Percentage Badge ─────────────────────────────────────────────── */
+    .report-pct-badge {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: var(--r-full, 9999px);
+        font-size: 11px;
+        font-weight: 700;
+        min-width: 44px;
+    }
+
+    .report-pct-badge.high {
+        background: var(--success-bg, #dce8e0);
+        color: #065f46;
+    }
+
+    .report-pct-badge.medium {
+        background: var(--warning-bg, #f0e8d0);
+        color: #92400e;
+    }
+
+    .report-pct-badge.low {
+        background: var(--danger-bg, #f0e0dc);
+        color: #991b1b;
+    }
+
+    /* ─── Responsive ───────────────────────────────────────────────────── */
+    @media (max-width: 640px) {
+        .primary-report .report-subjects-table {
+            font-size: 10px;
+        }
+
+        .primary-report .report-subjects-table th,
+        .primary-report .report-subjects-table td {
+            padding: 4px 6px;
+        }
+
+        .primary-report .report-subject-col {
+            min-width: 80px;
+        }
+
+        .primary-report .report-mg-col,
+        .primary-report .report-ex-col,
+        .primary-report .report-total-col,
+        .primary-report .report-max-col,
+        .primary-report .report-pct-col,
+        .primary-report .report-grade-col {
+            min-width: 32px;
+        }
+
+        .primary-report .report-pct-badge {
+            font-size: 9px;
+            padding: 1px 6px;
+            min-width: 32px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .primary-report .report-subjects-table {
+            font-size: 9px;
+        }
+
+        .primary-report .report-subject-col {
+            min-width: 60px;
+        }
+
+        .primary-report .report-mg-col,
+        .primary-report .report-ex-col,
+        .primary-report .report-total-col,
+        .primary-report .report-max-col,
+        .primary-report .report-pct-col,
+        .primary-report .report-grade-col {
+            min-width: 24px;
+        }
+    }
+
+    @media print {
+        .primary-report .report-header {
+            background: #2d1f3a !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .primary-report .report-summary-grid {
+            background: #2d1f3a !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .primary-report .report-pct-badge.high {
+            background: #dce8e0 !important;
+            color: #065f46 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .primary-report .report-pct-badge.medium {
+            background: #f0e8d0 !important;
+            color: #92400e !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .primary-report .report-pct-badge.low {
+            background: #f0e0dc !important;
+            color: #991b1b !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+</style>

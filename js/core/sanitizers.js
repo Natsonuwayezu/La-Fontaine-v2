@@ -351,38 +351,11 @@ function cleanFormData(formData, {
    4. FORM SERIALIZATION
    ═══════════════════════════════════════════════════════════════════ */
 
-/**
- * Serialize all named inputs from a form into a plain object.
- * Handles text, select, checkbox, radio, textarea, and hidden inputs.
- *
- * @param {string|HTMLFormElement} formOrId - form element or its ID
- * @returns {Object} field name → raw string value
- */
-function serializeForm(formOrId) {
-    const form = typeof formOrId === 'string'
-        ? document.getElementById(formOrId)
-        : formOrId;
-
-    if (!form) return {};
-
-    const data = {};
-    const inputs = form.querySelectorAll('input, select, textarea');
-
-    inputs.forEach(el => {
-        const name = el.name || el.id;
-        if (!name) return;
-
-        if (el.type === 'checkbox') {
-            data[name] = el.checked;
-        } else if (el.type === 'radio') {
-            if (el.checked) data[name] = el.value;
-        } else {
-            data[name] = el.value;
-        }
-    });
-
-    return data;
-}
+/* serializeForm() used to be declared here too, colliding with the richer
+   version in ui/forms.js (which loads after this file, per index.html) —
+   that redeclaration threw "Identifier 'serializeForm' has already been
+   declared" and silently killed every function in forms.js. Removed here;
+   ui/forms.js's version (form element + options) is canonical now. */
 
 /**
  * Populate a form with values from an object.
@@ -412,24 +385,9 @@ function populateForm(formOrId, values) {
     });
 }
 
-/**
- * Clear all inputs in a form back to empty/default.
- */
-function clearForm(formOrId) {
-    const form = typeof formOrId === 'string'
-        ? document.getElementById(formOrId)
-        : formOrId;
-    if (!form) return;
-    form.querySelectorAll('input, select, textarea').forEach(el => {
-        if (el.type === 'checkbox' || el.type === 'radio') {
-            el.checked = false;
-        } else {
-            el.value = '';
-        }
-        el.classList.remove('field-error', 'field-valid');
-    });
-    form.querySelectorAll('.field-error-msg').forEach(el => el.remove());
-}
+/* clearForm() used to be declared here too, colliding with the richer
+   version in ui/forms.js — same issue as serializeForm() above. Removed
+   here; ui/forms.js's version is canonical now. */
 
 /* ═══════════════════════════════════════════════════════════════════
    5. FIELD-LEVEL VISUAL FEEDBACK
@@ -558,9 +516,7 @@ window.cleanDate       = cleanDate;
 window.cleanBool       = cleanBool;
 window.cleanURL        = cleanURL;
 window.cleanFormData   = cleanFormData;
-window.serializeForm   = serializeForm;
 window.populateForm    = populateForm;
-window.clearForm       = clearForm;
 window.markFieldError  = markFieldError;
 window.markFieldValid  = markFieldValid;
 window.clearFieldErrors= clearFieldErrors;

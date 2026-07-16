@@ -564,53 +564,12 @@ function exportToCSV(data, filename) {
    9. PRINT HELPERS
    ═══════════════════════════════════════════════════════════════════ */
 
-/**
- * Open a print window with the given HTML content.
- * Includes the app's CSS via a <link> tag so print styles apply.
- *
- * @param {string} htmlContent  - full HTML body content to print
- * @param {string} [title]      - window/tab title
- */
-function openPrintWindow(htmlContent, title = 'ECOLE LA FONTAINE') {
-    const win = window.open('', '_blank');
-    if (!win) {
-        if (typeof showToast === 'function') {
-            showToast('Pop-up blocked. Please allow pop-ups for printing.', 'warning');
-        }
-        return;
-    }
-    win.document.write(`<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>${esc(title)}</title>
-    <link rel="stylesheet" href="css/print/print.css">
-    <link rel="stylesheet" href="css/base/typography.css">
-</head>
-<body>${htmlContent}</body>
-</html>`);
-    win.document.close();
-    win.focus();
-    // Small delay to ensure CSS loads before print dialog
-    setTimeout(() => { win.print(); }, 400);
-}
-
-/**
- * Print an element by its ID without opening a new window.
- * Temporarily hides the rest of the page using a print class.
- */
-function printElement(elementId) {
-    const el = document.getElementById(elementId);
-    if (!el) {
-        console.warn('[Utils] printElement: element not found:', elementId);
-        return;
-    }
-    el.classList.add('print-target');
-    document.body.classList.add('printing-element');
-    window.print();
-    document.body.classList.remove('printing-element');
-    el.classList.remove('print-target');
-}
+/* openPrintWindow() and printElement() used to be declared here too,
+   colliding with core/print-engine.js's richer versions (which load after
+   this file, per index.html) — that redeclaration threw "Identifier
+   already declared" and silently killed every function in print-engine.js
+   the moment it was added. Removed here; print-engine.js's versions
+   (which take an extraCSS param and use APP_NAME) are canonical now. */
 
 /* ═══════════════════════════════════════════════════════════════════
    10. QR CODE GENERATION  (Part 7.3)
@@ -933,8 +892,7 @@ window.downloadJSON = downloadJSON;
 window.exportToExcel = exportToExcel;
 window.exportAOAtoExcel = exportAOAtoExcel;
 window.exportToCSV = exportToCSV;
-window.openPrintWindow = openPrintWindow;
-window.printElement = printElement;
+
 window.generateQRCode = generateQRCode;
 window.qrPlaceholderSVG = qrPlaceholderSVG;
 window.getSchoolLogoHtml = getSchoolLogoHtml;

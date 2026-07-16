@@ -12,7 +12,7 @@ const GradingSettings = (() => {
         if (!container) return;
         container.innerHTML = `<div class="dashboard-page"><div class="loading-inline">Loading grading settings…</div></div>`;
 
-        const [bands, passMark] = await Promise.all([listGradingScale(), getPassMark()]);
+        const [bands, passMark] = await Promise.all([listGradingScale(), getPassMarkSetting()]);
 
         container.innerHTML = `
             <div class="dashboard-page">
@@ -100,7 +100,7 @@ const GradingSettings = (() => {
         input?.addEventListener('input', () => { slider.value = input.value; });
 
         container.querySelector('#save-pass-mark-btn')?.addEventListener('click', async () => {
-            const result = await setPassMark(input.value);
+            const result = await setPassMarkSetting(input.value);
             if (result.success) showToast('Pass mark updated', 'success');
             else showToast('Could not save', 'error', result.error);
         });

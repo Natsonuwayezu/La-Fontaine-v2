@@ -26,13 +26,13 @@ async function listGradingScale() {
     return [...scale].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
 }
 
-async function getPassMark() {
+async function getPassMarkSetting() {
     const val = await getSchoolSetting('pass_mark', DEFAULT_PASS_MARK);
     const num = Number(val);
     return Number.isFinite(num) ? num : DEFAULT_PASS_MARK;
 }
 
-async function setPassMark(value) {
+async function setPassMarkSetting(value) {
     const num = Number(value);
     if (!Number.isFinite(num) || num < 0 || num > 100) {
         return { success: false, error: 'Pass mark must be a number between 0 and 100.' };
@@ -113,8 +113,8 @@ async function resetGradingScaleToDefault() {
    ═══════════════════════════════════════════════════════════════════ */
 
 window.listGradingScale = listGradingScale;
-window.getPassMark = getPassMark;
-window.setPassMark = setPassMark;
+window.getPassMarkSetting = getPassMarkSetting;
+window.setPassMarkSetting = setPassMarkSetting;
 window.createGradeBand = createGradeBand;
 window.updateGradeBand = updateGradeBand;
 window.deleteGradeBand = deleteGradeBand;

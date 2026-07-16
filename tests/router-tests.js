@@ -1,0 +1,127 @@
+/* ═══════════════════════════════════════════════════════════════════
+   tests/router-tests.js
+   ═══════════════════════════════════════════════════════════════════
+   Tests for js/core/router.js's pure logic: moduleIdToRenderFn()
+   (nav id → expected render function name), and MODULE_FILE_MAP (nav
+   id → source file path, or array of paths for pages split into a
+   data-layer file + a render-page file). navigateTo() itself does
+   full page rendering + DB calls and isn't covered here.
+
+   The MODULE_FILE_MAP tests check against the real filesystem — if a
+   path in the map is ever mistyped or a file gets renamed/moved
+   without updating the map, these tests fail immediately instead of
+   surfacing as a runtime 404 the next time someone happens to click
+   that nav item.
+   ═══════════════════════════════════════════════════════════════════ */
+
+const fs = require('fs');
+const path = require('path');
+const { loadScripts, REPO_ROOT } = require('./helpers/load-scripts');
+
+beforeAll(() => {
+    loadScripts([
+        'js/config/constants.js',
+        'js/core/router.js',
+    ]);
+});
+
+describe('moduleIdToRenderFn', () => {
+    test('converts a simple hyphenated id to PascalCase render-function name', () => {
+        expect(moduleIdToRenderFn('academic-calendar')).toBe('renderAcademicCalendar');
+    });
+
+    test('handles a single-word id', () => {
+        expect(moduleIdToRenderFn('timetable')).toBe('renderTimetable');
+    });
+
+    test('handles a longer multi-hyphen id', () => {
+        expect(moduleIdToRenderFn('teacher-assignments')).toBe('renderTeacherAssignments');
+    });
+
+    test('matches the actual window.renderX function names used across settings/ and staff/', () => {
+        expect(moduleIdToRenderFn('school-settings')).toBe('renderSchoolSettings');
+        expect(moduleIdToRenderFn('backup-restore')).toBe('renderBackupRestore');
+        expect(moduleIdToRenderFn('system-logs')).toBe('renderSystemLogs');
+        expect(moduleIdToRenderFn('user-management')).toBe('renderUserManagement');
+    });
+});
+
+describe('MODULE_FILE_MAP entries with companion data-layer files', () => {
+    test('at least the known split pages use an array mapping', () => {
+        const arrayMappings = Object.entries(MODULE_FILE_MAP).filter(([, v]) => Array.isArray(v));
+        const ids = arrayMappings.map(([id]) => id);
+        expect(ids).toEqual(expect.arrayContaining([
+            'academic-calendar', 'grading-scale', 'user-management',
+            'teacher-assignments', 'teacher-performance', 'timetable',
+        ]));
+    });
+
+    test('regression: grading-scale must load grading-settings.js (the actual render page), not just grading-scale.js (the data layer)', () => {
+        const mapped = MODULE_FILE_MAP['grading-scale'];
+        expect(Array.isArray(mapped)).toBe(true);
+        expect(mapped).toContain('js/modules/settings/grading-settings.js');
+    });
+
+    test('every array-mapped moduleId ends with a file that plausibly matches its render function name', () => {
+        const arrayMappings = Object.entries(MODULE_FILE_MAP).filter(([, v]) => Array.isArray(v));
+        for (const [moduleId, files] of arrayMappings) {
+            const lastFile = files[files.length - 1];
+            const lastFileBase = lastFile.split('/').pop().replace('.js', '');
+            const moduleWords = moduleId.split('-');
+            const fileWords = lastFileBase.split('-');
+            const overlap = moduleWords.some(w => fileWords.includes(w));
+            expect({ moduleId, lastFile, overlap }).toEqual({ moduleId, lastFile, overlap: true });
+        }
+    });
+
+    test('loadModuleScript is exposed for the router to call during navigation', () => {
+        expect(typeof loadModuleScript).toBe('function');
+    });
+});
+
+describe('MODULE_FILE_MAP', () => {
+    test('every mapped file path actually exists on disk', () => {
+        const missing = [];
+        for (const [moduleId, mapped] of Object.entries(MODULE_FILE_MAP)) {
+            const filePaths = Array.isArray(mapped) ? mapped : [mapped];
+            for (const filePath of filePaths) {
+                const fullPath = path.join(REPO_ROOT, filePath);
+                if (!fs.existsSync(fullPath)) missing.push(`${moduleId} -> ${filePath}`);
+            }
+        }
+        expect(missing).toEqual([]);
+    });
+
+    const KNOWN_PENDING_MODULES = new Set([
+        'attendance-entry', 'attendance-reports', 'attendance-summary', 'attendance-analytics',
+        'holidays-marks', 'holidays-fees',
+        'finance-dashboard', 'fee-structure', 'fee-assignments', 'fee-term-status',
+        'record-payment', 'payment-history', 'receipts', 'overdue-payments',
+        'fee-waivers', 'credit-balances', 'balances', 'student-fees',
+        'student-statements', 'family-fee-summary', 'payment-reversals',
+        'manual-adjustments', 'discounts', 'carry-forward', 'finance-audit', 'financial-reports',
+        'bulk-import', 'bulk-export', 'bulk-finance-actions', 'bulk-student-actions',
+    ]);
+
+    test('no module outside the known-pending list has an empty (stub) file', () => {
+        const unexpectedlyEmpty = [];
+        for (const [moduleId, mapped] of Object.entries(MODULE_FILE_MAP)) {
+            if (KNOWN_PENDING_MODULES.has(moduleId)) continue;
+            const filePaths = Array.isArray(mapped) ? mapped : [mapped];
+            for (const filePath of filePaths) {
+                const fullPath = path.join(REPO_ROOT, filePath);
+                if (fs.existsSync(fullPath) && fs.statSync(fullPath).size === 0) {
+                    unexpectedlyEmpty.push(`${moduleId} -> ${filePath}`);
+                }
+            }
+        }
+        expect(unexpectedlyEmpty).toEqual([]);
+    });
+
+    test('has at least one entry per major section (dashboard, settings, staff)', () => {
+        const ids = Object.keys(MODULE_FILE_MAP);
+        expect(ids.some(id => id.includes('dashboard'))).toBe(true);
+        expect(ids).toEqual(expect.arrayContaining(['school-settings', 'grading-scale', 'backup-restore']));
+        expect(ids).toEqual(expect.arrayContaining(['timetable', 'user-management']));
+    });
+});

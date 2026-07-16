@@ -88,12 +88,21 @@ const MODULE_FILE_MAP = {
     'holidays-fees': 'js/modules/holidays/holidays-fees.js',
 
     // Staff
-    'user-management': 'js/modules/staff/user-management.js',
+    'user-management': ['js/modules/settings/users.js', 'js/modules/staff/user-management.js'],
     'teachers': 'js/modules/staff/teachers.js',
     'subjects': 'js/modules/staff/subjects.js',
-    'teacher-assignments': 'js/modules/staff/teacher-assignments.js',
-    'teacher-performance': 'js/modules/staff/teacher-performance.js',
-    'timetable': 'js/modules/staff/timetable.js',
+    'teacher-assignments': ['js/modules/staff/teachers.js', 'js/modules/staff/subjects.js', 'js/modules/staff/teacher-assignments.js'],
+    'teacher-performance': ['js/modules/staff/teachers.js', 'js/modules/staff/teacher-performance.js'],
+    'timetable': [
+        'js/modules/staff/teachers.js',
+        'js/modules/staff/subjects.js',
+        'js/modules/staff/timetable-conflicts.js',
+        'js/modules/staff/class-timetable.js',
+        'js/modules/staff/teacher-timetable.js',
+        'js/modules/staff/staff-timetable.js',
+        'js/modules/staff/timetable-import.js',
+        'js/modules/staff/timetable.js',
+    ],
     'class-timetable': 'js/modules/staff/class-timetable.js',
     'teacher-timetable': 'js/modules/staff/teacher-timetable.js',
     'staff-timetable': 'js/modules/staff/staff-timetable.js',
@@ -115,10 +124,10 @@ const MODULE_FILE_MAP = {
 
     // Settings
     'school-settings': 'js/modules/settings/school-settings.js',
-    'academic-calendar': 'js/modules/settings/academic-calendar.js',
+    'academic-calendar': ['js/modules/settings/academic-years.js', 'js/modules/settings/academic-calendar.js'],
     'academic-years': 'js/modules/settings/academic-years.js',
-    'class-management': 'js/modules/settings/class-management.js',
-    'grading-scale': 'js/modules/settings/grading-scale.js',
+    'class-management': ['js/modules/staff/teachers.js', 'js/modules/settings/class-management.js'],
+    'grading-scale': ['js/modules/settings/grading-scale.js', 'js/modules/settings/grading-settings.js'],
     'grading-settings': 'js/modules/settings/grading-settings.js',
     'holidays': 'js/modules/settings/holidays.js',
     'backup-restore': 'js/modules/settings/backup-restore.js',
@@ -158,38 +167,51 @@ function moduleIdToRenderFn(moduleId) {
    ───────────────────────────────────────────────────────────────── */
 
 const _loadedModules = new Set();
+const _loadedFiles = new Set();
 
 /**
- * Dynamically load a module's JS file if not already loaded.
- * Returns a promise that resolves when the script is ready.
+ * Load a single file (by path) if not already loaded. Internal helper
+ * for loadModuleScript() below.
  */
-function loadModuleScript(moduleId) {
+function _loadFile(filePath) {
     return new Promise((resolve, reject) => {
-        const filePath = MODULE_FILE_MAP[moduleId];
-
-        if (!filePath) {
-            reject(new Error(`No file mapped for moduleId: "${moduleId}"`));
-            return;
-        }
-
-        if (_loadedModules.has(moduleId)) {
-            resolve(); // already loaded
-            return;
-        }
+        if (_loadedFiles.has(filePath)) { resolve(); return; }
 
         const script = document.createElement('script');
         script.src = filePath + '?v=' + APP_VERSION;
         script.async = false;
         script.defer = false;
-        script.onload = () => {
-            _loadedModules.add(moduleId);
-            resolve();
-        };
-        script.onerror = () => {
-            reject(new Error(`Failed to load module script: ${filePath}`));
-        };
+        script.onload = () => { _loadedFiles.add(filePath); resolve(); };
+        script.onerror = () => reject(new Error(`Failed to load module script: ${filePath}`));
         document.head.appendChild(script);
     });
+}
+
+/**
+ * Dynamically load a module's JS file(s) if not already loaded.
+ * MODULE_FILE_MAP entries may be a single path (most modules) or an
+ * array of paths (for pages split into a data-layer file + a render-
+ * page file, e.g. 'grading-scale': [settings/grading-scale.js,
+ * settings/grading-settings.js] — loaded in order, so the data layer
+ * is always in scope before the page that calls it). Companion files
+ * shared across multiple moduleIds (e.g. staff/teachers.js) are only
+ * ever injected once, regardless of how many pages reference them.
+ * Returns a promise that resolves when all of them are ready.
+ */
+async function loadModuleScript(moduleId) {
+    const mapped = MODULE_FILE_MAP[moduleId];
+
+    if (!mapped) {
+        throw new Error(`No file mapped for moduleId: "${moduleId}"`);
+    }
+
+    if (_loadedModules.has(moduleId)) return; // already loaded
+
+    const filePaths = Array.isArray(mapped) ? mapped : [mapped];
+    for (const filePath of filePaths) {
+        await _loadFile(filePath);
+    }
+    _loadedModules.add(moduleId);
 }
 
 /* ─────────────────────────────────────────────────────────────────

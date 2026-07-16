@@ -199,7 +199,7 @@ function _recordFailedAttempt() {
     const status = _getLockoutStatus();
     status.count++;
 
-    if (status.count >= APP_CONFIG.maxFailedLogins) {
+    if (status.count >= APP_CONFIG.maxLoginAttempts) {
         status.lockedUntil = new Date(Date.now() + LOCKOUT_DURATION).toISOString();
     }
 

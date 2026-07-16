@@ -52,7 +52,7 @@ const YEAR_TERM_DATA = {
    STATE
    ═══════════════════════════════════════════════════════════════════ */
 
-const state = {
+const sidebarState = {
   currentYear: '2025-2026',
   currentTerm: 'Term 3',
   openGroup: null,
@@ -130,7 +130,7 @@ function render() {
             <div class="user-avatar">UG</div>
             <div class="user-info">
                 <div class="user-name">UWAYO GANZA Eugene</div>
-                <div class="user-role">${state.role === 'admin' ? 'Administrator' : state.role === 'teacher' ? 'Teacher' : 'Accountant'}</div>
+                <div class="user-role">${sidebarState.role === 'admin' ? 'Administrator' : sidebarState.role === 'teacher' ? 'Teacher' : 'Accountant'}</div>
             </div>
             <div class="logout-btn" id="sidebar-logout-btn" title="Log out">
                 <i class="fa-solid fa-right-from-bracket"></i>
@@ -152,7 +152,7 @@ function filterNavByRole() {
   Object.entries(NAV_SECTIONS).forEach(([sectionId, section]) => {
     const visibleItems = section.items.filter(item => {
       // Check if the role can access this module
-      return canAccess(state.role, item.id);
+      return canAccess(sidebarState.role, item.id);
     });
 
     if (visibleItems.length > 0) {
@@ -173,19 +173,19 @@ function renderBadgeRow() {
   const row = document.getElementById('badge-row');
   if (!row) return;
 
-  const yearData = YEAR_TERM_DATA[state.currentYear];
+  const yearData = YEAR_TERM_DATA[sidebarState.currentYear];
 
   row.innerHTML = `
         <span class="badge-pill" id="year-pill">
             <span class="dot ${yearData.locked ? 'locked' : 'green'}">
                 ${yearData.locked ? lockIconSvg() : ''}
             </span>
-            <strong>${state.currentYear.replace('-', ' \u2013 ')}</strong>
+            <strong>${sidebarState.currentYear.replace('-', ' \u2013 ')}</strong>
             ${chevronSvg()}
         </span>
         <div class="badge-dropdown" id="year-dropdown">
             ${Object.keys(YEAR_TERM_DATA).map(y => `
-                <div class="badge-dropdown-item ${y === state.currentYear ? 'active' : ''} ${YEAR_TERM_DATA[y].locked ? 'locked' : ''}" data-year="${y}">
+                <div class="badge-dropdown-item ${y === sidebarState.currentYear ? 'active' : ''} ${YEAR_TERM_DATA[y].locked ? 'locked' : ''}" data-year="${y}">
                     <span>${y.replace('-', ' \u2013 ')}</span>
                     ${YEAR_TERM_DATA[y].locked ? '<i class="fa-solid fa-lock lock-icon"></i>' : ''}
                     <i class="fa-solid fa-check check"></i>
@@ -195,14 +195,14 @@ function renderBadgeRow() {
 
         <span class="badge-pill" id="term-pill">
             <span class="dot blue"></span>
-            <strong>${state.currentTerm}</strong>
+            <strong>${sidebarState.currentTerm}</strong>
             ${chevronSvg()}
         </span>
         <div class="badge-dropdown" id="term-dropdown">
             ${['Term 1', 'Term 2', 'Term 3'].map(t => {
     const locked = yearData.lockedTerms.includes(t);
     return `
-                    <div class="badge-dropdown-item ${t === state.currentTerm ? 'active' : ''} ${locked ? 'locked' : ''}" data-term="${t}">
+                    <div class="badge-dropdown-item ${t === sidebarState.currentTerm ? 'active' : ''} ${locked ? 'locked' : ''}" data-term="${t}">
                         <span>${t}</span>
                         ${locked ? '<i class="fa-solid fa-lock lock-icon"></i>' : ''}
                         <i class="fa-solid fa-check check"></i>
@@ -260,12 +260,12 @@ function renderNav(filteredSections) {
 
   // Build section labels
   const sectionLabels = sections.length > 0 ? `
-        <div class="nav-section-label">${state.role === 'admin' ? 'Overview' : 'Main'}</div>
+        <div class="nav-section-label">${sidebarState.role === 'admin' ? 'Overview' : 'Main'}</div>
     ` : '';
 
   const groups = sections.map(id => {
     const sec = filteredSections[id];
-    const isOpen = state.openGroup === id;
+    const isOpen = sidebarState.openGroup === id;
 
     return `
             <div class="nav-group ${isOpen ? 'open' : ''}" id="grp-${id}">
@@ -277,7 +277,7 @@ function renderNav(filteredSections) {
                 <div class="nav-children ${isOpen ? 'open' : ''}" id="ch-${id}">
                     <div class="nav-children-inner">
                         ${sec.items.map(item => `
-                            <div class="nav-child ${item.id === state.activeModule ? 'active' : ''}" data-module="${item.id}">
+                            <div class="nav-child ${item.id === sidebarState.activeModule ? 'active' : ''}" data-module="${item.id}">
                                 <span class="child-dot"></span>
                                 <span class="child-label">${item.label}</span>
                                 ${item.badge ? `<span class="child-badge">${item.badge}</span>` : ''}
@@ -329,16 +329,16 @@ function toggleGroup(id) {
   const isOpen = children.classList.contains('open');
 
   // Close previously open group
-  if (state.openGroup && state.openGroup !== id) {
-    const prevHeader = document.querySelector(`#grp-${state.openGroup} .nav-group-header`);
-    const prevChildren = document.getElementById(`ch-${state.openGroup}`);
+  if (sidebarState.openGroup && sidebarState.openGroup !== id) {
+    const prevHeader = document.querySelector(`#grp-${sidebarState.openGroup} .nav-group-header`);
+    const prevChildren = document.getElementById(`ch-${sidebarState.openGroup}`);
     if (prevHeader) prevHeader.classList.remove('open');
     if (prevChildren) prevChildren.classList.remove('open');
   }
 
   header.classList.toggle('open', !isOpen);
   children.classList.toggle('open', !isOpen);
-  state.openGroup = isOpen ? null : id;
+  sidebarState.openGroup = isOpen ? null : id;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -386,7 +386,7 @@ function openHub(sectionId) {
   if (!sec) return;
 
   // Filter items by role
-  const visibleItems = sec.items.filter(item => canAccess(state.role, item.id));
+  const visibleItems = sec.items.filter(item => canAccess(sidebarState.role, item.id));
   if (visibleItems.length === 0) return;
 
   ensureHubOverlay();
@@ -465,8 +465,8 @@ function closeBadgeDropdowns() {
  */
 function selectYear(year) {
   const data = YEAR_TERM_DATA[year];
-  state.currentYear = year;
-  state.currentTerm = data.activeTerm || 'Term 1';
+  sidebarState.currentYear = year;
+  sidebarState.currentTerm = data.activeTerm || 'Term 1';
   renderBadgeRow();
   emitPeriodChange();
   closeBadgeDropdowns();
@@ -477,8 +477,8 @@ function selectYear(year) {
  * @param {string} term - The term name (e.g., 'Term 3')
  */
 function selectTerm(term) {
-  const data = YEAR_TERM_DATA[state.currentYear];
-  state.currentTerm = term;
+  const data = YEAR_TERM_DATA[sidebarState.currentYear];
+  sidebarState.currentTerm = term;
   renderBadgeRow();
   emitPeriodChange();
   closeBadgeDropdowns();
@@ -488,17 +488,17 @@ function selectTerm(term) {
  * Emit the academicPeriodChanged event
  */
 function emitPeriodChange() {
-  const data = YEAR_TERM_DATA[state.currentYear];
-  const locked = data.locked || data.lockedTerms.includes(state.currentTerm);
-  const progress = data.progress?.[state.currentTerm] ?? 0;
-  const days = data.days?.[state.currentTerm] ?? null;
+  const data = YEAR_TERM_DATA[sidebarState.currentYear];
+  const locked = data.locked || data.lockedTerms.includes(sidebarState.currentTerm);
+  const progress = data.progress?.[sidebarState.currentTerm] ?? 0;
+  const days = data.days?.[sidebarState.currentTerm] ?? null;
 
   document.dispatchEvent(new CustomEvent('academicPeriodChanged', {
     detail: {
-      year: state.currentYear,
-      term: state.currentTerm,
+      year: sidebarState.currentYear,
+      term: sidebarState.currentTerm,
       locked,
-      isActive: !locked && data.activeTerm === state.currentTerm,
+      isActive: !locked && data.activeTerm === sidebarState.currentTerm,
       progress,
       daysRemaining: days
     }
@@ -514,7 +514,7 @@ function emitPeriodChange() {
  * @param {string} moduleId - The module ID to navigate to
  */
 function navigate(moduleId) {
-  state.activeModule = moduleId;
+  sidebarState.activeModule = moduleId;
 
   // Update active states
   document.querySelectorAll('.nav-child.active').forEach(e => e.classList.remove('active'));
@@ -625,20 +625,20 @@ function bindEvents() {
  * @param {string} role - The user's role ('admin', 'teacher', 'accountant')
  */
 function init(role = 'admin') {
-  state.role = role || 'admin';
+  sidebarState.role = role || 'admin';
   render();
   ensureMobileOverlay();
 
   // Set initial active module from localStorage or default
   const savedModule = localStorage.getItem('elf_active_module');
   if (savedModule && NAV_MODULE_INDEX[savedModule]) {
-    state.activeModule = savedModule;
+    sidebarState.activeModule = savedModule;
   }
 
   // Emit initial period change
   setTimeout(emitPeriodChange, 100);
 
-  console.log('[Sidebar] Initialized with role:', state.role);
+  console.log('[Sidebar] Initialized with role:', sidebarState.role);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -657,7 +657,7 @@ const Sidebar = {
   selectYear,
   selectTerm,
   emitPeriodChange,
-  getState: () => ({ ...state })
+  getState: () => ({ ...sidebarState })
 };
 
 // ─── AUTO-INIT ──────────────────────────────────────────────────────

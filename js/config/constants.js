@@ -156,6 +156,17 @@ const DEFAULT_GRADES = [
 
 const DEFAULT_PASS_MARK = 50;
 
+// Used by core/formulas.js's getPassMark() and core/utils.js's print-header
+// helper, both of which referenced SCHOOL_DEFAULTS.X without this constant
+// being defined anywhere — getPassMark() would have thrown ReferenceError on
+// every call, which cascades into getGrade()/isPassing()/isPassingScore()/
+// getPromotionDecision(), since they all call it.
+const SCHOOL_DEFAULTS = {
+  pass_mark: DEFAULT_PASS_MARK,
+  school_name: 'ECOLE LA FONTAINE',
+  school_location: 'Rubavu, Rwanda',
+};
+
 const ACADEMIC_PHASES = ['pre-midterm', 'post-midterm', 'annual'];
 const TERMS = ['Term 1', 'Term 2', 'Term 3'];
 

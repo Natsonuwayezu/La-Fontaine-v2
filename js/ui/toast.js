@@ -87,20 +87,12 @@ function getToastContainer() {
     return containerEl;
 }
 
-/**
- * Escape HTML to prevent XSS
- * @param {string} str - String to escape
- * @returns {string} Escaped string
- */
-function esc(str) {
-    if (!str) return '';
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-}
+/* esc() is a plain-script global from core/utils.js, which loads before
+   this file in index.html — a duplicate copy used to be declared here too;
+   since classic <script> tags share one global scope, that redeclaration
+   threw "Identifier 'esc' has already been declared" the instant this file
+   was parsed, silently breaking every function in this entire file
+   (showToast and everything else below it). */
 
 /* ═══════════════════════════════════════════════════════════════════
    TOAST API

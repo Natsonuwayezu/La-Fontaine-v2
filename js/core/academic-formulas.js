@@ -25,10 +25,15 @@ const MG_TYPES = ['Quiz', 'Assignment', 'Observation', 'Midterm'];
 const EX_TYPES = ['Exam', 'Final Exam'];
 
 // Annual maximum totals per level
-const ANNUAL_MAX = {
-    primary: 1980,   // 3 × 660 (per term max)
-    nursery: 2400    // 3 × 800 (per term max)
-};
+// NOTE: ANNUAL_MAX is defined in config/constants.js, which loads before
+// this file (see this file's own "Load order" comment above) — it's a
+// plain-script global already in scope here, not redeclared.
+// A duplicate `const ANNUAL_MAX = {...}` used to be declared here too;
+// since classic <script> tags share one global scope, that duplicate
+// top-level const threw "Identifier 'ANNUAL_MAX' has already been
+// declared" the instant this file was parsed — silently breaking every
+// function in this entire file (calcMG, buildRegisterRows,
+// calcCompletionRate, findMissingMarks, and everything else below).
 
 // ─── FALLBACK HELPERS (in case formulas.js isn't loaded) ──────
 function getGradeFallback(pct) {
@@ -52,16 +57,13 @@ const isPassingFn = (typeof isPassing !== 'undefined') ? isPassing : isPassingFa
 const rankStudentsFn = (typeof rankStudents !== 'undefined') ? rankStudents : null;
 
 // ─── HELPERS ──────────────────────────────────────────────────────
-function scoreToPercent(score, max) {
-    if (score === null || score === undefined || !max || max <= 0) return null;
-    return Math.round((score / max) * 1000) / 10;
-}
-
-function getStudentRank(classRankedRows, studentId) {
-    if (!classRankedRows || !Array.isArray(classRankedRows)) return null;
-    const found = classRankedRows.find(r => r.id === studentId);
-    return found?.rank ?? null;
-}
+// scoreToPercent() and getStudentRank() are plain-script globals from
+// core/formulas.js, which loads immediately before this file in
+// index.html (see the "Load order" comment above) — duplicate copies
+// used to be declared here too; since classic <script> tags share one
+// global scope, that redeclaration threw "Identifier '...' has already
+// been declared" the instant this file was parsed, silently breaking
+// every function in this entire file.
 
 /* ═══════════════════════════════════════════════════════════════════
    1. DENOMINATOR RULE  (Part 4.3)

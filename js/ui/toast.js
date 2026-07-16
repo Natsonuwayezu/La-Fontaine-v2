@@ -317,3 +317,34 @@ function toastNotification(message, options = {}) {
 window.showToast = showToast;
 window._dismissToast = dismissToastById;
 window.clearAllToasts = clearAllToasts;
+
+/* ═══════════════════════════════════════════════════════════════════
+   window.Toast — object-style wrapper around showToast()
+   ═══════════════════════════════════════════════════════════════════
+   A number of already-written files (js/modules/students/student-list.js,
+   family-management.js, student-archive.js, student-profile.js,
+   student-promotion.js, and js/modules/communication/announcement-center.js,
+   announcements.js, notifications.js, notification-center.js, reminders.js)
+   call window.Toast?.success(title, message) / .warning() / .error() /
+   .info() — an object API this file never defined, so those ~20 call
+   sites have been silent no-ops (the `?.` swallows the "Toast is
+   undefined" case instead of throwing). All of them pass either a
+   single string (used as the main message) or two strings (title,
+   then a detail message) — matched here accordingly. */
+
+function _toastObjectStyle(type) {
+    return function (title, message) {
+        if (message === undefined) {
+            showToast(title, type);
+        } else {
+            showToast(message, type, { title });
+        }
+    };
+}
+
+window.Toast = {
+    success: _toastObjectStyle('success'),
+    error: _toastObjectStyle('error'),
+    warning: _toastObjectStyle('warning'),
+    info: _toastObjectStyle('info'),
+};

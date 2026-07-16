@@ -84,6 +84,26 @@ describe('showToast (real DOM behavior via jsdom)', () => {
     });
 });
 
+describe('window.Toast (object-style wrapper for pre-existing student/communication modules)', () => {
+    test('Toast.success with a single arg uses it as the main message', () => {
+        window.Toast.success('Removed from family');
+        expect(document.body.innerHTML).toContain('Removed from family');
+    });
+
+    test('Toast.warning with two args uses the first as title, second as message', () => {
+        window.Toast.warning('Already linked', 'A distinctive warning detail');
+        expect(document.body.innerHTML).toContain('Already linked');
+        expect(document.body.innerHTML).toContain('A distinctive warning detail');
+    });
+
+    test('all four toast types are available', () => {
+        expect(typeof window.Toast.success).toBe('function');
+        expect(typeof window.Toast.error).toBe('function');
+        expect(typeof window.Toast.warning).toBe('function');
+        expect(typeof window.Toast.info).toBe('function');
+    });
+});
+
 describe('showModal / closeModal (real DOM behavior via jsdom)', () => {
     test('renders modal content into the page', () => {
         showModal('<p>Distinctive modal body</p>', { title: 'Test Modal' });

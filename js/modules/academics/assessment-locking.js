@@ -10,7 +10,7 @@
    css/modules/assessments.css (lock-toggle, assessment-type-badge).
 
    Loaded as a plain <script> (not type="module") — no import/export.
-   Shared helpers (esc, showToast, navigateTo) are read off window,
+   Shared helpers (esc, showToast) are read off window,
    set up by core/utils.js, ui/toast.js, and core/router.js respectively.
 
    MOCK_DATA stands in for the real Supabase table until core/api.js
@@ -73,36 +73,36 @@
 
         container.innerHTML =
             '<div class="assessment-locking-page">' +
-                '<div class="assessment-toolbar">' +
-                    '<select class="marks-toolbar__select" id="al-phase-filter">' +
-                        '<option value="all">All Phases</option>' +
-                        PHASES.map(function (p) { return '<option value="' + esc(p) + '">' + esc(p) + '</option>'; }).join('') +
-                    '</select>' +
-                    '<select class="marks-toolbar__select" id="al-status-filter">' +
-                        '<option value="all">All Statuses</option>' +
-                        '<option value="locked">Locked Only</option>' +
-                        '<option value="open">Open Only</option>' +
-                    '</select>' +
-                    '<span class="assessment-toolbar__spacer"></span>' +
-                    '<span class="badge badge-neutral" id="al-selected-count">0 selected</span>' +
-                '</div>' +
-                '<div class="table-action-bar">' +
-                    '<button class="btn btn-outline-danger btn-sm" id="al-lock-selected"><i class="fa-solid fa-lock"></i> Lock Selected</button>' +
-                    '<button class="btn btn-outline-success btn-sm" id="al-unlock-selected"><i class="fa-solid fa-lock-open"></i> Unlock Selected</button>' +
-                    '<span class="marks-toolbar__spacer"></span>' +
-                    '<button class="btn btn-ghost btn-sm" id="al-select-all"><i class="fa-regular fa-square-check"></i> Select All</button>' +
-                    '<button class="btn btn-ghost btn-sm" id="al-clear-selection"><i class="fa-regular fa-square"></i> Clear</button>' +
-                '</div>' +
-                '<div class="table-wrapper">' +
-                    '<table class="data-table data-table-hover">' +
-                        '<thead><tr>' +
-                            '<th style="width:36px;"><input type="checkbox" id="al-select-all-checkbox" /></th>' +
-                            '<th>Assessment</th><th>Class</th><th>Subject</th><th>Type</th><th>Phase</th>' +
-                            '<th>Completion</th><th>Status</th><th style="width:80px;">Action</th>' +
-                        '</tr></thead>' +
-                        '<tbody id="al-table-body"></tbody>' +
-                    '</table>' +
-                '</div>' +
+            '<div class="assessment-toolbar">' +
+            '<select class="marks-toolbar__select" id="al-phase-filter">' +
+            '<option value="all">All Phases</option>' +
+            PHASES.map(function (p) { return '<option value="' + esc(p) + '">' + esc(p) + '</option>'; }).join('') +
+            '</select>' +
+            '<select class="marks-toolbar__select" id="al-status-filter">' +
+            '<option value="all">All Statuses</option>' +
+            '<option value="locked">Locked Only</option>' +
+            '<option value="open">Open Only</option>' +
+            '</select>' +
+            '<span class="assessment-toolbar__spacer"></span>' +
+            '<span class="badge badge-neutral" id="al-selected-count">0 selected</span>' +
+            '</div>' +
+            '<div class="table-action-bar">' +
+            '<button class="btn btn-outline-danger btn-sm" id="al-lock-selected"><i class="fa-solid fa-lock"></i> Lock Selected</button>' +
+            '<button class="btn btn-outline-success btn-sm" id="al-unlock-selected"><i class="fa-solid fa-lock-open"></i> Unlock Selected</button>' +
+            '<span class="marks-toolbar__spacer"></span>' +
+            '<button class="btn btn-ghost btn-sm" id="al-select-all"><i class="fa-regular fa-square-check"></i> Select All</button>' +
+            '<button class="btn btn-ghost btn-sm" id="al-clear-selection"><i class="fa-regular fa-square"></i> Clear</button>' +
+            '</div>' +
+            '<div class="table-wrapper">' +
+            '<table class="data-table data-table-hover">' +
+            '<thead><tr>' +
+            '<th style="width:36px;"><input type="checkbox" id="al-select-all-checkbox" /></th>' +
+            '<th>Assessment</th><th>Class</th><th>Subject</th><th>Type</th><th>Phase</th>' +
+            '<th>Completion</th><th>Status</th><th style="width:80px;">Action</th>' +
+            '</tr></thead>' +
+            '<tbody id="al-table-body"></tbody>' +
+            '</table>' +
+            '</div>' +
             '</div>';
 
         renderTable();
@@ -122,16 +122,16 @@
                 const pct = a.total ? Math.round((a.entered / a.total) * 100) : 0;
                 return (
                     '<tr>' +
-                        '<td><input type="checkbox" data-row-check="' + a.id + '" /></td>' +
-                        '<td style="font-weight:600;">' + esc(a.name) + '</td>' +
-                        '<td>' + esc(a.className) + '</td>' +
-                        '<td>' + esc(a.subject) + '</td>' +
-                        '<td><span class="assessment-type-badge ' + a.type + '">' + esc(a.type) + '</span></td>' +
-                        '<td>' + esc(a.phase) + '</td>' +
-                        '<td>' + a.entered + '/' + a.total + ' (' + pct + '%)</td>' +
-                        '<td><span class="table-status ' + (a.locked ? 'table-status-warning' : 'table-status-success') + '">' + (a.locked ? 'Locked' : 'Open') + '</span></td>' +
-                        '<td><button class="btn btn-ghost btn-xs" data-toggle-id="' + a.id + '" title="' + (a.locked ? 'Unlock' : 'Lock') + '">' +
-                            '<i class="fa-solid ' + (a.locked ? 'fa-lock-open' : 'fa-lock') + '"></i></button></td>' +
+                    '<td><input type="checkbox" data-row-check="' + a.id + '" /></td>' +
+                    '<td style="font-weight:600;">' + esc(a.name) + '</td>' +
+                    '<td>' + esc(a.className) + '</td>' +
+                    '<td>' + esc(a.subject) + '</td>' +
+                    '<td><span class="assessment-type-badge ' + a.type + '">' + esc(a.type) + '</span></td>' +
+                    '<td>' + esc(a.phase) + '</td>' +
+                    '<td>' + a.entered + '/' + a.total + ' (' + pct + '%)</td>' +
+                    '<td><span class="table-status ' + (a.locked ? 'table-status-warning' : 'table-status-success') + '">' + (a.locked ? 'Locked' : 'Open') + '</span></td>' +
+                    '<td><button class="btn btn-ghost btn-xs" data-toggle-id="' + a.id + '" title="' + (a.locked ? 'Unlock' : 'Lock') + '">' +
+                    '<i class="fa-solid ' + (a.locked ? 'fa-lock-open' : 'fa-lock') + '"></i></button></td>' +
                     '</tr>'
                 );
             }).join('');

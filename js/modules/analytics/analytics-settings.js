@@ -91,29 +91,29 @@
 
         modal.innerHTML =
             '<div class="filter-panel">' +
-                '<div class="filter-header"><h2><i class="fa-solid fa-sliders"></i> Analytics Settings</h2><button class="close-filter" id="as-close"><i class="fa-solid fa-xmark"></i></button></div>' +
-                '<div class="filter-body">' +
-                    '<div class="field"><label>Default Class</label><select id="as-class">' +
-                        CLASS_OPTIONS.map(function (o) { return '<option value="' + o.value + '"' + (o.value === settings.defaultClassId ? ' selected' : '') + '>' + esc(o.label) + '</option>'; }).join('') +
-                    '</select></div>' +
-                    '<div class="field"><label>Default Term</label><select id="as-term">' +
-                        TERM_OPTIONS.map(function (o) { return '<option value="' + o.value + '"' + (o.value === settings.defaultTerm ? ' selected' : '') + '>' + esc(o.label) + '</option>'; }).join('') +
-                    '</select></div>' +
-                    '<div class="field"><label>Default Subject</label><select id="as-subject">' +
-                        SUBJECT_OPTIONS.map(function (o) { return '<option value="' + o.value + '"' + (o.value === settings.defaultSubject ? ' selected' : '') + '>' + esc(o.label) + '</option>'; }).join('') +
-                    '</select></div>' +
-                    '<div class="field"><label>At-Risk Threshold (%)</label><input type="number" id="as-threshold" min="0" max="100" value="' + settings.atRiskThreshold + '" /></div>' +
-                    '<div class="field"><label>Trend Chart Type</label><select id="as-chart-type">' +
-                        '<option value="line"' + (settings.trendChartType === 'line' ? ' selected' : '') + '>Line</option>' +
-                        '<option value="bar"' + (settings.trendChartType === 'bar' ? ' selected' : '') + '>Bar</option>' +
-                    '</select></div>' +
-                    '<div class="field"><label>Auto-Refresh (minutes, 0 = off)</label><input type="number" id="as-refresh" min="0" max="60" value="' + settings.autoRefreshMinutes + '" /></div>' +
-                '</div>' +
-                '<div class="filter-footer">' +
-                    '<button class="btn-primary" id="as-save">Save Settings</button>' +
-                    '<button class="btn-ghost" id="as-reset">Reset to Defaults</button>' +
-                    '<button class="btn-danger" id="as-cancel" style="margin-left:auto;">Cancel</button>' +
-                '</div>' +
+            '<div class="filter-header"><h2><i class="fa-solid fa-sliders"></i> Analytics Settings</h2><button class="close-filter" id="as-close"><i class="fa-solid fa-xmark"></i></button></div>' +
+            '<div class="filter-body">' +
+            '<div class="field"><label>Default Class</label><select id="as-class">' +
+            CLASS_OPTIONS.map(function (o) { return '<option value="' + o.value + '"' + (o.value === settings.defaultClassId ? ' selected' : '') + '>' + esc(o.label) + '</option>'; }).join('') +
+            '</select></div>' +
+            '<div class="field"><label>Default Term</label><select id="as-term">' +
+            TERM_OPTIONS.map(function (o) { return '<option value="' + o.value + '"' + (o.value === settings.defaultTerm ? ' selected' : '') + '>' + esc(o.label) + '</option>'; }).join('') +
+            '</select></div>' +
+            '<div class="field"><label>Default Subject</label><select id="as-subject">' +
+            SUBJECT_OPTIONS.map(function (o) { return '<option value="' + o.value + '"' + (o.value === settings.defaultSubject ? ' selected' : '') + '>' + esc(o.label) + '</option>'; }).join('') +
+            '</select></div>' +
+            '<div class="field"><label>At-Risk Threshold (%)</label><input type="number" id="as-threshold" min="0" max="100" value="' + settings.atRiskThreshold + '" /></div>' +
+            '<div class="field"><label>Trend Chart Type</label><select id="as-chart-type">' +
+            '<option value="line"' + (settings.trendChartType === 'line' ? ' selected' : '') + '>Line</option>' +
+            '<option value="bar"' + (settings.trendChartType === 'bar' ? ' selected' : '') + '>Bar</option>' +
+            '</select></div>' +
+            '<div class="field"><label>Auto-Refresh (minutes, 0 = off)</label><input type="number" id="as-refresh" min="0" max="60" value="' + settings.autoRefreshMinutes + '" /></div>' +
+            '</div>' +
+            '<div class="filter-footer">' +
+            '<button class="btn-primary" id="as-save">Save Settings</button>' +
+            '<button class="btn-ghost" id="as-reset">Reset to Defaults</button>' +
+            '<button class="btn-danger" id="as-cancel" style="margin-left:auto;">Cancel</button>' +
+            '</div>' +
             '</div>';
 
         document.body.appendChild(modal);

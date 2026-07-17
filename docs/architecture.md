@@ -46,8 +46,10 @@ Files under `js/modules/` are **not** listed in `index.html`. `core/router.js` l
 
 1. `navigateTo(moduleId)` looks up `moduleId` in `MODULE_FILE_MAP` (in `router.js`).
 2. Each entry is either a single file path, or an **array** of paths for pages that split into a data-layer file + a render-page file (see below). Files load in array order via `document.createElement('script')`, appended to `<head>` — same shared global scope as everything else.
-3. Once loaded, the router calls `window[moduleIdToRenderFn(moduleId)]` — a mechanical conversion, e.g. `'grading-scale'` → `renderGradingScale`. **The last file in an array mapping must be the one that exposes that exact function name.**
+3. Once loaded, the router calls `window[moduleIdToRenderFn(moduleId)](container, params)` — `moduleIdToRenderFn` is a mechanical conversion, e.g. `'grading-scale'` → `renderGradingScale`. **The last file in an array mapping must be the one that exposes that exact function name.** `container` is `document.getElementById('moduleContent')` — the real "Dynamic content rendered here" element in `index.html`, **not** `#app` (the whole shell, sidebar/topbar included) and not `#app-main` (referenced in a few file header comments, but that id doesn't actually exist anywhere). Every top-level page module's render function must accept `container` as its first argument — this convention is uniform across every author in this codebase (settings/, staff/, academics/, dashboard/, attendance/, students/, communication/).
 4. Loaded files are tracked by file path (not by moduleId) in `_loadedFiles`, so a companion file shared across multiple pages (e.g. `staff/teachers.js`, used by three different staff pages) is only ever injected once.
+
+> This container-passing step was broken for a long stretch of this project's history — `navigateTo` called `renderFn(params)` with no container at all, so no page could ever render anything visible, with no console error to show for it. See `troubleshooting.md` for the full story if you're chasing something that smells similar.
 
 ### The data-layer / render-page split
 

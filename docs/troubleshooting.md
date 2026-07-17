@@ -2,7 +2,15 @@
 
 ## "Nothing happens" / a page is completely blank after clicking a nav item
 
-Open the browser console first — nearly every failure mode in this app surfaces there as an uncaught error, not a silent failure.
+Open the browser console first — nearly every failure mode in this app surfaces there as an uncaught error, not a silent failure. If the console is also silent and the page is just blank, see the very next section — that exact symptom (blank page, no error) was caused by a critical bug for most of this project's history.
+
+### Every render function must accept `render(container)` — a real DOM element, not `params`
+
+`core/router.js`'s `navigateTo()` used to call every page's render function as `renderFn(params)` (the navigation options object) instead of passing a container element — since setting `.innerHTML` on a plain object silently succeeds and throws nothing, **no page rendered anything visible, ever, on any navigation**, with zero console errors. This was the single most severe bug found in this project. Fixed: `navigateTo()` now derives `document.getElementById('moduleContent')` (the actual "Dynamic content rendered here" element in `index.html`) and calls `renderFn(moduleContainer, params)`.
+
+**If you're writing a new page module**, its top-level render function must be `function renderX(container) { container.innerHTML = ...; }` — `container` will be `#moduleContent`, not `#app` (the whole shell including sidebar/topbar) and not `#app-main` (referenced in some file header comments, but that id doesn't actually exist in `index.html`).
+
+**Related bugs in the same area, both fixed:** `_showModuleSkeleton()` (router.js) and `safeRenderModule()`'s error path (`error-handler.js`) both used to replace the *entire* `#app` element — sidebar and topbar included — instead of just `#moduleContent`, on every navigation and every render error respectively. If you ever see the sidebar/topbar disappear after clicking a nav item, check these two functions target `#moduleContent`, not `#app`.
 
 ### `Uncaught SyntaxError: Identifier 'X' has already been declared`
 
@@ -27,7 +35,15 @@ The mirror-image bug: something is *used* as a bare identifier but never declare
 grep -rn "\bNAME\b" js/ --include="*.js"       # everywhere it's used
 grep -rn "^const NAME\|^function NAME" js/ --include="*.js"   # where it's (supposedly) defined
 ```
-If the second command returns nothing, it was never defined — check for a typo'd near-miss (e.g. `APP_CONFIG.maxLoginAttempts` vs the referenced `APP_CONFIG.maxFailedLogins`) before adding a fresh definition.
+If the second command returns nothing, it was never defined — check for a typo'd near-miss (e.g. `APP_CONFIG.maxLoginAttempts` vs the referenced `APP_CONFIG.maxFailedLogins`) before adding a fresh definition. `DEFAULT_MODULE` (used as `DEFAULT_MODULE[role]` in 5 places, including the post-login redirect) hit this same bug.
+
+### Login page / `#login-root`
+
+`ui/shell.js`'s `showApp()`/`showLogin()` reference a `#login-root` element that doesn't exist anywhere in `index.html` — those show/hide calls silently no-op. `core/auth.js`'s `renderLoginPage()` renders the login markup directly into `#app` instead. This connects to the larger known gap that all of `html/partials/` is still empty (see `setup-guide.md`) — building `login.html` properly should include adding the `#login-root` element `shell.js` expects.
+
+### Dead code with a misleading doc comment
+
+`core/sanitizers.js`'s `renderApp()` has a comment claiming it's "the main render function used by all modules" — it isn't; nothing in the codebase calls it. Don't assume a function is load-bearing just because its comment says so; check for actual call sites first (`grep -rn "functionName(" js/`).
 
 ### A router-loaded page renders blank with no console error
 

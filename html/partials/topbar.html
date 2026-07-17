@@ -1,0 +1,134 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+     html/partials/topbar.html
+     ═══════════════════════════════════════════════════════════════════
+     Fetched by js/ui/shell.js and injected into the <header class="topbar">
+     already present in index.html's inline shell.
+
+     Structure and ids taken from sidebar.zip's topbar-sidebar.html
+     mockup, adapted to:
+       - drop the hardcoded "UWAYO GANZA" placeholder and 68%/24-days
+         placeholder values (populated at runtime by shell.js from
+         core/state.js instead — this fragment ships empty/zero states)
+       - use the confirmed real button convention from ui/topbar.js's
+         wiring pattern (data-action attributes, not inline onclick=)
+       - route Settings/Help through the real nav ids from
+         js/config/navigation.js ('school-settings', 'help-center')
+         rather than the mockup's shorter 'settings'/'help'
+
+     Styled entirely by css/components/topbar.css. No inline styles.
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<!-- ═══ ROW 1 ═══ -->
+<div class="topbar-row1">
+
+    <div class="topbar-left">
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar" data-action="toggle-sidebar">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="page-title-group">
+            <div class="page-title" id="pageTitle"><span class="highlight">—</span></div>
+            <div class="page-subtitle" id="pageSubtitle">Ecole La Fontaine</div>
+        </div>
+    </div>
+
+    <div class="topbar-center">
+        <div class="date-display">
+            <span class="date-icon"><i class="fa-regular fa-calendar"></i></span>
+            <span class="date-text">
+                <span class="day" id="currentDay">—</span>
+                <span id="currentMonth">—</span>
+                <span class="year" id="currentYear">—</span>
+            </span>
+            <span class="divider"></span>
+            <span class="time-text" id="currentTime">—:—</span>
+        </div>
+    </div>
+
+    <div class="topbar-right">
+
+        <button class="install-btn" id="installBtn" data-action="install-app" style="display:none;">
+            <i class="fa-solid fa-download"></i>
+            Install
+        </button>
+
+        <button class="icon-btn" id="notifBtn" data-action="open-notifications" title="Notifications">
+            <i class="fa-solid fa-bell"></i>
+            <span class="notif-count" id="notifCount" style="display:none;">0</span>
+        </button>
+
+        <div class="user-menu" id="userMenu" data-action="toggle-user-dropdown">
+            <div class="user-avatar" id="topbarUserAvatar">—</div>
+            <div class="user-info">
+                <span class="name" id="topbarUserName">—</span>
+                <span class="role" id="topbarUserRole">—</span>
+            </div>
+            <span class="chevron"><i class="fa-solid fa-chevron-down"></i></span>
+
+            <div class="dropdown" id="userDropdown">
+                <div class="dropdown-header">
+                    <div class="user-avatar" id="topbarUserAvatarDropdown">—</div>
+                    <div class="user-info">
+                        <span class="name" id="topbarUserNameDropdown">—</span>
+                    </div>
+                </div>
+                <div class="dropdown-divider"></div>
+                <button class="dropdown-item" data-action="show-profile">
+                    <span class="icon"><i class="fa-solid fa-user"></i></span>
+                    <span class="label">My Profile</span>
+                </button>
+                <button class="dropdown-item" data-action="change-password">
+                    <span class="icon"><i class="fa-solid fa-key"></i></span>
+                    <span class="label">Change Password</span>
+                </button>
+                <button class="dropdown-item" data-action="toggle-theme">
+                    <span class="icon"><i class="fa-solid fa-moon" id="dropdownThemeIcon"></i></span>
+                    <span class="label" id="dropdownThemeLabel">Dark Mode</span>
+                </button>
+                <div class="dropdown-divider"></div>
+                <button class="dropdown-item" data-nav="school-settings">
+                    <span class="icon"><i class="fa-solid fa-gear"></i></span>
+                    <span class="label">Settings</span>
+                </button>
+                <button class="dropdown-item" data-nav="help-center">
+                    <span class="icon"><i class="fa-solid fa-circle-question"></i></span>
+                    <span class="label">Help Center</span>
+                </button>
+                <div class="dropdown-divider"></div>
+                <button class="dropdown-item danger" data-action="logout">
+                    <span class="icon"><i class="fa-solid fa-right-from-bracket"></i></span>
+                    <span class="label">Sign Out</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ═══ ROW 2 — Academic Period Strip ═══ -->
+<div class="topbar-row2">
+
+    <div class="year-badge">
+        <span class="status-dot active" id="yearStatus"></span>
+        <span>Year:</span>
+        <strong id="academicYear">—</strong>
+    </div>
+
+    <div class="term-badge">
+        <strong id="termDisplay">—</strong>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+        </div>
+        <span class="progress-text" id="progressText">0%</span>
+    </div>
+
+    <span class="phase-badge" id="phaseBadge">—</span>
+
+    <span class="days-remaining">
+        <i class="fa-regular fa-clock" style="opacity:0.5;"></i>
+        <strong id="daysLeft">—</strong> days left
+    </span>
+
+</div>

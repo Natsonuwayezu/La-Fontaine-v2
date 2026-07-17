@@ -1,0 +1,56 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+     html/partials/footer.html
+     ═══════════════════════════════════════════════════════════════════
+     Fetched by js/ui/shell.js and injected into the
+     <footer class="app-footer" id="appFooter"> already present in
+     index.html's inline shell (confirmed: "Rendered by js/ui/shell.js"
+     comment sits inside that exact element).
+
+     NOTE: no CSS file in the repo defines .app-footer at all — not in
+     css/layouts/, not in css/components/, not in any theme file (grep
+     across the whole css/ tree came back empty). Rather than ship an
+     unstyled footer, a small scoped <style> block is included below
+     using the same confirmed variable names used everywhere else
+     (--text-soft, --border-light) so it matches the rest of the shell
+     immediately. Delete the <style> block if/when a real
+     css/components/footer.css gets written.
+
+     Content: school name, version, and the live clock element that
+     several of the standalone dashboard modules already reference by
+     id (id="footerTime" — confirmed in admin-dashboard.js,
+     accountant-dashboard.js, teacher-dashboard.js's updateClock()
+     functions, all of which do
+     document.getElementById('footerTime').textContent = ...). Since
+     the shell now owns this footer instead of each dashboard
+     duplicating its own, dashboards should stop rendering their own
+     "ECOLE LA FONTAINE · v9.0 · <time>" line and defer to this one —
+     flagging that here rather than silently leaving two clocks on
+     screen at once.
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<style>
+    .app-footer {
+        text-align: center;
+        font-size: 12px;
+        color: var(--text-soft, #6b5f56);
+        padding: 14px 0 4px;
+        border-top: 1px solid var(--border-light, #e8e0d8);
+    }
+
+    .app-footer span {
+        margin: 0 4px;
+    }
+
+    .app-footer a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .app-footer a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+ECOLE LA FONTAINE · School Management System
+<span>·</span> v9.0
+<span>·</span> <span id="footerTime">—</span>

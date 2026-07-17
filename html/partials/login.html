@@ -1,0 +1,105 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+     html/partials/login.html
+     ═══════════════════════════════════════════════════════════════════
+     A fragment injected into #app by core/auth.js BEFORE the sidebar/
+     topbar shell renders, and removed (or hidden) once a session is
+     established. auth.js currently doesn't exist yet, so nothing
+     wires this in today — this is the markup it should inject.
+
+     No login markup existed anywhere in the project (checked both
+     zips directly: sidebar.zip has no login.html/login mockup, and
+     index.html has no #loginPage element) — css/modules/login.css
+     (764 lines, fully written, confirmed) was sitting unused with
+     nothing built against it. This fragment is built fresh against
+     that file's real, verified structure: .particles-bg, .login-scene,
+     .card-wrap, .neon-border (rotating gradient), .login-card
+     (glassmorphism), .fold-cover (opening animation), .logo-box,
+     .school-name, .login-form, password toggle, .login-btn,
+     .login-alert, .biometric-btn.
+
+     Particle count/positions are seeded here with varied inline
+     left/animation-delay/animation-duration/size so the background
+     animates immediately even before any JS runs (login.css only
+     defines the shared .particle look + keyframes, not per-particle
+     placement — that has to come from markup or a script).
+
+     core/auth.js is expected to:
+       - wire #loginForm's submit to its real authentication call
+       - toggle .fold-cover open on successful login (per login.css's
+         "FOLD COVER — Opening Animation" section)
+       - show #loginAlert with a message on failure
+       - remove/hide this whole fragment once a session exists
+
+     Styled entirely by css/modules/login.css. No inline styles other
+     than the particle placement noted above.
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<div class="particles-bg" id="loginParticles" aria-hidden="true">
+    <div class="particle" style="left:6%;  width:10px; height:10px; animation-duration:22s; animation-delay:-2s;"></div>
+    <div class="particle" style="left:14%; width:6px;  height:6px;  animation-duration:18s; animation-delay:-9s;"></div>
+    <div class="particle" style="left:22%; width:14px; height:14px; animation-duration:26s; animation-delay:-4s;"></div>
+    <div class="particle" style="left:31%; width:8px;  height:8px;  animation-duration:20s; animation-delay:-14s;"></div>
+    <div class="particle" style="left:40%; width:5px;  height:5px;  animation-duration:16s; animation-delay:-6s;"></div>
+    <div class="particle" style="left:49%; width:12px; height:12px; animation-duration:24s; animation-delay:-11s;"></div>
+    <div class="particle" style="left:58%; width:7px;  height:7px;  animation-duration:19s; animation-delay:-3s;"></div>
+    <div class="particle" style="left:66%; width:9px;  height:9px;  animation-duration:23s; animation-delay:-17s;"></div>
+    <div class="particle" style="left:74%; width:6px;  height:6px;  animation-duration:17s; animation-delay:-8s;"></div>
+    <div class="particle" style="left:82%; width:13px; height:13px; animation-duration:27s; animation-delay:-1s;"></div>
+    <div class="particle" style="left:90%; width:8px;  height:8px;  animation-duration:21s; animation-delay:-13s;"></div>
+    <div class="particle" style="left:96%; width:10px; height:10px; animation-duration:25s; animation-delay:-19s;"></div>
+</div>
+
+<div class="login-scene" id="loginScene">
+    <div class="card-wrap" id="loginCardWrap">
+        <div class="neon-border" aria-hidden="true"></div>
+
+        <div class="login-card" id="loginCard">
+            <div class="fold-cover" id="loginFoldCover" aria-hidden="true"></div>
+
+            <div class="login-content">
+
+                <div class="logo-box">
+                    <i class="fa-solid fa-school"></i>
+                </div>
+
+                <div class="school-name">
+                    <div class="name">ECOLE LA FONTAINE</div>
+                    <div class="tagline">Rubavu, Rwanda · Trilingual Nursery &amp; Primary School</div>
+                </div>
+
+                <div class="login-alert" id="loginAlert" role="alert" style="display:none;">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span id="loginAlertMessage">Incorrect username or password.</span>
+                </div>
+
+                <form class="login-form" id="loginForm" autocomplete="on">
+                    <div class="username-field">
+                        <label for="loginUsername">Username</label>
+                        <input type="text" id="loginUsername" name="username" autocomplete="username" required autofocus />
+                    </div>
+
+                    <div class="password-field">
+                        <label for="loginPassword">Password</label>
+                        <div style="position:relative;">
+                            <input type="password" id="loginPassword" name="password" autocomplete="current-password" required />
+                            <button type="button" class="password-toggle" id="loginPasswordToggle" aria-label="Show password">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="login-btn" id="loginSubmitBtn">
+                        <span class="label">Sign In</span>
+                        <span class="spinner" id="loginSpinner" style="display:none;" aria-hidden="true"></span>
+                    </button>
+
+                    <button type="button" class="biometric-btn" id="loginBiometricBtn" style="display:none;">
+                        <i class="fa-solid fa-fingerprint"></i>
+                        Sign in with biometrics
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>

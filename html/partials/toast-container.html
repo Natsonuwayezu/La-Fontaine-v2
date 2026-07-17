@@ -1,0 +1,23 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+     html/partials/toast-container.html
+     ═══════════════════════════════════════════════════════════════════
+     Fetched by js/ui/shell.js and appended once to <body>. This is
+     the actual container js/ui/toast.js's showToast() writes into —
+     confirmed by reading that file directly: it calls
+     getToastContainer(), which looks for id="toastContainer" and
+     creates one if missing. Shipping it here means toast.js finds it
+     immediately instead of falling back to its own on-the-fly
+     creation.
+
+     Individual toast elements are NOT included here — toast.js builds
+     each one dynamically per call (icon from TOAST_ICONS, color from
+     TOAST_COLORS, dismiss button, etc.), matching what was already
+     confirmed in that file. This fragment only provides the empty
+     container shell and position modifier.
+
+     Styled entirely by css/components/toast.css. No inline styles.
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true">
+    <!-- Individual .toast elements are appended here at runtime by js/ui/toast.js -->
+</div>

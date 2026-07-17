@@ -1,0 +1,288 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+     html/partials/sidebar.html
+     ═══════════════════════════════════════════════════════════════════
+     Fetched by js/ui/shell.js and injected into the <aside class="sidebar">
+     already present in index.html's inline shell — specifically into
+     the three empty targets: #sidebarHeader, #sidebarNav, #sidebarFooter.
+
+     This fragment does NOT include the <aside> wrapper itself (that
+     stays in index.html); it's the three inner pieces, concatenated,
+     so shell.js can either inject them as one fetch or split this file
+     into three by the HTML comment markers below if it prefers finer
+     control.
+
+     Markup pattern taken from sidebar.zip's topbar-sidebar.html mockup;
+     nav groups/items/icons/descriptions are the REAL data from
+     js/config/navigation.js's NAV_SECTIONS (not the mockup's own
+     shorter placeholder list) so this fragment doesn't drift from the
+     canonical registry. Every data-module id below matches a route
+     that's either already implemented (dashboards, academics,
+     communication, students, bulk, analytics) or still pending
+     (finance, staff, settings, holidays, help) per SMS_AUDIT.md — the
+     nav item exists either way since navigation.js already registers it.
+
+     Styled entirely by css/components/sidebar.css. No inline styles.
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<!-- ═══ #sidebarHeader ═══ -->
+<div class="sidebar-header" id="sidebarHeaderFragment">
+    <div class="school-brand">
+        <div class="logo-box" id="logoBox"><i class="fa-solid fa-school"></i></div>
+        <div class="brand-text">
+            <div class="brand-name">ECOLE LA FONTAINE</div>
+            <div class="brand-sub">School Management System</div>
+        </div>
+    </div>
+
+    <div class="badge-row">
+        <span class="badge-pill" id="yearBadge" data-action="toggle-badge-dropdown" data-target="yearDropdown">
+            <span class="dot green" id="yearDot"></span>
+            <strong id="currentYearLabel">—</strong>
+            <i class="fa-solid fa-chevron-down" style="font-size:12px;opacity:0.6;"></i>
+        </span>
+        <div class="badge-dropdown" id="yearDropdown">
+            <!-- Populated by js/config/academic-years.js (or a settings module) at runtime -->
+        </div>
+
+        <span class="badge-pill" id="termBadge" data-action="toggle-badge-dropdown" data-target="termDropdown">
+            <span class="dot blue" id="termDot"></span>
+            <strong id="currentTermLabel">—</strong>
+            <i class="fa-solid fa-chevron-down" style="font-size:12px;opacity:0.6;"></i>
+        </span>
+        <div class="badge-dropdown" id="termDropdown">
+            <!-- Populated at runtime -->
+        </div>
+
+        <button class="faq-button" data-nav="help-center" title="Help &amp; Support">
+            <i class="fa-solid fa-circle-question"></i>
+        </button>
+    </div>
+</div>
+
+<!-- ═══ #sidebarNav ═══ -->
+<nav class="sidebar-nav" id="sidebarNavFragment">
+
+    <div class="nav-section-label">Overview</div>
+    <div class="nav-group" id="grp-dashboard" data-section="dashboard">
+        <div class="nav-group-header" data-action="toggle-group" data-group="dashboard">
+            <i class="fa-solid fa-table-cells-large"></i>
+            <span class="label">Dashboard</span>
+            <i class="fa-solid fa-chevron-right nav-chevron"></i>
+        </div>
+        <div class="nav-children" id="ch-dashboard">
+            <div class="nav-children-inner">
+                <div class="nav-child" data-module="admin-dashboard"><span class="child-dot"></span>Admin Dashboard
+                </div>
+                <div class="nav-child" data-module="accountant-dashboard"><span class="child-dot"></span>Accountant
+                    Dashboard</div>
+                <div class="nav-child" data-module="teacher-dashboard"><span class="child-dot"></span>Teacher Dashboard
+                </div>
+                <div class="nav-child" data-module="analytics"><span class="child-dot"></span>Academic Analytics</div>
+                <div class="nav-child" data-module="finance-dashboard"><span class="child-dot"></span>Finance Dashboard
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-section-label">Management &amp; Reports</div>
+
+    <div class="nav-group" id="grp-comms" data-section="comms">
+        <div class="nav-group-header" data-action="toggle-group" data-group="comms">
+            <i class="fa-solid fa-comments"></i>
+            <span class="label">Communication</span>
+            <i class="fa-solid fa-chevron-right nav-chevron"></i>
+        </div>
+        <div class="nav-children" id="ch-comms">
+            <div class="nav-children-inner">
+                <div class="nav-child" data-module="notifications"><span class="child-dot"></span>Notifications <span
+                        class="child-badge" id="nav-badge-notifications">3</span></div>
+                <div class="nav-child" data-module="announcements"><span class="child-dot"></span>Announcements</div>
+                <div class="nav-child" data-module="reminders"><span class="child-dot"></span>Reminders</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-group" id="grp-attendance" data-section="attendance">
+        <div class="nav-group-header" data-action="toggle-group" data-group="attendance">
+            <i class="fa-solid fa-clipboard-check"></i>
+            <span class="label">Attendance</span>
+            <i class="fa-solid fa-chevron-right nav-chevron"></i>
+        </div>
+        <div class="nav-children" id="ch-attendance">
+            <div class="nav-children-inner">
+                <div class="nav-child" data-module="attendance"><span class="child-dot"></span>Record Attendance</div>
+                <div class="nav-child" data-module="attendance-reports"><span class="child-dot"></span>Reports</div>
+                <div class="nav-child" data-module="attendance-summary"><span class="child-dot"></span>Summary</div>
+                <div class="nav-child" data-module="attendance-analytics"><span class="child-dot"></span>Analytics</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-group" id="grp-students" data-section="students">
+        <div class="nav-group-header" data-action="toggle-group" data-group="students">
+            <i class="fa-solid fa-users"></i>
+            <span class="label">Students</span>
+            <i class="fa-solid fa-chevron-right nav-chevron"></i>
+        </div>
+        <div class="nav-children" id="ch-students">
+            <div class="nav-children-inner">
+                <div class="nav-child" data-module="student-list"><span class="child-dot"></span>All Students</div>
+                <div class="nav-child" data-module="enroll-student"><span class="child-dot"></span>Enroll Student</div>
+                <div class="nav-child" data-module="student-details"><span class="child-dot"></span>Student Profile
+                </div>
+                <div class="nav-child" data-module="family-management"><span class="child-dot"></span>Family Management
+                </div>
+                <div class="nav-child" data-module="student-archive"><span class="child-dot"></span>Archive</div>
+                <div class="nav-child" data-module="student-fee-status"><span class="child-dot"></span>Student Fee
+                    Status</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-group" id="grp-academics" data-section="academics">
+        <div class="nav-group-header" data-action="toggle-group" data-group="academics">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span class="label">Academics</span>
+            <i class="fa-solid fa-chevron-right nav-chevron"></i>
+        </div>
+        <div class="nav-children" id="ch-academics">
+            <div class="nav-children-inner">
+                <div class="nav-child" data-module="assessments"><span class="child-dot"></span>Assessments</div>
+                <div class="nav-child" data-module="marks-entry"><span class="child-dot"></span>Marks Entry</div>
+                <div class="nav-child" data-module="marks-database"><span class="child-dot"></span>Marks Database</div>
+                <div class="nav-child" data-module="class-register"><span class="child-dot"></span>Class Register</div>
+                <div class="nav-child" data-module="report-cards"><span class="child-dot"></span>Report Cards</div>
+                <div class="nav-child" data-module="transcripts"><span class="child-dot"></span>Transcripts</div>
+                <div class="nav-child" data-module="statistics"><span class="child-dot"></span>Statistics</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-group" id="grp-holidays" data-section="holidays">
+        <div class="nav-group-header" data-action="toggle-group" data-group="holidays">
+            <i class="fa-solid fa-umbrella-beach"></i>
+            <span class="label">Holidays</span>
+            <i class="fa-solid fa-chevron-right nav-chevron"></i>
+        </div>
+        <div class="nav-children" id="ch-holidays">
+            <div class="nav-children-inner">
+                <div class="nav-child" data-module="holidays-marks"><span class="child-dot"></span>Holiday Marks</div>
+                <div class="nav-child" data-module="holidays-fees"><span class="child-dot"></span>Holiday Fees</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-group" id="grp-finance" data-section="finance">
+        <div class="nav-group-header" data-action="toggle-group" data-group="finance">
+            <i class="fa-solid fa-sack-dollar"></i>
+            <span class="label">Finance</span>
+            <i class="fa-solid fa-chevron-right nav-chevron"></i>
+        </div>
+        <div class="nav-children" id="ch-finance">
+            <div class="nav-children-inner">
+                <div class="nav-child" data-module="finance-dashboard"><span class="child-dot"></span>Finance Dashboard
+                </div>
+                <div class="nav-child" data-module="fee-structure"><span class="child-dot"></span>Fee Structure</div>
+                <div class="nav-child" data-module="record-payment"><span class="child-dot"></span>Record Payment</div>
+                <div class="nav-child" data-module="payment-history"><span class="child-dot"></span>Payment History
+                </div>
+                <div class="nav-child" data-module="receipts"><span class="child-dot"></span>Receipts</div>
+                <div class="nav-child" data-module="fee-waivers"><span class="child-dot"></span>Waivers / Discounts
+                </div>
+                <div class="nav-child" data-module="payment-reversals"><span class="child-dot"></span>Reversals</div>
+                <div class="nav-child" data-module="finance-audit"><span class="child-dot"></span>Finance Audit</div>
+                <div class="nav-child" data-module="family-fee-summary"><span class="child-dot"></span>Family Fee
+                    Summary</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-group" id="grp-staff" data-section="staff">
+        <div class="nav-group-header" data-action="toggle-group" data-group="staff">
+            <i class="fa-solid fa-chalkboard-user"></i>
+            <span class="label">Staff</span>
+            <i class="fa-solid fa-chevron-right nav-chevron"></i>
+        </div>
+        <div class="nav-children" id="ch-staff">
+            <div class="nav-children-inner">
+                <div class="nav-child" data-module="user-management"><span class="child-dot"></span>User Management
+                </div>
+                <div class="nav-child" data-module="class-management"><span class="child-dot"></span>Class / Subjects
+                </div>
+                <div class="nav-child" data-module="teacher-assignments"><span class="child-dot"></span>Teacher
+                    Assignments</div>
+                <div class="nav-child" data-module="teacher-performance"><span class="child-dot"></span>Teacher
+                    Performance</div>
+                <div class="nav-child" data-module="timetable"><span class="child-dot"></span>Timetable</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-group" id="grp-bulk" data-section="bulk">
+        <div class="nav-group-header" data-action="toggle-group" data-group="bulk">
+            <i class="fa-solid fa-layer-group"></i>
+            <span class="label">Bulk Operations</span>
+            <i class="fa-solid fa-chevron-right nav-chevron"></i>
+        </div>
+        <div class="nav-children" id="ch-bulk">
+            <div class="nav-children-inner">
+                <div class="nav-child" data-module="bulk-import"><span class="child-dot"></span>Bulk Import</div>
+                <div class="nav-child" data-module="bulk-export"><span class="child-dot"></span>Bulk Export</div>
+                <div class="nav-child" data-module="student-promotion"><span class="child-dot"></span>Student Promotion
+                </div>
+                <div class="nav-child" data-module="carry-forward"><span class="child-dot"></span>Carry Forward</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-section-label">System</div>
+
+    <div class="nav-group" id="grp-settings" data-section="settings">
+        <div class="nav-group-header" data-action="toggle-group" data-group="settings">
+            <i class="fa-solid fa-gear"></i>
+            <span class="label">Settings</span>
+            <i class="fa-solid fa-chevron-right nav-chevron"></i>
+        </div>
+        <div class="nav-children" id="ch-settings">
+            <div class="nav-children-inner">
+                <div class="nav-child" data-module="school-settings"><span class="child-dot"></span>School Settings
+                </div>
+                <div class="nav-child" data-module="academic-calendar"><span class="child-dot"></span>Academic Calendar
+                </div>
+                <div class="nav-child" data-module="grading-scale"><span class="child-dot"></span>Grading Settings</div>
+                <div class="nav-child" data-module="backup-restore"><span class="child-dot"></span>Backup &amp; Restore
+                </div>
+                <div class="nav-child" data-module="system-logs"><span class="child-dot"></span>System Logs</div>
+                <div class="nav-child" data-module="system-health"><span class="child-dot"></span>System Health</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-group" id="grp-help" data-section="help">
+        <div class="nav-group-header" data-action="toggle-group" data-group="help">
+            <i class="fa-solid fa-circle-question"></i>
+            <span class="label">Help</span>
+            <i class="fa-solid fa-chevron-right nav-chevron"></i>
+        </div>
+        <div class="nav-children" id="ch-help">
+            <div class="nav-children-inner">
+                <div class="nav-child" data-module="help-center"><span class="child-dot"></span>Help Center</div>
+                <div class="nav-child" data-module="faq"><span class="child-dot"></span>FAQ</div>
+                <div class="nav-child" data-module="support"><span class="child-dot"></span>Contact Support</div>
+            </div>
+        </div>
+    </div>
+
+</nav>
+
+<!-- ═══ #sidebarFooter ═══ -->
+<div class="sidebar-footer" id="sidebarFooterFragment">
+    <div class="user-profile" id="sidebarUserProfile" data-action="toggle-user-menu">
+        <div class="user-avatar" id="sidebarUserAvatar">—</div>
+        <div class="user-details">
+            <div class="user-name" id="sidebarUserName">—</div>
+            <div class="user-role" id="sidebarUserRole">—</div>
+        </div>
+        <i class="fa-solid fa-ellipsis-vertical"></i>
+    </div>
+</div>

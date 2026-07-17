@@ -1,0 +1,86 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+     html/partials/term-progress-bar.html
+     ═══════════════════════════════════════════════════════════════════
+     A standalone, reusable "how far through the current term are we"
+     strip — distinct from topbar.css's .progress-bar/.progress-fill
+     inside .topbar-row2 (that one lives permanently in the topbar;
+     this one is meant to be dropped into report cards, dashboards, or
+     anywhere else a quick term-progress readout is useful).
+
+     NOTE ON STYLING: only theme-override rules for this component
+     exist in the repo today — css/themes/light.css and
+     css/themes/dark.css both style .term-progress-bar /
+     .progress-label / .progress-track (confirmed by grep), and every
+     css/print/*.css file explicitly hides .term-progress-bar when
+     printing. But no base stylesheet defining the component's layout
+     (padding, flex structure, bar height, border-radius, transitions)
+     exists anywhere — css/components/term-progress-bar.css was
+     apparently planned but never created. Rather than ship markup
+     that depends on a nonexistent file and renders unstyled, the
+     component's base layout is included here as a scoped <style>
+     block using the same CSS variable names the theme files already
+     target (--bg-card, --border-light, --text-muted, --text-body,
+     --bg-tertiary) so it inherits the correct light/dark colors
+     immediately and matches those override rules exactly.
+
+     If a real css/components/term-progress-bar.css gets written
+     later, delete the <style> block below and this partial keeps
+     working unchanged.
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<style>
+    .term-progress-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 16px;
+        background: var(--bg-card, #fcfaf8);
+        border-bottom: 1px solid var(--border-light, #e8e0d8);
+    }
+
+    .term-progress-bar .progress-label {
+        font-size: 12px;
+        color: var(--text-muted, #a8988e);
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .term-progress-bar .progress-label strong {
+        color: var(--text-body, #2c241e);
+        font-weight: 600;
+    }
+
+    .term-progress-bar .progress-track {
+        flex: 1;
+        height: 6px;
+        border-radius: 99px;
+        background: var(--bg-tertiary, #f0ebe6);
+        overflow: hidden;
+    }
+
+    .term-progress-bar .progress-track .progress-fill {
+        height: 100%;
+        border-radius: 99px;
+        background: var(--role-primary, #2d1f3a);
+        transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .term-progress-bar .progress-pct {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-body, #2c241e);
+        min-width: 34px;
+        text-align: right;
+        flex-shrink: 0;
+    }
+</style>
+
+<div class="term-progress-bar" id="term-progress-bar">
+    <span class="progress-label">
+        <strong id="term-progress-term-label">Term 3</strong> · <span id="term-progress-days-left">—</span> days left
+    </span>
+    <div class="progress-track">
+        <div class="progress-fill" id="term-progress-fill" style="width: 0%;"></div>
+    </div>
+    <span class="progress-pct" id="term-progress-pct">0%</span>
+</div>

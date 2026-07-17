@@ -1,0 +1,163 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+     html/partials/empty-states.html
+     ═══════════════════════════════════════════════════════════════════
+     IMPORTANT — read before wiring this into anything.
+
+     js/ui/empty-states.js does NOT read this file. Every empty state
+     in the app is generated entirely in JavaScript at call time via
+     EmptyStates.renderInto(container, spec) or
+     EmptyStates.renderPreset(container, presetName, overrides) — that
+     file builds its own <div class="empty-state">...</div> markup
+     (with inline styles, not css/ classes) and injects it directly
+     into whatever container a module passes in. There is nothing for
+     a static partial to be fetched into.
+
+     So what is this file for? Two legitimate uses:
+       1. A <noscript> fallback — if JavaScript fails to load, module
+          containers would otherwise render nothing at all. Wiring
+          shell.js to drop this fragment's markup into #moduleContent
+          inside a <noscript> tag (or before boot.js finishes) gives
+          the visitor a real message instead of a blank page.
+       2. A visual reference for the six presets EmptyStates.js
+          defines, so a developer adding a new module's empty state
+          can see what each preset produces without opening dev tools.
+
+     The markup below intentionally mirrors renderInto()'s generated
+     structure and inline styles exactly (same class names:
+     .empty-state / .empty-state-icon / .empty-state-title /
+     .empty-state-message / .empty-state-action) so if a real CSS
+     module for empty states gets written later, these elements are
+     already the right shape to style.
+
+     Preset reference (matches EmptyStates.js's PRESETS registry):
+       noData, noSearchResults, noConnection, noAccess, noUpdates, noFees
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<!-- ═══ noData ═══ -->
+<div class="empty-state" data-preset="noData"
+    style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:48px 24px; min-height:240px;">
+    <div class="empty-state-icon"
+        style="font-size:64px; width:64px; height:64px; margin-bottom:16px; color:var(--text-muted, #a8988e); opacity:0.4; flex-shrink:0;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path
+                d="M3 7h18M3 7l2 13a2 2 0 0 0 2 1.8h10a2 2 0 0 0 2-1.8L21 7M3 7l1.5-3.5A2 2 0 0 1 6.34 2h11.32a2 2 0 0 1 1.84 1.5L21 7" />
+            <path d="M9 11h6" />
+        </svg>
+    </div>
+    <div class="empty-state-title"
+        style="font-size:20px; font-weight:700; color:var(--text-dark, #1a1410); margin-bottom:6px;">No records yet
+    </div>
+    <div class="empty-state-message"
+        style="font-size:14px; color:var(--text-soft, #6b5f56); max-width:420px; margin:0 auto 20px; line-height:1.6;">
+        Once data is added, it will show up here.
+    </div>
+</div>
+
+<!-- ═══ noSearchResults ═══ -->
+<div class="empty-state" data-preset="noSearchResults"
+    style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:48px 24px; min-height:240px;">
+    <div class="empty-state-icon"
+        style="font-size:64px; width:64px; height:64px; margin-bottom:16px; color:var(--text-muted, #a8988e); opacity:0.4; flex-shrink:0;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+            stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+        </svg>
+    </div>
+    <div class="empty-state-title"
+        style="font-size:20px; font-weight:700; color:var(--text-dark, #1a1410); margin-bottom:6px;">No matches found
+    </div>
+    <div class="empty-state-message"
+        style="font-size:14px; color:var(--text-soft, #6b5f56); max-width:420px; margin:0 auto 20px; line-height:1.6;">
+        Try adjusting your search terms or filters.
+    </div>
+</div>
+
+<!-- ═══ noConnection ═══ -->
+<div class="empty-state" data-preset="noConnection"
+    style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:48px 24px; min-height:240px;">
+    <div class="empty-state-icon"
+        style="font-size:64px; width:64px; height:64px; margin-bottom:16px; color:var(--text-muted, #a8988e); opacity:0.4; flex-shrink:0;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M1 1l22 22" />
+            <path d="M16.72 11.06a10.94 10.94 0 0 1 2.28 1.49" />
+            <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39" />
+            <path d="M10.71 5.05a16 16 0 0 1 11.87 3.95" />
+            <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88" />
+            <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+            <path d="M12 20h.01" />
+        </svg>
+    </div>
+    <div class="empty-state-title"
+        style="font-size:20px; font-weight:700; color:var(--text-dark, #1a1410); margin-bottom:6px;">Connection issue
+    </div>
+    <div class="empty-state-message"
+        style="font-size:14px; color:var(--text-soft, #6b5f56); max-width:420px; margin:0 auto 20px; line-height:1.6;">
+        Check your internet connection and try again.
+    </div>
+    <button class="btn btn-primary empty-state-action" data-empty-action>Retry</button>
+</div>
+
+<!-- ═══ noAccess ═══ -->
+<div class="empty-state" data-preset="noAccess"
+    style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:48px 24px; min-height:240px;">
+    <div class="empty-state-icon"
+        style="font-size:64px; width:64px; height:64px; margin-bottom:16px; color:var(--text-muted, #a8988e); opacity:0.4; flex-shrink:0;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+            stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+    </div>
+    <div class="empty-state-title"
+        style="font-size:20px; font-weight:700; color:var(--text-dark, #1a1410); margin-bottom:6px;">Access denied</div>
+    <div class="empty-state-message"
+        style="font-size:14px; color:var(--text-soft, #6b5f56); max-width:420px; margin:0 auto 20px; line-height:1.6;">
+        You don't have permission to view this section.
+    </div>
+</div>
+
+<!-- ═══ noUpdates ═══ -->
+<div class="empty-state" data-preset="noUpdates"
+    style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:48px 24px; min-height:240px;">
+    <div class="empty-state-icon"
+        style="font-size:64px; width:64px; height:64px; margin-bottom:16px; color:var(--text-muted, #a8988e); opacity:0.4; flex-shrink:0;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M22 12h-4l-3 4-3-4H2" />
+            <path d="M22 12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6z" />
+        </svg>
+    </div>
+    <div class="empty-state-title"
+        style="font-size:20px; font-weight:700; color:var(--text-dark, #1a1410); margin-bottom:6px;">No updates
+        available</div>
+    <div class="empty-state-message"
+        style="font-size:14px; color:var(--text-soft, #6b5f56); max-width:420px; margin:0 auto 20px; line-height:1.6;">
+        You're all caught up.
+    </div>
+</div>
+
+<!-- ═══ noFees ═══ -->
+<div class="empty-state" data-preset="noFees"
+    style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:48px 24px; min-height:240px;">
+    <div class="empty-state-icon"
+        style="font-size:64px; width:64px; height:64px; margin-bottom:16px; color:var(--text-muted, #a8988e); opacity:0.4; flex-shrink:0;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M20 6V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2" />
+            <path d="M16 14h.01" />
+            <path d="M20 10H4" />
+            <path d="M16 10v4" />
+        </svg>
+    </div>
+    <div class="empty-state-title"
+        style="font-size:20px; font-weight:700; color:var(--text-dark, #1a1410); margin-bottom:6px;">No fees assigned
+    </div>
+    <div class="empty-state-message"
+        style="font-size:14px; color:var(--text-soft, #6b5f56); max-width:420px; margin:0 auto 20px; line-height:1.6;">
+        This student has no fee records for the selected year.
+    </div>
+    <button class="btn btn-primary empty-state-action" data-empty-action>Assign Fees</button>
+</div>

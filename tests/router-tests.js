@@ -21,6 +21,11 @@ const { loadScripts, REPO_ROOT } = require('./helpers/load-scripts');
 beforeAll(() => {
     loadScripts([
         'js/config/constants.js',
+        'js/core/utils.js',
+        'js/core/state.js',
+        'js/core/logger.js',
+        'js/core/permissions.js',
+        'js/core/error-handler.js',
         'js/core/router.js',
     ]);
 });
@@ -60,6 +65,62 @@ describe('APP_NAME / APP_VERSION (regression: used to be undefined everywhere)',
     test('match the values in APP_CONFIG', () => {
         expect(APP_NAME).toBe(APP_CONFIG.name);
         expect(APP_VERSION).toBe(APP_CONFIG.version);
+    });
+});
+
+describe('safeRenderModule (regression: used to wipe #app instead of #moduleContent on error)', () => {
+    beforeEach(() => {
+        document.body.innerHTML = `
+            <div id="app">
+                <aside id="sidebar">SIDEBAR CONTENT</aside>
+                <div id="moduleContent"></div>
+            </div>
+        `;
+    });
+
+    test('a successful render leaves the sidebar untouched', async () => {
+        await safeRenderModule('test-module', () => {
+            document.getElementById('moduleContent').innerHTML = '<p>Page content</p>';
+        });
+        expect(document.getElementById('sidebar').textContent).toBe('SIDEBAR CONTENT');
+        expect(document.getElementById('moduleContent').innerHTML).toContain('Page content');
+    });
+
+    test('a failed render shows the error inside #moduleContent, not by wiping #app (regression)', async () => {
+        await safeRenderModule('test-module', () => {
+            throw new Error('Simulated render failure');
+        });
+        // The sidebar must still exist — #app itself must not have been wiped.
+        expect(document.getElementById('sidebar')).not.toBeNull();
+        expect(document.getElementById('sidebar').textContent).toBe('SIDEBAR CONTENT');
+        // The error UI should have landed in #moduleContent instead.
+        expect(document.getElementById('moduleContent').innerHTML).toContain('module-error');
+    });
+});
+
+describe('navigateTo passes a real container element to render functions (regression)', () => {
+    // A full behavioral test of navigateTo() isn't practical here: it calls
+    // loadModuleScript(), which injects a real <script src> tag — and jsdom
+    // doesn't execute or fetch dynamically-injected scripts by default, so
+    // that promise would simply never resolve. Instead, this asserts against
+    // the router's own source text that it derives #moduleContent and passes
+    // it into renderFn — a direct regression guard for the exact bug that
+    // was fixed (renderFn(params) instead of renderFn(container, params)).
+    const routerSource = fs.readFileSync(path.join(REPO_ROOT, 'js/core/router.js'), 'utf8');
+
+    test('derives #moduleContent as the render container', () => {
+        expect(routerSource).toMatch(/getElementById\(\s*['"]moduleContent['"]\s*\)/);
+    });
+
+    test('calls renderFn with the derived container, not with params alone', () => {
+        expect(routerSource).toMatch(/renderFn\(\s*moduleContainer\s*,\s*params\s*\)/);
+    });
+
+    test('the skeleton loader also targets #moduleContent, not #app (regression)', () => {
+        const skeletonFnMatch = routerSource.match(/function _showModuleSkeleton[\s\S]*?\n}/);
+        expect(skeletonFnMatch).not.toBeNull();
+        expect(skeletonFnMatch[0]).toMatch(/getElementById\(\s*['"]moduleContent['"]\s*\)/);
+        expect(skeletonFnMatch[0]).not.toMatch(/getElementById\(\s*['"]app['"]\s*\)/);
     });
 });
 

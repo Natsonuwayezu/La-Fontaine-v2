@@ -378,8 +378,19 @@ async function navigateTo(moduleId, params = {}) {
             );
         }
 
-        // Render the module safely
-        await safeRenderModule(moduleId, () => renderFn(params));
+        // Render the module safely — every render(container) function across
+        // this app (settings/, staff/, academics/, dashboard/, attendance/, ...)
+        // expects an actual DOM element as its first argument, not `params`.
+        // #moduleContent is the real dynamic-content target in index.html
+        // (the div literally commented "Dynamic content rendered here") —
+        // NOT #app (the whole shell, sidebar included) and not #app-main
+        // (referenced in some file header comments but not an id that
+        // actually exists in index.html).
+        const moduleContainer = document.getElementById('moduleContent');
+        if (!moduleContainer) {
+            throw new Error('#moduleContent element not found in the page — cannot render any module.');
+        }
+        await safeRenderModule(moduleId, () => renderFn(moduleContainer, params));
 
         // Apply role/holiday visibility overrides after render
         enforceRoleVisibility();
@@ -400,18 +411,18 @@ async function navigateTo(moduleId, params = {}) {
    ───────────────────────────────────────────────────────────────── */
 
 /**
- * Show a skeleton placeholder in #app while the module loads.
+ * Show a skeleton placeholder in #moduleContent while the module loads.
  * Instantly replaced by the real content when render() completes.
  */
 function _showModuleSkeleton(moduleId) {
-    const app = document.getElementById('app');
-    if (!app) return;
+    const container = document.getElementById('moduleContent');
+    if (!container) return;
 
     // Module title for skeleton heading
     const navItem = getNavItem(moduleId);
     const label = navItem?.label || moduleId;
 
-    app.innerHTML = `
+    container.innerHTML = `
         <div class="module-skeleton" aria-busy="true" aria-label="Loading ${esc(label)}">
             <div class="skeleton-header">
                 <div class="skeleton skeleton-title"></div>

@@ -218,9 +218,9 @@ async function safeRenderModule(moduleId, renderFn) {
     } catch (err) {
         _handleError(err, `render:${moduleId}`);
 
-        const app = document.getElementById('app');
-        if (app) {
-            app.innerHTML = `
+        const container = document.getElementById('moduleContent');
+        if (container) {
+            container.innerHTML = `
                 <div class="module-error" role="alert">
                     <div class="module-error-inner">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none"

@@ -43,6 +43,19 @@ const APP_CONFIG = {
 const APP_NAME = APP_CONFIG.name;
 const APP_VERSION = APP_CONFIG.version;
 
+// Used as DEFAULT_MODULE[role] in 5 places across core/error-handler.js,
+// core/router.js, core/boot.js, and core/auth.js (x2, including the
+// post-login redirect — hit on every successful login) but was never
+// defined anywhere. Mirrors config/navigation.js's getDefaultModule(role)
+// function, which has the same per-role mapping — kept as a separate
+// object here since all 5 call sites use object-indexing (DEFAULT_MODULE[role]),
+// not a function call.
+const DEFAULT_MODULE = {
+  admin: 'admin-dashboard',
+  accountant: 'accountant-dashboard',
+  teacher: 'teacher-dashboard',
+};
+
 // ──────────────────────────────────────────────────────────────────────
 // SCHOOL METADATA
 // ──────────────────────────────────────────────────────────────────────
@@ -800,6 +813,7 @@ if (typeof window !== 'undefined') {
   window.APP_CONFIG = APP_CONFIG;
   window.APP_NAME = APP_NAME;
   window.APP_VERSION = APP_VERSION;
+  window.DEFAULT_MODULE = DEFAULT_MODULE;
   window.APP_META = APP_META;
   window.CURRENCY = CURRENCY;
   window.CLASS_LEVELS = CLASS_LEVELS;

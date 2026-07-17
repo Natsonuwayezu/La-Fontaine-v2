@@ -1,0 +1,1127 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+   RANKING TEMPLATE — ECOLE LA FONTAINE
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: Printable class rankings template. Used by ranking-engine.js
+   and class-register.js for generating PDF/print views.
+   Uses Font Awesome icons only — no emojis.
+   ═══════════════════════════════════════════════════════════════════ -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Class Rankings — ECOLE LA FONTAINE</title>
+
+    <!-- Font Awesome (for print compatibility) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- Google Fonts (fallback) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+        /* ═══════════════════════════════════════════════════════════════════
+           ROOT — Print & Screen Styles
+           ═══════════════════════════════════════════════════════════════════ */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --ranking-primary: #2d1f3a;
+            --ranking-secondary: #7a5a7a;
+            --ranking-accent: #c9a84c;
+            --ranking-bg: #fcfaf8;
+            --ranking-text: #1a1410;
+            --ranking-text-muted: #6b5f56;
+            --ranking-border: #e8e0d8;
+            --ranking-success: #3a7a5a;
+            --ranking-warning: #b8983a;
+            --ranking-danger: #c45a4a;
+            --ranking-gold: #c9a84c;
+            --ranking-silver: #b8b0a8;
+            --ranking-bronze: #cd8a6a;
+            --ranking-shadow: 0 4px 24px rgba(26, 20, 16, 0.08);
+            --ranking-radius: 12px;
+        }
+
+        body {
+            font-family: 'DM Sans', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f0eb;
+            color: var(--ranking-text);
+            padding: 24px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ─── Ranking Container ──────────────────────────────────────────── */
+        .ranking-container {
+            max-width: 1100px;
+            width: 100%;
+            background: var(--ranking-bg);
+            border-radius: var(--ranking-radius);
+            box-shadow: var(--ranking-shadow);
+            overflow: hidden;
+            border: 1px solid var(--ranking-border);
+        }
+
+        /* ─── Header ────────────────────────────────────────────────────── */
+        .ranking-header {
+            background: linear-gradient(135deg, var(--ranking-primary), #4d2f4a);
+            color: #f5f0eb;
+            padding: 28px 36px 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ranking-header::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.04);
+            pointer-events: none;
+        }
+
+        .ranking-header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ranking-header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .ranking-logo {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #f5f0eb;
+            flex-shrink: 0;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .ranking-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+
+        .ranking-header-title {
+            font-family: 'Syne', 'Playfair Display', serif;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            line-height: 1.2;
+        }
+
+        .ranking-header-title span {
+            color: var(--ranking-accent);
+        }
+
+        .ranking-header-sub {
+            font-size: 12px;
+            opacity: 0.7;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            margin-top: 2px;
+        }
+
+        .ranking-header-right {
+            text-align: right;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ranking-header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: 99px;
+            background: rgba(255, 255, 255, 0.10);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 12px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .ranking-header-badge i {
+            font-size: 12px;
+            opacity: 0.6;
+        }
+
+        .ranking-header-meta {
+            font-size: 13px;
+            font-weight: 500;
+            margin-top: 6px;
+            opacity: 0.8;
+        }
+
+        .ranking-header-meta span {
+            opacity: 0.5;
+            margin: 0 6px;
+        }
+
+        /* ─── Summary Stats ────────────────────────────────────────────── */
+        .ranking-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            padding: 20px 36px;
+            background: var(--ranking-bg);
+            border-bottom: 1px solid var(--ranking-border);
+        }
+
+        .ranking-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .ranking-stat-value {
+            font-family: 'Syne', 'Playfair Display', serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--ranking-primary);
+            line-height: 1.1;
+        }
+
+        .ranking-stat-value .suffix {
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--ranking-text-muted);
+        }
+
+        .ranking-stat-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--ranking-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .ranking-stat-bar {
+            margin-top: 4px;
+            height: 4px;
+            border-radius: 99px;
+            background: var(--ranking-border);
+            overflow: hidden;
+            width: 100%;
+            max-width: 120px;
+        }
+
+        .ranking-stat-bar .fill {
+            height: 100%;
+            border-radius: 99px;
+            background: linear-gradient(90deg, var(--ranking-primary), var(--ranking-secondary));
+            transition: width 0.6s ease;
+        }
+
+        .ranking-stat-bar .fill.success {
+            background: var(--ranking-success);
+        }
+
+        .ranking-stat-bar .fill.warning {
+            background: var(--ranking-warning);
+        }
+
+        .ranking-stat-bar .fill.danger {
+            background: var(--ranking-danger);
+        }
+
+        /* ─── Ranking Table ────────────────────────────────────────────── */
+        .ranking-table-wrap {
+            overflow-x: auto;
+            padding: 0 4px 4px 4px;
+        }
+
+        .ranking-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .ranking-table thead th {
+            background: var(--ranking-bg);
+            padding: 14px 16px 12px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--ranking-text-muted);
+            border-bottom: 2px solid var(--ranking-border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .ranking-table thead th:first-child {
+            padding-left: 36px;
+        }
+
+        .ranking-table thead th:last-child {
+            padding-right: 36px;
+        }
+
+        .ranking-table tbody td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--ranking-border);
+            vertical-align: middle;
+            font-size: 13px;
+        }
+
+        .ranking-table tbody td:first-child {
+            padding-left: 36px;
+        }
+
+        .ranking-table tbody td:last-child {
+            padding-right: 36px;
+        }
+
+        .ranking-table tbody tr {
+            transition: background 0.15s ease;
+        }
+
+        .ranking-table tbody tr:hover {
+            background: rgba(45, 31, 58, 0.03);
+        }
+
+        .ranking-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* ─── Rank Column ───────────────────────────────────────────────── */
+        .rank-cell {
+            font-weight: 700;
+            text-align: center;
+            font-size: 15px;
+            min-width: 48px;
+            color: var(--ranking-text);
+        }
+
+        .rank-cell .rank-icon {
+            font-size: 14px;
+            margin-right: 2px;
+        }
+
+        .rank-cell.gold {
+            color: var(--ranking-gold);
+        }
+
+        .rank-cell.silver {
+            color: var(--ranking-silver);
+        }
+
+        .rank-cell.bronze {
+            color: var(--ranking-bronze);
+        }
+
+        .rank-cell .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 700;
+            background: var(--ranking-border);
+            color: var(--ranking-text-muted);
+        }
+
+        .rank-cell .rank-badge.gold {
+            background: var(--ranking-gold);
+            color: white;
+        }
+
+        .rank-cell .rank-badge.silver {
+            background: var(--ranking-silver);
+            color: white;
+        }
+
+        .rank-cell .rank-badge.bronze {
+            background: var(--ranking-bronze);
+            color: white;
+        }
+
+        /* ─── Student Name ──────────────────────────────────────────────── */
+        .student-name {
+            font-weight: 600;
+            color: var(--ranking-text);
+        }
+
+        .student-name .student-code {
+            font-weight: 400;
+            font-size: 11px;
+            color: var(--ranking-text-muted);
+            margin-left: 8px;
+            font-family: monospace;
+        }
+
+        .student-class {
+            font-size: 12px;
+            color: var(--ranking-text-muted);
+        }
+
+        /* ─── Score Columns ────────────────────────────────────────────── */
+        .score-cell {
+            font-weight: 600;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .pct-cell {
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .pct-cell .pct-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 12px;
+            border-radius: 99px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .pct-cell .pct-badge.high {
+            background: rgba(58, 122, 90, 0.12);
+            color: var(--ranking-success);
+        }
+
+        .pct-cell .pct-badge.medium {
+            background: rgba(184, 152, 58, 0.12);
+            color: var(--ranking-warning);
+        }
+
+        .pct-cell .pct-badge.low {
+            background: rgba(196, 90, 74, 0.12);
+            color: var(--ranking-danger);
+        }
+
+        /* ─── Grade Cell ────────────────────────────────────────────────── */
+        .grade-cell {
+            text-align: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .grade-cell .grade-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .grade-cell .grade-badge.Ap {
+            background: rgba(58, 122, 90, 0.15);
+            color: var(--ranking-success);
+        }
+
+        .grade-cell .grade-badge.A {
+            background: rgba(58, 122, 90, 0.10);
+            color: var(--ranking-success);
+        }
+
+        .grade-cell .grade-badge.B {
+            background: rgba(106, 138, 186, 0.12);
+            color: #4a6a8a;
+        }
+
+        .grade-cell .grade-badge.C {
+            background: rgba(184, 152, 58, 0.12);
+            color: var(--ranking-warning);
+        }
+
+        .grade-cell .grade-badge.D {
+            background: rgba(196, 138, 58, 0.12);
+            color: #9a6a2a;
+        }
+
+        .grade-cell .grade-badge.F {
+            background: rgba(196, 90, 74, 0.12);
+            color: var(--ranking-danger);
+        }
+
+        .grade-cell .grade-badge.ABS {
+            background: rgba(168, 158, 148, 0.12);
+            color: var(--ranking-text-muted);
+        }
+
+        /* ─── Status Cell ───────────────────────────────────────────────── */
+        .status-cell {
+            text-align: center;
+        }
+
+        .status-cell .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 10px;
+            border-radius: 99px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .status-cell .status-badge.pass {
+            background: rgba(58, 122, 90, 0.10);
+            color: var(--ranking-success);
+        }
+
+        .status-cell .status-badge.fail {
+            background: rgba(196, 90, 74, 0.10);
+            color: var(--ranking-danger);
+        }
+
+        .status-cell .status-badge.borderline {
+            background: rgba(184, 152, 58, 0.10);
+            color: var(--ranking-warning);
+        }
+
+        .status-cell .status-badge i {
+            font-size: 10px;
+        }
+
+        /* ─── Footer ────────────────────────────────────────────────────── */
+        .ranking-footer {
+            padding: 16px 36px 20px;
+            border-top: 1px solid var(--ranking-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            background: var(--ranking-bg);
+            font-size: 12px;
+            color: var(--ranking-text-muted);
+        }
+
+        .ranking-footer-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .ranking-footer-left .footer-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 99px;
+            background: var(--ranking-border);
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--ranking-text-muted);
+        }
+
+        .ranking-footer-left .footer-badge i {
+            font-size: 11px;
+            opacity: 0.6;
+        }
+
+        .ranking-footer-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .ranking-footer-right .footer-signature {
+            text-align: right;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .ranking-footer-right .footer-signature .sig-line {
+            display: block;
+            width: 120px;
+            height: 1px;
+            background: var(--ranking-border);
+            margin: 4px 0 2px auto;
+        }
+
+        .ranking-footer-right .footer-signature .sig-name {
+            font-weight: 600;
+            color: var(--ranking-text);
+        }
+
+        /* ─── Print Styles ──────────────────────────────────────────────── */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .ranking-container {
+                border-radius: 0;
+                box-shadow: none;
+                border: none;
+            }
+
+            .ranking-header {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .ranking-header-badge {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .ranking-stat-bar .fill {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .pct-cell .pct-badge {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .grade-cell .grade-badge {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .status-cell .status-badge {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .rank-cell .rank-badge {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .ranking-table tbody tr:hover {
+                background: transparent;
+            }
+
+            .ranking-footer {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+
+        /* ─── Responsive ────────────────────────────────────────────────── */
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+
+            .ranking-header {
+                padding: 20px 20px 18px;
+            }
+
+            .ranking-header-title {
+                font-size: 16px;
+            }
+
+            .ranking-header-meta {
+                font-size: 11px;
+            }
+
+            .ranking-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+                padding: 16px 20px;
+            }
+
+            .ranking-stat-value {
+                font-size: 18px;
+            }
+
+            .ranking-table thead th {
+                padding: 10px 12px 8px;
+                font-size: 9px;
+            }
+
+            .ranking-table thead th:first-child {
+                padding-left: 20px;
+            }
+
+            .ranking-table thead th:last-child {
+                padding-right: 20px;
+            }
+
+            .ranking-table tbody td {
+                padding: 10px 12px;
+                font-size: 12px;
+            }
+
+            .ranking-table tbody td:first-child {
+                padding-left: 20px;
+            }
+
+            .ranking-table tbody td:last-child {
+                padding-right: 20px;
+            }
+
+            .ranking-footer {
+                padding: 14px 20px 16px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .ranking-footer-right {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .ranking-footer-right .footer-signature {
+                text-align: left;
+            }
+
+            .ranking-footer-right .footer-signature .sig-line {
+                margin: 4px 0 2px 0;
+            }
+
+            .rank-cell .rank-badge {
+                width: 24px;
+                height: 24px;
+                font-size: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .ranking-header-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .ranking-header-right {
+                text-align: left;
+                width: 100%;
+            }
+
+            .ranking-stats {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+            }
+
+            .ranking-table-wrap {
+                padding: 0 2px 2px 2px;
+            }
+
+            .ranking-table {
+                font-size: 11px;
+                min-width: 500px;
+            }
+
+            .ranking-table thead th {
+                padding: 8px 6px;
+                font-size: 8px;
+            }
+
+            .ranking-table thead th:first-child,
+            .ranking-table thead th:last-child {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+
+            .ranking-table tbody td {
+                padding: 6px 8px;
+                font-size: 11px;
+            }
+
+            .ranking-table tbody td:first-child,
+            .ranking-table tbody td:last-child {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+
+            .pct-cell .pct-badge {
+                font-size: 10px;
+                padding: 1px 8px;
+            }
+
+            .grade-cell .grade-badge {
+                font-size: 11px;
+                min-width: 30px;
+                padding: 1px 6px;
+            }
+
+            .student-name .student-code {
+                font-size: 9px;
+                margin-left: 4px;
+            }
+        }
+
+        @media print and (max-width: 768px) {
+            .ranking-container {
+                margin: 0;
+                padding: 0;
+            }
+
+            .ranking-header {
+                padding: 16px 16px 14px;
+            }
+
+            .ranking-stats {
+                padding: 12px 16px;
+            }
+
+            .ranking-footer {
+                padding: 12px 16px 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="ranking-container" id="rankingContainer">
+
+        <!-- ═══ HEADER ═══ -->
+        <header class="ranking-header">
+            <div class="ranking-header-top">
+                <div class="ranking-header-left">
+                    <div class="ranking-logo" id="rankingLogo">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <div class="ranking-header-title">
+                            Class Rankings <span>·</span> ECOLE LA FONTAINE
+                        </div>
+                        <div class="ranking-header-sub" id="rankingHeaderSub">
+                            Academic Year 2025–2026 · Term 3
+                        </div>
+                    </div>
+                </div>
+                <div class="ranking-header-right">
+                    <div class="ranking-header-badge">
+                        <i class="fa-regular fa-calendar"></i>
+                        <span id="rankingDate">26 Jun 2026</span>
+                    </div>
+                    <div class="ranking-header-meta" id="rankingHeaderMeta">
+                        <span id="rankingClassName">Primary 4A</span>
+                        <span>·</span>
+                        <span id="rankingStudentCount">28 students</span>
+                        <span>·</span>
+                        <span id="rankingPhaseLabel">Pre-Midterm</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ═══ STATS ═══ -->
+        <div class="ranking-stats" id="rankingStats">
+            <div class="ranking-stat">
+                <div class="ranking-stat-value" id="statTotalStudents">28</div>
+                <div class="ranking-stat-label">Total Students</div>
+            </div>
+            <div class="ranking-stat">
+                <div class="ranking-stat-value" id="statAvgScore">72.4<span class="suffix">%</span></div>
+                <div class="ranking-stat-label">Class Average</div>
+                <div class="ranking-stat-bar">
+                    <div class="fill" id="statAvgBar" style="width:72.4%;"></div>
+                </div>
+            </div>
+            <div class="ranking-stat">
+                <div class="ranking-stat-value" id="statPassRate">78.2<span class="suffix">%</span></div>
+                <div class="ranking-stat-label">Pass Rate</div>
+                <div class="ranking-stat-bar">
+                    <div class="fill success" id="statPassBar" style="width:78.2%;"></div>
+                </div>
+            </div>
+            <div class="ranking-stat">
+                <div class="ranking-stat-value" id="statTopStudent">HABIMANA Eric</div>
+                <div class="ranking-stat-label">Top Student</div>
+            </div>
+            <div class="ranking-stat">
+                <div class="ranking-stat-value" id="statHighestScore">96<span class="suffix">%</span></div>
+                <div class="ranking-stat-label">Highest Score</div>
+            </div>
+        </div>
+
+        <!-- ═══ TABLE ═══ -->
+        <div class="ranking-table-wrap">
+            <table class="ranking-table" id="rankingTable">
+                <thead>
+                    <tr>
+                        <th style="text-align:center;min-width:56px;">Rank</th>
+                        <th style="min-width:180px;">Student</th>
+                        <th style="text-align:right;min-width:80px;">Score</th>
+                        <th style="text-align:right;min-width:80px;">Max</th>
+                        <th style="text-align:center;min-width:80px;">%</th>
+                        <th style="text-align:center;min-width:60px;">Grade</th>
+                        <th style="text-align:center;min-width:80px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="rankingTbody">
+                    <!-- Dynamic content inserted by ranking-engine.js -->
+                    <tr>
+                        <td colspan="7" style="text-align:center;padding:40px;color:var(--ranking-text-muted);">
+                            <i class="fa-solid fa-spinner fa-spin" style="margin-right:8px;"></i>
+                            Loading rankings...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ═══ FOOTER ═══ -->
+        <footer class="ranking-footer">
+            <div class="ranking-footer-left">
+                <span class="footer-badge">
+                    <i class="fa-regular fa-file-lines"></i>
+                    Generated: <span id="footerGenerated">26 Jun 2026 14:30</span>
+                </span>
+                <span class="footer-badge">
+                    <i class="fa-regular fa-clock"></i>
+                    <span id="footerTimeframe">Term 3 · 2025–2026</span>
+                </span>
+                <span class="footer-badge">
+                    <i class="fa-regular fa-flag"></i>
+                    <span id="footerPhase">Pre-Midterm</span>
+                </span>
+            </div>
+            <div class="ranking-footer-right">
+                <div class="footer-signature">
+                    <span class="sig-name" id="footerHeadTeacher">UWAYO GANZA Eugene</span>
+                    <span class="sig-line"></span>
+                    <span style="font-size:10px;opacity:0.6;">Head of School</span>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        /**
+         * RANKING TEMPLATE — Data Injection
+         * This script runs when the template is used as a standalone print view.
+         * In normal operation, ranking-engine.js populates the table directly.
+         */
+
+        (function() {
+            'use strict';
+
+            // ─── Check if we're in standalone print mode ──────────────────
+            const isStandalone = window.location.search.includes('standalone=true') ||
+                                 window.location.search.includes('print=true');
+
+            if (!isStandalone) {
+                // In normal mode, wait for ranking-engine.js to populate
+                console.log('[Ranking Template] Ready for data injection.');
+                return;
+            }
+
+            // ─── Parse URL parameters ──────────────────────────────────────
+            const params = new URLSearchParams(window.location.search);
+            const className = params.get('class') || 'Primary 4A';
+            const termName = params.get('term') || 'Term 3';
+            const yearName = params.get('year') || '2025–2026';
+            const phase = params.get('phase') || 'pre_midterm';
+            const dataParam = params.get('data');
+
+            // ─── Update header ─────────────────────────────────────────────
+            document.getElementById('rankingHeaderSub').textContent =
+                `Academic Year ${yearName} · ${termName}`;
+
+            document.getElementById('rankingDate').textContent =
+                new Date().toLocaleDateString('en-GB', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                });
+
+            document.getElementById('rankingClassName').textContent = className;
+            document.getElementById('rankingPhaseLabel').textContent =
+                phase === 'pre_midterm' ? 'Pre-Midterm' :
+                phase === 'post_midterm' ? 'Post-Midterm' : 'Annual';
+
+            document.getElementById('footerTimeframe').textContent =
+                `${termName} · ${yearName}`;
+
+            document.getElementById('footerPhase').textContent =
+                phase === 'pre_midterm' ? 'Pre-Midterm' :
+                phase === 'post_midterm' ? 'Post-Midterm' : 'Annual';
+
+            document.getElementById('footerGenerated').textContent =
+                new Date().toLocaleString('en-GB', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+            // ─── If data is provided as JSON param ────────────────────────
+            if (dataParam) {
+                try {
+                    const data = JSON.parse(decodeURIComponent(dataParam));
+                    renderRankings(data);
+                } catch (e) {
+                    console.warn('[Ranking Template] Failed to parse data:', e);
+                    document.getElementById('rankingTbody').innerHTML = `
+                        <tr>
+                            <td colspan="7" style="text-align:center;padding:40px;color:var(--ranking-text-muted);">
+                                <i class="fa-solid fa-triangle-exclamation" style="margin-right:8px;"></i>
+                                Invalid ranking data provided.
+                            </td>
+                        </tr>
+                    `;
+                }
+            } else {
+                // ─── Demo data for preview ──────────────────────────────────
+                renderDemoData();
+            }
+
+            // ─── Render function ────────────────────────────────────────────
+            function renderRankings(data) {
+                const tbody = document.getElementById('rankingTbody');
+
+                if (!data || !data.students || data.students.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" style="text-align:center;padding:40px;color:var(--ranking-text-muted);">
+                                <i class="fa-regular fa-face-frown" style="margin-right:8px;"></i>
+                                No ranking data available.
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                // Update stats
+                if (data.stats) {
+                    document.getElementById('statTotalStudents').textContent = data.stats.totalStudents || data.students.length;
+                    document.getElementById('statAvgScore').innerHTML =
+                        (data.stats.average || 0).toFixed(1) + '<span class="suffix">%</span>';
+                    document.getElementById('statPassRate').innerHTML =
+                        (data.stats.passRate || 0).toFixed(1) + '<span class="suffix">%</span>';
+                    document.getElementById('statTopStudent').textContent = data.stats.topStudent || '—';
+                    document.getElementById('statHighestScore').innerHTML =
+                        (data.stats.highest || 0).toFixed(0) + '<span class="suffix">%</span>';
+
+                    const avgBar = document.getElementById('statAvgBar');
+                    if (avgBar) avgBar.style.width = Math.min(100, data.stats.average || 0) + '%';
+
+                    const passBar = document.getElementById('statPassBar');
+                    if (passBar) passBar.style.width = Math.min(100, data.stats.passRate || 0) + '%';
+                }
+
+                // Render rows
+                const rows = data.students.map((s, index) => {
+                    const rank = s.rank || index + 1;
+                    const isTop3 = rank <= 3;
+                    const rankClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
+                    const rankIcon = rank === 1 ? 'fa-solid fa-trophy' :
+                                     rank === 2 ? 'fa-solid fa-medal' :
+                                     rank === 3 ? 'fa-solid fa-medal' : '';
+
+                    const pct = s.percentage || 0;
+                    const pctClass = pct >= 80 ? 'high' : pct >= 60 ? 'medium' : 'low';
+
+                    const grade = s.grade || '—';
+                    const gradeClass = grade === 'A+' ? 'Ap' :
+                                       grade === 'A' ? 'A' :
+                                       grade === 'B' ? 'B' :
+                                       grade === 'C' ? 'C' :
+                                       grade === 'D' ? 'D' :
+                                       grade === 'F' ? 'F' : '';
+
+                    const passed = pct >= 50;
+                    const statusClass = passed ? 'pass' : (pct >= 40 ? 'borderline' : 'fail');
+                    const statusIcon = passed ? 'fa-regular fa-circle-check' :
+                                      (pct >= 40 ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-circle-xmark');
+
+                    return `
+                        <tr>
+                            <td class="rank-cell ${rankClass}">
+                                <span class="rank-badge ${rankClass}">
+                                    ${rank === 1 ? '<i class="fa-solid fa-trophy"></i>' :
+                                     rank === 2 ? '<i class="fa-solid fa-medal"></i>' :
+                                     rank === 3 ? '<i class="fa-solid fa-medal"></i>' : rank}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="student-name">
+                                    ${s.name || '—'}
+                                    <span class="student-code">${s.code || ''}</span>
+                                </div>
+                                <div class="student-class">${s.class || ''}</div>
+                            </td>
+                            <td class="score-cell">${(s.score || 0).toFixed(1)}</td>
+                            <td class="score-cell">${s.max || 0}</td>
+                            <td class="pct-cell">
+                                <span class="pct-badge ${pctClass}">${pct.toFixed(1)}%</span>
+                            </td>
+                            <td class="grade-cell">
+                                <span class="grade-badge ${gradeClass}">${grade}</span>
+                            </td>
+                            <td class="status-cell">
+                                <span class="status-badge ${statusClass}">
+                                    <i class="${statusIcon}"></i>
+                                    ${passed ? 'Pass' : (pct >= 40 ? 'Borderline' : 'Fail')}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+                tbody.innerHTML = rows;
+            }
+
+            // ─── Demo data ──────────────────────────────────────────────────
+            function renderDemoData() {
+                const demoStudents = [
+                    { rank: 1, name: 'HABIMANA Eric', code: 'STU-001', class: 'Primary 4A', score: 48, max: 50, percentage: 96, grade: 'A+' },
+                    { rank: 2, name: 'UWERA Grace', code: 'STU-006', class: 'Primary 4A', score: 45, max: 50, percentage: 90, grade: 'A+' },
+                    { rank: 3, name: 'INGABIRE Sarah', code: 'STU-002', class: 'Primary 4A', score: 42, max: 50, percentage: 84, grade: 'A' },
+                    { rank: 4, name: 'KAMALI Moses', code: 'STU-003', class: 'Primary 4A', score: 38, max: 50, percentage: 76, grade: 'B' },
+                    { rank: 5, name: 'MUGISHA Jean', code: 'STU-004', class: 'Primary 4A', score: 35, max: 50, percentage: 70, grade: 'B' },
+                    { rank: 6, name: 'NIYONZIMA Claire', code: 'STU-005', class: 'Primary 4A', score: 32, max: 50, percentage: 64, grade: 'C' },
+                    { rank: 7, name: 'ISHIMWE Jean', code: 'STU-007', class: 'Primary 4A', score: 28, max: 50, percentage: 56, grade: 'D' },
+                    { rank: 8, name: 'MUKAMANA Ange', code: 'STU-008', class: 'Primary 4A', score: 24, max: 50, percentage: 48, grade: 'F' },
+                ];
+
+                const stats = {
+                    totalStudents: 28,
+                    average: 72.4,
+                    passRate: 78.2,
+                    topStudent: 'HABIMANA Eric',
+                    highest: 96
+                };
+
+                renderRankings({ students: demoStudents, stats: stats });
+            }
+
+        })();
+    </script>
+
+</body>
+</html>

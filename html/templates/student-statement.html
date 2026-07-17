@@ -1,0 +1,829 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+   STUDENT STATEMENT — Statement of Account
+   ═══════════════════════════════════════════════════════════════════
+   Purpose: Full student fee statement with payment history.
+   Uses Font Awesome icons only — no emojis.
+   Print-ready with A4 layout.
+   No pure white, no pure black.
+   ═══════════════════════════════════════════════════════════════════ -->
+
+<div class="statement-container" id="studentStatement">
+
+    <!-- ─── Header ──────────────────────────────────────────────────── -->
+    <div class="statement-header">
+        <div class="statement-brand">
+            <div class="statement-logo">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <div class="statement-school">
+                <div class="statement-school-name">ECOLE LA FONTAINE</div>
+                <div class="statement-school-address">Rubavu, Rwanda</div>
+                <div class="statement-school-contact">
+                    <span><i class="fa-solid fa-phone"></i> +250 788 534 320</span>
+                    <span class="statement-divider">·</span>
+                    <span><i class="fa-solid fa-envelope"></i> info@ecolelafontaine.rw</span>
+                </div>
+            </div>
+        </div>
+        <div class="statement-title-block">
+            <div class="statement-title">STATEMENT OF ACCOUNT</div>
+            <div class="statement-subtitle" id="statementPeriod">Term 3 · 2025-2026</div>
+            <div class="statement-date">Issued: <span id="statementIssueDate">26 Jun 2026</span></div>
+        </div>
+    </div>
+
+    <!-- ─── Student Info ─────────────────────────────────────────────── -->
+    <div class="statement-student-info">
+        <div class="statement-student-row">
+            <div class="statement-student-field">
+                <span class="statement-field-label">Student</span>
+                <span class="statement-field-value" id="statementStudentName">GANZA KING</span>
+            </div>
+            <div class="statement-student-field">
+                <span class="statement-field-label">Student Code</span>
+                <span class="statement-field-value" id="statementStudentCode">STU-001</span>
+            </div>
+            <div class="statement-student-field">
+                <span class="statement-field-label">Class</span>
+                <span class="statement-field-value" id="statementStudentClass">Primary 4A</span>
+            </div>
+        </div>
+        <div class="statement-student-row">
+            <div class="statement-student-field">
+                <span class="statement-field-label">Guardian</span>
+                <span class="statement-field-value" id="statementGuardian">HABIMANA Grace</span>
+            </div>
+            <div class="statement-student-field">
+                <span class="statement-field-label">Phone</span>
+                <span class="statement-field-value" id="statementGuardianPhone">+250 788 534 320</span>
+            </div>
+            <div class="statement-student-field">
+                <span class="statement-field-label">Status</span>
+                <span class="statement-field-value statement-status-active" id="statementStudentStatus">Active</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Fee Summary Cards ────────────────────────────────────────── -->
+    <div class="statement-summary-cards">
+        <div class="statement-summary-card">
+            <div class="statement-summary-label">Total Fees</div>
+            <div class="statement-summary-value" id="statementTotalFees">450,000 RWF</div>
+        </div>
+        <div class="statement-summary-card">
+            <div class="statement-summary-label">Total Paid</div>
+            <div class="statement-summary-value statement-summary-paid" id="statementTotalPaid">385,000 RWF</div>
+        </div>
+        <div class="statement-summary-card">
+            <div class="statement-summary-label">Outstanding</div>
+            <div class="statement-summary-value statement-summary-balance" id="statementOutstanding">65,000 RWF</div>
+        </div>
+        <div class="statement-summary-card">
+            <div class="statement-summary-label">Collection Rate</div>
+            <div class="statement-summary-value" id="statementCollectionRate">85.6%</div>
+        </div>
+    </div>
+
+    <!-- ─── Fee Breakdown ────────────────────────────────────────────── -->
+    <div class="statement-section">
+        <div class="statement-section-title">
+            <i class="fa-solid fa-list"></i>
+            Fee Breakdown
+        </div>
+        <table class="statement-table" id="statementFeeTable">
+            <thead>
+                <tr>
+                    <th>Fee Category</th>
+                    <th class="statement-table-right">Amount</th>
+                    <th class="statement-table-right">Paid</th>
+                    <th class="statement-table-right">Balance</th>
+                    <th class="statement-table-center">Status</th>
+                </tr>
+            </thead>
+            <tbody id="statementFeeRows">
+                <tr>
+                    <td>School Fees</td>
+                    <td class="statement-table-right">150,000 RWF</td>
+                    <td class="statement-table-right">150,000 RWF</td>
+                    <td class="statement-table-right">0 RWF</td>
+                    <td class="statement-table-center"><span class="statement-badge statement-badge-paid">Paid</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Transport</td>
+                    <td class="statement-table-right">50,000 RWF</td>
+                    <td class="statement-table-right">50,000 RWF</td>
+                    <td class="statement-table-right">0 RWF</td>
+                    <td class="statement-table-center"><span class="statement-badge statement-badge-paid">Paid</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Activity Fee</td>
+                    <td class="statement-table-right">25,000 RWF</td>
+                    <td class="statement-table-right">20,000 RWF</td>
+                    <td class="statement-table-right">5,000 RWF</td>
+                    <td class="statement-table-center"><span
+                            class="statement-badge statement-badge-partial">Partial</span></td>
+                </tr>
+                <tr>
+                    <td>Library Fee</td>
+                    <td class="statement-table-right">10,000 RWF</td>
+                    <td class="statement-table-right">0 RWF</td>
+                    <td class="statement-table-right">10,000 RWF</td>
+                    <td class="statement-table-center"><span class="statement-badge statement-badge-due">Due</span></td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td><strong>TOTAL</strong></td>
+                    <td class="statement-table-right"><strong id="statementFootTotal">235,000 RWF</strong></td>
+                    <td class="statement-table-right"><strong id="statementFootPaid">220,000 RWF</strong></td>
+                    <td class="statement-table-right"><strong id="statementFootBalance">15,000 RWF</strong></td>
+                    <td class="statement-table-center"></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- ─── Payment History ──────────────────────────────────────────── -->
+    <div class="statement-section">
+        <div class="statement-section-title">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            Payment History
+        </div>
+        <table class="statement-table" id="statementPaymentTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Receipt</th>
+                    <th>Method</th>
+                    <th class="statement-table-right">Amount</th>
+                    <th class="statement-table-center">Status</th>
+                </tr>
+            </thead>
+            <tbody id="statementPaymentRows">
+                <tr>
+                    <td>26 Jun 2026</td>
+                    <td><span class="statement-receipt">RCP-045</span></td>
+                    <td>Cash</td>
+                    <td class="statement-table-right">50,000 RWF</td>
+                    <td class="statement-table-center"><span class="statement-badge statement-badge-paid">Paid</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>24 Jun 2026</td>
+                    <td><span class="statement-receipt">RCP-042</span></td>
+                    <td>Mobile-Money</td>
+                    <td class="statement-table-right">35,000 RWF</td>
+                    <td class="statement-table-center"><span class="statement-badge statement-badge-paid">Paid</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>20 Jun 2026</td>
+                    <td><span class="statement-receipt">RCP-038</span></td>
+                    <td>Bank Transfer</td>
+                    <td class="statement-table-right">25,000 RWF</td>
+                    <td class="statement-table-center"><span class="statement-badge statement-badge-paid">Paid</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>15 Jun 2026</td>
+                    <td><span class="statement-receipt">RCP-035</span></td>
+                    <td>Cash</td>
+                    <td class="statement-table-right">20,000 RWF</td>
+                    <td class="statement-table-center"><span class="statement-badge statement-badge-paid">Paid</span>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3"><strong>TOTAL PAYMENTS</strong></td>
+                    <td class="statement-table-right"><strong id="statementPaymentTotal">130,000 RWF</strong></td>
+                    <td class="statement-table-center"></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- ─── Balance History ──────────────────────────────────────────── -->
+    <div class="statement-section">
+        <div class="statement-section-title">
+            <i class="fa-solid fa-chart-line"></i>
+            Balance History
+        </div>
+        <div class="statement-balance-timeline" id="statementBalanceTimeline">
+            <div class="statement-balance-item">
+                <span class="statement-balance-date">26 Jun 2026</span>
+                <span class="statement-balance-desc">Payment - 50,000 RWF</span>
+                <span class="statement-balance-amount">Balance: 15,000 RWF</span>
+            </div>
+            <div class="statement-balance-item">
+                <span class="statement-balance-date">24 Jun 2026</span>
+                <span class="statement-balance-desc">Payment - 35,000 RWF</span>
+                <span class="statement-balance-amount">Balance: 65,000 RWF</span>
+            </div>
+            <div class="statement-balance-item">
+                <span class="statement-balance-date">20 Jun 2026</span>
+                <span class="statement-balance-desc">Payment - 25,000 RWF</span>
+                <span class="statement-balance-amount">Balance: 100,000 RWF</span>
+            </div>
+            <div class="statement-balance-item">
+                <span class="statement-balance-date">15 Jun 2026</span>
+                <span class="statement-balance-desc">Payment - 20,000 RWF</span>
+                <span class="statement-balance-amount">Balance: 125,000 RWF</span>
+            </div>
+            <div class="statement-balance-item">
+                <span class="statement-balance-date">01 Jun 2026</span>
+                <span class="statement-balance-desc">Fees assessed</span>
+                <span class="statement-balance-amount statement-balance-debit">Balance: 145,000 RWF</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Notes ─────────────────────────────────────────────────────── -->
+    <div class="statement-notes">
+        <div class="statement-notes-label">
+            <i class="fa-regular fa-pen-to-square"></i>
+            Notes
+        </div>
+        <div class="statement-notes-text" id="statementNotes">
+            Please ensure all outstanding fees are paid by the due date.
+            Late payments may incur additional charges.
+        </div>
+    </div>
+
+    <!-- ─── Footer ────────────────────────────────────────────────────── -->
+    <div class="statement-footer">
+        <div class="statement-footer-row">
+            <div class="statement-signature">
+                <span>_________________________</span>
+                <span class="statement-signature-label">Accountant Signature</span>
+            </div>
+            <div class="statement-signature">
+                <span>_________________________</span>
+                <span class="statement-signature-label">Head Teacher Signature</span>
+            </div>
+            <div class="statement-signature">
+                <span>_________________________</span>
+                <span class="statement-signature-label">Parent/Guardian Signature</span>
+            </div>
+        </div>
+        <div class="statement-footer-divider"></div>
+        <div class="statement-footer-text">
+            <span>This is an official statement of account.</span>
+            <span>Generated on <span id="statementFooterDate">26 Jun 2026 14:30:45</span></span>
+            <span>ECOLE LA FONTAINE · Rubavu, Rwanda</span>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
+   STUDENT STATEMENT STYLES (embedded for self-containment)
+   ═══════════════════════════════════════════════════════════════════ -->
+
+<style>
+    /* ─── Container ────────────────────────────────────────────────────── */
+    .statement-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px 24px;
+        background: #fcfaf8;
+        font-family: 'DM Sans', 'Plus Jakarta Sans', sans-serif;
+        color: #2c241e;
+        border: 1px solid #e8e0d8;
+        border-radius: 8px;
+        box-shadow: 0 4px 24px rgba(26, 20, 16, 0.06);
+    }
+
+    /* ─── Header ───────────────────────────────────────────────────────── */
+    .statement-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 2px solid #e8e0d8;
+        padding-bottom: 16px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .statement-brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .statement-logo {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        background: var(--role-gradient, linear-gradient(135deg, #2d1f3a, #4d2f4a));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .statement-logo i {
+        font-size: 24px;
+        color: #f5f0eb;
+    }
+
+    .statement-school-name {
+        font-family: 'Syne', 'Playfair Display', serif;
+        font-size: 18px;
+        font-weight: 700;
+        color: #1a1410;
+        letter-spacing: -0.3px;
+    }
+
+    .statement-school-address {
+        font-size: 11px;
+        color: #6b5f56;
+    }
+
+    .statement-school-contact {
+        font-size: 10px;
+        color: #6b5f56;
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .statement-school-contact i {
+        font-size: 10px;
+        color: #6b5f56;
+        margin-right: 2px;
+    }
+
+    .statement-divider {
+        color: #a8988e;
+    }
+
+    .statement-title-block {
+        text-align: right;
+    }
+
+    .statement-title {
+        font-family: 'Syne', 'Playfair Display', serif;
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--role-primary, #2d1f3a);
+        letter-spacing: 1px;
+    }
+
+    .statement-subtitle {
+        font-size: 13px;
+        color: #6b5f56;
+        font-weight: 500;
+    }
+
+    .statement-date {
+        font-size: 11px;
+        color: #a8988e;
+        margin-top: 2px;
+    }
+
+    /* ─── Student Info ─────────────────────────────────────────────────── */
+    .statement-student-info {
+        background: #f5f0eb;
+        border-radius: 8px;
+        padding: 14px 18px;
+        margin-bottom: 20px;
+    }
+
+    .statement-student-row {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+    }
+
+    .statement-student-row:first-child {
+        margin-bottom: 6px;
+    }
+
+    .statement-student-field {
+        display: flex;
+        flex-direction: column;
+        min-width: 120px;
+    }
+
+    .statement-field-label {
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6b5f56;
+    }
+
+    .statement-field-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1a1410;
+    }
+
+    .statement-status-active {
+        color: var(--success, #3a7a5a);
+    }
+
+    .statement-status-inactive {
+        color: var(--warning, #b8983a);
+    }
+
+    .statement-status-graduated {
+        color: var(--info, #4a7a8a);
+    }
+
+    /* ─── Summary Cards ───────────────────────────────────────────────── */
+    .statement-summary-cards {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .statement-summary-card {
+        background: #f5f0eb;
+        border-radius: 8px;
+        padding: 14px 16px;
+        text-align: center;
+        border: 1px solid #e8e0d8;
+    }
+
+    .statement-summary-label {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6b5f56;
+    }
+
+    .statement-summary-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1a1410;
+        margin-top: 2px;
+    }
+
+    .statement-summary-paid {
+        color: var(--success, #3a7a5a);
+    }
+
+    .statement-summary-balance {
+        color: var(--danger, #c45a4a);
+    }
+
+    /* ─── Section ──────────────────────────────────────────────────────── */
+    .statement-section {
+        margin-bottom: 24px;
+    }
+
+    .statement-section-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1a1410;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .statement-section-title i {
+        font-size: 14px;
+        color: var(--role-primary, #2d1f3a);
+    }
+
+    /* ─── Tables ───────────────────────────────────────────────────────── */
+    .statement-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+    }
+
+    .statement-table thead tr {
+        background: #f5f0eb;
+    }
+
+    .statement-table th {
+        padding: 8px 10px;
+        text-align: left;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6b5f56;
+        border-bottom: 1px solid #e8e0d8;
+    }
+
+    .statement-table td {
+        padding: 8px 10px;
+        border-bottom: 1px solid #f0ebe6;
+        color: #2c241e;
+    }
+
+    .statement-table tbody tr:hover {
+        background: #faf7f4;
+    }
+
+    .statement-table tfoot td {
+        padding: 10px 10px;
+        font-weight: 700;
+        border-top: 2px solid #e8e0d8;
+        background: #f5f0eb;
+    }
+
+    .statement-table-right {
+        text-align: right;
+    }
+
+    .statement-table-center {
+        text-align: center;
+    }
+
+    .statement-receipt {
+        font-family: 'Courier New', monospace;
+        font-size: 11px;
+        color: #6b5f56;
+        font-weight: 600;
+    }
+
+    /* ─── Badges ───────────────────────────────────────────────────────── */
+    .statement-badge {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 99px;
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .statement-badge-paid {
+        background: #dce8e0;
+        color: #065f46;
+    }
+
+    .statement-badge-partial {
+        background: #f0e8d0;
+        color: #92400e;
+    }
+
+    .statement-badge-due {
+        background: #f0e0dc;
+        color: #991b1b;
+    }
+
+    .statement-badge-waived {
+        background: #e8e6ed;
+        color: #4a2d5a;
+    }
+
+    /* ─── Balance Timeline ───────────────────────────────────────────── */
+    .statement-balance-timeline {
+        border-left: 2px solid #e8e0d8;
+        padding-left: 16px;
+        margin-left: 4px;
+    }
+
+    .statement-balance-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        border-bottom: 1px solid #f0ebe6;
+        font-size: 12px;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .statement-balance-item:last-child {
+        border-bottom: none;
+    }
+
+    .statement-balance-date {
+        color: #6b5f56;
+        font-weight: 500;
+        min-width: 100px;
+    }
+
+    .statement-balance-desc {
+        flex: 1;
+        color: #2c241e;
+    }
+
+    .statement-balance-amount {
+        font-weight: 600;
+        color: #1a1410;
+        min-width: 120px;
+        text-align: right;
+    }
+
+    .statement-balance-debit {
+        color: var(--danger, #c45a4a);
+    }
+
+    .statement-balance-credit {
+        color: var(--success, #3a7a5a);
+    }
+
+    /* ─── Notes ───────────────────────────────────────────────────────── */
+    .statement-notes {
+        background: #f5f0eb;
+        border-radius: 8px;
+        padding: 14px 18px;
+        margin-bottom: 20px;
+        border-left: 3px solid var(--role-primary, #2d1f3a);
+    }
+
+    .statement-notes-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6b5f56;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 4px;
+    }
+
+    .statement-notes-label i {
+        font-size: 12px;
+    }
+
+    .statement-notes-text {
+        font-size: 13px;
+        color: #2c241e;
+        line-height: 1.5;
+    }
+
+    /* ─── Footer ───────────────────────────────────────────────────────── */
+    .statement-footer {
+        border-top: 2px solid #e8e0d8;
+        padding-top: 16px;
+        margin-top: 4px;
+    }
+
+    .statement-footer-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+
+    .statement-signature {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .statement-signature span:first-child {
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        color: #6b5f56;
+        letter-spacing: 1px;
+        border-bottom: 1px solid #6b5f56;
+        padding-bottom: 2px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .statement-signature-label {
+        font-size: 9px;
+        color: #6b5f56;
+        margin-top: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .statement-footer-divider {
+        border: none;
+        border-top: 1px solid #e8e0d8;
+        margin: 8px 0;
+    }
+
+    .statement-footer-text {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        font-size: 10px;
+        color: #a8988e;
+        text-align: center;
+    }
+
+    /* ─── Print styles ────────────────────────────────────────────────── */
+    @media print {
+        .statement-container {
+            max-width: 100%;
+            margin: 0;
+            padding: 16px 20px;
+            border: none;
+            box-shadow: none;
+            border-radius: 0;
+            background: #fcfaf8;
+        }
+
+        .statement-table tbody tr:hover {
+            background: transparent;
+        }
+
+        .statement-student-info {
+            background: #f5f0eb;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .statement-summary-card {
+            background: #f5f0eb;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .statement-badge {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .statement-logo {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+
+    /* ─── Responsive ───────────────────────────────────────────────────── */
+    @media (max-width: 640px) {
+        .statement-container {
+            padding: 12px 14px;
+        }
+
+        .statement-header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
+        }
+
+        .statement-title-block {
+            text-align: left;
+        }
+
+        .statement-title {
+            font-size: 16px;
+        }
+
+        .statement-summary-cards {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .statement-summary-value {
+            font-size: 15px;
+        }
+
+        .statement-student-row {
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .statement-student-field {
+            min-width: 0;
+        }
+
+        .statement-footer-row {
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .statement-balance-item {
+            font-size: 11px;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .statement-balance-amount {
+            text-align: left;
+        }
+
+        .statement-table {
+            font-size: 10px;
+        }
+
+        .statement-table th,
+        .statement-table td {
+            padding: 5px 6px;
+        }
+
+        .statement-table-right {
+            text-align: right;
+        }
+
+        .statement-table-center {
+            text-align: center;
+        }
+    }
+</style>

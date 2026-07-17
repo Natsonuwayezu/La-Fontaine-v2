@@ -46,6 +46,23 @@ describe('moduleIdToRenderFn', () => {
     });
 });
 
+describe('APP_NAME / APP_VERSION (regression: used to be undefined everywhere)', () => {
+    test('both are defined as bare top-level constants', () => {
+        // router.js's loadModuleScript() builds every dynamic module-load
+        // URL as `filePath + '?v=' + APP_VERSION` — if this were undefined,
+        // navigating to ANY page would throw ReferenceError.
+        expect(typeof APP_NAME).toBe('string');
+        expect(APP_NAME.length).toBeGreaterThan(0);
+        expect(typeof APP_VERSION).toBe('string');
+        expect(APP_VERSION.length).toBeGreaterThan(0);
+    });
+
+    test('match the values in APP_CONFIG', () => {
+        expect(APP_NAME).toBe(APP_CONFIG.name);
+        expect(APP_VERSION).toBe(APP_CONFIG.version);
+    });
+});
+
 describe('MODULE_FILE_MAP entries with companion data-layer files', () => {
     test('at least the known split pages use an array mapping', () => {
         const arrayMappings = Object.entries(MODULE_FILE_MAP).filter(([, v]) => Array.isArray(v));

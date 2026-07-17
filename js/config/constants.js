@@ -33,6 +33,16 @@ const APP_CONFIG = {
   defaultLocale: 'en',
 };
 
+// Used as bare top-level identifiers by core/router.js (in every dynamic
+// module-load URL — script.src = filePath + '?v=' + APP_VERSION),
+// core/boot.js, core/window-exposure.js, and core/print-engine.js (5
+// usages) — none of which is APP_CONFIG.name/version. Neither constant
+// was ever defined anywhere until now; router.js's loadModuleScript()
+// would have thrown ReferenceError the first time any page was navigated
+// to at all, since it runs on every single dynamic module load.
+const APP_NAME = APP_CONFIG.name;
+const APP_VERSION = APP_CONFIG.version;
+
 // ──────────────────────────────────────────────────────────────────────
 // SCHOOL METADATA
 // ──────────────────────────────────────────────────────────────────────
@@ -788,6 +798,8 @@ function isPrimaryClass(className) {
 
 if (typeof window !== 'undefined') {
   window.APP_CONFIG = APP_CONFIG;
+  window.APP_NAME = APP_NAME;
+  window.APP_VERSION = APP_VERSION;
   window.APP_META = APP_META;
   window.CURRENCY = CURRENCY;
   window.CLASS_LEVELS = CLASS_LEVELS;

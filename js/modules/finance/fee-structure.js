@@ -16,8 +16,8 @@
 /* ── Module-level state ─────────────────────────────────────────── */
 let _feeFilter = { yearId: null, categoryId: '', appliesToClass: '' };
 
-async function renderFeeStructure() {
-    const app = document.getElementById('app');
+async function renderFeeStructure(container, params = {}) {
+    const app = container;
     if (!canManageFees()) {
         app.innerHTML = `<div class="alert alert-danger">Access denied.</div>`;
         return;

@@ -11,8 +11,8 @@
 
 'use strict';
 
-async function renderFinanceDashboard() {
-    const app = document.getElementById('app');
+async function renderFinanceDashboard(container, params = {}) {
+    const app = container;
     if (!canRecordPayment()) {
         app.innerHTML = `<div class="alert alert-danger">Access denied.</div>`;
         return;

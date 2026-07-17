@@ -110,14 +110,13 @@ describe('MODULE_FILE_MAP', () => {
     });
 
     const KNOWN_PENDING_MODULES = new Set([
-        'attendance-entry', 'attendance-reports', 'attendance-summary', 'attendance-analytics',
         'holidays-marks', 'holidays-fees',
         'finance-dashboard', 'fee-structure', 'fee-assignments', 'fee-term-status',
         'record-payment', 'payment-history', 'receipts', 'overdue-payments',
         'fee-waivers', 'credit-balances', 'balances', 'student-fees',
         'student-statements', 'family-fee-summary', 'payment-reversals',
         'manual-adjustments', 'discounts', 'carry-forward', 'finance-audit', 'financial-reports',
-        'bulk-import', 'bulk-export', 'bulk-finance-actions', 'bulk-student-actions',
+        'bulk-finance-actions', 'bulk-student-actions',
     ]);
 
     test('no module outside the known-pending list has an empty (stub) file', () => {

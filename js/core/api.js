@@ -621,6 +621,7 @@ const REFRESH_MAP = {
     fee_categories: async () => { state.feeCategories = await getAll('fee_categories'); },
     fee_amounts: async () => { state.feeAmounts = await getAll('fee_amounts'); },
     student_fees: async () => { state.studentFees = await getAllRecords('student_fees'); },
+    student_credit_balance: async () => { state.creditBalances = await getAll('student_credit_balance'); },
     payments: async () => { state.payments = await getAllRecords('payments'); },
     payment_allocations: async () => { state.paymentAllocations = await getAllRecords('payment_allocations'); },
     families: async () => { state.families = await getAll('families'); },

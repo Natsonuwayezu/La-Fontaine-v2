@@ -50,6 +50,7 @@ const state = {
     feeCategories: [],
     feeAmounts: [],
     studentFees: [],
+    creditBalances: [],     // student_credit_balance rows
     payments: [],
     paymentAllocations: [],
     schoolSettings: {},     // { key: value } map from school_settings

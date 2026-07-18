@@ -16,8 +16,8 @@
 
 let _ffsFamilyId = null;
 
-async function renderFamilyFeeSummary(params = {}) {
-    const app = document.getElementById('app');
+async function renderFamilyFeeSummary(container, params = {}) {
+    const app = container;
     if (!canViewPayments()) {
         app.innerHTML = `<div class="alert alert-danger">Access denied.</div>`;
         return;

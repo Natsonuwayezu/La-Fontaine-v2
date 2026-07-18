@@ -39,7 +39,7 @@ If the second command returns nothing, it was never defined — check for a typo
 
 ### Login page / `#login-root`
 
-`ui/shell.js`'s `showApp()`/`showLogin()` reference a `#login-root` element that doesn't exist anywhere in `index.html` — those show/hide calls silently no-op. `core/auth.js`'s `renderLoginPage()` renders the login markup directly into `#app` instead. This connects to the larger known gap that all of `html/partials/` is still empty (see `setup-guide.md`) — building `login.html` properly should include adding the `#login-root` element `shell.js` expects.
+`ui/shell.js`'s `showApp()`/`showLogin()` reference a `#login-root` element that doesn't exist anywhere in `index.html`, and `html/partials/login.html` (now written) doesn't add one either — it uses its own `#loginScene`/`#loginCard` ids instead. Those `shell.js` show/hide calls silently no-op. `core/auth.js`'s `renderLoginPage()` renders the login markup directly into `#app` instead. Still unresolved as of this writing — worth reconciling once the partial actually gets wired into `index.html` (see the note in `setup-guide.md` about partials still needing to be loaded, not just written).
 
 ### Dead code with a misleading doc comment
 

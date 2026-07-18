@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  assets/icons/sprite.svg
+  ═══════════════════════════════════════════════════════════════════
+  Vector counterpart to the rendered PNGs (icon-192.png, icon-512.png,
+  icon-maskable-*.png, apple-touch-icon.png, favicon.ico) generated
+  alongside this file. Same design — a solid #c44536 circle with an
+  "LF" monogram — matching the brand mark's primary background color
+  already used in every dashboard module
+  (admin/accountant/teacher-dashboard.js's topbar brand, and the
+  boot-loader emblem in html/partials/loaders.html).
+
+  Referenced by:
+    - site.webmanifest, as a scalable "any" size icon entry
+    - js/core/pwa.js's PWA_CACHE_FILES precache list
+    - anywhere in the app that wants a crisp icon at an arbitrary size
+      via <svg><use href="/assets/icons/sprite.svg#icon-mark"></use></svg>
+
+  Three symbols:
+    #icon-mark        — standard icon, transparent background outside
+                         the circle (use for favicons, general display)
+    #icon-mark-mask   — maskable variant: fills the FULL viewBox with
+                         the brand color (no transparency) so OS icon
+                         masks (circle/squircle/rounded-square) can crop
+                         it safely per the PWA maskable-icon spec
+    #icon-mark-mono   — single-color silhouette (currentColor) for
+                         contexts needing a monochrome mark, e.g. a
+                         notification badge or a dark-mode-aware spot
+                         that should inherit surrounding text color
+                         instead of carrying its own fixed color
+  ═══════════════════════════════════════════════════════════════════
+-->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
+
+  <symbol id="icon-mark" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="50" fill="#c44536" />
+    <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
+          font-family="'Playfair Display', Georgia, serif" font-weight="700"
+          font-size="42" fill="#ffffff">LF</text>
+  </symbol>
+
+  <symbol id="icon-mark-mask" viewBox="0 0 100 100">
+    <rect x="0" y="0" width="100" height="100" fill="#c44536" />
+    <circle cx="50" cy="50" r="40" fill="#c44536" />
+    <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
+          font-family="'Playfair Display', Georgia, serif" font-weight="700"
+          font-size="34" fill="#ffffff">LF</text>
+  </symbol>
+
+  <symbol id="icon-mark-mono" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="50" fill="currentColor" />
+    <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
+          font-family="'Playfair Display', Georgia, serif" font-weight="700"
+          font-size="42" fill="#000000" style="mix-blend-mode: destination-out;">LF</text>
+  </symbol>
+
+</svg>

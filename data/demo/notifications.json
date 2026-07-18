@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "recipient_id": 1,
+    "sender_id": null,
+    "type": "payment",
+    "title": "Payment Recorded",
+    "message": "50,000 RWF recorded for MUGISHA Jean.",
+    "action_url": "payment-history",
+    "is_read": false,
+    "read_at": null,
+    "created_at": "2026-06-10T10:05:00Z"
+  },
+  {
+    "id": 2,
+    "recipient_id": 1,
+    "sender_id": null,
+    "type": "overdue",
+    "title": "Overdue Payment",
+    "message": "HABIMANA Eric has an overdue Term 3 balance.",
+    "action_url": "payment-history",
+    "is_read": false,
+    "read_at": null,
+    "created_at": "2026-07-01T08:00:00Z"
+  },
+  {
+    "id": 3,
+    "recipient_id": 3,
+    "sender_id": 1,
+    "type": "reminder",
+    "title": "Marks Due",
+    "message": "Final Exam marks for Primary 1 Mathematics are due by Friday.",
+    "action_url": "marks-entry",
+    "is_read": true,
+    "read_at": "2026-06-25T09:00:00Z",
+    "created_at": "2026-06-24T08:00:00Z"
+  }
+]

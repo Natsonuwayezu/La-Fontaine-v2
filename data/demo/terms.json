@@ -1,0 +1,35 @@
+[
+  {
+    "id": 4,
+    "academic_year_id": 2,
+    "term_number": 1,
+    "term_label": "Term 1",
+    "start_date": "2025-09-01",
+    "end_date": "2025-12-05",
+    "midterm_date": "2025-10-24",
+    "status": "completed",
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 5,
+    "academic_year_id": 2,
+    "term_number": 2,
+    "term_label": "Term 2",
+    "start_date": "2026-01-05",
+    "end_date": "2026-03-27",
+    "midterm_date": "2026-02-13",
+    "status": "completed",
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 6,
+    "academic_year_id": 2,
+    "term_number": 3,
+    "term_label": "Term 3",
+    "start_date": "2026-04-13",
+    "end_date": "2026-06-26",
+    "midterm_date": "2026-05-22",
+    "status": "in_progress",
+    "created_at": "2025-08-01T08:00:00Z"
+  }
+]

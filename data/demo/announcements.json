@@ -1,0 +1,28 @@
+[
+  {
+    "id": 1,
+    "sender_id": 1,
+    "type": "general",
+    "recipients": "all",
+    "title": "Term 3 Resumption",
+    "message": "Term 3 classes resume on 13 April 2026. Please ensure fees are settled before the first day.",
+    "send_via": "in_app,email",
+    "is_draft": false,
+    "scheduled_at": null,
+    "sent_at": "2026-04-08T08:00:00Z",
+    "created_at": "2026-04-08T08:00:00Z"
+  },
+  {
+    "id": 2,
+    "sender_id": 2,
+    "type": "urgent",
+    "recipients": "specific",
+    "title": "Overdue Fee Reminder",
+    "message": "Several families have overdue Term 3 balances. Please settle at the accounts office by end of week.",
+    "send_via": "in_app,sms",
+    "is_draft": false,
+    "scheduled_at": null,
+    "sent_at": "2026-06-15T08:00:00Z",
+    "created_at": "2026-06-15T08:00:00Z"
+  }
+]

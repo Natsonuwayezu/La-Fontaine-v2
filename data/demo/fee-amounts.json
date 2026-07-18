@@ -1,0 +1,146 @@
+[
+  {
+    "id": 1,
+    "fee_category_id": 1,
+    "class_id": 1,
+    "academic_year_id": 2,
+    "amount": 90000,
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 2,
+    "fee_category_id": 4,
+    "class_id": 1,
+    "academic_year_id": 2,
+    "amount": 15000,
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 3,
+    "fee_category_id": 1,
+    "class_id": 2,
+    "academic_year_id": 2,
+    "amount": 90000,
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 4,
+    "fee_category_id": 4,
+    "class_id": 2,
+    "academic_year_id": 2,
+    "amount": 15000,
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 5,
+    "fee_category_id": 1,
+    "class_id": 3,
+    "academic_year_id": 2,
+    "amount": 90000,
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 6,
+    "fee_category_id": 4,
+    "class_id": 3,
+    "academic_year_id": 2,
+    "amount": 15000,
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 7,
+    "fee_category_id": 1,
+    "class_id": 4,
+    "academic_year_id": 2,
+    "amount": 120000,
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 8,
+    "fee_category_id": 4,
+    "class_id": 4,
+    "academic_year_id": 2,
+    "amount": 15000,
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 9,
+    "fee_category_id": 1,
+    "class_id": 5,
+    "academic_year_id": 2,
+    "amount": 120000,
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 10,
+    "fee_category_id": 4,
+    "class_id": 5,
+    "academic_year_id": 2,
+    "amount": 15000,
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 11,
+    "fee_category_id": 1,
+    "class_id": 6,
+    "academic_year_id": 2,
+    "amount": 120000,
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 12,
+    "fee_category_id": 4,
+    "class_id": 6,
+    "academic_year_id": 2,
+    "amount": 15000,
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 13,
+    "fee_category_id": 1,
+    "class_id": 7,
+    "academic_year_id": 2,
+    "amount": 120000,
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 14,
+    "fee_category_id": 4,
+    "class_id": 7,
+    "academic_year_id": 2,
+    "amount": 15000,
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 15,
+    "fee_category_id": 1,
+    "class_id": 8,
+    "academic_year_id": 2,
+    "amount": 120000,
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 16,
+    "fee_category_id": 4,
+    "class_id": 8,
+    "academic_year_id": 2,
+    "amount": 15000,
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 17,
+    "fee_category_id": 1,
+    "class_id": 9,
+    "academic_year_id": 2,
+    "amount": 120000,
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 18,
+    "fee_category_id": 4,
+    "class_id": 9,
+    "academic_year_id": 2,
+    "amount": 15000,
+    "created_at": "2025-08-01T08:00:00Z"
+  }
+]

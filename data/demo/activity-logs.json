@@ -1,0 +1,36 @@
+[
+  {
+    "id": 1,
+    "user_id": 1,
+    "action": "LOGIN",
+    "entity_type": "session",
+    "entity_id": null,
+    "details": {},
+    "ip_address": "41.202.11.1",
+    "created_at": "2026-07-14T07:58:00Z"
+  },
+  {
+    "id": 2,
+    "user_id": 3,
+    "action": "SAVE_MARKS",
+    "entity_type": "assessment",
+    "entity_id": 1,
+    "details": {
+      "count": 28
+    },
+    "ip_address": "41.202.11.5",
+    "created_at": "2026-06-27T09:10:00Z"
+  },
+  {
+    "id": 3,
+    "user_id": 2,
+    "action": "CREATE_PAYMENT",
+    "entity_type": "payment",
+    "entity_id": 1,
+    "details": {
+      "amount": 120000
+    },
+    "ip_address": "41.202.11.9",
+    "created_at": "2026-06-10T10:05:00Z"
+  }
+]

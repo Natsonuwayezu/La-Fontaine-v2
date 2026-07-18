@@ -1,0 +1,92 @@
+[
+  {
+    "id": 1,
+    "name": "NURSERY 1",
+    "code": "N1",
+    "level": "nursery",
+    "sort_order": 1,
+    "class_teacher_id": null,
+    "is_active": true,
+    "created_at": "2018-01-15T08:00:00Z"
+  },
+  {
+    "id": 2,
+    "name": "NURSERY 2",
+    "code": "N2",
+    "level": "nursery",
+    "sort_order": 2,
+    "class_teacher_id": null,
+    "is_active": true,
+    "created_at": "2018-01-15T08:00:00Z"
+  },
+  {
+    "id": 3,
+    "name": "NURSERY 3",
+    "code": "N3",
+    "level": "nursery",
+    "sort_order": 3,
+    "class_teacher_id": null,
+    "is_active": true,
+    "created_at": "2018-01-15T08:00:00Z"
+  },
+  {
+    "id": 4,
+    "name": "PRIMARY 1",
+    "code": "P1",
+    "level": "primary",
+    "sort_order": 4,
+    "class_teacher_id": 3,
+    "is_active": true,
+    "created_at": "2018-01-15T08:00:00Z"
+  },
+  {
+    "id": 5,
+    "name": "PRIMARY 2",
+    "code": "P2",
+    "level": "primary",
+    "sort_order": 5,
+    "class_teacher_id": 4,
+    "is_active": true,
+    "created_at": "2018-01-15T08:00:00Z"
+  },
+  {
+    "id": 6,
+    "name": "PRIMARY 3",
+    "code": "P3",
+    "level": "primary",
+    "sort_order": 6,
+    "class_teacher_id": 5,
+    "is_active": true,
+    "created_at": "2018-01-15T08:00:00Z"
+  },
+  {
+    "id": 7,
+    "name": "PRIMARY 4",
+    "code": "P4",
+    "level": "primary",
+    "sort_order": 7,
+    "class_teacher_id": 3,
+    "is_active": true,
+    "created_at": "2018-01-15T08:00:00Z"
+  },
+  {
+    "id": 8,
+    "name": "PRIMARY 5",
+    "code": "P5",
+    "level": "primary",
+    "sort_order": 8,
+    "class_teacher_id": 4,
+    "is_active": true,
+    "created_at": "2018-01-15T08:00:00Z"
+  },
+  {
+    "id": 9,
+    "name": "PRIMARY 6",
+    "code": "P6",
+    "level": "primary",
+    "sort_order": 9,
+    "class_teacher_id": 5,
+    "is_active": true,
+    "created_at": "2018-01-15T08:00:00Z"
+  }
+]

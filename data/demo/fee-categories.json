@@ -1,0 +1,57 @@
+[
+  {
+    "id": 1,
+    "name": "Tuition",
+    "description": "Standard termly tuition fee",
+    "reset_frequency": "termly",
+    "apply_to": "all",
+    "class_id": null,
+    "is_mandatory": true,
+    "is_active": true,
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 2,
+    "name": "Transport",
+    "description": "School bus service",
+    "reset_frequency": "termly",
+    "apply_to": "student",
+    "class_id": null,
+    "is_mandatory": false,
+    "is_active": true,
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 3,
+    "name": "Uniform",
+    "description": "School uniform set",
+    "reset_frequency": "annual",
+    "apply_to": "student",
+    "class_id": null,
+    "is_mandatory": false,
+    "is_active": true,
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 4,
+    "name": "Books & Materials",
+    "description": "Textbooks and stationery",
+    "reset_frequency": "annual",
+    "apply_to": "all",
+    "class_id": null,
+    "is_mandatory": true,
+    "is_active": true,
+    "created_at": "2025-08-01T08:00:00Z"
+  },
+  {
+    "id": 5,
+    "name": "Lunch Program",
+    "description": "Daily lunch",
+    "reset_frequency": "termly",
+    "apply_to": "student",
+    "class_id": null,
+    "is_mandatory": false,
+    "is_active": true,
+    "created_at": "2025-08-01T08:00:00Z"
+  }
+]

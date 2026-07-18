@@ -1,0 +1,31 @@
+{
+  "_comment": "assets/icons/icon-manifest.json — describes every icon asset in this folder: which file backs which purpose, and which symbol inside sprite.svg is its vector counterpart. Referenced by js/core/pwa.js's PWA_CACHE_FILES precache list and by site.webmanifest.",
+  "brand": {
+    "name": "ECOLE LA FONTAINE",
+    "monogram": "LF",
+    "primaryColor": "#c44536",
+    "primaryColorDark": "#a83528",
+    "designNote": "Matches the .mark brand circle already used in every dashboard's topbar (admin/accountant/teacher-dashboard.js) and the boot-loader emblem in html/partials/loaders.html."
+  },
+  "sprite": {
+    "path": "/assets/icons/sprite.svg",
+    "symbols": [
+      { "id": "icon-mark", "purpose": "any", "description": "Standard icon, transparent outside the circle" },
+      { "id": "icon-mark-mask", "purpose": "maskable", "description": "Fills the full viewBox with brand color for OS icon masks (circle/squircle/rounded-square)" },
+      { "id": "icon-mark-mono", "purpose": "monochrome", "description": "Single-color silhouette using currentColor, for notification badges or color-inheriting contexts" }
+    ]
+  },
+  "raster": [
+    { "file": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "file": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "file": "icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "file": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "file": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "apple-touch-icon", "note": "Opaque background required by iOS — no alpha channel" },
+    { "file": "favicon.ico", "sizes": "16x16 32x32 48x48", "type": "image/x-icon", "purpose": "favicon" },
+    { "file": "icon-monochrome-96.png", "sizes": "96x96", "type": "image/png", "purpose": "notification-badge", "note": "Transparent LF cutout on a solid white circle, for the Notification API's badge option" }
+  ],
+  "generatedFrom": {
+    "font": "assets/fonts/playfair-display/PlayfairDisplay-Bold.ttf",
+    "generator": "Pillow (Python), hand-authored SVG for sprite.svg to match"
+  }
+}

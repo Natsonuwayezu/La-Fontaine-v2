@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Report Card Verification — ECOLE LA FONTAINE</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <style>
+        /* ── Reset ── */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #0f172a;
+            background-image:
+                radial-gradient(ellipse at 20% 50%, rgba(26, 58, 92, 0.45) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 50%, rgba(201, 168, 76, 0.12) 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 100%, rgba(0, 180, 216, 0.08) 0%, transparent 50%);
+            color: #f1f5f9;
+            padding: 24px 16px;
+        }
+
+        /* ── School Header ── */
+        .school-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .school-logo {
+            width: 68px;
+            height: 68px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #1d4ed8, #3b82f6, #06b6d4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 14px;
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.35);
+            font-size: 30px;
+        }
+
+        .school-header h1 {
+            font-size: 17px;
+            font-weight: 700;
+            color: #f1f5f9;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+        }
+
+        .school-header p {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 3px;
+        }
+
+        /* ── Card ── */
+        .card {
+            width: 100%;
+            max-width: 480px;
+            background: linear-gradient(145deg, #111827, #0f172a);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 20px;
+            padding: 28px 24px;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+        }
+
+        /* ── States ── */
+        .state {
+            display: none;
+            text-align: center;
+        }
+
+        .state.active {
+            display: block;
+        }
+
+        /* Loading */
+        .spinner {
+            width: 44px;
+            height: 44px;
+            margin: 0 auto 18px;
+            border: 3px solid rgba(255, 255, 255, 0.06);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        /* Icon badges */
+        .icon-badge {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 28px;
+        }
+
+        .icon-badge.success {
+            background: rgba(34, 197, 94, 0.12);
+        }
+
+        .icon-badge.error {
+            background: rgba(239, 68, 68, 0.12);
+        }
+
+        .icon-badge.warn {
+            background: rgba(251, 191, 36, 0.12);
+        }
+
+        /* Status heading */
+        .state h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .state.success-state h2 {
+            color: #4ade80;
+        }
+
+        .state.error-state h2 {
+            color: #f87171;
+        }
+
+        .state.warn-state h2 {
+            color: #fbbf24;
+        }
+
+        .state p.sub {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        /* Student info table */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            text-align: left;
+        }
+
+        .info-table tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .info-table tr:last-child {
+            border-bottom: none;
+        }
+
+        .info-table td {
+            padding: 10px 0;
+            font-size: 13px;
+        }
+
+        .info-table td:first-child {
+            color: #64748b;
+            font-weight: 500;
+            width: 42%;
+        }
+
+        .info-table td:last-child {
+            color: #e2e8f0;
+            font-weight: 600;
+        }
+
+        /* Verification seal */
+        .seal {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(34, 197, 94, 0.08);
+            border: 1px solid rgba(34, 197, 94, 0.18);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-top: 16px;
+        }
+
+        .seal-icon {
+            font-size: 20px;
+        }
+
+        .seal-text {
+            font-size: 12px;
+            color: #86efac;
+            line-height: 1.4;
+        }
+
+        .seal-text strong {
+            display: block;
+            font-size: 13px;
+        }
+
+        /* Verified timestamp */
+        .verified-at {
+            font-size: 11px;
+            color: #334155;
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        /* Divider */
+        .divider {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            margin: 18px 0;
+        }
+
+        /* Button */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 10px 22px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: .18s;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            opacity: .88;
+            transform: translateY(-1px);
+        }
+
+        .btn-sm {
+            padding: 7px 16px;
+            font-size: 12px;
+        }
+
+        /* Footer */
+        .page-footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 11px;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 22px 16px;
+                border-radius: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- School Header -->
+    <div class="school-header">
+        <div class="school-logo">🏫</div>
+        <h1>ECOLE LA FONTAINE</h1>
+        <p>Report Card Verification Portal · Rubavu, Rwanda</p>
+    </div>
+
+    <!-- Main Card -->
+    <div class="card">
+
+        <!-- STATE: Loading -->
+        <div class="state active" id="stateLoading">
+            <div class="spinner"></div>
+            <p class="loading-text">Verifying report card authenticity…</p>
+        </div>
+
+        <!-- STATE: Success -->
+        <div class="state success-state" id="stateSuccess">
+            <div class="icon-badge success">✅</div>
+            <h2>Authentic Report Card</h2>
+            <p class="sub">This report card has been verified as genuine and was issued by ECOLE LA FONTAINE.</p>
+
+            <table class="info-table" id="infoTable"></table>
+
+            <div class="seal">
+                <span class="seal-icon">🔐</span>
+                <div class="seal-text">
+                    <strong>Officially Verified</strong>
+                    This document is authentic and unaltered. Issued by ECOLE LA FONTAINE management system.
+                </div>
+            </div>
+
+            <p class="verified-at" id="verifiedAt"></p>
+        </div>
+
+        <!-- STATE: Error — invalid params -->
+        <div class="state error-state" id="stateError">
+            <div class="icon-badge error">❌</div>
+            <h2>Verification Failed</h2>
+            <p class="sub" id="errorMessage">This QR code is invalid or the record could not be found. It may have been
+                tampered with.</p>
+            <hr class="divider">
+            <p style="font-size:12px;color:#475569;">If you believe this is an error, please contact the school
+                administration directly.</p>
+        </div>
+
+        <!-- STATE: Warning — student found but data mismatch -->
+        <div class="state warn-state" id="stateWarn">
+            <div class="icon-badge warn">⚠️</div>
+            <h2>Data Mismatch Detected</h2>
+            <p class="sub" id="warnMessage">The record was found but some details do not match. This document may have
+                been altered.</p>
+        </div>
+
+        <!-- STATE: No params -->
+        <div class="state" id="stateNoParams">
+            <div class="icon-badge warn">🔍</div>
+            <h2>No QR Data Found</h2>
+            <p class="sub">This page is used to verify report cards from ECOLE LA FONTAINE. Please scan the QR code
+                printed on the report card.</p>
+            <hr class="divider">
+            <p style="font-size:12px;color:#475569;line-height:1.6;">
+                If you are a school administrator, report cards with QR codes are generated from the school management
+                system.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="page-footer">
+        ECOLE LA FONTAINE · School Management System<br>
+        Verification powered by a secure database · <span id="footerYear"></span>
+    </div>
+
+    <script>
+        'use strict';
+
+        // ── Supabase config ───────────────────────────────────────────────
+        const SUPABASE_URL = 'https://ovmymtdrugdljnttiltd.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXltdGRydWdkbGpudHRpbHRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4Nzg3OTMsImV4cCI6MjA2NDQ1NDc5M30.vi7Xa3eF9D9OTCkDZUYn6ScsyuQPwb0eN9nNazPpFcc';
+
+        // ── QR param keys (must match QR_CONFIG in constants.js) ─────────
+        const PARAM_STUDENT = 's';   // student code
+        const PARAM_TERM = 't';   // term number (1,2,3)
+        const PARAM_YEAR = 'y';   // academic_year id
+
+        // ── Helpers ───────────────────────────────────────────────────────
+        function showState(id) {
+            document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        async function supabaseGet(table, filter) {
+            const url = `${SUPABASE_URL}/rest/v1/${table}?${filter}&limit=1`;
+            const res = await fetch(url, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                }
+            });
+            if (!res.ok) throw new Error(`DB error ${res.status}`);
+            const data = await res.json();
+            return Array.isArray(data) && data.length > 0 ? data[0] : null;
+        }
+
+        function buildInfoTable(rows) {
+            return rows.map(([label, value]) => `
+        <tr>
+            <td>${label}</td>
+            <td>${value || '—'}</td>
+        </tr>
+    `).join('');
+        }
+
+        function termName(t) {
+            return ['Term 1', 'Term 2', 'Term 3'][parseInt(t) - 1] || `Term ${t}`;
+        }
+
+        function formatDate(d) {
+            return new Date(d).toLocaleDateString('en-GB', {
+                day: '2-digit', month: 'long', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+        }
+
+        // ── Main verification ─────────────────────────────────────────────
+        async function verify() {
+            document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+            const params = new URLSearchParams(window.location.search);
+            const studentCode = params.get(PARAM_STUDENT);
+            const termNum = params.get(PARAM_TERM);
+            const yearId = params.get(PARAM_YEAR);
+
+            // No QR params at all
+            if (!studentCode && !termNum && !yearId) {
+                showState('stateNoParams');
+                return;
+            }
+
+            // Missing required params
+            if (!studentCode || !termNum || !yearId) {
+                document.getElementById('errorMessage').textContent =
+                    'The QR code is incomplete. Required information is missing.';
+                showState('stateError');
+                return;
+            }
+
+            try {
+                // Fetch student
+                const student = await supabaseGet(
+                    'students',
+                    `student_code=eq.${encodeURIComponent(studentCode)}&select=id,first_name,last_name,student_code,class_id,status,enrollment_date`
+                );
+
+                if (!student) {
+                    document.getElementById('errorMessage').textContent =
+                        `No student found with code "${studentCode}". This report card may be fraudulent.`;
+                    showState('stateError');
+                    return;
+                }
+
+                // Fetch class name
+                const cls = await supabaseGet(
+                    'classes',
+                    `id=eq.${student.class_id}&select=name`
+                );
+
+                // Fetch academic year
+                const year = await supabaseGet(
+                    'academic_years',
+                    `id=eq.${yearId}&select=name`
+                );
+
+                if (!year) {
+                    document.getElementById('errorMessage').textContent =
+                        `Academic year record not found. The QR code may be outdated.`;
+                    showState('stateError');
+                    return;
+                }
+
+                // Check student is active or was active
+                if (student.status === 'deleted') {
+                    document.getElementById('warnMessage').textContent =
+                        `Student "${studentCode}" exists but has been removed from the system. Please contact the school.`;
+                    showState('stateWarn');
+                    return;
+                }
+
+                // Build success info table
+                const fullName = `${student.first_name} ${student.last_name}`;
+                document.getElementById('infoTable').innerHTML = buildInfoTable([
+                    ['Student Code', student.student_code],
+                    ['Full Name', fullName],
+                    ['Class', cls ? cls.name : '—'],
+                    ['Academic Year', year.name],
+                    ['Term', termName(termNum)],
+                    ['Enrolled', student.enrollment_date
+                        ? new Date(student.enrollment_date).toLocaleDateString('en-GB')
+                        : '—'],
+                    ['Status', student.status || 'Active'],
+                ]);
+
+                document.getElementById('verifiedAt').textContent =
+                    `Verified on ${formatDate(new Date())} · ECOLE LA FONTAINE Database`;
+
+                showState('stateSuccess');
+
+            } catch (err) {
+                console.error('[QR Verify]', err);
+                if (!navigator.onLine) {
+                    document.getElementById('errorMessage').textContent =
+                        'You are currently offline. Please connect to the internet to verify this report card.';
+                } else {
+                    document.getElementById('errorMessage').textContent =
+                        'A network error occurred while verifying. Please try again in a moment.';
+                }
+                showState('stateError');
+            }
+        }
+
+        // Run
+        verify();
+    </script>
+</body>
+
+</html>

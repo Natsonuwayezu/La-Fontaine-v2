@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "student_id": 7,
+    "academic_year_id": 2,
+    "amount": 20000,
+    "paid_amount": 20000,
+    "is_paid": true,
+    "applied_at_term_id": 6,
+    "created_at": "2026-06-01T08:00:00Z"
+  },
+  {
+    "id": 2,
+    "student_id": 8,
+    "academic_year_id": 2,
+    "amount": 20000,
+    "paid_amount": 0,
+    "is_paid": false,
+    "applied_at_term_id": 6,
+    "created_at": "2026-06-01T08:00:00Z"
+  }
+]

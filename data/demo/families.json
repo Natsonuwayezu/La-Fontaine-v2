@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "code": "FAM-001",
+    "guardian_name": "Jean Baptiste HABIMANA",
+    "guardian_phone": "+250788101010",
+    "guardian_email": "jb.habimana@example.com",
+    "address": "Rubavu, Nyamyumba",
+    "discount_amount": 0,
+    "created_at": "2023-08-15T08:00:00Z"
+  },
+  {
+    "id": 2,
+    "code": "FAM-002",
+    "guardian_name": "Solange MUGISHA",
+    "guardian_phone": "+250788202020",
+    "guardian_email": "s.mugisha@example.com",
+    "address": "Rubavu, Gisenyi",
+    "discount_amount": 15000,
+    "created_at": "2023-08-16T08:00:00Z"
+  },
+  {
+    "id": 3,
+    "code": "FAM-003",
+    "guardian_name": "Emmanuel KAMALI",
+    "guardian_phone": "+250788303030",
+    "guardian_email": "e.kamali@example.com",
+    "address": "Rubavu, Rubavu Ville",
+    "discount_amount": 0,
+    "created_at": "2023-08-17T08:00:00Z"
+  },
+  {
+    "id": 4,
+    "code": "FAM-004",
+    "guardian_name": "Alice UWERA",
+    "guardian_phone": "+250788404040",
+    "guardian_email": "a.uwera@example.com",
+    "address": "Rubavu, Cyanzarwe",
+    "discount_amount": 0,
+    "created_at": "2023-08-18T08:00:00Z"
+  },
+  {
+    "id": 5,
+    "code": "FAM-005",
+    "guardian_name": "Paul NIYONZIMA",
+    "guardian_phone": "+250788505050",
+    "guardian_email": "p.niyonzima@example.com",
+    "address": "Rubavu, Kanama",
+    "discount_amount": 0,
+    "created_at": "2023-08-19T08:00:00Z"
+  },
+  {
+    "id": 6,
+    "code": "FAM-006",
+    "guardian_name": "Grace MUKAMANA",
+    "guardian_phone": "+250788606060",
+    "guardian_email": "g.mukamana@example.com",
+    "address": "Rubavu, Nyakiriba",
+    "discount_amount": 10000,
+    "created_at": "2023-08-20T08:00:00Z"
+  }
+]

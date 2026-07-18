@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "student_id": 7,
+    "class_id": 7,
+    "academic_year_id": 2,
+    "enrolled_at": "2026-06-01",
+    "status": "active",
+    "created_at": "2026-06-01T08:00:00Z"
+  },
+  {
+    "id": 2,
+    "student_id": 8,
+    "class_id": 7,
+    "academic_year_id": 2,
+    "enrolled_at": "2026-06-01",
+    "status": "active",
+    "created_at": "2026-06-01T08:00:00Z"
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "holiday_subject_id": 1,
+    "student_id": 7,
+    "score": 17,
+    "is_absent": false,
+    "recorded_by": 3,
+    "created_at": "2026-06-20T08:00:00Z"
+  },
+  {
+    "id": 2,
+    "holiday_subject_id": 1,
+    "student_id": 8,
+    "score": 15,
+    "is_absent": false,
+    "recorded_by": 3,
+    "created_at": "2026-06-20T08:00:00Z"
+  }
+]

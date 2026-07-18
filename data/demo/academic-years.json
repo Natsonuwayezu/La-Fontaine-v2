@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "year_label": "2024-2025",
+    "start_date": "2024-09-02",
+    "end_date": "2025-06-27",
+    "is_current": false,
+    "created_at": "2024-08-01T08:00:00Z"
+  },
+  {
+    "id": 2,
+    "year_label": "2025-2026",
+    "start_date": "2025-09-01",
+    "end_date": "2026-06-26",
+    "is_current": true,
+    "created_at": "2025-08-01T08:00:00Z"
+  }
+]

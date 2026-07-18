@@ -1,0 +1,59 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+     html/partials/loaders.html
+     ═══════════════════════════════════════════════════════════════════
+     Fetched by js/ui/shell.js (or inlined by core/boot.js before
+     shell.js even runs, since the boot loader has to be visible
+     before the rest of the shell exists) and appended to <body>.
+
+     Two pieces, per css/components/loaders.css's own header comment
+     ("Three tiers" — this covers tiers 2 and 3; tier 1's primitives
+     like .spinner/.skeleton are used inline by other modules and
+     don't need a home here):
+
+       #boot-loader          — one-time full-screen emblem shown after
+                                login while initial dashboard data
+                                streams in. The SVG structure below
+                                (emblem-ring-outer/active/secondary,
+                                emblem-mark, emblem-orbit-dot) matches
+                                loaders.css's selectors exactly — these
+                                are real animated elements, not a
+                                placeholder shape.
+       #task-loader-overlay   — empty shell; js/ui/loaders.js injects
+                                the actual .task-loader element (with
+                                its data-family modifier and icon) into
+                                this container at runtime for
+                                long-running actions.
+
+     core/boot.js is expected to add .is-hidden to #boot-loader once
+     the initial data load finishes (see loaders.css's
+     .boot-loader.is-hidden rule).
+
+     Styled entirely by css/components/loaders.css. No inline styles.
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<!-- ═══ BOOT LOADER ═══ -->
+<div class="boot-loader" id="boot-loader">
+    <div class="boot-loader__frame">
+        <div class="boot-loader__emblem">
+            <svg viewBox="0 0 200 200" width="100%" height="100%">
+                <circle class="emblem-ring-outer" cx="100" cy="100" r="94" />
+                <circle class="emblem-ring-secondary" cx="100" cy="100" r="78" />
+                <circle class="emblem-ring-active" cx="100" cy="100" r="86" />
+                <circle class="emblem-orbit-dot" cx="100" cy="14" r="4" />
+                <path class="emblem-mark"
+                    d="M70 60 L130 60 L130 78 L100 78 L100 96 L124 96 L124 114 L100 114 L100 140 L70 140 Z" />
+            </svg>
+        </div>
+    </div>
+    <div class="boot-loader__label" id="boot-loader-label">Loading Ecole La Fontaine…</div>
+    <div class="boot-loader__progress">
+        <div class="progress-bar">
+            <div class="progress-fill" id="boot-loader-progress-fill" style="width: 0%;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ TASK LOADER OVERLAY (populated at runtime by js/ui/loaders.js) ═══ -->
+<div class="task-loader-overlay" id="task-loader-overlay">
+    <!-- js/ui/loaders.js injects a .task-loader[data-family="..."] element here -->
+</div>

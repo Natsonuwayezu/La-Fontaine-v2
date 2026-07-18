@@ -1,0 +1,60 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+     html/partials/modal-container.html
+     ═══════════════════════════════════════════════════════════════════
+     Fetched by js/ui/shell.js and appended once to <body>. Provides
+     the single shared modal overlay + confirm-dialog overlay that
+     every ui/modals.js call reuses (rather than each module building
+     its own overlay, which is what several of the standalone
+     sidebar.zip mockups did before this was centralized).
+
+     Two independent overlays are included:
+       #modalOverlay    — generic modal (any size: modal-xs..modal-full)
+       #confirmOverlay  — the .modal-confirm variant (icon + title +
+                          message + two-button footer), used for
+                          destructive-action confirmations in place of
+                          native confirm() — the same pattern already
+                          used ad hoc in modules/bulk/bulk-student-actions.js
+                          and modules/academics/marks-entry.js. Once
+                          ui/modals.js exists, those modules should
+                          switch to calling window.Modals.confirm(...)
+                          against this shared dialog instead of building
+                          their own inline popup each time.
+
+     Styled entirely by css/components/modals.css. No inline styles.
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<!-- ═══ GENERIC MODAL ═══ -->
+<div class="modal-overlay" id="modalOverlay" style="display:none;" aria-hidden="true">
+    <div class="modal modal-md" id="modalPanel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-header">
+            <span id="modalTitle">—</span>
+            <button class="modal-close" id="modalCloseBtn" aria-label="Close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <!-- Populated per-call by ui/modals.js -->
+        </div>
+        <div class="modal-footer" id="modalFooter">
+            <!-- Populated per-call by ui/modals.js -->
+        </div>
+    </div>
+</div>
+
+<!-- ═══ CONFIRM DIALOG ═══ -->
+<div class="modal-overlay" id="confirmOverlay" style="display:none;" aria-hidden="true">
+    <div class="modal modal-sm modal-confirm" id="confirmPanel" role="alertdialog" aria-modal="true"
+        aria-labelledby="confirmTitle">
+        <div class="modal-body">
+            <div class="confirm-icon" id="confirmIcon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="confirm-title" id="confirmTitle">Are you sure?</div>
+            <div class="confirm-message" id="confirmMessage">This action cannot be undone.</div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" id="confirmCancelBtn">Cancel</button>
+            <button class="btn btn-danger" id="confirmAcceptBtn">Confirm</button>
+        </div>
+    </div>
+</div>

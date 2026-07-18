@@ -17,8 +17,8 @@ let _faFilter = { classId: '', feeAmountId: '', status: '', search: '' };
 let _faPage = 1;
 const _faPageSize = 50;
 
-async function renderFeeAssignments() {
-    const app = document.getElementById('app');
+async function renderFeeAssignments(container, params = {}) {
+    const app = container;
     if (!canManageFees()) {
         app.innerHTML = `<div class="alert alert-danger">Access denied.</div>`;
         return;

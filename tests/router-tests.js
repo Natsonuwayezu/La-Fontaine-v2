@@ -171,10 +171,10 @@ describe('MODULE_FILE_MAP', () => {
     });
 
     const KNOWN_PENDING_MODULES = new Set([
-        'fee-assignments', 'fee-term-status',
+        'fee-term-status',
         'payment-history', 'receipts', 'overdue-payments',
         'balances', 'student-fees',
-        'student-statements', 'family-fee-summary', 'payment-reversals',
+        'student-statements', 'payment-reversals',
         'manual-adjustments', 'discounts', 'carry-forward', 'finance-audit', 'financial-reports',
     ]);
 

@@ -171,10 +171,7 @@ describe('MODULE_FILE_MAP', () => {
     });
 
     const KNOWN_PENDING_MODULES = new Set([
-        'fee-term-status', 'overdue-payments',
-        'balances', 'student-fees',
-        'student-statements',
-        'manual-adjustments', 'discounts', 'carry-forward', 'financial-reports',
+        'overdue-payments', 'student-statements',
     ]);
 
     test('no module outside the known-pending list has an empty (stub) file', () => {

@@ -14,8 +14,8 @@ let _balFilter = { classId: '', status: 'all', search: '' };
 let _balPage = 1;
 const _balSize = 50;
 
-async function renderBalances() {
-    const app = document.getElementById('app');
+async function renderBalances(container, params = {}) {
+    const app = container;
     if (!canViewPayments()) {
         app.innerHTML = `<div class="alert alert-danger">Access denied.</div>`;
         return;

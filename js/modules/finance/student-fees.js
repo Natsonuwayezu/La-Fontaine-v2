@@ -16,8 +16,8 @@
 let _sfStudentId = null;
 let _sfTab = 'fees';
 
-async function renderStudentFees(params = {}) {
-    const app = document.getElementById('app');
+async function renderStudentFees(container, params = {}) {
+    const app = container;
     if (!canViewPayments()) {
         app.innerHTML = `<div class="alert alert-danger">Access denied.</div>`;
         return;

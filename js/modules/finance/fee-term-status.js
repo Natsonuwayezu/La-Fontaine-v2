@@ -13,8 +13,8 @@
 
 let _ftsFilter = { classId: '', search: '' };
 
-async function renderFeeTermStatus() {
-    const app = document.getElementById('app');
+async function renderFeeTermStatus(container, params = {}) {
+    const app = container;
     if (!canViewPayments()) {
         app.innerHTML = `<div class="alert alert-danger">Access denied.</div>`;
         return;

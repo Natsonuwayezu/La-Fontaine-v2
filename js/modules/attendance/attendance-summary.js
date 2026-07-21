@@ -153,3 +153,11 @@ const AttendanceSummary = (() => {
 
     return { render };
 })();
+
+// ─── EXPOSE ─────────────────────────────────────────────────────────
+// window.AttendanceSummary was never assigned anywhere in this file, and the router
+// looks up window.renderAttendanceSummary specifically (see core/router.js's
+// moduleIdToRenderFn) — this page was completely unreachable via navigation
+// despite being fully built.
+window.AttendanceSummary = AttendanceSummary;
+window.renderAttendanceSummary = AttendanceSummary.render;

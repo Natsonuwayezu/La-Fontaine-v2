@@ -144,6 +144,7 @@
 
     <!-- Core Config -->
     <script src="js/config/constants.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="js/config/supabase-config.js"></script>
     <script src="js/config/navigation.js"></script>
     <script src="js/config/role-permissions.js"></script>
@@ -206,6 +207,9 @@
     <script src="js/mobile/mobile-tables.js"></script>
     <script src="js/mobile/mobile-navigation.js"></script>
     <script src="js/mobile/mobile-modals.js"></script>
+
+    <!-- Boot (LAST of all core files, per its own documented load order) -->
+    <script src="js/core/boot.js"></script>
 
     <!-- Window Exports (LAST) -->
     <script src="js/core/window-exposure.js"></script>

@@ -89,7 +89,7 @@ const TeacherAssignments = (() => {
         const existing = assignments.find(a => String(a.teacher_id) === String(teacherId) && String(a.class_id) === String(classId));
 
         if (existing) {
-            const ok = await confirmDialog('Remove this teacher-class assignment?', 'Remove Assignment');
+            const ok = await confirmDialog('Remove this teacher-class assignment?', 'Remove Assignment', { confirmClass: 'btn-danger' });
             if (!ok) return;
             await remove('teacher_assignments', existing.id);
             await logAction('TEACHER_ASSIGNMENT_REMOVED', 'teacher_assignments', existing.id);

@@ -671,3 +671,7 @@ if (document.readyState === 'loading') {
 // ─── EXPOSE ─────────────────────────────────────────────────────────
 
 window.Sidebar = Sidebar;
+// window-exposure.js's sanity check (and the boot.js convention used
+// throughout this app) expects a bare window.renderSidebar — this was
+// never aliased, only the Sidebar namespace itself was exposed.
+window.renderSidebar = Sidebar.render;

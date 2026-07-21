@@ -21,8 +21,8 @@ let _ssDateTo = '';
 let _ssMode = 'student';   // 'student' | 'family'
 let _ssFamilyId = null;
 
-async function renderStudentStatements(params = {}) {
-    const app = document.getElementById('app');
+async function renderStudentStatements(container, params = {}) {
+    const app = container;
     if (!canViewPayments()) {
         app.innerHTML = `<div class="alert alert-danger">Access denied.</div>`;
         return;

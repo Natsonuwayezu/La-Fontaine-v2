@@ -165,3 +165,11 @@ const StudentPromotion = (() => {
   return { render };
 })();
  
+
+// ─── EXPOSE ─────────────────────────────────────────────────────────
+// window.StudentPromotion was never assigned anywhere in this file, and the router
+// looks up window.renderStudentPromotion specifically (see core/router.js's
+// moduleIdToRenderFn) — this page was completely unreachable via navigation
+// despite being fully built.
+window.StudentPromotion = StudentPromotion;
+window.renderStudentPromotion = StudentPromotion.render;

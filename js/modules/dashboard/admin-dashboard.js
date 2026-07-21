@@ -291,30 +291,30 @@ const AdminDashboard = (() => {
 
                 <!-- ═══ CHARTS ROW ═══ -->
                 <div class="charts-row">
-                    <div class="chart-card">
-                        <div class="chart-card-header">
-                            <span class="chart-card-title"><i class="fa-solid fa-chart-column"></i> Class Performance</span>
-                            <span class="chart-card-badge">This Term</span>
+                    <div class="dash-card">
+                        <div class="dash-card-header">
+                            <span class="dash-card-title"><i class="fa-solid fa-chart-column"></i> Class Performance</span>
+                            <span class="dash-card-badge">This Term</span>
                         </div>
-                        <div class="chart-card-body">
+                        <div class="dash-card-body">
                             <canvas id="chart-class-performance" height="200"></canvas>
                         </div>
                     </div>
-                    <div class="chart-card">
-                        <div class="chart-card-header">
-                            <span class="chart-card-title"><i class="fa-solid fa-bullseye"></i> Grade Distribution</span>
-                            <span class="chart-card-badge">428 Students</span>
+                    <div class="dash-card">
+                        <div class="dash-card-header">
+                            <span class="dash-card-title"><i class="fa-solid fa-bullseye"></i> Grade Distribution</span>
+                            <span class="dash-card-badge">428 Students</span>
                         </div>
-                        <div class="chart-card-body">
+                        <div class="dash-card-body">
                             <canvas id="chart-grade-distribution" height="200"></canvas>
                         </div>
                     </div>
-                    <div class="chart-card">
-                        <div class="chart-card-header">
-                            <span class="chart-card-title"><i class="fa-solid fa-square-check"></i> Attendance Overview</span>
-                            <span class="chart-card-badge">Today</span>
+                    <div class="dash-card">
+                        <div class="dash-card-header">
+                            <span class="dash-card-title"><i class="fa-solid fa-square-check"></i> Attendance Overview</span>
+                            <span class="dash-card-badge">Today</span>
                         </div>
-                        <div class="chart-card-body">
+                        <div class="dash-card-body">
                             <canvas id="chart-attendance" height="200"></canvas>
                         </div>
                     </div>
@@ -350,12 +350,12 @@ const AdminDashboard = (() => {
                             </div>
                         </div>
                     </div>
-                    <div class="fee-chart-card">
-                        <div class="fee-chart-card-header">
-                            <span class="fee-chart-card-title"><i class="fa-solid fa-chart-line"></i> Fee Collection by Class</span>
-                            <span class="fee-chart-card-badge">This Term</span>
+                    <div class="dash-card">
+                        <div class="dash-card-header">
+                            <span class="dash-card-title"><i class="fa-solid fa-chart-line"></i> Fee Collection by Class</span>
+                            <span class="dash-card-badge">This Term</span>
                         </div>
-                        <div class="fee-chart-card-body">
+                        <div class="dash-card-body">
                             <canvas id="chart-fee-collection" height="200"></canvas>
                         </div>
                     </div>
@@ -846,3 +846,9 @@ const AdminDashboard = (() => {
    ═══════════════════════════════════════════════════════════════════ */
 
 window.AdminDashboard = AdminDashboard;
+
+// NOTE: window.AdminDashboard was already exposed, but the router looks up
+// window.renderAdminDashboard specifically (see core/router.js's moduleIdToRenderFn) —
+// that exact name was never assigned, so this page was unreachable via
+// navigation despite being fully built.
+window.renderAdminDashboard = AdminDashboard.render;

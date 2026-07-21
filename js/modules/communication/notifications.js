@@ -184,3 +184,11 @@ const Notifications = (() => {
 
   return { render, unreadCount, __previewList: previewList, markAllReadExternal };
 })();
+
+// ─── EXPOSE ─────────────────────────────────────────────────────────
+// window.Notifications was never assigned anywhere in this file, and the router
+// looks up window.renderNotifications specifically (see core/router.js's
+// moduleIdToRenderFn) — this page was completely unreachable via navigation
+// despite being fully built.
+window.Notifications = Notifications;
+window.renderNotifications = Notifications.render;

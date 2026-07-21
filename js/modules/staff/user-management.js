@@ -122,7 +122,7 @@ const UserManagement = (() => {
 
         container.querySelectorAll('[data-delete-user]').forEach(btn => {
             btn.addEventListener('click', async () => {
-                const ok = await confirmDialog('Delete this staff account? This cannot be undone.', 'Delete Account');
+                const ok = await confirmDialog('Delete this staff account? This cannot be undone.', 'Delete Account', { confirmClass: 'btn-danger' });
                 if (!ok) return;
                 const result = await deleteUser(btn.dataset.deleteUser);
                 if (result.success) render(container);

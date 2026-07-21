@@ -195,7 +195,7 @@ const AcademicCalendar = (() => {
         container.querySelectorAll('[data-delete-year]').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.stopPropagation();
-                const ok = await confirmDialog('Delete this academic year? This cannot be undone.', 'Delete Academic Year');
+                const ok = await confirmDialog('Delete this academic year? This cannot be undone.', 'Delete Academic Year', { confirmClass: 'btn-danger' });
                 if (!ok) return;
                 const result = await deleteAcademicYear(btn.dataset.deleteYear);
                 if (result.success) render(container);
@@ -230,7 +230,7 @@ const AcademicCalendar = (() => {
         container.addEventListener('click', async (e) => {
             const delBtn = e.target.closest('[data-delete-term]');
             if (delBtn) {
-                const ok = await confirmDialog('Delete this term?', 'Delete Term');
+                const ok = await confirmDialog('Delete this term?', 'Delete Term', { confirmClass: 'btn-danger' });
                 if (ok) { await deleteTerm(delBtn.dataset.deleteTerm); render(container); }
             }
         });

@@ -394,7 +394,7 @@ function renderTeacherDashboard(container) {
             <!-- Charts Row -->
             <div class="charts-row">
                 <!-- Grade Distribution (Donut) -->
-                <div class="chart-card">
+                <div class="dash-card">
                     <div class="chart-head">
                         <span class="title">
                             <i class="fa-solid fa-chart-pie" style="color:var(--role-primary, #4a2d5a);margin-right:6px;"></i>
@@ -408,7 +408,7 @@ function renderTeacherDashboard(container) {
                 </div>
 
                 <!-- Subject Completion (Horizontal Bar) -->
-                <div class="chart-card">
+                <div class="dash-card">
                     <div class="chart-head">
                         <span class="title">
                             <i class="fa-solid fa-chart-bar" style="color:var(--role-secondary, #8a5a9a);margin-right:6px;"></i>

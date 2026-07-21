@@ -18,8 +18,8 @@ let _odFilter = { classId: '', severity: 'all', catId: '', search: '' };
 let _odPage   = 1;
 const _odSize = 50;
 
-async function renderOverduePayments() {
-    const app = document.getElementById('app');
+async function renderOverduePayments(container, params = {}) {
+    const app = container;
     if (!canViewPayments()) {
         app.innerHTML = `<div class="alert alert-danger">Access denied.</div>`;
         return;

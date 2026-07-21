@@ -134,3 +134,11 @@ const AnnouncementCenter = (() => {
 
   return { render, renderInto, unreadCount };
 })();
+
+// ─── EXPOSE ─────────────────────────────────────────────────────────
+// window.AnnouncementCenter was never assigned anywhere in this file, and the router
+// looks up window.renderAnnouncementCenter specifically (see core/router.js's
+// moduleIdToRenderFn) — this page was completely unreachable via navigation
+// despite being fully built.
+window.AnnouncementCenter = AnnouncementCenter;
+window.renderAnnouncementCenter = AnnouncementCenter.render;

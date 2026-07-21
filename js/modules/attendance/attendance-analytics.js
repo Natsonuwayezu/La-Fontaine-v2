@@ -238,3 +238,11 @@ const AttendanceAnalytics = (() => {
 
     return { render };
 })();
+
+// ─── EXPOSE ─────────────────────────────────────────────────────────
+// window.AttendanceAnalytics was never assigned anywhere in this file, and the router
+// looks up window.renderAttendanceAnalytics specifically (see core/router.js's
+// moduleIdToRenderFn) — this page was completely unreachable via navigation
+// despite being fully built.
+window.AttendanceAnalytics = AttendanceAnalytics;
+window.renderAttendanceAnalytics = AttendanceAnalytics.render;

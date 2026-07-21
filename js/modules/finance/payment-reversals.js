@@ -165,7 +165,8 @@ async function renderPaymentReversals(container, params = {}) {
                 : '';
             const ok = await confirmDialog(
                 `Reverse ${fmtCurrency(payment.amount)} for ${esc(studentName(payment.student_id))}? This restores the fee balance it covered and cannot be undone.${warningExtra}`,
-                'Confirm Reversal'
+                'Confirm Reversal',
+                { confirmClass: 'btn-danger' }
             );
             if (!ok) return;
 

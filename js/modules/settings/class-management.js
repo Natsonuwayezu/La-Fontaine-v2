@@ -225,7 +225,7 @@ const ClassManagement = (() => {
 
         container.querySelectorAll('[data-delete-class]').forEach(btn => {
             btn.addEventListener('click', async () => {
-                const ok = await confirmDialog('Delete this class? Students in it will not be moved automatically.', 'Delete Class');
+                const ok = await confirmDialog('Delete this class? Students in it will not be moved automatically.', 'Delete Class', { confirmClass: 'btn-danger' });
                 if (!ok) return;
                 await remove('classes', btn.dataset.deleteClass);
                 await refreshTable('classes');
@@ -282,7 +282,7 @@ const ClassManagement = (() => {
 
         container.querySelectorAll('[data-delete-subject]').forEach(btn => {
             btn.addEventListener('click', async () => {
-                const ok = await confirmDialog('Delete this subject?', 'Delete Subject');
+                const ok = await confirmDialog('Delete this subject?', 'Delete Subject', { confirmClass: 'btn-danger' });
                 if (!ok) return;
                 await remove('subjects', btn.dataset.deleteSubject);
                 await refreshTable('subjects');

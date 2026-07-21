@@ -122,7 +122,8 @@ const BackupRestorePage = (() => {
     async function restoreFromFile(file, container) {
         const ok = await confirmDialog(
             'Restoring will overwrite existing data in every table found in this backup file. This cannot be undone. Continue?',
-            'Restore Backup'
+            'Restore Backup',
+            { confirmClass: 'btn-danger' }
         );
         if (!ok) return;
 

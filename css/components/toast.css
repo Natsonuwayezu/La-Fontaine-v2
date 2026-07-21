@@ -707,3 +707,78 @@
         animation: none !important;
     }
 }
+/* ═══════════════════════════════════════════════════════════════════
+   PWA UPDATE BANNER
+   ═══════════════════════════════════════════════════════════════════
+   Created dynamically by core/pwa.js's _showUpdateNotification() when
+   a new service-worker version has installed and is waiting to take
+   over. Was never styled anywhere — added here since it's the same
+   "transient overlay notice" family as the toast component above.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.pwa-update-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--z-toast, 9999);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: #2563eb;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+}
+
+.pwa-update-banner svg {
+    flex-shrink: 0;
+    animation: pwa-update-spin 2s linear infinite;
+}
+
+@keyframes pwa-update-spin {
+    to { transform: rotate(360deg); }
+}
+
+.pwa-update-banner .btn-sm {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.pwa-update-banner .btn-sm:hover {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+.pwa-update-dismiss {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.pwa-update-dismiss:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+}
+
+@media (max-width: 480px) {
+    .pwa-update-banner {
+        flex-wrap: wrap;
+        font-size: 0.78rem;
+        text-align: center;
+    }
+}

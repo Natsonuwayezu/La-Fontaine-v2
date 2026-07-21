@@ -562,3 +562,5 @@ if (document.readyState === 'loading') {
 
 // ─── EXPOSE TO WINDOW ───────────────────────────────────────────────
 window.Topbar = Topbar;
+// Same reasoning as ui/sidebar.js's window.renderSidebar alias.
+window.renderTopbar = Topbar.render;

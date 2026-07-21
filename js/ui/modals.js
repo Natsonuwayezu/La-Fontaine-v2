@@ -330,7 +330,13 @@ function confirmDialog(message, title = 'Confirm', options = {}) {
         const {
             confirmText = 'Confirm',
             cancelText = 'Cancel',
-            confirmClass = 'btn-danger',
+            // Was 'btn-danger' (red) — since almost no call site across the
+            // app ever overrode this, EVERY confirmation dialog showed red,
+            // even for routine actions (saving a term, granting a waiver,
+            // enrolling a student). Genuinely destructive actions
+            // (delete/remove/reverse) should pass { confirmClass: 'btn-danger' }
+            // explicitly instead of relying on this default.
+            confirmClass = 'btn-primary',
             size = 'sm'
         } = options;
 

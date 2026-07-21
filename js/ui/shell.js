@@ -169,6 +169,7 @@ const Shell = (() => {
      ═══════════════════════════════════════════════════════════════ */
 
   return {
+    init,
     showApp,
     showLogin,
     hideBootLoader,
@@ -180,3 +181,11 @@ const Shell = (() => {
 
 // ─── EXPOSE TO WINDOW ───────────────────────────────────────────────
 window.Shell = Shell;
+// window-exposure.js's sanity check (and boot.js's own step-7 comment,
+// "Shell renders sidebar + topbar + #app placeholder") expect a bare
+// window.renderShell — Shell has no separate "render" concept (it
+// auto-initializes via its own DOMContentLoaded listener above), so
+// this aliases to the same init() that auto-init already calls;
+// re-running it here is what boot.js's step 7 intends, and is safe
+// since init() only sets up DOM structure/listeners.
+window.renderShell = Shell.init;

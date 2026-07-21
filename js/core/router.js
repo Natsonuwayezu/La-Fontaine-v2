@@ -32,7 +32,7 @@ const MODULE_FILE_MAP = {
     'attendance-analytics': 'js/modules/attendance/attendance-analytics.js',
 
     // Students
-    'student-list': 'js/modules/students/student-list.js',
+    'student-list': ['js/modules/bulk/bulk-student-actions.js', 'js/modules/students/student-list.js'],
     'enroll-student': 'js/modules/students/enroll-student.js',
     'student-details': 'js/modules/students/student-details.js',
     'student-profile': 'js/modules/students/student-profile.js',

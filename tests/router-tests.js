@@ -170,9 +170,7 @@ describe('MODULE_FILE_MAP', () => {
         expect(missing).toEqual([]);
     });
 
-    const KNOWN_PENDING_MODULES = new Set([
-        'overdue-payments', 'student-statements',
-    ]);
+    const KNOWN_PENDING_MODULES = new Set([]);
 
     test('no module outside the known-pending list has an empty (stub) file', () => {
         const unexpectedlyEmpty = [];

@@ -274,3 +274,11 @@ const Announcements = (() => {
 
   return { render, openEditor };
 })();
+
+// ─── EXPOSE ─────────────────────────────────────────────────────────
+// window.Announcements was never assigned anywhere in this file, and the router
+// looks up window.renderAnnouncements specifically (see core/router.js's
+// moduleIdToRenderFn) — this page was completely unreachable via navigation
+// despite being fully built.
+window.Announcements = Announcements;
+window.renderAnnouncements = Announcements.render;

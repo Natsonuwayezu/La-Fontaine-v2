@@ -265,3 +265,11 @@ const HolidaysFees = (() => {
 
     return { render };
 })();
+
+// ─── EXPOSE ─────────────────────────────────────────────────────────
+// window.HolidaysFees was never assigned anywhere in this file, and the router
+// looks up window.renderHolidaysFees specifically (see core/router.js's
+// moduleIdToRenderFn) — this page was completely unreachable via navigation
+// despite being fully built.
+window.HolidaysFees = HolidaysFees;
+window.renderHolidaysFees = HolidaysFees.render;

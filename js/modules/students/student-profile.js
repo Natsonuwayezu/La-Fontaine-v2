@@ -325,3 +325,11 @@ const StudentProfile = (() => {
 
   return { render };
 })();
+
+// ─── EXPOSE ─────────────────────────────────────────────────────────
+// window.StudentProfile was never assigned anywhere in this file, and the router
+// looks up window.renderStudentProfile specifically (see core/router.js's
+// moduleIdToRenderFn) — this page was completely unreachable via navigation
+// despite being fully built.
+window.StudentProfile = StudentProfile;
+window.renderStudentProfile = StudentProfile.render;

@@ -197,3 +197,11 @@ const Reminders = (() => {
 
   return { render };
 })();
+
+// ─── EXPOSE ─────────────────────────────────────────────────────────
+// window.Reminders was never assigned anywhere in this file, and the router
+// looks up window.renderReminders specifically (see core/router.js's
+// moduleIdToRenderFn) — this page was completely unreachable via navigation
+// despite being fully built.
+window.Reminders = Reminders;
+window.renderReminders = Reminders.render;

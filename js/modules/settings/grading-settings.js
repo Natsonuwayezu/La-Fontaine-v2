@@ -125,7 +125,7 @@ const GradingSettings = (() => {
 
         container.querySelectorAll('[data-delete-band]').forEach(btn => {
             btn.addEventListener('click', async () => {
-                const ok = await confirmDialog('Delete this grade band?', 'Delete Grade Band');
+                const ok = await confirmDialog('Delete this grade band?', 'Delete Grade Band', { confirmClass: 'btn-danger' });
                 if (!ok) return;
                 await deleteGradeBand(btn.dataset.deleteBand);
                 render(container);
@@ -159,4 +159,10 @@ const GradingSettings = (() => {
 })();
 
 window.renderGradingSettings = GradingSettings.render;
+// The router derives window.renderGradingScale from the 'grading-scale'
+// moduleId (see core/router.js's moduleIdToRenderFn) — this file's name
+// doesn't match that nav id, so the expected function name never existed
+// here despite the MODULE_FILE_MAP array correctly loading this file.
+// Without this alias, navigating to Settings > Grading was completely broken.
+window.renderGradingScale = GradingSettings.render;
 window.GradingSettings = GradingSettings;

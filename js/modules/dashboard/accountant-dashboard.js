@@ -198,14 +198,14 @@ function renderAccountantDashboard(container) {
 
             <!-- ═══ CHARTS ROW ═══ -->
             <div class="charts-row">
-                <div class="chart-card">
+                <div class="dash-card">
                     <div class="chart-head">
                         <span class="title"><i class="fa-solid fa-chart-column" style="color:var(--success);margin-right:6px;"></i> Collection by Class</span>
                         <span class="badge">This Term</span>
                     </div>
                     <div class="chart-container tall"><canvas id="collectionChart"></canvas></div>
                 </div>
-                <div class="chart-card">
+                <div class="dash-card">
                     <div class="chart-head">
                         <span class="title"><i class="fa-solid fa-chart-line" style="color:var(--info);margin-right:6px;"></i> Monthly Trend</span>
                         <span class="badge">Last 6 Months</span>

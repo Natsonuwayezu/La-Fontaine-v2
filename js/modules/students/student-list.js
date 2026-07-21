@@ -201,9 +201,9 @@ const StudentList = (() => {
     bar.querySelectorAll('[data-bulk]').forEach(btn => {
       btn.onclick = () => {
         if (btn.dataset.bulk === 'export') {
-          window.Toast?.success('Export started', `Preparing export for ${selectedIds.length} students.`);
+          window.BulkStudentActions?.exportSelected(selectedIds);
         } else {
-          window.Router?.navigate('student-promotion');
+          window.BulkStudentActions?.promoteSelected(selectedIds);
         }
       };
     });
@@ -211,3 +211,11 @@ const StudentList = (() => {
 
   return { render };
 })();
+
+// ─── EXPOSE ─────────────────────────────────────────────────────────
+// window.StudentList was never assigned anywhere in this file, and the router
+// looks up window.renderStudentList specifically (see core/router.js's
+// moduleIdToRenderFn) — this page was completely unreachable via navigation
+// despite being fully built.
+window.StudentList = StudentList;
+window.renderStudentList = StudentList.render;

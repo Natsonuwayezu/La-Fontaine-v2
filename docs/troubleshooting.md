@@ -1,5 +1,33 @@
 # Troubleshooting
 
+## The app doesn't boot at all / blank white screen / console shows "ReferenceError: boot is not defined"
+
+Three separate things had to all be true for the app to boot, and each was missing independently at different points in this project's history:
+
+1. **`core/boot.js` must be referenced in `index.html`'s script list.** It was fully written (defines and exposes `window.boot`) but never actually added as a `<script>` tag — `main.js`'s `await boot()` had nothing to call. Check `grep boot.js index.html` — it should appear once, positioned last among `js/core/` files, before `window-exposure.js` and `main.js` (per `boot.js`'s own documented load order).
+2. **The Supabase JS CDN script must load before `js/config/supabase-config.js`.** Without it, `window.supabase` is undefined and every database call fails from the very first line. Check for a `<script src="...supabase-js@2...">` tag before the `supabase-config.js` tag.
+3. **`ui/sidebar.js`, `ui/topbar.js`, `ui/shell.js` must each expose a bare `window.renderSidebar`/`renderTopbar`/`renderShell`**, not just their namespace object (`window.Sidebar`/`Topbar`/`Shell`). `window-exposure.js` runs a sanity check for exactly these three names (plus `boot`) on load and warns in the console if any are missing — take that warning seriously, it means navigation-adjacent code has a real gap, not just a lint nitpick.
+
+All three are covered by `tests/boot-chain-tests.js` now.
+
+## A specific page is unreachable — clicking its nav item does nothing, no console error
+
+This was the single most common failure found in a full-repo audit: **17 fully-built, syntax-valid, nav-registered pages** (the entire Students module, entire Attendance module, entire Communication module, `admin-dashboard.js`, both `holidays-*.js` modules) were completely unreachable, because each only exposed its IIFE namespace (e.g. `window.StudentList`) and never assigned the *exact* `window.render<PascalCaseModuleId>` name `core/router.js`'s `moduleIdToRenderFn()` derives from the nav id. No thrown error — `navigateTo()` just silently fails its `typeof renderFn !== 'function'` check.
+
+**How to check a specific page:** open the file, find its IIFE variable name (`const X = (() => {...})()`), confirm it does `return { render, ... }`, then confirm two lines exist near the bottom: `window.X = X;` **and** `window.render<ModuleId> = X.render;`. Missing the second line is the bug.
+
+**How to check the whole app at once:** `npx jest tests/module-exposure-tests.js` — loads every `MODULE_FILE_MAP` entry's file(s) into an isolated sandbox and asserts the router-derived function name is actually assigned there for real. This is now a permanent regression guard; run it after adding any new page.
+
+One related, narrower version of the same bug: a page split into a data-layer file + a render-page file (see `architecture.md`) whose render-page filename doesn't match its own nav id — `grading-settings.js` for the `'grading-scale'` nav id was exactly this case: it exposed `window.renderGradingSettings` (matching its filename) but not `window.renderGradingScale` (what the router actually looks up for that nav id). Fixed with an explicit second alias; watch for this pattern whenever a render-page file's name diverges from its nav id.
+
+## Every confirmation dialog shows a red "Confirm" button, even for routine actions
+
+`ui/modals.js`'s `confirmDialog()` used to default `confirmClass` to `'btn-danger'` (red), and since virtually no call site anywhere in the app ever overrode it, every single confirmation — granting a waiver, saving a term, enrolling a student, not just genuinely destructive actions — showed red. The default is now `'btn-primary'`; pass `{ confirmClass: 'btn-danger' }` explicitly for anything that's actually irreversible (delete, remove, reverse, restore-overwriting-data). Covered by `tests/boot-chain-tests.js`.
+
+## Note: there are two separate confirm-dialog *systems*
+
+`index.html` also has a static, hardcoded `#confirmOverlay`/`#confirmBtn` block left over from early development, calling `window.confirmProceed()`/`closeConfirm()` — **neither function is defined anywhere in the codebase**, so this static dialog is completely inert (the `onclick="window.confirmProceed && confirmProceed()"` guard just silently no-ops). Every real confirmation in the app goes through `ui/modals.js`'s dynamically-created `confirmDialog()` instead. If you're looking at `#confirmOverlay` in `index.html` wondering why its styling doesn't seem to affect anything you see in the app, this is why — it's dead markup, not a bug worth fixing, just worth knowing about so you don't spend time debugging the wrong dialog.
+
 ## "Nothing happens" / a page is completely blank after clicking a nav item
 
 Open the browser console first — nearly every failure mode in this app surfaces there as an uncaught error, not a silent failure. If the console is also silent and the page is just blank, see the very next section — that exact symptom (blank page, no error) was caused by a critical bug for most of this project's history.

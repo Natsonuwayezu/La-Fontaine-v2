@@ -203,3 +203,11 @@ const FamilyManagement = (() => {
 
   return { render };
 })();
+
+// ─── EXPOSE ─────────────────────────────────────────────────────────
+// window.FamilyManagement was never assigned anywhere in this file, and the router
+// looks up window.renderFamilyManagement specifically (see core/router.js's
+// moduleIdToRenderFn) — this page was completely unreachable via navigation
+// despite being fully built.
+window.FamilyManagement = FamilyManagement;
+window.renderFamilyManagement = FamilyManagement.render;

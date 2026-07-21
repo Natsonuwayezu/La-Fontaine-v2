@@ -104,3 +104,11 @@ const StudentArchive = (() => {
 
   return { render };
 })();
+
+// ─── EXPOSE ─────────────────────────────────────────────────────────
+// window.StudentArchive was never assigned anywhere in this file, and the router
+// looks up window.renderStudentArchive specifically (see core/router.js's
+// moduleIdToRenderFn) — this page was completely unreachable via navigation
+// despite being fully built.
+window.StudentArchive = StudentArchive;
+window.renderStudentArchive = StudentArchive.render;

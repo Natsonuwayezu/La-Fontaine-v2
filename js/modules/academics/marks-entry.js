@@ -215,7 +215,7 @@ function renderMarksEntry(container) {
             </div>
 
             <!-- ═══ SCORE DISTRIBUTION ═══ -->
-            <div class="chart-card" style="margin-top:16px;">
+            <div class="dash-card" style="margin-top:16px;">
                 <div class="chart-head">
                     <span class="title"><i class="fa-solid fa-chart-bar" style="color:var(--academics-accent, #8b5cf6);margin-right:6px;"></i> Score Distribution</span>
                     <span class="badge" id="me-dist-count"></span>

@@ -88,11 +88,25 @@
         return 'RECOMMENDED FOR REPEAT';
     }
 
-    function qrMarkup() {
-        if (typeof window.qrPlaceholderSVG === 'function') {
-            return '<img src="' + window.qrPlaceholderSVG() + '" alt="Verification QR code" />';
+    // QR data URL — populated async before print
+    let _qrDataUrl = null;
+    let _qrToken = null;
+    let _qrFilename = null;
+
+    function qrMarkup(dataUrl) {
+        if (dataUrl) {
+            return (
+                '<img src="' + dataUrl + '" alt="Verification QR code" ' +
+                'width="72" height="72" style="border-radius:4px;"/>'
+            );
         }
-        return '<div style="width:72px;height:72px;border-radius:4px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:0.6rem;text-align:center;">QR pending</div>';
+        // Fallback placeholder while async QR generates
+        return (
+            '<div style="width:72px;height:72px;border-radius:4px;' +
+            'background:#e2e8f0;display:flex;align-items:center;' +
+            'justify-content:center;color:#94a3b8;font-size:0.55rem;' +
+            'text-align:center;line-height:1.3;">QR<br/>generating</div>'
+        );
     }
 
     // ─── RENDER ──────────────────────────────────────────────────────
@@ -108,18 +122,18 @@
 
         container.innerHTML =
             '<div class="report-cards-page">' +
-                '<div class="reports-toolbar">' +
-                    '<select class="marks-toolbar__select" id="rc-class">' +
-                        CLASS_OPTIONS.map(function (o) { return '<option value="' + o.value + '"' + (o.value === state.classId ? ' selected' : '') + '>' + esc(o.label) + '</option>'; }).join('') +
-                    '</select>' +
-                    '<select class="marks-toolbar__select" id="rc-student">' +
-                        students.map(function (s) { return '<option value="' + s.id + '"' + (s.id === state.studentId ? ' selected' : '') + '>' + esc(s.name) + '</option>'; }).join('') +
-                    '</select>' +
-                    '<span class="reports-toolbar__spacer"></span>' +
-                    '<button class="btn btn-outline-primary btn-sm" id="rc-open-generator"><i class="fa-solid fa-layer-group"></i> Batch Generate</button>' +
-                    '<button class="btn btn-primary btn-sm" id="rc-print"><i class="fa-solid fa-print"></i> Print</button>' +
-                '</div>' +
-                '<div id="rc-preview"></div>' +
+            '<div class="reports-toolbar">' +
+            '<select class="marks-toolbar__select" id="rc-class">' +
+            CLASS_OPTIONS.map(function (o) { return '<option value="' + o.value + '"' + (o.value === state.classId ? ' selected' : '') + '>' + esc(o.label) + '</option>'; }).join('') +
+            '</select>' +
+            '<select class="marks-toolbar__select" id="rc-student">' +
+            students.map(function (s) { return '<option value="' + s.id + '"' + (s.id === state.studentId ? ' selected' : '') + '>' + esc(s.name) + '</option>'; }).join('') +
+            '</select>' +
+            '<span class="reports-toolbar__spacer"></span>' +
+            '<button class="btn btn-outline-primary btn-sm" id="rc-open-generator"><i class="fa-solid fa-layer-group"></i> Batch Generate</button>' +
+            '<button class="btn btn-primary btn-sm" id="rc-print"><i class="fa-solid fa-print"></i> Print</button>' +
+            '</div>' +
+            '<div id="rc-preview"></div>' +
             '</div>';
 
         renderPreview();
@@ -140,45 +154,45 @@
 
         el.innerHTML =
             '<div class="report-card">' +
-                '<div class="report-header">' +
-                    '<div class="report-logo"><i class="fa-solid fa-graduation-cap" style="color:#fff;font-size:1.4rem;"></i></div>' +
-                    '<div>' +
-                        '<div class="report-school-name">École La Fontaine</div>' +
-                        '<div class="report-school-meta">Rubavu, Rwanda · Trilingual Nursery &amp; Primary School</div>' +
-                        '<div class="report-title">Academic Report Card</div>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="report-info">' +
-                    infoItem('Student', student.name) +
-                    infoItem('Class', classLabel) +
-                    infoItem('Admission No.', student.admissionNo) +
-                '</div>' +
-                '<table class="report-subjects">' +
-                    '<thead><tr><th style="text-align:left;">Subject</th><th>Score</th><th>Grade</th><th>Comment</th></tr></thead>' +
-                    '<tbody>' + SUBJECTS.map(function (subj) {
-                        const score = student.scores[subj];
-                        return (
-                            '<tr>' +
-                                '<td class="subj-name">' + esc(subj) + '</td>' +
-                                '<td>' + score + '%</td>' +
-                                '<td>' + gradeLabel(score) + '</td>' +
-                                '<td class="subj-comment">' + esc(student.comments[subj]) + '</td>' +
-                            '</tr>'
-                        );
-                    }).join('') + '</tbody>' +
-                '</table>' +
-                '<div class="report-summary">' +
-                    summaryItem(total, 'Total') +
-                    summaryItem(myRank.average.toFixed(1) + '%', 'Average') +
-                    summaryItem('#' + myRank.position, 'Position') +
-                    summaryItem(gradeLabel(myRank.average), 'Overall Grade') +
-                '</div>' +
-                '<div class="report-decision-banner ' + decision + '">' + decisionLabel(decision) + '</div>' +
-                '<div class="report-footer">' +
-                    '<div class="report-signature-line">Class Teacher</div>' +
-                    '<div class="report-qr-block">' + qrMarkup() + '<span class="report-qr-block__label">Scan to verify this report card online</span></div>' +
-                    '<div class="report-signature-line">Head Teacher</div>' +
-                '</div>' +
+            '<div class="report-header">' +
+            '<div class="report-logo"><i class="fa-solid fa-graduation-cap" style="color:#fff;font-size:1.4rem;"></i></div>' +
+            '<div>' +
+            '<div class="report-school-name">École La Fontaine</div>' +
+            '<div class="report-school-meta">Rubavu, Rwanda · Trilingual Nursery &amp; Primary School</div>' +
+            '<div class="report-title">Academic Report Card</div>' +
+            '</div>' +
+            '</div>' +
+            '<div class="report-info">' +
+            infoItem('Student', student.name) +
+            infoItem('Class', classLabel) +
+            infoItem('Admission No.', student.admissionNo) +
+            '</div>' +
+            '<table class="report-subjects">' +
+            '<thead><tr><th style="text-align:left;">Subject</th><th>Score</th><th>Grade</th><th>Comment</th></tr></thead>' +
+            '<tbody>' + SUBJECTS.map(function (subj) {
+                const score = student.scores[subj];
+                return (
+                    '<tr>' +
+                    '<td class="subj-name">' + esc(subj) + '</td>' +
+                    '<td>' + score + '%</td>' +
+                    '<td>' + gradeLabel(score) + '</td>' +
+                    '<td class="subj-comment">' + esc(student.comments[subj]) + '</td>' +
+                    '</tr>'
+                );
+            }).join('') + '</tbody>' +
+            '</table>' +
+            '<div class="report-summary">' +
+            summaryItem(total, 'Total') +
+            summaryItem(myRank.average.toFixed(1) + '%', 'Average') +
+            summaryItem('#' + myRank.position, 'Position') +
+            summaryItem(gradeLabel(myRank.average), 'Overall Grade') +
+            '</div>' +
+            '<div class="report-decision-banner ' + decision + '">' + decisionLabel(decision) + '</div>' +
+            '<div class="report-footer">' +
+            '<div class="report-signature-line">Class Teacher</div>' +
+            '<div class="report-qr-block">' + qrMarkup(_qrDataUrl) + '<span class="report-qr-block__label">Scan to verify this report card online</span></div>' +
+            '<div class="report-signature-line">Head Teacher</div>' +
+            '</div>' +
             '</div>';
     }
 

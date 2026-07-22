@@ -389,201 +389,222 @@ const USER_ROLE_LABELS = {
      START of the next term (not deducted immediately).
    - Not all students attend holiday programs — only enrolled ones.
    ───────────────────────────────────────────────────────────────── */
- 
+
 const HOLIDAY_CONFIG = {
-    // localStorage key to persist holiday session state
-    sessionKey       : 'lf_holiday_session',
-    // Banner text shown during holiday mode
-    bannerText       : 'HOLIDAY SESSION ACTIVE — Data recorded here goes to separate holiday tables and does NOT affect the normal academic year.',
-    bannerColor      : '#c44536',
-    // Holiday fees are applied at next term start
-    feesApplyAt      : 'next_term_start',
-    // Tables used during holiday mode (separate from main tables)
-    marksTable       : 'holiday_marks',
-    feesTable        : 'holiday_fees',
-    studentsTable    : 'holiday_enrollments', // only students enrolled in holiday program
-    subjectsTable    : 'holiday_subjects',    // custom holiday subjects
+  // localStorage key to persist holiday session state
+  sessionKey: 'lf_holiday_session',
+  // Banner text shown during holiday mode
+  bannerText: 'HOLIDAY SESSION ACTIVE — Data recorded here goes to separate holiday tables and does NOT affect the normal academic year.',
+  bannerColor: '#c44536',
+  // Holiday fees are applied at next term start
+  feesApplyAt: 'next_term_start',
+  // Tables used during holiday mode (separate from main tables)
+  marksTable: 'holiday_marks',
+  feesTable: 'holiday_fees',
+  studentsTable: 'holiday_enrollments', // only students enrolled in holiday program
+  subjectsTable: 'holiday_subjects',    // custom holiday subjects
 };
- 
+
 /* ─────────────────────────────────────────────────────────────────
    REPORT CARD STRINGS  (Part 7)
    ───────────────────────────────────────────────────────────────── */
- 
+
 const REPORT_STRINGS = {
-    nursery: {
-        pre_midterm  : 'RÉSULTATS DES TESTS DEMI-TRIMESTRE',
-        post_midterm : 'RÉSULTATS DE FIN DE TRIMESTRE',
-        annual       : 'RAPPORT ANNUEL',
-        subject_col  : 'MATIÈRES',
-        note_col     : 'NOTE',
-        cote_col     : 'CÔTE',
-        total_label  : 'TOTAL DES POINTS',
-        avg_label    : 'MOYENNE',
-        rank_label   : 'RANG',
-        footer_prefix: 'Fait à ECOLE LA FONTAINE, Le',
-        pass_msg     : 'FÉLICITATIONS! L\'élève est PROMU(E) en',
-        remedial_msg : 'COURS DE RATTRAPAGE — POUR PASSER LES EXAMENS DE DEUXIÈME SESSION',
-        fail_msg     : 'L\'élève doit REPRENDRE la classe',
-    },
-    primary: {
-        pre_midterm  : 'MID-TERM EXAMINATION RESULTS',
-        post_midterm : 'END OF TERM EXAMINATIONS RESULTS',
-        annual       : 'ANNUAL REPORT CARD',
-        subject_col  : 'SUBJECT',
-        score_col    : 'SCORE/MG',
-        grade_col    : 'GRADE/EX',
-        total_col    : 'TOTAL',
-        total_label  : 'TOTAL SCORE',
-        avg_label    : 'AVERAGE',
-        grade_label  : 'GRADE',
-        rank_label   : 'RANK',
-        footer_prefix: 'Done at ECOLE LA FONTAINE, ON',
-        pass_msg     : 'CONGRATULATIONS! The student is PROMOTED to',
-        remedial_msg : 'HOLIDAY REMEDIAL COURSES — TO SIT FOR SECOND SITTING EXAMINATIONS',
-        fail_msg     : 'The student must REPEAT',
-    },
+  nursery: {
+    pre_midterm: 'RÉSULTATS DES TESTS DEMI-TRIMESTRE',
+    post_midterm: 'RÉSULTATS DE FIN DE TRIMESTRE',
+    annual: 'RAPPORT ANNUEL',
+    subject_col: 'MATIÈRES',
+    note_col: 'NOTE',
+    cote_col: 'CÔTE',
+    total_label: 'TOTAL DES POINTS',
+    avg_label: 'MOYENNE',
+    rank_label: 'RANG',
+    footer_prefix: 'Fait à ECOLE LA FONTAINE, Le',
+    pass_msg: 'FÉLICITATIONS! L\'élève est PROMU(E) en',
+    remedial_msg: 'COURS DE RATTRAPAGE — POUR PASSER LES EXAMENS DE DEUXIÈME SESSION',
+    fail_msg: 'L\'élève doit REPRENDRE la classe',
+  },
+  primary: {
+    pre_midterm: 'MID-TERM EXAMINATION RESULTS',
+    post_midterm: 'END OF TERM EXAMINATIONS RESULTS',
+    annual: 'ANNUAL REPORT CARD',
+    subject_col: 'SUBJECT',
+    score_col: 'SCORE/MG',
+    grade_col: 'GRADE/EX',
+    total_col: 'TOTAL',
+    total_label: 'TOTAL SCORE',
+    avg_label: 'AVERAGE',
+    grade_label: 'GRADE',
+    rank_label: 'RANK',
+    footer_prefix: 'Done at ECOLE LA FONTAINE, ON',
+    pass_msg: 'CONGRATULATIONS! The student is PROMOTED to',
+    remedial_msg: 'HOLIDAY REMEDIAL COURSES — TO SIT FOR SECOND SITTING EXAMINATIONS',
+    fail_msg: 'The student must REPEAT',
+  },
 };
- 
+
 /* ─────────────────────────────────────────────────────────────────
    CELL COLOR THRESHOLDS (class register)  (Part 8, last paragraph)
    ───────────────────────────────────────────────────────────────── */
- 
+
 const CELL_COLORS = [
-    { min: 80,  max: 100, bg: '#d1fae5', text: '#065f46', cls: 'cell-high'   },
-    { min: 60,  max: 79,  bg: '#fef3c7', text: '#92400e', cls: 'cell-medium' },
-    { min: 50,  max: 59,  bg: '#ffedd5', text: '#9a3412', cls: 'cell-low'    },
-    { min:  0,  max: 49,  bg: '#fee2e2', text: '#991b1b', cls: 'cell-fail'   },
+  { min: 80, max: 100, bg: '#d1fae5', text: '#065f46', cls: 'cell-high' },
+  { min: 60, max: 79, bg: '#fef3c7', text: '#92400e', cls: 'cell-medium' },
+  { min: 50, max: 59, bg: '#ffedd5', text: '#9a3412', cls: 'cell-low' },
+  { min: 0, max: 49, bg: '#fee2e2', text: '#991b1b', cls: 'cell-fail' },
 ];
- 
+
 /* ─────────────────────────────────────────────────────────────────
    DAYS OF WEEK  (timetable)
    ───────────────────────────────────────────────────────────────── */
- 
+
 // DB stores 1=Mon … 5=Fri  (Part 2.9)
 const DAYS_OF_WEEK = [
-    { id: 1, name: 'Monday',    short: 'Mon' },
-    { id: 2, name: 'Tuesday',   short: 'Tue' },
-    { id: 3, name: 'Wednesday', short: 'Wed' },
-    { id: 4, name: 'Thursday',  short: 'Thu' },
-    { id: 5, name: 'Friday',    short: 'Fri' },
+  { id: 1, name: 'Monday', short: 'Mon' },
+  { id: 2, name: 'Tuesday', short: 'Tue' },
+  { id: 3, name: 'Wednesday', short: 'Wed' },
+  { id: 4, name: 'Thursday', short: 'Thu' },
+  { id: 5, name: 'Friday', short: 'Fri' },
 ];
- 
+
 /* ─────────────────────────────────────────────────────────────────
    ANNOUNCEMENT TYPES  (Part 2.22)
    ───────────────────────────────────────────────────────────────── */
- 
-const ANNOUNCEMENT_TYPES      = ['general', 'urgent', 'event'];
+
+const ANNOUNCEMENT_TYPES = ['general', 'urgent', 'event'];
 const ANNOUNCEMENT_RECIPIENTS = ['all', 'teachers', 'accountants', 'specific'];
-const ANNOUNCEMENT_CHANNELS   = ['in_app', 'email', 'sms'];
- 
+const ANNOUNCEMENT_CHANNELS = ['in_app', 'email', 'sms'];
+
 /* ─────────────────────────────────────────────────────────────────
    QR CODE CONFIG  (Part 7.3)
    ───────────────────────────────────────────────────────────────── */
- 
+
 const QR_CONFIG = {
-    // Base URL of the standalone QR verify page
-    // Change this to the deployed domain before production
-    verifyBaseUrl : window.location.origin + '/qr-verify.html',
-    // Query params encoded into QR
-    // ?s=STU-2026-0045&t=2&y=3
-    studentParam  : 's',
-    termParam     : 't',
-    yearParam     : 'y',
-    size          : 128,  // px
+  /* ── Verify page URL ───────────────────────────────────────────
+     The QR code encodes ONLY:
+       https://portal.ecolelafontaine.rw/qr-verify.html?v={UUID}
+     The server looks up the UUID → fetches frozen snapshot →
+     builds PDF in memory → auto-downloads. No student data in URL.
+     Change verifyBaseUrl to your production domain before deploy.
+  ────────────────────────────────────────────────────────────────── */
+  verifyBaseUrl: window.location.origin + '/qr-verify.html',
+
+  /* ── Token param key ────────────────────────────────────────── */
+  tokenParam: 'v',           // ?v={UUID}  (short, clean)
+
+  /* ── QR visual config ───────────────────────────────────────── */
+  size: 160,           // QR image px — big enough for badge centre
+
+  /* ── Center badge colors per document type ──────────────────── */
+  badge: {
+    report_card: { color: '#1a3a5c', emoji: '🎓' },  // navy
+    receipt: { color: '#2d6a4f', emoji: '💰' },  // green
+    transcript: { color: '#c99a3b', emoji: '📜' },  // gold
+  },
+
+  /* ── jsPDF CDN — loaded on demand by qr-verify.html ────────── */
+  jsPdfCdn: 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+
+  /* ── QRCodeJS CDN — loaded on demand by qrcode.js ───────────── */
+  qrCodeJsCdn: 'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js',
 };
- 
+
 /* ─────────────────────────────────────────────────────────────────
    ROLE THEMING  (Part 10.3)
    ───────────────────────────────────────────────────────────────── */
- 
+
 const ROLE_THEME = {
-    admin      : { primary: '#1a3a5c', gradient: 'linear-gradient(135deg,#1a3a5c,#2d5a8e)', bodyClass: 'role-admin'      },
-    accountant : { primary: '#0d9488', gradient: 'linear-gradient(135deg,#0d9488,#14b8a6)', bodyClass: 'role-accountant' },
-    teacher    : { primary: '#7c3aed', gradient: 'linear-gradient(135deg,#7c3aed,#8b5cf6)', bodyClass: 'role-teacher'    },
+  admin: { primary: '#1a3a5c', gradient: 'linear-gradient(135deg,#1a3a5c,#2d5a8e)', bodyClass: 'role-admin' },
+  accountant: { primary: '#0d9488', gradient: 'linear-gradient(135deg,#0d9488,#14b8a6)', bodyClass: 'role-accountant' },
+  teacher: { primary: '#7c3aed', gradient: 'linear-gradient(135deg,#7c3aed,#8b5cf6)', bodyClass: 'role-teacher' },
 };
- 
+
 /* ─────────────────────────────────────────────────────────────────
    ASCII CHART CONFIG  (Part 10.2)
    ───────────────────────────────────────────────────────────────── */
- 
-const ASCII_BAR_WIDTH    = 20;   // default character width of horizontal bars
-const ASCII_FILL_CHAR    = '█';
-const ASCII_EMPTY_CHAR   = '░';
- 
+
+const ASCII_BAR_WIDTH = 20;   // default character width of horizontal bars
+const ASCII_FILL_CHAR = '█';
+const ASCII_EMPTY_CHAR = '░';
+
 /* ─────────────────────────────────────────────────────────────────
    PAGINATION
    ───────────────────────────────────────────────────────────────── */
- 
-const DEFAULT_PAGE_SIZE  = 25;
-const PAGE_SIZE_OPTIONS  = [10, 25, 50, 100, 'All'];
- 
+
+const DEFAULT_PAGE_SIZE = 25;
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100, 'All'];
+
 /* ─────────────────────────────────────────────────────────────────
    DEBOUNCE DELAYS
    ───────────────────────────────────────────────────────────────── */
- 
-const DEBOUNCE_SEARCH    = 300;  // ms
-const DEBOUNCE_SAVE      = 500;  // ms
-const DEBOUNCE_RESIZE    = 150;  // ms
- 
+
+const DEBOUNCE_SEARCH = 300;  // ms
+const DEBOUNCE_SAVE = 500;  // ms
+const DEBOUNCE_RESIZE = 150;  // ms
+
 /* ─────────────────────────────────────────────────────────────────
    OFFLINE / INDEXEDDB CONFIG  (Part 12)
    ───────────────────────────────────────────────────────────────── */
- 
-const IDB_NAME    = 'ecole_la_fontaine_offline';
+
+const IDB_NAME = 'ecole_la_fontaine_offline';
 const IDB_VERSION = 1;
-const IDB_STORES  = {
-    pendingMarks    : 'pending_marks',
-    pendingPayments : 'pending_payments',
-    cachedStudents  : 'cached_students',
+const IDB_STORES = {
+  pendingMarks: 'pending_marks',
+  pendingPayments: 'pending_payments',
+  cachedStudents: 'cached_students',
 };
- 
+
 /* ─────────────────────────────────────────────────────────────────
    BACKUP CONFIG  (Part 5.11)
    ───────────────────────────────────────────────────────────────── */
- 
+
 const BACKUP_FILENAME_PREFIX = 'backup_ECOLE_';
 const BACKUP_ALL_TABLES = [
-    'school_settings', 'academic_years', 'terms', 'holidays',
-    'classes', 'subjects', 'teachers', 'teacher_assignments',
-    'timetable_slots', 'families', 'students', 'assessments',
-    'marks', 'fee_categories', 'fee_amounts', 'student_fees',
-    'student_credit_balance', 'payments', 'payment_allocations',
-    'fee_waivers', 'notifications', 'announcements', 'system_logs',
-    'grading_scale', 'student_promotions', 'student_promotion_records',
-    // Holiday tables (separate — always back up together)
-    'holiday_marks', 'holiday_fees', 'holiday_enrollments', 'holiday_subjects',
+  'school_settings', 'academic_years', 'terms', 'holidays',
+  'classes', 'subjects', 'teachers', 'teacher_assignments',
+  'timetable_slots', 'families', 'students', 'assessments',
+  'marks', 'fee_categories', 'fee_amounts', 'student_fees',
+  'student_credit_balance', 'payments', 'payment_allocations',
+  'fee_waivers', 'notifications', 'announcements', 'system_logs',
+  'grading_scale', 'student_promotions', 'student_promotion_records',
+  // Holiday tables
+  'holiday_marks', 'holiday_fees', 'holiday_enrollments', 'holiday_subjects',
+  // QR verification snapshot tables
+  'verifications', 'report_card_snapshots',
+  'receipt_snapshots', 'transcript_snapshots',
 ];
- 
+
 /* ─────────────────────────────────────────────────────────────────
    TERM STATUS OPTIONS  (Part 2.3)
    ───────────────────────────────────────────────────────────────── */
- 
+
 const TERM_STATUSES = ['upcoming', 'in_progress', 'completed'];
- 
+
 /* ─────────────────────────────────────────────────────────────────
    HOLIDAY TYPE OPTIONS  (Part 2.4)
    ───────────────────────────────────────────────────────────────── */
- 
+
 const HOLIDAY_TYPES = ['Public Holiday', 'Vacation', 'Event'];
- 
+
 /* ─────────────────────────────────────────────────────────────────
    RWANDA PUBLIC HOLIDAYS  (recurring, by MM-DD)
    Used by importRwandaHolidays() in settings/holidays.js
    ───────────────────────────────────────────────────────────────── */
- 
+
 const RWANDA_PUBLIC_HOLIDAYS = [
-    { name: 'New Year\'s Day',            month: 1,  day: 1  },
-    { name: 'Heroes\' Day',               month: 2,  day: 1  },
-    { name: 'International Women\'s Day', month: 3,  day: 8  },
-    { name: 'Genocide Memorial Day',      month: 4,  day: 7  },
-    { name: 'Good Friday',                month: 4,  day: 18, variable: true },
-    { name: 'Easter Monday',              month: 4,  day: 21, variable: true },
-    { name: 'Labour Day',                 month: 5,  day: 1  },
-    { name: 'Liberation Day',             month: 7,  day: 4  },
-    { name: 'Umuganura Day',              month: 8,  day: 1  },
-    { name: 'Assumption Day',             month: 8,  day: 15 },
-    { name: 'Christmas Day',              month: 12, day: 25 },
-    { name: 'Boxing Day',                 month: 12, day: 26 },
+  { name: 'New Year\'s Day', month: 1, day: 1 },
+  { name: 'Heroes\' Day', month: 2, day: 1 },
+  { name: 'International Women\'s Day', month: 3, day: 8 },
+  { name: 'Genocide Memorial Day', month: 4, day: 7 },
+  { name: 'Good Friday', month: 4, day: 18, variable: true },
+  { name: 'Easter Monday', month: 4, day: 21, variable: true },
+  { name: 'Labour Day', month: 5, day: 1 },
+  { name: 'Liberation Day', month: 7, day: 4 },
+  { name: 'Umuganura Day', month: 8, day: 1 },
+  { name: 'Assumption Day', month: 8, day: 15 },
+  { name: 'Christmas Day', month: 12, day: 25 },
+  { name: 'Boxing Day', month: 12, day: 26 },
 ];
 
 // ──────────────────────────────────────────────────────────────────────

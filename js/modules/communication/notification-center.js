@@ -95,7 +95,7 @@ const NotificationCenter = (() => {
 
     panel.querySelector('[data-view-all]').addEventListener('click', () => {
       close();
-      window.Router?.navigate('notifications');
+      navigateTo('notifications');
     });
     panel.querySelector('[data-mark-all]').addEventListener('click', (e) => {
       e.stopPropagation();
@@ -106,7 +106,7 @@ const NotificationCenter = (() => {
     panel.querySelectorAll('[data-notif]').forEach(btn => {
       btn.addEventListener('click', () => {
         close();
-        window.Router?.navigate('notifications');
+        navigateTo('notifications');
       });
     });
 
@@ -141,3 +141,5 @@ const NotificationCenter = (() => {
 
   return { attach, close, unreadCount };
 })();
+
+window.NotificationCenter = NotificationCenter;

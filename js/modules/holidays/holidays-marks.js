@@ -108,7 +108,7 @@ const HolidaysMarks = (() => {
                     if (row?.id && window.state) window.state.holidaySubjects = [...(window.state.holidaySubjects || []), row];
                     window.Toast?.success('Holiday subject created', name);
                     window.Modals?.close(record);
-                    const container = document.getElementById('app-main');
+                    const container = document.getElementById('moduleContent');
                     if (container) populateSubjects(container);
                 } catch (err) {
                     window.Toast?.error('Could not create subject', err?.message);

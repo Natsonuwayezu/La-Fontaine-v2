@@ -187,7 +187,7 @@ const FamilyManagement = (() => {
           family.discountPct = family.members.length >= 2 ? pct : 0;
           window.Modals?.close(record);
           window.Toast?.success('Discount updated', `${family.name} now has a ${family.discountPct}% family discount.`);
-          const container = document.getElementById('app-main');
+          const container = document.getElementById('moduleContent');
           if (container) renderList(container);
         });
       }

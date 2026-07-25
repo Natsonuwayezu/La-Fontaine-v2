@@ -222,7 +222,7 @@ function renderGrid() {
 
     grid.querySelectorAll('[data-open-entry]').forEach(btn => {
         btn.addEventListener('click', () => {
-            if (window.Router?.navigate) window.Router.navigate('marks-entry');
+            navigateTo('marks-entry');
         });
     });
 }

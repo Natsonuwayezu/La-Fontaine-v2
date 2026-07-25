@@ -1,1639 +1,1466 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-    <title>Document Verification — ECOLE LA FONTAINE</title>
-    <meta name="robots" content="noindex,nofollow" />
-    <style>
-        /* ════════════════════════════════════════════════════════════════
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Document Verification — ECOLE LA FONTAINE</title>
+<meta name="robots" content="noindex,nofollow"/>
+<style>
+/* ════════════════════════════════════════════════════════════════
    QR VERIFY PAGE — ECOLE LA FONTAINE
    Auto-downloads the verified PDF and shows a download-success
    screen. No data is displayed — the PDF IS the document.
    ════════════════════════════════════════════════════════════════ */
 
-        *,
-        *::before,
-        *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
 
-        :root {
-            --navy: #1a3a5c;
-            --green: #2d6a4f;
-            --gold: #c99a3b;
-            --danger: #c44536;
-            --bg: #0b1628;
-            --card-bg: #111d2e;
-            --border: rgba(255, 255, 255, 0.07);
-            --text: #e2e8f0;
-            --muted: #64748b;
-            --success: #4ade80;
-            --warning: #fbbf24;
-            --error: #f87171;
-        }
+:root {
+    --navy    : #1a3a5c;
+    --green   : #2d6a4f;
+    --gold    : #c99a3b;
+    --danger  : #c44536;
+    --bg      : #0b1628;
+    --card-bg : #111d2e;
+    --border  : rgba(255,255,255,0.07);
+    --text     : #e2e8f0;
+    --muted    : #64748b;
+    --success  : #4ade80;
+    --warning  : #fbbf24;
+    --error    : #f87171;
+}
 
-        body {
-            font-family: 'Segoe UI', 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg);
-            background-image:
-                radial-gradient(ellipse at 20% 40%, rgba(26, 58, 92, 0.50) 0%, transparent 55%),
-                radial-gradient(ellipse at 80% 60%, rgba(201, 154, 59, 0.10) 0%, transparent 55%);
-            color: var(--text);
-            padding: 24px 16px;
-        }
+body {
+    font-family: 'Segoe UI', 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    background-image:
+        radial-gradient(ellipse at 20% 40%, rgba(26,58,92,0.50) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 60%, rgba(201,154,59,0.10) 0%, transparent 55%);
+    color: var(--text);
+    padding: 24px 16px;
+}
 
-        /* ── Logo header ── */
-        .header {
-            text-align: center;
-            margin-bottom: 28px;
-        }
+/* ── Logo header ── */
+.header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+.logo-wrap {
+    width: 64px; height: 64px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--navy), #2d5a8e);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 12px;
+    box-shadow: 0 8px 32px rgba(26,58,92,0.50);
+    font-size: 30px;
+    overflow: hidden;
+}
+.logo-wrap img { width:100%; height:100%; object-fit:contain; border-radius:16px; }
+.header h1 {
+    font-size: 16px; font-weight: 700;
+    letter-spacing: .6px; text-transform: uppercase;
+    color: #f1f5f9;
+}
+.header p { font-size: 11px; color: var(--muted); margin-top: 3px; }
 
-        .logo-wrap {
-            width: 64px;
-            height: 64px;
-            border-radius: 16px;
-            background: linear-gradient(135deg, var(--navy), #2d5a8e);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 12px;
-            box-shadow: 0 8px 32px rgba(26, 58, 92, 0.50);
-            font-size: 30px;
-            overflow: hidden;
-        }
+/* ── Card ── */
+.card {
+    width: 100%; max-width: 460px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 28px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.55);
+}
 
-        .logo-wrap img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            border-radius: 16px;
-        }
+/* ── States ── */
+.state { display:none; text-align:center; }
+.state.active { display:block; }
 
-        .header h1 {
-            font-size: 16px;
-            font-weight: 700;
-            letter-spacing: .6px;
-            text-transform: uppercase;
-            color: #f1f5f9;
-        }
+/* ── Spinner ── */
+.spinner-wrap { margin-bottom: 20px; }
+.spinner {
+    width: 52px; height: 52px;
+    border: 4px solid rgba(255,255,255,0.07);
+    border-radius: 50%;
+    margin: 0 auto;
+    animation: spin .9s linear infinite;
+    position: relative;
+}
+.spinner::before {
+    content: '';
+    position: absolute; inset: -4px;
+    border: 4px solid transparent;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin .9s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
 
-        .header p {
-            font-size: 11px;
-            color: var(--muted);
-            margin-top: 3px;
-        }
+.step-list {
+    list-style: none;
+    text-align: left;
+    margin: 20px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.step-list li {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: var(--muted);
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.03);
+    transition: color .25s, background .25s;
+}
+.step-list li.active { color: #93c5fd; background: rgba(59,130,246,0.08); }
+.step-list li.done   { color: var(--success); background: rgba(74,222,128,0.06); }
+.step-list li.error  { color: var(--error);   background: rgba(248,113,113,0.08); }
+.step-dot {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; flex-shrink: 0;
+    transition: background .25s;
+}
+.step-list li.active .step-dot { background: rgba(59,130,246,0.25); }
+.step-list li.done   .step-dot { background: rgba(74,222,128,0.20); }
+.step-list li.error  .step-dot { background: rgba(248,113,113,0.20); }
 
-        /* ── Card ── */
-        .card {
-            width: 100%;
-            max-width: 460px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 32px 28px;
-            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
-        }
+/* ── Icon badge ── */
+.icon-badge {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 18px;
+    font-size: 34px;
+}
+.icon-badge.success { background: rgba(74,222,128,0.10); }
+.icon-badge.error   { background: rgba(248,113,113,0.10); }
+.icon-badge.offline { background: rgba(251,191,36,0.10); }
 
-        /* ── States ── */
-        .state {
-            display: none;
-            text-align: center;
-        }
+.state h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.state.downloaded-state h2 { color: var(--success); }
+.state.error-state h2      { color: var(--error); }
+.state.offline-state h2    { color: var(--warning); }
+.state.empty-state h2      { color: var(--muted); }
 
-        .state.active {
-            display: block;
-        }
+.sub {
+    font-size: 13px; color: var(--muted);
+    line-height: 1.6; margin-bottom: 20px;
+}
 
-        /* ── Spinner ── */
-        .spinner-wrap {
-            margin-bottom: 20px;
-        }
+/* ── Download info box ── */
+.dl-box {
+    background: rgba(74,222,128,0.06);
+    border: 1px solid rgba(74,222,128,0.15);
+    border-radius: 12px;
+    padding: 16px 18px;
+    text-align: left;
+    margin: 16px 0;
+}
+.dl-box .dl-label {
+    font-size: 11px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: .5px; margin-bottom: 6px;
+}
+.dl-box .dl-filename {
+    font-size: 13px; font-weight: 600; color: #86efac;
+    font-family: monospace;
+    word-break: break-all;
+}
+.dl-box .dl-meta {
+    font-size: 11px; color: var(--muted); margin-top: 6px;
+}
 
-        .spinner {
-            width: 52px;
-            height: 52px;
-            border: 4px solid rgba(255, 255, 255, 0.07);
-            border-radius: 50%;
-            margin: 0 auto;
-            animation: spin .9s linear infinite;
-            position: relative;
-        }
+/* ── Doc type badge ── */
+.doc-type-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 999px;
+    font-size: 12px; font-weight: 700;
+    margin-bottom: 14px;
+    text-transform: uppercase; letter-spacing: .5px;
+}
+.doc-type-badge.report  { background: rgba(26,58,92,0.35);  color: #93c5fd; }
+.doc-type-badge.receipt { background: rgba(45,106,79,0.35); color: #86efac; }
+.doc-type-badge.transcript { background: rgba(201,154,59,0.25); color: #fcd34d; }
 
-        .spinner::before {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border: 4px solid transparent;
-            border-top-color: #3b82f6;
-            border-radius: 50%;
-            animation: spin .9s linear infinite;
-        }
+/* ── Retry / manual download button ── */
+.btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 11px 24px; border: none; border-radius: 10px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    text-decoration: none; transition: .18s;
+    margin-top: 12px;
+}
+.btn-primary {
+    background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+    color: #fff;
+}
+.btn-primary:hover { opacity:.88; transform:translateY(-1px); }
+.btn-ghost {
+    background: rgba(255,255,255,0.05);
+    color: var(--muted);
+    border: 1px solid var(--border);
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.08); }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
+/* ── Divider ── */
+.divider { border:none; border-top:1px solid var(--border); margin: 20px 0; }
 
-        .step-list {
-            list-style: none;
-            text-align: left;
-            margin: 20px 0 0;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+/* ── Seal ── */
+.seal {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: rgba(74,222,128,0.06);
+    border: 1px solid rgba(74,222,128,0.14);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-top: 16px; text-align: left;
+}
+.seal-text { font-size: 11px; color: #86efac; line-height: 1.5; }
+.seal-text strong { display:block; font-size:12px; margin-bottom:2px; }
 
-        .step-list li {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 13px;
-            color: var(--muted);
-            padding: 8px 12px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.03);
-            transition: color .25s, background .25s;
-        }
+/* ── Footer ── */
+.footer {
+    margin-top: 24px; text-align: center;
+    font-size: 11px; color: #1e293b; line-height: 1.7;
+}
 
-        .step-list li.active {
-            color: #93c5fd;
-            background: rgba(59, 130, 246, 0.08);
-        }
-
-        .step-list li.done {
-            color: var(--success);
-            background: rgba(74, 222, 128, 0.06);
-        }
-
-        .step-list li.error {
-            color: var(--error);
-            background: rgba(248, 113, 113, 0.08);
-        }
-
-        .step-dot {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.06);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            flex-shrink: 0;
-            transition: background .25s;
-        }
-
-        .step-list li.active .step-dot {
-            background: rgba(59, 130, 246, 0.25);
-        }
-
-        .step-list li.done .step-dot {
-            background: rgba(74, 222, 128, 0.20);
-        }
-
-        .step-list li.error .step-dot {
-            background: rgba(248, 113, 113, 0.20);
-        }
-
-        /* ── Icon badge ── */
-        .icon-badge {
-            width: 72px;
-            height: 72px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 18px;
-            font-size: 34px;
-        }
-
-        .icon-badge.success {
-            background: rgba(74, 222, 128, 0.10);
-        }
-
-        .icon-badge.error {
-            background: rgba(248, 113, 113, 0.10);
-        }
-
-        .icon-badge.offline {
-            background: rgba(251, 191, 36, 0.10);
-        }
-
-        .state h2 {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .state.downloaded-state h2 {
-            color: var(--success);
-        }
-
-        .state.error-state h2 {
-            color: var(--error);
-        }
-
-        .state.offline-state h2 {
-            color: var(--warning);
-        }
-
-        .state.empty-state h2 {
-            color: var(--muted);
-        }
-
-        .sub {
-            font-size: 13px;
-            color: var(--muted);
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        /* ── Download info box ── */
-        .dl-box {
-            background: rgba(74, 222, 128, 0.06);
-            border: 1px solid rgba(74, 222, 128, 0.15);
-            border-radius: 12px;
-            padding: 16px 18px;
-            text-align: left;
-            margin: 16px 0;
-        }
-
-        .dl-box .dl-label {
-            font-size: 11px;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: .5px;
-            margin-bottom: 6px;
-        }
-
-        .dl-box .dl-filename {
-            font-size: 13px;
-            font-weight: 600;
-            color: #86efac;
-            font-family: monospace;
-            word-break: break-all;
-        }
-
-        .dl-box .dl-meta {
-            font-size: 11px;
-            color: var(--muted);
-            margin-top: 6px;
-        }
-
-        /* ── Doc type badge ── */
-        .doc-type-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 5px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 700;
-            margin-bottom: 14px;
-            text-transform: uppercase;
-            letter-spacing: .5px;
-        }
-
-        .doc-type-badge.report {
-            background: rgba(26, 58, 92, 0.35);
-            color: #93c5fd;
-        }
-
-        .doc-type-badge.receipt {
-            background: rgba(45, 106, 79, 0.35);
-            color: #86efac;
-        }
-
-        .doc-type-badge.transcript {
-            background: rgba(201, 154, 59, 0.25);
-            color: #fcd34d;
-        }
-
-        /* ── Retry / manual download button ── */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 11px 24px;
-            border: none;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            transition: .18s;
-            margin-top: 12px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #1d4ed8, #3b82f6);
-            color: #fff;
-        }
-
-        .btn-primary:hover {
-            opacity: .88;
-            transform: translateY(-1px);
-        }
-
-        .btn-ghost {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--muted);
-            border: 1px solid var(--border);
-        }
-
-        .btn-ghost:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        /* ── Divider ── */
-        .divider {
-            border: none;
-            border-top: 1px solid var(--border);
-            margin: 20px 0;
-        }
-
-        /* ── Seal ── */
-        .seal {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            background: rgba(74, 222, 128, 0.06);
-            border: 1px solid rgba(74, 222, 128, 0.14);
-            border-radius: 10px;
-            padding: 12px 14px;
-            margin-top: 16px;
-            text-align: left;
-        }
-
-        .seal-text {
-            font-size: 11px;
-            color: #86efac;
-            line-height: 1.5;
-        }
-
-        .seal-text strong {
-            display: block;
-            font-size: 12px;
-            margin-bottom: 2px;
-        }
-
-        /* ── Footer ── */
-        .footer {
-            margin-top: 24px;
-            text-align: center;
-            font-size: 11px;
-            color: #1e293b;
-            line-height: 1.7;
-        }
-
-        @media (max-width:480px) {
-            .card {
-                padding: 24px 18px;
-                border-radius: 16px;
-            }
-        }
-    </style>
+@media (max-width:480px) {
+    .card { padding: 24px 18px; border-radius: 16px; }
+}
+</style>
 </head>
-
 <body>
 
-    <!-- Header -->
-    <div class="header">
-        <div class="logo-wrap" id="logoWrap">🏫</div>
-        <h1 id="schoolName">ECOLE LA FONTAINE</h1>
-        <p>Document Verification Portal · Rubavu, Rwanda</p>
+<!-- Header -->
+<div class="header">
+    <div class="logo-wrap" id="logoWrap">🏫</div>
+    <h1 id="schoolName">ECOLE LA FONTAINE</h1>
+    <p>Document Verification Portal · Rubavu, Rwanda</p>
+</div>
+
+<!-- Card -->
+<div class="card">
+
+    <!-- STATE: Processing (default) -->
+    <div class="state active" id="stateLoading">
+        <div class="spinner-wrap"><div class="spinner"></div></div>
+        <p class="sub" id="loadingMsg">Verifying document…</p>
+        <ul class="step-list" id="stepList">
+            <li id="step1" class="active"><span class="step-dot">1</span>Reading verification token</li>
+            <li id="step2"><span class="step-dot">2</span>Looking up document snapshot</li>
+            <li id="step3"><span class="step-dot">3</span>Building PDF</li>
+            <li id="step4"><span class="step-dot">4</span>Starting download</li>
+        </ul>
     </div>
 
-    <!-- Card -->
-    <div class="card">
+    <!-- STATE: Downloaded -->
+    <div class="state downloaded-state" id="stateDownloaded">
+        <div class="icon-badge success">✅</div>
+        <div class="doc-type-badge" id="docTypeBadge">📄 Document</div>
+        <h2>Your file is downloading</h2>
+        <p class="sub">
+            The verified document has been built from the official school database
+            and is downloading now. Check your <strong>Downloads</strong> folder.
+        </p>
 
-        <!-- STATE: Processing (default) -->
-        <div class="state active" id="stateLoading">
-            <div class="spinner-wrap">
-                <div class="spinner"></div>
+        <div class="dl-box">
+            <div class="dl-label">Filename</div>
+            <div class="dl-filename" id="dlFilename">—</div>
+            <div class="dl-meta" id="dlMeta">—</div>
+        </div>
+
+        <div class="seal">
+            <span style="font-size:18px;">🔐</span>
+            <div class="seal-text">
+                <strong>Officially Verified</strong>
+                This document was generated from the live ECOLE LA FONTAINE database.
+                Data frozen at the time of original issuance.
             </div>
-            <p class="sub" id="loadingMsg">Verifying document…</p>
-            <ul class="step-list" id="stepList">
-                <li id="step1" class="active"><span class="step-dot">1</span>Reading verification token</li>
-                <li id="step2"><span class="step-dot">2</span>Looking up document snapshot</li>
-                <li id="step3"><span class="step-dot">3</span>Building PDF</li>
-                <li id="step4"><span class="step-dot">4</span>Starting download</li>
-            </ul>
         </div>
 
-        <!-- STATE: Downloaded -->
-        <div class="state downloaded-state" id="stateDownloaded">
-            <div class="icon-badge success">✅</div>
-            <div class="doc-type-badge" id="docTypeBadge">📄 Document</div>
-            <h2>Your file is downloading</h2>
-            <p class="sub">
-                The verified document has been built from the official school database
-                and is downloading now. Check your <strong>Downloads</strong> folder.
-            </p>
-
-            <div class="dl-box">
-                <div class="dl-label">Filename</div>
-                <div class="dl-filename" id="dlFilename">—</div>
-                <div class="dl-meta" id="dlMeta">—</div>
-            </div>
-
-            <div class="seal">
-                <span style="font-size:18px;">🔐</span>
-                <div class="seal-text">
-                    <strong>Officially Verified</strong>
-                    This document was generated from the live ECOLE LA FONTAINE database.
-                    Data frozen at the time of original issuance.
-                </div>
-            </div>
-
-            <button class="btn btn-ghost" id="btnRetry" onclick="retryDownload()" style="margin-top:16px;">
-                ⬇ Download not started? Click here
-            </button>
-        </div>
-
-        <!-- STATE: Error -->
-        <div class="state error-state" id="stateError">
-            <div class="icon-badge error">❌</div>
-            <h2>Verification Failed</h2>
-            <p class="sub" id="errorMsg">
-                This QR code is invalid or the document could not be found.
-            </p>
-            <hr class="divider" />
-            <p style="font-size:12px;color:#475569;line-height:1.6;">
-                If you believe this is an error, contact the school administration directly.
-            </p>
-        </div>
-
-        <!-- STATE: No token -->
-        <div class="state empty-state" id="stateEmpty">
-            <div class="icon-badge offline">🔍</div>
-            <h2>No QR Code Found</h2>
-            <p class="sub">
-                This page is used to verify official documents from ECOLE LA FONTAINE.
-                Please scan the QR code printed on the document.
-            </p>
-        </div>
-
-        <!-- STATE: Offline -->
-        <div class="state offline-state" id="stateOffline">
-            <div class="icon-badge offline">📡</div>
-            <h2>No Internet Connection</h2>
-            <p class="sub">
-                Verifying this document requires an internet connection.
-                Please connect and scan the QR code again.
-            </p>
-        </div>
-
+        <button class="btn btn-ghost" id="btnRetry" onclick="retryDownload()"
+                style="margin-top:16px;">
+            ⬇ Download not started? Click here
+        </button>
     </div>
 
-    <div class="footer">
-        ECOLE LA FONTAINE · School Management System<br />
-        Verification powered by secure database · <span id="footerYear"></span>
+    <!-- STATE: Error -->
+    <div class="state error-state" id="stateError">
+        <div class="icon-badge error">❌</div>
+        <h2>Verification Failed</h2>
+        <p class="sub" id="errorMsg">
+            This QR code is invalid or the document could not be found.
+        </p>
+        <hr class="divider"/>
+        <p style="font-size:12px;color:#475569;line-height:1.6;">
+            If you believe this is an error, contact the school administration directly.
+        </p>
     </div>
 
-    <!-- ════════════════════════════════════════════════════════════════
+    <!-- STATE: No token -->
+    <div class="state empty-state" id="stateEmpty">
+        <div class="icon-badge offline">🔍</div>
+        <h2>No QR Code Found</h2>
+        <p class="sub">
+            This page is used to verify official documents from ECOLE LA FONTAINE.
+            Please scan the QR code printed on the document.
+        </p>
+    </div>
+
+    <!-- STATE: Offline -->
+    <div class="state offline-state" id="stateOffline">
+        <div class="icon-badge offline">📡</div>
+        <h2>No Internet Connection</h2>
+        <p class="sub">
+            Verifying this document requires an internet connection.
+            Please connect and scan the QR code again.
+        </p>
+    </div>
+
+</div>
+
+<div class="footer">
+    ECOLE LA FONTAINE · School Management System<br/>
+    Verification powered by secure database · <span id="footerYear"></span>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
      VERIFICATION + PDF BUILD SCRIPT
      ════════════════════════════════════════════════════════════════ -->
-    <script>
-        'use strict';
+<script>
+'use strict';
 
-        /* ─── Config ───────────────────────────────────────────────────── */
-        const SB_URL = 'https://ovmymtdrugdljnttiltd.supabase.co';
-        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXltdGRydWdkbGpudHRpbHRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4Nzg3OTMsImV4cCI6MjA2NDQ1NDc5M30.vi7Xa3eF9D9OTCkDZUYn6ScsyuQPwb0eN9nNazPpFcc';
+/* ─── Config ───────────────────────────────────────────────────── */
+const SB_URL = 'https://ovmymtdrugdljnttiltd.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXltdGRydWdkbGpudHRpbHRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4Nzg3OTMsImV4cCI6MjA2NDQ1NDc5M30.vi7Xa3eF9D9OTCkDZUYn6ScsyuQPwb0eN9nNazPpFcc';
 
-        /* jsPDF CDN — loaded on demand */
-        const JSPDF_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+/* jsPDF CDN — loaded on demand */
+const JSPDF_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
 
-        /* ─── State ─────────────────────────────────────────────────────── */
-        let _pdfBlob = null;
-        let _dlFilename = '';
-        let _objectUrl = null;
+/* ─── State ─────────────────────────────────────────────────────── */
+let _pdfBlob     = null;
+let _dlFilename  = '';
+let _objectUrl   = null;
 
-        /* ─── Helpers ───────────────────────────────────────────────────── */
-        document.getElementById('footerYear').textContent = new Date().getFullYear();
+/* ─── Helpers ───────────────────────────────────────────────────── */
+document.getElementById('footerYear').textContent = new Date().getFullYear();
 
-        function showState(id) {
-            document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
-            const el = document.getElementById(id);
-            if (el) el.classList.add('active');
+function showState(id) {
+    document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
+    const el = document.getElementById(id);
+    if (el) el.classList.add('active');
+}
+
+function setStep(stepId, status) {
+    const el = document.getElementById(stepId);
+    if (!el) return;
+    el.classList.remove('active', 'done', 'error');
+    el.classList.add(status);
+    const dot = el.querySelector('.step-dot');
+    if (dot) {
+        dot.textContent = status === 'done' ? '✓' : status === 'error' ? '✗' : dot.textContent;
+    }
+}
+
+function fail(msg) {
+    document.getElementById('errorMsg').textContent = msg;
+    showState('stateError');
+}
+
+async function dbGet(table, filter) {
+    const url = `${SB_URL}/rest/v1/${table}?${filter}&limit=1`;
+    const res = await fetch(url, {
+        headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` },
+    });
+    if (!res.ok) throw new Error(`Database error ${res.status} on ${table}`);
+    const data = await res.json();
+    return Array.isArray(data) && data.length > 0 ? data[0] : null;
+}
+
+async function dbPatch(table, id, body) {
+    await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: {
+            apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+    }).catch(() => {});
+}
+
+function loadScript(src) {
+    return new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = resolve;
+        s.onerror = () => reject(new Error('Script load failed: ' + src));
+        document.head.appendChild(s);
+    });
+}
+
+function fmtDate(str) {
+    if (!str) return '—';
+    const d = new Date(str);
+    return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+function fmtCurrency(n) {
+    return (Number(n) || 0).toLocaleString('fr-RW') + ' RWF';
+}
+
+/* ─── Download trigger ──────────────────────────────────────────── */
+function triggerDownload(blob, filename) {
+    _pdfBlob    = blob;
+    _dlFilename = filename;
+
+    if (_objectUrl) URL.revokeObjectURL(_objectUrl);
+    _objectUrl = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href     = _objectUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    // Revoke after a short delay
+    setTimeout(() => { URL.revokeObjectURL(_objectUrl); _objectUrl = null; }, 60000);
+}
+
+window.retryDownload = function() {
+    if (_pdfBlob && _dlFilename) {
+        _objectUrl = URL.createObjectURL(_pdfBlob);
+        const a = document.createElement('a');
+        a.href = _objectUrl; a.download = _dlFilename;
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(_objectUrl), 60000);
+    }
+};
+
+/* ─── Show download success screen ─────────────────────────────── */
+function showDownloaded(docType, filename, snapshot) {
+    const badges = {
+        report_card : { cls: 'report',     icon: '🎓', label: 'Report Card'  },
+        receipt     : { cls: 'receipt',    icon: '💰', label: 'Receipt'      },
+        transcript  : { cls: 'transcript', icon: '📜', label: 'Transcript'   },
+    };
+    const b = badges[docType] || { cls: 'report', icon: '📄', label: 'Document' };
+
+    const badgeEl = document.getElementById('docTypeBadge');
+    if (badgeEl) {
+        badgeEl.className = `doc-type-badge ${b.cls}`;
+        badgeEl.textContent = `${b.icon} ${b.label}`;
+    }
+
+    const fnEl = document.getElementById('dlFilename');
+    if (fnEl) fnEl.textContent = filename;
+
+    const metaEl = document.getElementById('dlMeta');
+    if (metaEl) {
+        const name = snapshot.student_name || snapshot.student_first_name || '';
+        const year = snapshot.year_name || '';
+        const term = snapshot.term_name || '';
+        metaEl.textContent = [name, year, term].filter(Boolean).join(' · ');
+    }
+
+    // Update school name in header if available
+    if (snapshot.school_name) {
+        const sn = document.getElementById('schoolName');
+        if (sn) sn.textContent = snapshot.school_name;
+    }
+    if (snapshot.school_logo) {
+        const lw = document.getElementById('logoWrap');
+        if (lw) lw.innerHTML = `<img src="${snapshot.school_logo}" alt="Logo"/>`;
+    }
+
+    showState('stateDownloaded');
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PDF BUILDERS
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── Shared colours & helpers ───────────────────────────────────── */
+const C = {
+    navy   : [26, 58, 92],
+    green  : [45, 106, 79],
+    gold   : [201, 154, 59],
+    danger : [196, 69, 54],
+    white  : [255, 255, 255],
+    light  : [250, 248, 245],
+    border : [220, 215, 208],
+    text   : [26, 20, 16],
+    muted  : [107, 95, 86],
+};
+
+function hexFill(doc, color) { doc.setFillColor(...color); }
+function hexText(doc, color) { doc.setTextColor(...color); }
+function hexDraw(doc, color) { doc.setDrawColor(...color); }
+
+function addSchoolHeader(doc, snap, subtitle) {
+    const margin = 14;
+    const W      = doc.internal.pageSize.getWidth();
+
+    // Navy header bar
+    hexFill(doc, C.navy);
+    doc.rect(0, 0, W, 38, 'F');
+
+    // Logo (left)
+    if (snap.school_logo) {
+        try {
+            doc.addImage(snap.school_logo, 'PNG', margin, 5, 26, 26);
+        } catch(e) { /* ignore logo errors */ }
+    }
+
+    // School name & subtitle (centred)
+    hexText(doc, C.white);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.text(snap.school_name || 'ECOLE LA FONTAINE', W / 2, 13, { align: 'center' });
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    const addr = [snap.school_address, snap.school_phone, snap.school_email].filter(Boolean).join(' · ');
+    doc.text(addr, W / 2, 20, { align: 'center' });
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.text(subtitle || '', W / 2, 29, { align: 'center' });
+
+    doc.setFont('helvetica', 'normal');
+    return 44; // y after header
+}
+
+function addStudentInfoRow(doc, snap, y) {
+    const W      = doc.internal.pageSize.getWidth();
+    const margin = 14;
+
+    // Light background box
+    hexFill(doc, [245, 242, 238]);
+    doc.rect(margin, y, W - margin * 2, 30, 'F');
+    hexDraw(doc, C.border);
+    doc.rect(margin, y, W - margin * 2, 30, 'S');
+
+    const fields = [
+        ['Student Name', snap.student_name || ''],
+        ['Student Code', snap.student_code || ''],
+        ['Class',        snap.class_name   || ''],
+        ['DOB',          fmtDate(snap.student_dob)],
+        ['Guardian',     snap.guardian_name || '—'],
+        ['Date',         fmtDate(snap.generated_at)],
+    ];
+
+    hexText(doc, C.text);
+    const colW = (W - margin * 2) / 3;
+    fields.forEach((f, i) => {
+        const col = i % 3;
+        const row = Math.floor(i / 3);
+        const fx  = margin + 4 + col * colW;
+        const fy  = y + 8 + row * 11;
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7);
+        hexText(doc, C.muted);
+        doc.text(f[0].toUpperCase(), fx, fy);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+        hexText(doc, C.text);
+        doc.text(String(f[1]), fx, fy + 5);
+    });
+
+    return y + 35;
+}
+
+/* ── REPORT CARD PDF ────────────────────────────────────────────── */
+function buildReportCardPdf(snap) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const W   = doc.internal.pageSize.getWidth();  // 210
+    const H   = doc.internal.pageSize.getHeight(); // 297
+    const margin = 14;
+    const phase  = snap.phase || 'post_midterm';
+    const isAnnual = phase === 'annual';
+
+    /* ══════════════════════════ PAGE 1 ══════════════════════════ */
+    const titleMap = {
+        pre_midterm  : 'WELCOMING TEST / MID-TERM RESULTS',
+        post_midterm : 'END OF TERM EXAMINATION RESULTS',
+        annual       : 'ANNUAL REPORT CARD',
+    };
+    const subtitle = `${titleMap[phase] || 'TERM RESULTS'} · ${snap.term_name ? snap.term_name.toUpperCase() + ' · ' : ''}${snap.year_name || ''}`;
+
+    let y = addSchoolHeader(doc, snap, subtitle);
+    y = addStudentInfoRow(doc, snap, y);
+    y += 4;
+
+    const subjects   = snap.subjects || [];
+    const annualData = snap.annual_data;
+
+    if (!isAnnual) {
+        y = _buildTermAssessmentTable(doc, snap, subjects, y, margin, W, phase);
+    } else {
+        y = _buildAnnualAssessmentTable(doc, snap, subjects, annualData, y, margin, W);
+    }
+
+    // Overall summary line
+    if (y < H - 20) {
+        const totals = snap.totals || {};
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        hexText(doc, C.navy);
+        const summaryParts = [
+            `OVERALL: ${totals.grand ?? snap.overall_percentage?.toFixed(1) ?? '—'}`,
+            `AVERAGE: ${snap.overall_percentage?.toFixed(1) ?? '—'}%`,
+            `GRADE: ${snap.overall_grade || '—'}`,
+            `RANK: ${snap.rank || '—'}`,
+        ];
+        doc.text(summaryParts.join('    '), margin, y + 6);
+        y += 12;
+    }
+
+    _addVerificationStamp(doc, snap, H);
+
+    /* ══════════════════════════ PAGE 2 ══════════════════════════ */
+    doc.addPage();
+    y = addSchoolHeader(doc, snap, subtitle);
+    y = addStudentInfoRow(doc, snap, y);
+    y += 4;
+
+    // Simple MG/EX/TOTAL table (original report card format)
+    y = _buildSimpleMarksTable(doc, subjects, snap, y, margin, W, isAnnual, annualData);
+
+    // Teacher comment
+    if (snap.teacher_comment && y < H - 50) {
+        y += 6;
+        hexFill(doc, [248, 245, 240]);
+        doc.rect(margin, y, W - margin * 2, 24, 'F');
+        hexDraw(doc, C.border);
+        doc.rect(margin, y, W - margin * 2, 24, 'S');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7.5);
+        hexText(doc, C.muted);
+        doc.text("TEACHER'S COMMENT:", margin + 3, y + 6);
+
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(8.5);
+        hexText(doc, C.text);
+        const commentLines = doc.splitTextToSize(snap.teacher_comment, W - margin * 2 - 6);
+        doc.text(commentLines.slice(0, 2), margin + 3, y + 13);
+        y += 28;
+    }
+
+    // Promotion decision
+    if (snap.promotion_label && y < H - 40) {
+        const isPass    = (snap.promotion_decision || '').toUpperCase() === 'PROMOTED';
+        const decColor  = isPass ? C.green : C.danger;
+        hexFill(doc, decColor);
+        doc.rect(margin, y, W - margin * 2, 12, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        hexText(doc, C.white);
+        doc.text(String(snap.promotion_label).toUpperCase(), W / 2, y + 8, { align: 'center' });
+        y += 16;
+    }
+
+    // Signature lines
+    y = Math.max(y, H - 48);
+    _addSignatureLines(doc, snap, y, margin, W, H);
+
+    return doc;
+}
+
+function _buildTermAssessmentTable(doc, snap, subjects, y, margin, W, phase) {
+    if (!subjects || subjects.length === 0) return y;
+
+    // Find max assessments per kind across all subjects
+    let maxMG = 0, maxMid = 0, maxEx = 0;
+    subjects.forEach(sub => {
+        const mg  = (sub.assessments || []).filter(a => a.kind === 'mg').length;
+        const mid = (sub.assessments || []).filter(a => a.kind === 'midterm').length;
+        const ex  = (sub.assessments || []).filter(a => a.kind === 'ex').length;
+        if (mg  > maxMG)  maxMG  = mg;
+        if (mid > maxMid) maxMid = mid;
+        if (ex  > maxEx)  maxEx  = ex;
+    });
+    // If no assessment data, fall back to 1 col each
+    if (maxMG  === 0) maxMG  = 1;
+    if (maxMid === 0) maxMid = 1;
+    if (phase === 'pre_midterm') maxEx = 0;
+    else if (maxEx === 0) maxEx = 1;
+
+    // Fixed trailing columns
+    const trailCols   = phase === 'post_midterm' ? 4 : 2; // TOT_MG, [TOT_EX, G_TOT,] %
+    const totalCols   = 1 + maxMG + maxMid + maxEx + trailCols; // subject + assessments + totals
+    const subjectColW = 30;
+    const restW       = W - margin * 2 - subjectColW;
+    const cellW       = restW / (totalCols - 1);
+    const rowH        = 7;
+    const hdrH        = 14;
+
+    // Header rows
+    hexFill(doc, C.navy);
+    doc.rect(margin, y, W - margin * 2, hdrH, 'F');
+    hexText(doc, C.white);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6.5);
+
+    // Row 1: group headers
+    const groups = [
+        { label: 'QUIZZES',  cols: maxMG  },
+        { label: 'MIDTERM',  cols: maxMid },
+        ...(maxEx > 0 ? [{ label: 'EXAMS', cols: maxEx }] : []),
+        ...(phase === 'post_midterm'
+            ? [{ label: 'TOT MG' }, { label: 'TOT EX' }, { label: 'G-TOT' }, { label: '%' }]
+            : [{ label: 'TOT MG' }, { label: '%' }]
+        ),
+    ];
+
+    let gx = margin + subjectColW;
+    groups.forEach(g => {
+        const gw = (g.cols || 1) * cellW;
+        doc.text(g.label, gx + gw / 2, y + 5, { align: 'center' });
+        gx += gw;
+    });
+
+    // Row 2: column numbers
+    hexText(doc, [180, 200, 230]);
+    doc.setFontSize(5.5);
+    let hx = margin + subjectColW;
+    for (let i = 1; i <= maxMG;  i++) { doc.text(`Q${i}`, hx + cellW/2, y+10, {align:'center'}); hx += cellW; }
+    for (let i = 1; i <= maxMid; i++) { doc.text(`M${i}`, hx + cellW/2, y+10, {align:'center'}); hx += cellW; }
+    for (let i = 1; i <= maxEx;  i++) { doc.text(`E${i}`, hx + cellW/2, y+10, {align:'center'}); hx += cellW; }
+    ['MG','EX','TOT','%'].slice(0, trailCols).forEach(l => {
+        doc.text(l, hx + cellW/2, y+10, {align:'center'}); hx += cellW;
+    });
+
+    y += hdrH;
+
+    // Subject rows
+    subjects.forEach((sub, idx) => {
+        const rowY   = y + idx * rowH;
+        const isEven = idx % 2 === 0;
+
+        hexFill(doc, isEven ? C.white : C.light);
+        doc.rect(margin, rowY, W - margin * 2, rowH, 'F');
+
+        hexText(doc, C.text);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7);
+        doc.text((sub.name || '').toUpperCase().substring(0, 16), margin + 2, rowY + 5);
+
+        // Cells
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6.5);
+        let cx = margin + subjectColW;
+
+        const mgAsses  = (sub.assessments || []).filter(a => a.kind === 'mg');
+        const midAsses = (sub.assessments || []).filter(a => a.kind === 'midterm');
+        const exAsses  = (sub.assessments || []).filter(a => a.kind === 'ex');
+
+        // MG columns
+        for (let i = 0; i < maxMG; i++) {
+            const a = mgAsses[i];
+            const txt = a ? `${a.score}/${a.max}` : '';
+            hexText(doc, a ? C.text : [200, 195, 190]);
+            doc.text(txt, cx + cellW/2, rowY + 5, { align: 'center' });
+            cx += cellW;
         }
-
-        function setStep(stepId, status) {
-            const el = document.getElementById(stepId);
-            if (!el) return;
-            el.classList.remove('active', 'done', 'error');
-            el.classList.add(status);
-            const dot = el.querySelector('.step-dot');
-            if (dot) {
-                dot.textContent = status === 'done' ? '✓' : status === 'error' ? '✗' : dot.textContent;
-            }
-        }
-
-        function fail(msg) {
-            document.getElementById('errorMsg').textContent = msg;
-            showState('stateError');
-        }
-
-        async function dbGet(table, filter) {
-            const url = `${SB_URL}/rest/v1/${table}?${filter}&limit=1`;
-            const res = await fetch(url, {
-                headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` },
-            });
-            if (!res.ok) throw new Error(`Database error ${res.status} on ${table}`);
-            const data = await res.json();
-            return Array.isArray(data) && data.length > 0 ? data[0] : null;
-        }
-
-        async function dbPatch(table, id, body) {
-            await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, {
-                method: 'PATCH',
-                headers: {
-                    apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(body),
-            }).catch(() => { });
-        }
-
-        function loadScript(src) {
-            return new Promise((resolve, reject) => {
-                if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
-                const s = document.createElement('script');
-                s.src = src;
-                s.onload = resolve;
-                s.onerror = () => reject(new Error('Script load failed: ' + src));
-                document.head.appendChild(s);
-            });
-        }
-
-        function fmtDate(str) {
-            if (!str) return '—';
-            const d = new Date(str);
-            return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-        }
-
-        function fmtCurrency(n) {
-            return (Number(n) || 0).toLocaleString('fr-RW') + ' RWF';
-        }
-
-        /* ─── Download trigger ──────────────────────────────────────────── */
-        function triggerDownload(blob, filename) {
-            _pdfBlob = blob;
-            _dlFilename = filename;
-
-            if (_objectUrl) URL.revokeObjectURL(_objectUrl);
-            _objectUrl = URL.createObjectURL(blob);
-
-            const a = document.createElement('a');
-            a.href = _objectUrl;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-
-            // Revoke after a short delay
-            setTimeout(() => { URL.revokeObjectURL(_objectUrl); _objectUrl = null; }, 60000);
-        }
-
-        window.retryDownload = function () {
-            if (_pdfBlob && _dlFilename) {
-                _objectUrl = URL.createObjectURL(_pdfBlob);
-                const a = document.createElement('a');
-                a.href = _objectUrl; a.download = _dlFilename;
-                document.body.appendChild(a); a.click();
-                document.body.removeChild(a);
-                setTimeout(() => URL.revokeObjectURL(_objectUrl), 60000);
-            }
-        };
-
-        /* ─── Show download success screen ─────────────────────────────── */
-        function showDownloaded(docType, filename, snapshot) {
-            const badges = {
-                report_card: { cls: 'report', icon: '🎓', label: 'Report Card' },
-                receipt: { cls: 'receipt', icon: '💰', label: 'Receipt' },
-                transcript: { cls: 'transcript', icon: '📜', label: 'Transcript' },
-            };
-            const b = badges[docType] || { cls: 'report', icon: '📄', label: 'Document' };
-
-            const badgeEl = document.getElementById('docTypeBadge');
-            if (badgeEl) {
-                badgeEl.className = `doc-type-badge ${b.cls}`;
-                badgeEl.textContent = `${b.icon} ${b.label}`;
-            }
-
-            const fnEl = document.getElementById('dlFilename');
-            if (fnEl) fnEl.textContent = filename;
-
-            const metaEl = document.getElementById('dlMeta');
-            if (metaEl) {
-                const name = snapshot.student_name || snapshot.student_first_name || '';
-                const year = snapshot.year_name || '';
-                const term = snapshot.term_name || '';
-                metaEl.textContent = [name, year, term].filter(Boolean).join(' · ');
-            }
-
-            // Update school name in header if available
-            if (snapshot.school_name) {
-                const sn = document.getElementById('schoolName');
-                if (sn) sn.textContent = snapshot.school_name;
-            }
-            if (snapshot.school_logo) {
-                const lw = document.getElementById('logoWrap');
-                if (lw) lw.innerHTML = `<img src="${snapshot.school_logo}" alt="Logo"/>`;
-            }
-
-            showState('stateDownloaded');
-        }
-
-        /* ════════════════════════════════════════════════════════════════
-           PDF BUILDERS
-           ════════════════════════════════════════════════════════════════ */
-
-        /* ── Shared colours & helpers ───────────────────────────────────── */
-        const C = {
-            navy: [26, 58, 92],
-            green: [45, 106, 79],
-            gold: [201, 154, 59],
-            danger: [196, 69, 54],
-            white: [255, 255, 255],
-            light: [250, 248, 245],
-            border: [220, 215, 208],
-            text: [26, 20, 16],
-            muted: [107, 95, 86],
-        };
-
-        function hexFill(doc, color) { doc.setFillColor(...color); }
-        function hexText(doc, color) { doc.setTextColor(...color); }
-        function hexDraw(doc, color) { doc.setDrawColor(...color); }
-
-        function addSchoolHeader(doc, snap, subtitle) {
-            const margin = 14;
-            const W = doc.internal.pageSize.getWidth();
-
-            // Navy header bar
-            hexFill(doc, C.navy);
-            doc.rect(0, 0, W, 38, 'F');
-
-            // Logo (left)
-            if (snap.school_logo) {
-                try {
-                    doc.addImage(snap.school_logo, 'PNG', margin, 5, 26, 26);
-                } catch (e) { /* ignore logo errors */ }
-            }
-
-            // School name & subtitle (centred)
-            hexText(doc, C.white);
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(13);
-            doc.text(snap.school_name || 'ECOLE LA FONTAINE', W / 2, 13, { align: 'center' });
-
+        // Midterm columns
+        for (let i = 0; i < maxMid; i++) {
+            const a = midAsses[i];
+            const txt = a ? `${a.score}/${a.max}` : '';
+            hexText(doc, a ? C.navy : [200, 195, 190]);
+            doc.setFont('helvetica', a ? 'bold' : 'normal');
+            doc.text(txt, cx + cellW/2, rowY + 5, { align: 'center' });
             doc.setFont('helvetica', 'normal');
-            doc.setFontSize(8);
-            const addr = [snap.school_address, snap.school_phone, snap.school_email].filter(Boolean).join(' · ');
-            doc.text(addr, W / 2, 20, { align: 'center' });
-
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(11);
-            doc.text(subtitle || '', W / 2, 29, { align: 'center' });
-
-            doc.setFont('helvetica', 'normal');
-            return 44; // y after header
+            cx += cellW;
+        }
+        // Exam columns
+        for (let i = 0; i < maxEx; i++) {
+            const a = exAsses[i];
+            const txt = a ? `${a.score}/${a.max}` : '';
+            hexText(doc, a ? C.green : [200, 195, 190]);
+            doc.text(txt, cx + cellW/2, rowY + 5, { align: 'center' });
+            cx += cellW;
         }
 
-        function addStudentInfoRow(doc, snap, y) {
-            const W = doc.internal.pageSize.getWidth();
-            const margin = 14;
+        // Totals
+        hexText(doc, C.text);
+        doc.setFont('helvetica', 'bold');
+        const trail = phase === 'post_midterm'
+            ? [sub.mg, sub.ex, sub.total, sub.percentage != null ? sub.percentage.toFixed(1)+'%' : '—']
+            : [sub.mg, sub.percentage != null ? sub.percentage.toFixed(1)+'%' : '—'];
+        trail.forEach(val => {
+            doc.text(val != null ? String(val) : '—', cx + cellW/2, rowY + 5, { align:'center' });
+            cx += cellW;
+        });
 
-            // Light background box
-            hexFill(doc, [245, 242, 238]);
-            doc.rect(margin, y, W - margin * 2, 30, 'F');
-            hexDraw(doc, C.border);
-            doc.rect(margin, y, W - margin * 2, 30, 'S');
-
-            const fields = [
-                ['Student Name', snap.student_name || ''],
-                ['Student Code', snap.student_code || ''],
-                ['Class', snap.class_name || ''],
-                ['DOB', fmtDate(snap.student_dob)],
-                ['Guardian', snap.guardian_name || '—'],
-                ['Date', fmtDate(snap.generated_at)],
-            ];
-
-            hexText(doc, C.text);
-            const colW = (W - margin * 2) / 3;
-            fields.forEach((f, i) => {
-                const col = i % 3;
-                const row = Math.floor(i / 3);
-                const fx = margin + 4 + col * colW;
-                const fy = y + 8 + row * 11;
-
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(7);
-                hexText(doc, C.muted);
-                doc.text(f[0].toUpperCase(), fx, fy);
-
-                doc.setFont('helvetica', 'normal');
-                doc.setFontSize(8.5);
-                hexText(doc, C.text);
-                doc.text(String(f[1]), fx, fy + 5);
-            });
-
-            return y + 35;
-        }
-
-        /* ── REPORT CARD PDF ────────────────────────────────────────────── */
-        function buildReportCardPdf(snap) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-            const W = doc.internal.pageSize.getWidth();  // 210
-            const H = doc.internal.pageSize.getHeight(); // 297
-            const margin = 14;
-            const phase = snap.phase || 'post_midterm';
-            const isAnnual = phase === 'annual';
-
-            /* ══════════════════════════ PAGE 1 ══════════════════════════ */
-            const titleMap = {
-                pre_midterm: 'WELCOMING TEST / MID-TERM RESULTS',
-                post_midterm: 'END OF TERM EXAMINATION RESULTS',
-                annual: 'ANNUAL REPORT CARD',
-            };
-            const subtitle = `${titleMap[phase] || 'TERM RESULTS'} · ${snap.term_name ? snap.term_name.toUpperCase() + ' · ' : ''}${snap.year_name || ''}`;
-
-            let y = addSchoolHeader(doc, snap, subtitle);
-            y = addStudentInfoRow(doc, snap, y);
-            y += 4;
-
-            const subjects = snap.subjects || [];
-            const annualData = snap.annual_data;
-
-            if (!isAnnual) {
-                y = _buildTermAssessmentTable(doc, snap, subjects, y, margin, W, phase);
-            } else {
-                y = _buildAnnualAssessmentTable(doc, snap, subjects, annualData, y, margin, W);
-            }
-
-            // Overall summary line
-            if (y < H - 20) {
-                const totals = snap.totals || {};
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(9);
-                hexText(doc, C.navy);
-                const summaryParts = [
-                    `OVERALL: ${totals.grand ?? snap.overall_percentage?.toFixed(1) ?? '—'}`,
-                    `AVERAGE: ${snap.overall_percentage?.toFixed(1) ?? '—'}%`,
-                    `GRADE: ${snap.overall_grade || '—'}`,
-                    `RANK: ${snap.rank || '—'}`,
-                ];
-                doc.text(summaryParts.join('    '), margin, y + 6);
-                y += 12;
-            }
-
-            _addVerificationStamp(doc, snap, H);
-
-            /* ══════════════════════════ PAGE 2 ══════════════════════════ */
-            doc.addPage();
-            y = addSchoolHeader(doc, snap, subtitle);
-            y = addStudentInfoRow(doc, snap, y);
-            y += 4;
-
-            // Simple MG/EX/TOTAL table (original report card format)
-            y = _buildSimpleMarksTable(doc, subjects, snap, y, margin, W, isAnnual, annualData);
-
-            // Teacher comment
-            if (snap.teacher_comment && y < H - 50) {
-                y += 6;
-                hexFill(doc, [248, 245, 240]);
-                doc.rect(margin, y, W - margin * 2, 24, 'F');
-                hexDraw(doc, C.border);
-                doc.rect(margin, y, W - margin * 2, 24, 'S');
-
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(7.5);
-                hexText(doc, C.muted);
-                doc.text("TEACHER'S COMMENT:", margin + 3, y + 6);
-
-                doc.setFont('helvetica', 'italic');
-                doc.setFontSize(8.5);
-                hexText(doc, C.text);
-                const commentLines = doc.splitTextToSize(snap.teacher_comment, W - margin * 2 - 6);
-                doc.text(commentLines.slice(0, 2), margin + 3, y + 13);
-                y += 28;
-            }
-
-            // Promotion decision
-            if (snap.promotion_label && y < H - 40) {
-                const isPass = (snap.promotion_decision || '').toUpperCase() === 'PROMOTED';
-                const decColor = isPass ? C.green : C.danger;
-                hexFill(doc, decColor);
-                doc.rect(margin, y, W - margin * 2, 12, 'F');
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(9);
-                hexText(doc, C.white);
-                doc.text(String(snap.promotion_label).toUpperCase(), W / 2, y + 8, { align: 'center' });
-                y += 16;
-            }
-
-            // Signature lines
-            y = Math.max(y, H - 48);
-            _addSignatureLines(doc, snap, y, margin, W, H);
-
-            return doc;
-        }
-
-        function _buildTermAssessmentTable(doc, snap, subjects, y, margin, W, phase) {
-            if (!subjects || subjects.length === 0) return y;
-
-            // Find max assessments per kind across all subjects
-            let maxMG = 0, maxMid = 0, maxEx = 0;
-            subjects.forEach(sub => {
-                const mg = (sub.assessments || []).filter(a => a.kind === 'mg').length;
-                const mid = (sub.assessments || []).filter(a => a.kind === 'midterm').length;
-                const ex = (sub.assessments || []).filter(a => a.kind === 'ex').length;
-                if (mg > maxMG) maxMG = mg;
-                if (mid > maxMid) maxMid = mid;
-                if (ex > maxEx) maxEx = ex;
-            });
-            // If no assessment data, fall back to 1 col each
-            if (maxMG === 0) maxMG = 1;
-            if (maxMid === 0) maxMid = 1;
-            if (phase === 'pre_midterm') maxEx = 0;
-            else if (maxEx === 0) maxEx = 1;
-
-            // Fixed trailing columns
-            const trailCols = phase === 'post_midterm' ? 4 : 2; // TOT_MG, [TOT_EX, G_TOT,] %
-            const totalCols = 1 + maxMG + maxMid + maxEx + trailCols; // subject + assessments + totals
-            const subjectColW = 30;
-            const restW = W - margin * 2 - subjectColW;
-            const cellW = restW / (totalCols - 1);
-            const rowH = 7;
-            const hdrH = 14;
-
-            // Header rows
-            hexFill(doc, C.navy);
-            doc.rect(margin, y, W - margin * 2, hdrH, 'F');
+        // Grade badge (right edge)
+        if (sub.grade) {
+            const gradeColor = _gradeColor(sub.grade);
+            hexFill(doc, gradeColor);
+            doc.roundedRect(W - margin - 8, rowY + 1, 7, 5, 1, 1, 'F');
             hexText(doc, C.white);
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(6.5);
-
-            // Row 1: group headers
-            const groups = [
-                { label: 'QUIZZES', cols: maxMG },
-                { label: 'MIDTERM', cols: maxMid },
-                ...(maxEx > 0 ? [{ label: 'EXAMS', cols: maxEx }] : []),
-                ...(phase === 'post_midterm'
-                    ? [{ label: 'TOT MG' }, { label: 'TOT EX' }, { label: 'G-TOT' }, { label: '%' }]
-                    : [{ label: 'TOT MG' }, { label: '%' }]
-                ),
-            ];
-
-            let gx = margin + subjectColW;
-            groups.forEach(g => {
-                const gw = (g.cols || 1) * cellW;
-                doc.text(g.label, gx + gw / 2, y + 5, { align: 'center' });
-                gx += gw;
-            });
-
-            // Row 2: column numbers
-            hexText(doc, [180, 200, 230]);
             doc.setFontSize(5.5);
-            let hx = margin + subjectColW;
-            for (let i = 1; i <= maxMG; i++) { doc.text(`Q${i}`, hx + cellW / 2, y + 10, { align: 'center' }); hx += cellW; }
-            for (let i = 1; i <= maxMid; i++) { doc.text(`M${i}`, hx + cellW / 2, y + 10, { align: 'center' }); hx += cellW; }
-            for (let i = 1; i <= maxEx; i++) { doc.text(`E${i}`, hx + cellW / 2, y + 10, { align: 'center' }); hx += cellW; }
-            ['MG', 'EX', 'TOT', '%'].slice(0, trailCols).forEach(l => {
-                doc.text(l, hx + cellW / 2, y + 10, { align: 'center' }); hx += cellW;
+            doc.text(sub.grade, W - margin - 4.5, rowY + 4.8, { align: 'center' });
+        }
+
+        // Row bottom border
+        hexDraw(doc, C.border);
+        doc.setLineWidth(0.1);
+        doc.line(margin, rowY + rowH, W - margin, rowY + rowH);
+    });
+
+    // Totals footer row
+    const footY = y + subjects.length * rowH;
+    hexFill(doc, C.navy);
+    doc.rect(margin, footY, W - margin * 2, rowH + 1, 'F');
+    hexText(doc, C.white);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+
+    const totals = snap.totals || {};
+    doc.text('GRAND TOTAL', margin + 2, footY + 5);
+
+    let tx = margin + subjectColW + (maxMG + maxMid + maxEx) * cellW;
+    const footVals = phase === 'post_midterm'
+        ? [totals.mg, totals.ex, totals.grand, totals.percentage != null ? totals.percentage.toFixed(1)+'%' : '—']
+        : [totals.mg, totals.percentage != null ? totals.percentage.toFixed(1)+'%' : '—'];
+
+    footVals.forEach(v => {
+        doc.text(v != null ? String(v) : '—', tx + cellW/2, footY + 5.5, { align:'center' });
+        tx += cellW;
+    });
+
+    return footY + rowH + 6;
+}
+
+function _buildAnnualAssessmentTable(doc, snap, subjects, annualData, y, margin, W) {
+    if (!subjects || subjects.length === 0) return y;
+
+    const terms   = annualData?.perTerm ? Object.values(annualData.perTerm) : [];
+    const nTerms  = Math.max(terms.length, 3);
+    const colPerTerm = 4; // TOT MG | TOT EX | G-TOT | %
+    const annualCols = 4; // same
+    const subjectColW = 26;
+    const restW       = W - margin * 2 - subjectColW;
+    const cellW       = restW / (nTerms * colPerTerm + annualCols);
+    const rowH        = 7;
+    const hdrH        = 17;
+
+    // Header
+    hexFill(doc, C.navy);
+    doc.rect(margin, y, W - margin * 2, hdrH, 'F');
+    hexText(doc, C.white);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6);
+
+    let hx = margin + subjectColW;
+    for (let t = 1; t <= nTerms; t++) {
+        const gw = colPerTerm * cellW;
+        doc.text(`TERM ${t}`, hx + gw/2, y + 5, { align: 'center' });
+        ['TOT MG','TOT EX','G-TOT','%'].forEach((lbl, ci) => {
+            doc.setFontSize(5.2);
+            hexText(doc, [180,200,230]);
+            doc.text(lbl, hx + ci * cellW + cellW/2, y + 11, { align:'center' });
+        });
+        hx += gw;
+    }
+    // Annual group header
+    const aw = annualCols * cellW;
+    doc.setFontSize(6);
+    hexText(doc, C.gold);
+    doc.text('ANNUAL', hx + aw/2, y + 5, { align:'center' });
+    ['MG','EX','G-TOT','%'].forEach((lbl, ci) => {
+        doc.setFontSize(5.2);
+        hexText(doc, [230,200,120]);
+        doc.text(lbl, hx + ci * cellW + cellW/2, y + 11, { align:'center' });
+    });
+
+    y += hdrH;
+
+    const perSubjectAnnual = annualData?.perSubjectAnnual || {};
+
+    subjects.forEach((sub, idx) => {
+        const rowY   = y + idx * rowH;
+        hexFill(doc, idx % 2 === 0 ? C.white : C.light);
+        doc.rect(margin, rowY, W - margin * 2, rowH, 'F');
+
+        hexText(doc, C.text);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(6.5);
+        doc.text((sub.name || '').substring(0, 14).toUpperCase(), margin + 2, rowY + 5);
+
+        let cx = margin + subjectColW;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6.5);
+
+        for (let t = 1; t <= nTerms; t++) {
+            const termData = Object.values(annualData?.perTerm || {}).find(td => td.termNumber === t);
+            const subData  = termData?.perSubject?.[sub.id] || {};
+            const vals = [subData.mg, subData.ex, subData.tot,
+                subData.tot != null
+                    ? (subData.tot / (Number(sub.mg_max||0)+Number(sub.ex_max||0))*100).toFixed(1)+'%'
+                    : '—'];
+            vals.forEach(v => {
+                hexText(doc, v && v !== '—' ? C.text : [200,195,190]);
+                doc.text(v != null ? String(v) : '—', cx + cellW/2, rowY+5, {align:'center'});
+                cx += cellW;
             });
+        }
 
-            y += hdrH;
+        // Annual columns
+        const sa = perSubjectAnnual[sub.id] || {};
+        hexText(doc, C.navy);
+        doc.setFont('helvetica', 'bold');
+        [sa.annualMG, sa.annualEX, sa.annualTot,
+         sa.annualPct != null ? sa.annualPct.toFixed(1)+'%' : '—'].forEach(v => {
+            doc.text(v != null ? String(v) : '—', cx + cellW/2, rowY+5, {align:'center'});
+            cx += cellW;
+        });
 
-            // Subject rows
-            subjects.forEach((sub, idx) => {
-                const rowY = y + idx * rowH;
-                const isEven = idx % 2 === 0;
+        hexDraw(doc, C.border);
+        doc.setLineWidth(0.1);
+        doc.line(margin, rowY + rowH, W - margin, rowY + rowH);
+    });
 
-                hexFill(doc, isEven ? C.white : C.light);
-                doc.rect(margin, rowY, W - margin * 2, rowH, 'F');
+    return y + subjects.length * rowH + 6;
+}
 
-                hexText(doc, C.text);
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(7);
-                doc.text((sub.name || '').toUpperCase().substring(0, 16), margin + 2, rowY + 5);
+function _buildSimpleMarksTable(doc, subjects, snap, y, margin, W, isAnnual, annualData) {
+    const cols = isAnnual
+        ? ['SUBJECT', 'TERM 1', 'TERM 2', 'TERM 3', 'ANNUAL', 'GRADE', 'STATUS']
+        : ['SUBJECT', 'MG', 'EX', 'TOTAL', 'MAX', '%', 'GRADE'];
 
-                // Cells
-                doc.setFont('helvetica', 'normal');
-                doc.setFontSize(6.5);
-                let cx = margin + subjectColW;
+    const colWs = isAnnual
+        ? [45, 20, 20, 20, 20, 14, 14]
+        : [50, 18, 18, 20, 18, 16, 14];
 
-                const mgAsses = (sub.assessments || []).filter(a => a.kind === 'mg');
-                const midAsses = (sub.assessments || []).filter(a => a.kind === 'midterm');
-                const exAsses = (sub.assessments || []).filter(a => a.kind === 'ex');
+    const rowH = 7.5;
 
-                // MG columns
-                for (let i = 0; i < maxMG; i++) {
-                    const a = mgAsses[i];
-                    const txt = a ? `${a.score}/${a.max}` : '';
-                    hexText(doc, a ? C.text : [200, 195, 190]);
-                    doc.text(txt, cx + cellW / 2, rowY + 5, { align: 'center' });
-                    cx += cellW;
-                }
-                // Midterm columns
-                for (let i = 0; i < maxMid; i++) {
-                    const a = midAsses[i];
-                    const txt = a ? `${a.score}/${a.max}` : '';
-                    hexText(doc, a ? C.navy : [200, 195, 190]);
-                    doc.setFont('helvetica', a ? 'bold' : 'normal');
-                    doc.text(txt, cx + cellW / 2, rowY + 5, { align: 'center' });
-                    doc.setFont('helvetica', 'normal');
-                    cx += cellW;
-                }
-                // Exam columns
-                for (let i = 0; i < maxEx; i++) {
-                    const a = exAsses[i];
-                    const txt = a ? `${a.score}/${a.max}` : '';
-                    hexText(doc, a ? C.green : [200, 195, 190]);
-                    doc.text(txt, cx + cellW / 2, rowY + 5, { align: 'center' });
-                    cx += cellW;
-                }
+    // Header
+    hexFill(doc, C.navy);
+    doc.rect(margin, y, W - margin * 2, rowH, 'F');
+    hexText(doc, C.white);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
 
-                // Totals
-                hexText(doc, C.text);
-                doc.setFont('helvetica', 'bold');
-                const trail = phase === 'post_midterm'
-                    ? [sub.mg, sub.ex, sub.total, sub.percentage != null ? sub.percentage.toFixed(1) + '%' : '—']
-                    : [sub.mg, sub.percentage != null ? sub.percentage.toFixed(1) + '%' : '—'];
-                trail.forEach(val => {
-                    doc.text(val != null ? String(val) : '—', cx + cellW / 2, rowY + 5, { align: 'center' });
-                    cx += cellW;
-                });
+    let hx = margin;
+    cols.forEach((c, i) => {
+        doc.text(c, hx + colWs[i]/2, y + 5.2, { align:'center' });
+        hx += colWs[i];
+    });
+    y += rowH;
 
-                // Grade badge (right edge)
-                if (sub.grade) {
-                    const gradeColor = _gradeColor(sub.grade);
-                    hexFill(doc, gradeColor);
-                    doc.roundedRect(W - margin - 8, rowY + 1, 7, 5, 1, 1, 'F');
+    subjects.forEach((sub, idx) => {
+        const rowY    = y + idx * rowH;
+        hexFill(doc, idx % 2 === 0 ? C.white : C.light);
+        doc.rect(margin, rowY, W - margin * 2, rowH, 'F');
+
+        hexText(doc, C.text);
+        doc.setFont('helvetica', idx % 2 === 0 ? 'bold' : 'normal');
+        doc.setFontSize(7.5);
+        let rx = margin;
+
+        if (isAnnual) {
+            const sa = (annualData?.perSubjectAnnual || {})[sub.id] || {};
+            const vals = [
+                sub.name,
+                sa.term1Tot != null ? String(sa.term1Tot) : '—',
+                sa.term2Tot != null ? String(sa.term2Tot) : '—',
+                sa.term3Tot != null ? String(sa.term3Tot) : '—',
+                sa.annualTot != null ? String(sa.annualTot) : '—',
+                sub.grade || '—',
+                sub.isPassing ? '✓ Pass' : sub.grade ? '✗ Fail' : '—',
+            ];
+            vals.forEach((v, i) => {
+                hexText(doc, i === 6 ? (sub.isPassing ? C.green : C.danger) : C.text);
+                doc.text(String(v), rx + colWs[i]/2, rowY+5.2, {align:'center'});
+                rx += colWs[i];
+            });
+        } else {
+            const vals = [
+                sub.name,
+                sub.mg    != null ? String(sub.mg)    : '—',
+                sub.ex    != null ? String(sub.ex)    : '—',
+                sub.total != null ? String(sub.total) : '—',
+                sub.max   != null ? String(sub.max)   : '—',
+                sub.percentage != null ? sub.percentage.toFixed(1)+'%' : '—',
+                sub.grade || '—',
+            ];
+            vals.forEach((v, i) => {
+                const isGrade = i === 6;
+                if (isGrade) {
+                    const gc = _gradeColor(sub.grade);
+                    hexFill(doc, gc);
+                    doc.roundedRect(rx + 1, rowY + 1.5, colWs[i] - 2, rowH - 3, 1, 1, 'F');
                     hexText(doc, C.white);
-                    doc.setFontSize(5.5);
-                    doc.text(sub.grade, W - margin - 4.5, rowY + 4.8, { align: 'center' });
-                }
-
-                // Row bottom border
-                hexDraw(doc, C.border);
-                doc.setLineWidth(0.1);
-                doc.line(margin, rowY + rowH, W - margin, rowY + rowH);
-            });
-
-            // Totals footer row
-            const footY = y + subjects.length * rowH;
-            hexFill(doc, C.navy);
-            doc.rect(margin, footY, W - margin * 2, rowH + 1, 'F');
-            hexText(doc, C.white);
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(7);
-
-            const totals = snap.totals || {};
-            doc.text('GRAND TOTAL', margin + 2, footY + 5);
-
-            let tx = margin + subjectColW + (maxMG + maxMid + maxEx) * cellW;
-            const footVals = phase === 'post_midterm'
-                ? [totals.mg, totals.ex, totals.grand, totals.percentage != null ? totals.percentage.toFixed(1) + '%' : '—']
-                : [totals.mg, totals.percentage != null ? totals.percentage.toFixed(1) + '%' : '—'];
-
-            footVals.forEach(v => {
-                doc.text(v != null ? String(v) : '—', tx + cellW / 2, footY + 5.5, { align: 'center' });
-                tx += cellW;
-            });
-
-            return footY + rowH + 6;
-        }
-
-        function _buildAnnualAssessmentTable(doc, snap, subjects, annualData, y, margin, W) {
-            if (!subjects || subjects.length === 0) return y;
-
-            const terms = annualData?.perTerm ? Object.values(annualData.perTerm) : [];
-            const nTerms = Math.max(terms.length, 3);
-            const colPerTerm = 4; // TOT MG | TOT EX | G-TOT | %
-            const annualCols = 4; // same
-            const subjectColW = 26;
-            const restW = W - margin * 2 - subjectColW;
-            const cellW = restW / (nTerms * colPerTerm + annualCols);
-            const rowH = 7;
-            const hdrH = 17;
-
-            // Header
-            hexFill(doc, C.navy);
-            doc.rect(margin, y, W - margin * 2, hdrH, 'F');
-            hexText(doc, C.white);
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(6);
-
-            let hx = margin + subjectColW;
-            for (let t = 1; t <= nTerms; t++) {
-                const gw = colPerTerm * cellW;
-                doc.text(`TERM ${t}`, hx + gw / 2, y + 5, { align: 'center' });
-                ['TOT MG', 'TOT EX', 'G-TOT', '%'].forEach((lbl, ci) => {
-                    doc.setFontSize(5.2);
-                    hexText(doc, [180, 200, 230]);
-                    doc.text(lbl, hx + ci * cellW + cellW / 2, y + 11, { align: 'center' });
-                });
-                hx += gw;
-            }
-            // Annual group header
-            const aw = annualCols * cellW;
-            doc.setFontSize(6);
-            hexText(doc, C.gold);
-            doc.text('ANNUAL', hx + aw / 2, y + 5, { align: 'center' });
-            ['MG', 'EX', 'G-TOT', '%'].forEach((lbl, ci) => {
-                doc.setFontSize(5.2);
-                hexText(doc, [230, 200, 120]);
-                doc.text(lbl, hx + ci * cellW + cellW / 2, y + 11, { align: 'center' });
-            });
-
-            y += hdrH;
-
-            const perSubjectAnnual = annualData?.perSubjectAnnual || {};
-
-            subjects.forEach((sub, idx) => {
-                const rowY = y + idx * rowH;
-                hexFill(doc, idx % 2 === 0 ? C.white : C.light);
-                doc.rect(margin, rowY, W - margin * 2, rowH, 'F');
-
-                hexText(doc, C.text);
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(6.5);
-                doc.text((sub.name || '').substring(0, 14).toUpperCase(), margin + 2, rowY + 5);
-
-                let cx = margin + subjectColW;
-                doc.setFont('helvetica', 'normal');
-                doc.setFontSize(6.5);
-
-                for (let t = 1; t <= nTerms; t++) {
-                    const termData = Object.values(annualData?.perTerm || {}).find(td => td.termNumber === t);
-                    const subData = termData?.perSubject?.[sub.id] || {};
-                    const vals = [subData.mg, subData.ex, subData.tot,
-                    subData.tot != null
-                        ? (subData.tot / (Number(sub.mg_max || 0) + Number(sub.ex_max || 0)) * 100).toFixed(1) + '%'
-                        : '—'];
-                    vals.forEach(v => {
-                        hexText(doc, v && v !== '—' ? C.text : [200, 195, 190]);
-                        doc.text(v != null ? String(v) : '—', cx + cellW / 2, rowY + 5, { align: 'center' });
-                        cx += cellW;
-                    });
-                }
-
-                // Annual columns
-                const sa = perSubjectAnnual[sub.id] || {};
-                hexText(doc, C.navy);
-                doc.setFont('helvetica', 'bold');
-                [sa.annualMG, sa.annualEX, sa.annualTot,
-                sa.annualPct != null ? sa.annualPct.toFixed(1) + '%' : '—'].forEach(v => {
-                    doc.text(v != null ? String(v) : '—', cx + cellW / 2, rowY + 5, { align: 'center' });
-                    cx += cellW;
-                });
-
-                hexDraw(doc, C.border);
-                doc.setLineWidth(0.1);
-                doc.line(margin, rowY + rowH, W - margin, rowY + rowH);
-            });
-
-            return y + subjects.length * rowH + 6;
-        }
-
-        function _buildSimpleMarksTable(doc, subjects, snap, y, margin, W, isAnnual, annualData) {
-            const cols = isAnnual
-                ? ['SUBJECT', 'TERM 1', 'TERM 2', 'TERM 3', 'ANNUAL', 'GRADE', 'STATUS']
-                : ['SUBJECT', 'MG', 'EX', 'TOTAL', 'MAX', '%', 'GRADE'];
-
-            const colWs = isAnnual
-                ? [45, 20, 20, 20, 20, 14, 14]
-                : [50, 18, 18, 20, 18, 16, 14];
-
-            const rowH = 7.5;
-
-            // Header
-            hexFill(doc, C.navy);
-            doc.rect(margin, y, W - margin * 2, rowH, 'F');
-            hexText(doc, C.white);
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(7);
-
-            let hx = margin;
-            cols.forEach((c, i) => {
-                doc.text(c, hx + colWs[i] / 2, y + 5.2, { align: 'center' });
-                hx += colWs[i];
-            });
-            y += rowH;
-
-            subjects.forEach((sub, idx) => {
-                const rowY = y + idx * rowH;
-                hexFill(doc, idx % 2 === 0 ? C.white : C.light);
-                doc.rect(margin, rowY, W - margin * 2, rowH, 'F');
-
-                hexText(doc, C.text);
-                doc.setFont('helvetica', idx % 2 === 0 ? 'bold' : 'normal');
-                doc.setFontSize(7.5);
-                let rx = margin;
-
-                if (isAnnual) {
-                    const sa = (annualData?.perSubjectAnnual || {})[sub.id] || {};
-                    const vals = [
-                        sub.name,
-                        sa.term1Tot != null ? String(sa.term1Tot) : '—',
-                        sa.term2Tot != null ? String(sa.term2Tot) : '—',
-                        sa.term3Tot != null ? String(sa.term3Tot) : '—',
-                        sa.annualTot != null ? String(sa.annualTot) : '—',
-                        sub.grade || '—',
-                        sub.isPassing ? '✓ Pass' : sub.grade ? '✗ Fail' : '—',
-                    ];
-                    vals.forEach((v, i) => {
-                        hexText(doc, i === 6 ? (sub.isPassing ? C.green : C.danger) : C.text);
-                        doc.text(String(v), rx + colWs[i] / 2, rowY + 5.2, { align: 'center' });
-                        rx += colWs[i];
-                    });
                 } else {
-                    const vals = [
-                        sub.name,
-                        sub.mg != null ? String(sub.mg) : '—',
-                        sub.ex != null ? String(sub.ex) : '—',
-                        sub.total != null ? String(sub.total) : '—',
-                        sub.max != null ? String(sub.max) : '—',
-                        sub.percentage != null ? sub.percentage.toFixed(1) + '%' : '—',
-                        sub.grade || '—',
-                    ];
-                    vals.forEach((v, i) => {
-                        const isGrade = i === 6;
-                        if (isGrade) {
-                            const gc = _gradeColor(sub.grade);
-                            hexFill(doc, gc);
-                            doc.roundedRect(rx + 1, rowY + 1.5, colWs[i] - 2, rowH - 3, 1, 1, 'F');
-                            hexText(doc, C.white);
-                        } else {
-                            hexText(doc, C.text);
-                        }
-                        doc.text(String(v), rx + colWs[i] / 2, rowY + 5.2, { align: 'center' });
-                        rx += colWs[i];
-                    });
+                    hexText(doc, C.text);
                 }
-
-                hexDraw(doc, C.border);
-                doc.setLineWidth(0.1);
-                doc.line(margin, rowY + rowH, W - margin, rowY + rowH);
+                doc.text(String(v), rx + colWs[i]/2, rowY+5.2, {align:'center'});
+                rx += colWs[i];
             });
-
-            // Totals footer
-            const footY = y + subjects.length * rowH;
-            const totals = snap.totals || {};
-            hexFill(doc, C.navy);
-            doc.rect(margin, footY, W - margin * 2, rowH, 'F');
-            hexText(doc, C.white);
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(7);
-            doc.text('GRAND TOTAL', margin + 2, footY + 5.2);
-
-            if (!isAnnual) {
-                let tx = margin + colWs[0];
-                [totals.mg, totals.ex, totals.grand, totals.max,
-                totals.percentage != null ? totals.percentage.toFixed(1) + '%' : '—',
-                snap.overall_grade || '—'].forEach((v, i) => {
-                    doc.text(v != null ? String(v) : '—', tx + colWs[i + 1] / 2, footY + 5.2, { align: 'center' });
-                    tx += colWs[i + 1];
-                });
-            }
-
-            return footY + rowH + 4;
         }
 
-        function _gradeColor(grade) {
-            const g = (grade || '').toUpperCase();
-            if (g.startsWith('A')) return C.green;
-            if (g.startsWith('B')) return C.navy;
-            if (g.startsWith('C')) return C.gold;
-            if (g.startsWith('D')) return [180, 100, 40];
-            return C.danger;
-        }
+        hexDraw(doc, C.border);
+        doc.setLineWidth(0.1);
+        doc.line(margin, rowY + rowH, W - margin, rowY + rowH);
+    });
 
-        function _addSignatureLines(doc, snap, y, margin, W, H) {
-            const sigY = Math.min(y, H - 36);
-            hexDraw(doc, C.border);
-            doc.setLineWidth(0.3);
-            const sigW = (W - margin * 2) / 3;
-            const labels = ['Class Teacher', 'Head of School', 'Parent / Guardian'];
-            labels.forEach((lbl, i) => {
-                const lx = margin + i * sigW;
-                doc.line(lx + 4, sigY + 8, lx + sigW - 4, sigY + 8);
-                doc.setFont('helvetica', 'normal');
-                doc.setFontSize(7);
-                hexText(doc, C.muted);
-                doc.text(lbl, lx + sigW / 2, sigY + 13, { align: 'center' });
-            });
-            if (snap.head_teacher_name) {
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(7);
-                hexText(doc, C.text);
-                doc.text(snap.head_teacher_name, margin + sigW + sigW / 2, sigY + 4, { align: 'center' });
-            }
-        }
+    // Totals footer
+    const footY = y + subjects.length * rowH;
+    const totals = snap.totals || {};
+    hexFill(doc, C.navy);
+    doc.rect(margin, footY, W - margin * 2, rowH, 'F');
+    hexText(doc, C.white);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    doc.text('GRAND TOTAL', margin + 2, footY + 5.2);
 
-        function _addVerificationStamp(doc, snap, H) {
-            const W = doc.internal.pageSize.getWidth();
-            const margin = 14;
-            const stampY = H - 16;
+    if (!isAnnual) {
+        let tx = margin + colWs[0];
+        [totals.mg, totals.ex, totals.grand, totals.max,
+         totals.percentage != null ? totals.percentage.toFixed(1)+'%' : '—',
+         snap.overall_grade || '—'].forEach((v, i) => {
+            doc.text(v != null ? String(v) : '—', tx + colWs[i+1]/2, footY+5.2, {align:'center'});
+            tx += colWs[i+1];
+        });
+    }
 
-            hexFill(doc, [240, 248, 240]);
-            doc.rect(margin, stampY, W - margin * 2, 10, 'F');
-            hexDraw(doc, [180, 220, 180]);
-            doc.rect(margin, stampY, W - margin * 2, 10, 'S');
+    return footY + rowH + 4;
+}
 
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(6.5);
-            hexText(doc, C.green);
-            const stamp = [
-                '🔐 VERIFIED BY ECOLE LA FONTAINE',
-                `Generated: ${new Date().toLocaleString('en-GB')}`,
-                `From official database · Data frozen at issuance date`,
-            ].join('   ·   ');
-            doc.text(stamp, W / 2, stampY + 6.5, { align: 'center' });
-        }
+function _gradeColor(grade) {
+    const g = (grade || '').toUpperCase();
+    if (g.startsWith('A'))  return C.green;
+    if (g.startsWith('B'))  return C.navy;
+    if (g.startsWith('C'))  return C.gold;
+    if (g.startsWith('D'))  return [180, 100, 40];
+    return C.danger;
+}
 
-        /* ── RECEIPT PDF ─────────────────────────────────────────────────── */
-        function buildReceiptPdf(snap) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-            const W = doc.internal.pageSize.getWidth();
-            const H = doc.internal.pageSize.getHeight();
-            const margin = 14;
+function _addSignatureLines(doc, snap, y, margin, W, H) {
+    const sigY = Math.min(y, H - 36);
+    hexDraw(doc, C.border);
+    doc.setLineWidth(0.3);
+    const sigW = (W - margin * 2) / 3;
+    const labels = ['Class Teacher', 'Head of School', 'Parent / Guardian'];
+    labels.forEach((lbl, i) => {
+        const lx = margin + i * sigW;
+        doc.line(lx + 4, sigY + 8, lx + sigW - 4, sigY + 8);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        hexText(doc, C.muted);
+        doc.text(lbl, lx + sigW/2, sigY + 13, { align:'center' });
+    });
+    if (snap.head_teacher_name) {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7);
+        hexText(doc, C.text);
+        doc.text(snap.head_teacher_name, margin + sigW + sigW/2, sigY + 4, { align:'center' });
+    }
+}
 
-            let y = addSchoolHeader(doc, snap, 'OFFICIAL PAYMENT RECEIPT');
+function _addVerificationStamp(doc, snap, H) {
+    const W      = doc.internal.pageSize.getWidth();
+    const margin = 14;
+    const stampY = H - 16;
 
-            // Receipt badge
-            hexFill(doc, C.green);
-            doc.rect(margin, y, W - margin * 2, 9, 'F');
-            hexText(doc, C.white);
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(9);
-            doc.text(`RECEIPT NO. ${snap.receipt_number || '—'}`, W / 2, y + 6, { align: 'center' });
-            y += 13;
+    hexFill(doc, [240,248,240]);
+    doc.rect(margin, stampY, W - margin*2, 10, 'F');
+    hexDraw(doc, [180,220,180]);
+    doc.rect(margin, stampY, W - margin*2, 10, 'S');
 
-            // Student + payment info
-            y = addStudentInfoRow(doc, snap, y);
-            y += 4;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6.5);
+    hexText(doc, C.green);
+    const stamp = [
+        '🔐 VERIFIED BY ECOLE LA FONTAINE',
+        `Generated: ${new Date().toLocaleString('en-GB')}`,
+        `From official database · Data frozen at issuance date`,
+    ].join('   ·   ');
+    doc.text(stamp, W/2, stampY + 6.5, { align:'center' });
+}
 
-            // Payment info box
-            hexFill(doc, C.light);
-            doc.rect(margin, y, W - margin * 2, 22, 'F');
-            hexDraw(doc, C.border);
-            doc.rect(margin, y, W - margin * 2, 22, 'S');
+/* ── RECEIPT PDF ─────────────────────────────────────────────────── */
+function buildReceiptPdf(snap) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const W   = doc.internal.pageSize.getWidth();
+    const H   = doc.internal.pageSize.getHeight();
+    const margin = 14;
 
-            const payFields = [
-                ['Payment Date', fmtDate(snap.payment_date)],
-                ['Payment Method', snap.payment_method || '—'],
-                ['Reference', snap.reference_number || '—'],
-                ['Term', snap.term_name || '—'],
-                ['Academic Year', snap.year_name || '—'],
-                ['Recorded By', snap.recorded_by || '—'],
-            ];
-            const colW = (W - margin * 2) / 3;
-            payFields.forEach(([lbl, val], i) => {
-                const col = i % 3, row = Math.floor(i / 3);
-                const fx = margin + 4 + col * colW;
-                const fy = y + 7 + row * 10;
-                doc.setFont('helvetica', 'bold'); doc.setFontSize(7); hexText(doc, C.muted);
-                doc.text(lbl.toUpperCase(), fx, fy);
-                doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); hexText(doc, C.text);
-                doc.text(String(val), fx, fy + 5);
-            });
-            y += 26;
+    let y = addSchoolHeader(doc, snap, 'OFFICIAL PAYMENT RECEIPT');
 
-            // Fee breakdown table
-            const lineItems = snap.line_items || snap.fees || [];
-            const rowH = 7;
+    // Receipt badge
+    hexFill(doc, C.green);
+    doc.rect(margin, y, W - margin*2, 9, 'F');
+    hexText(doc, C.white);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.text(`RECEIPT NO. ${snap.receipt_number || '—'}`, W/2, y+6, {align:'center'});
+    y += 13;
 
-            hexFill(doc, C.navy);
-            doc.rect(margin, y, W - margin * 2, rowH, 'F');
-            hexText(doc, C.white);
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(7);
-            doc.text('DESCRIPTION', margin + 3, y + 5);
-            doc.text('AMOUNT', W - margin - 40, y + 5, { align: 'left' });
-            doc.text('PAID', W - margin - 20, y + 5, { align: 'left' });
-            doc.text('BALANCE', W - margin - 2, y + 5, { align: 'right' });
-            y += rowH;
+    // Student + payment info
+    y = addStudentInfoRow(doc, snap, y);
+    y += 4;
 
-            lineItems.forEach((item, idx) => {
-                const rowY = y + idx * rowH;
-                hexFill(doc, idx % 2 === 0 ? C.white : C.light);
-                doc.rect(margin, rowY, W - margin * 2, rowH, 'F');
-                hexText(doc, C.text);
-                doc.setFont('helvetica', 'normal');
-                doc.setFontSize(7.5);
-                doc.text(String(item.fee_name || item.category || '—'), margin + 3, rowY + 5);
-                doc.text(fmtCurrency(item.amount || item.allocated || 0), W - margin - 40, rowY + 5);
-                hexText(doc, C.green);
-                doc.setFont('helvetica', 'bold');
-                doc.text(fmtCurrency(item.allocated || item.paid || 0), W - margin - 20, rowY + 5);
-                hexText(doc, item.balance > 0 ? C.danger : C.green);
-                doc.text(fmtCurrency(item.balance || 0), W - margin - 2, rowY + 5, { align: 'right' });
-                hexDraw(doc, C.border);
-                doc.setLineWidth(0.1);
-                doc.line(margin, rowY + rowH, W - margin, rowY + rowH);
-            });
+    // Payment info box
+    hexFill(doc, C.light);
+    doc.rect(margin, y, W - margin*2, 22, 'F');
+    hexDraw(doc, C.border);
+    doc.rect(margin, y, W - margin*2, 22, 'S');
 
-            y += lineItems.length * rowH + 4;
+    const payFields = [
+        ['Payment Date', fmtDate(snap.payment_date)],
+        ['Payment Method', snap.payment_method || '—'],
+        ['Reference', snap.reference_number || '—'],
+        ['Term', snap.term_name || '—'],
+        ['Academic Year', snap.year_name || '—'],
+        ['Recorded By', snap.recorded_by || '—'],
+    ];
+    const colW = (W - margin*2) / 3;
+    payFields.forEach(([lbl, val], i) => {
+        const col = i % 3, row = Math.floor(i/3);
+        const fx = margin + 4 + col * colW;
+        const fy = y + 7 + row * 10;
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(7); hexText(doc, C.muted);
+        doc.text(lbl.toUpperCase(), fx, fy);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); hexText(doc, C.text);
+        doc.text(String(val), fx, fy + 5);
+    });
+    y += 26;
 
-            // Amount paid box
-            hexFill(doc, C.navy);
-            doc.rect(margin, y, W - margin * 2, 22, 'F');
-            hexText(doc, C.white);
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(14);
-            doc.text(fmtCurrency(snap.amount || 0), W / 2, y + 10, { align: 'center' });
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(8);
-            doc.text('AMOUNT PAID', W / 2, y + 5, { align: 'center' });
-            doc.setFontSize(7.5);
-            hexText(doc, [200, 220, 200]);
-            doc.text(snap.amount_in_words || '', W / 2, y + 17, { align: 'center' });
-            y += 26;
+    // Fee breakdown table
+    const lineItems = snap.line_items || snap.fees || [];
+    const rowH = 7;
 
-            // Totals summary
-            hexFill(doc, C.light);
-            doc.rect(margin, y, W - margin * 2, 22, 'F');
-            hexDraw(doc, C.border);
-            doc.rect(margin, y, W - margin * 2, 22, 'S');
-            const sumItems = [
-                ['Total Fees Expected', snap.total_fees],
-                ['Total Paid (this session)', snap.amount],
-                ['Outstanding Balance', snap.outstanding_balance],
-            ];
-            sumItems.forEach(([lbl, val], i) => {
-                const sx = margin + 4 + i * ((W - margin * 2) / 3);
-                doc.setFont('helvetica', 'bold'); doc.setFontSize(7); hexText(doc, C.muted);
-                doc.text(lbl, sx, y + 7);
-                doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
-                hexText(doc, i === 2 && (val || 0) > 0 ? C.danger : C.green);
-                doc.text(fmtCurrency(val || 0), sx, y + 15);
-            });
-            y += 26;
+    hexFill(doc, C.navy);
+    doc.rect(margin, y, W - margin*2, rowH, 'F');
+    hexText(doc, C.white);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    doc.text('DESCRIPTION', margin + 3, y + 5);
+    doc.text('AMOUNT', W - margin - 40, y + 5, { align:'left' });
+    doc.text('PAID', W - margin - 20, y + 5, { align:'left' });
+    doc.text('BALANCE', W - margin - 2, y + 5, { align:'right' });
+    y += rowH;
 
-            // Signatures
-            y = Math.max(y, H - 40);
-            _addSignatureLines(doc, snap, y, margin, W, H);
-            _addVerificationStamp(doc, snap, H);
+    lineItems.forEach((item, idx) => {
+        const rowY = y + idx * rowH;
+        hexFill(doc, idx % 2 === 0 ? C.white : C.light);
+        doc.rect(margin, rowY, W - margin*2, rowH, 'F');
+        hexText(doc, C.text);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        doc.text(String(item.fee_name || item.category || '—'), margin + 3, rowY + 5);
+        doc.text(fmtCurrency(item.amount || item.allocated || 0), W - margin - 40, rowY + 5);
+        hexText(doc, C.green);
+        doc.setFont('helvetica', 'bold');
+        doc.text(fmtCurrency(item.allocated || item.paid || 0), W - margin - 20, rowY + 5);
+        hexText(doc, item.balance > 0 ? C.danger : C.green);
+        doc.text(fmtCurrency(item.balance || 0), W - margin - 2, rowY + 5, { align:'right' });
+        hexDraw(doc, C.border);
+        doc.setLineWidth(0.1);
+        doc.line(margin, rowY + rowH, W - margin, rowY + rowH);
+    });
 
-            return doc;
-        }
+    y += lineItems.length * rowH + 4;
 
-        /* ── TRANSCRIPT PDF ──────────────────────────────────────────────── */
-        function buildTranscriptPdf(snap) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-            const W = doc.internal.pageSize.getWidth();   // 297
-            const H = doc.internal.pageSize.getHeight();  // 210
-            const margin = 14;
+    // Amount paid box
+    hexFill(doc, C.navy);
+    doc.rect(margin, y, W - margin*2, 22, 'F');
+    hexText(doc, C.white);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.text(fmtCurrency(snap.amount || 0), W/2, y + 10, { align:'center' });
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.text('AMOUNT PAID', W/2, y + 5, { align:'center' });
+    doc.setFontSize(7.5);
+    hexText(doc, [200, 220, 200]);
+    doc.text(snap.amount_in_words || '', W/2, y + 17, { align:'center' });
+    y += 26;
 
-            let y = addSchoolHeader(doc, snap, `ACADEMIC TRANSCRIPT · ${snap.year_name || ''}`);
-            y = addStudentInfoRow(doc, snap, y);
-            y += 4;
+    // Totals summary
+    hexFill(doc, C.light);
+    doc.rect(margin, y, W - margin*2, 22, 'F');
+    hexDraw(doc, C.border);
+    doc.rect(margin, y, W - margin*2, 22, 'S');
+    const sumItems = [
+        ['Total Fees Expected', snap.total_fees],
+        ['Total Paid (this session)', snap.amount],
+        ['Outstanding Balance', snap.outstanding_balance],
+    ];
+    sumItems.forEach(([lbl, val], i) => {
+        const sx = margin + 4 + i * ((W - margin*2) / 3);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(7); hexText(doc, C.muted);
+        doc.text(lbl, sx, y + 7);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
+        hexText(doc, i === 2 && (val||0) > 0 ? C.danger : C.green);
+        doc.text(fmtCurrency(val || 0), sx, y + 15);
+    });
+    y += 26;
 
-            const terms = snap.terms || [];
-            const subjects = terms.length > 0 ? terms[0].subjects : [];
-            const rowH = 7;
+    // Signatures
+    y = Math.max(y, H - 40);
+    _addSignatureLines(doc, snap, y, margin, W, H);
+    _addVerificationStamp(doc, snap, H);
 
-            // Dynamic columns: subject col + per term (MG/EX/TOT/%) + cumulative
-            const subjectColW = 40;
-            const termColW = 16;
-            const nTerms = terms.length;
-            const totalDataCols = nTerms * 4 + 3; // each term: mg/ex/tot/% + cumul grade/rank
-            const restW = W - margin * 2 - subjectColW;
-            const cellW = restW / totalDataCols;
+    return doc;
+}
 
-            // Header row 1: term groups
-            hexFill(doc, C.navy);
-            doc.rect(margin, y, W - margin * 2, 14, 'F');
-            hexText(doc, C.white);
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(6.5);
+/* ── TRANSCRIPT PDF ──────────────────────────────────────────────── */
+function buildTranscriptPdf(snap) {
+    const { jsPDF } = window.jspdf;
+    const doc  = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    const W    = doc.internal.pageSize.getWidth();   // 297
+    const H    = doc.internal.pageSize.getHeight();  // 210
+    const margin = 14;
 
-            let hx = margin + subjectColW;
-            terms.forEach(t => {
-                const gw = 4 * cellW;
-                doc.text(t.term_name || `TERM ${t.term_number}`, hx + gw / 2, y + 5, { align: 'center' });
-                ['MG', 'EX', 'TOT', '%'].forEach((lbl, ci) => {
-                    doc.setFontSize(5);
-                    hexText(doc, [180, 200, 230]);
-                    doc.text(lbl, hx + ci * cellW + cellW / 2, y + 10, { align: 'center' });
-                });
-                hx += gw;
-            });
-            doc.setFontSize(6.5);
-            hexText(doc, C.gold);
-            doc.text('CUMULATIVE', hx + cellW * 1.5, y + 5, { align: 'center' });
-            ['GRD', 'RNK', '%'].forEach((l, ci) => {
-                doc.setFontSize(5);
-                hexText(doc, [230, 200, 120]);
-                doc.text(l, hx + ci * cellW + cellW / 2, y + 10, { align: 'center' });
-            });
-            y += 14;
+    let y = addSchoolHeader(doc, snap, `ACADEMIC TRANSCRIPT · ${snap.year_name || ''}`);
+    y = addStudentInfoRow(doc, snap, y);
+    y += 4;
 
-            // Subject rows
-            subjects.forEach((sub, idx) => {
-                const rowY = y + idx * rowH;
-                hexFill(doc, idx % 2 === 0 ? C.white : C.light);
-                doc.rect(margin, rowY, W - margin * 2, rowH, 'F');
-                hexText(doc, C.text);
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(6.5);
-                doc.text((sub.name || '').substring(0, 18), margin + 2, rowY + 5);
+    const terms    = snap.terms || [];
+    const subjects = terms.length > 0 ? terms[0].subjects : [];
+    const rowH     = 7;
 
-                let cx = margin + subjectColW;
-                doc.setFont('helvetica', 'normal');
-                terms.forEach(t => {
-                    const ts = (t.subjects || []).find(s => s.id === sub.id) || {};
-                    [ts.mg, ts.ex, ts.total,
-                    ts.percentage != null ? ts.percentage.toFixed(1) + '%' : '—'
-                    ].forEach(v => {
-                        hexText(doc, v && v !== '—' ? C.text : [200, 195, 190]);
-                        doc.text(v != null ? String(v) : '—', cx + cellW / 2, rowY + 5, { align: 'center' });
-                        cx += cellW;
-                    });
-                });
+    // Dynamic columns: subject col + per term (MG/EX/TOT/%) + cumulative
+    const subjectColW = 40;
+    const termColW    = 16;
+    const nTerms      = terms.length;
+    const totalDataCols = nTerms * 4 + 3; // each term: mg/ex/tot/% + cumul grade/rank
+    const restW       = W - margin*2 - subjectColW;
+    const cellW       = restW / totalDataCols;
 
-                // Cumulative
-                hexText(doc, C.navy);
-                doc.setFont('helvetica', 'bold');
-                [sub.grade || '—', '—', sub.percentage != null ? sub.percentage.toFixed(1) + '%' : '—'
-                ].forEach(v => {
-                    doc.text(String(v), cx + cellW / 2, rowY + 5, { align: 'center' });
-                    cx += cellW;
-                });
+    // Header row 1: term groups
+    hexFill(doc, C.navy);
+    doc.rect(margin, y, W - margin*2, 14, 'F');
+    hexText(doc, C.white);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6.5);
 
-                hexDraw(doc, C.border);
-                doc.setLineWidth(0.1);
-                doc.line(margin, rowY + rowH, W - margin, rowY + rowH);
-            });
+    let hx = margin + subjectColW;
+    terms.forEach(t => {
+        const gw = 4 * cellW;
+        doc.text(t.term_name || `TERM ${t.term_number}`, hx + gw/2, y + 5, {align:'center'});
+        ['MG','EX','TOT','%'].forEach((lbl, ci) => {
+            doc.setFontSize(5);
+            hexText(doc, [180,200,230]);
+            doc.text(lbl, hx + ci*cellW + cellW/2, y+10, {align:'center'});
+        });
+        hx += gw;
+    });
+    doc.setFontSize(6.5);
+    hexText(doc, C.gold);
+    doc.text('CUMULATIVE', hx + cellW*1.5, y+5, {align:'center'});
+    ['GRD','RNK','%'].forEach((l,ci) => {
+        doc.setFontSize(5);
+        hexText(doc, [230,200,120]);
+        doc.text(l, hx + ci*cellW + cellW/2, y+10, {align:'center'});
+    });
+    y += 14;
 
-            // Footer totals
-            const footY = y + subjects.length * rowH;
-            hexFill(doc, C.navy);
-            doc.rect(margin, footY, W - margin * 2, rowH, 'F');
-            hexText(doc, C.white);
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(7);
-            doc.text('TOTALS', margin + 2, footY + 5);
+    // Subject rows
+    subjects.forEach((sub, idx) => {
+        const rowY = y + idx * rowH;
+        hexFill(doc, idx%2===0 ? C.white : C.light);
+        doc.rect(margin, rowY, W - margin*2, rowH, 'F');
+        hexText(doc, C.text);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(6.5);
+        doc.text((sub.name||'').substring(0,18), margin+2, rowY+5);
 
-            let tx = margin + subjectColW;
-            terms.forEach(t => {
-                [t.g_tot, '—', t.g_tot, t.percentage != null ? t.percentage.toFixed(1) + '%' : '—'
-                ].forEach(v => {
-                    doc.text(v != null ? String(v) : '—', tx + cellW / 2, footY + 5, { align: 'center' });
-                    tx += cellW;
-                });
-            });
-
-            const cum = snap.cumulative_totals || {};
-            [snap.overall_grade || '—',
-                '—',
-            cum.annual_pct != null ? cum.annual_pct.toFixed(1) + '%' : '—'
+        let cx = margin + subjectColW;
+        doc.setFont('helvetica', 'normal');
+        terms.forEach(t => {
+            const ts = (t.subjects||[]).find(s => s.id === sub.id) || {};
+            [ts.mg, ts.ex, ts.total,
+             ts.percentage != null ? ts.percentage.toFixed(1)+'%' : '—'
             ].forEach(v => {
-                hexText(doc, C.gold);
-                doc.text(String(v), tx + cellW / 2, footY + 5, { align: 'center' });
-                tx += cellW;
+                hexText(doc, v && v !== '—' ? C.text : [200,195,190]);
+                doc.text(v != null ? String(v) : '—', cx+cellW/2, rowY+5, {align:'center'});
+                cx += cellW;
             });
+        });
 
-            _addVerificationStamp(doc, snap, H);
-            return doc;
+        // Cumulative
+        hexText(doc, C.navy);
+        doc.setFont('helvetica','bold');
+        [sub.grade||'—', '—', sub.percentage != null ? sub.percentage.toFixed(1)+'%' : '—'
+        ].forEach(v => {
+            doc.text(String(v), cx+cellW/2, rowY+5, {align:'center'});
+            cx += cellW;
+        });
+
+        hexDraw(doc, C.border);
+        doc.setLineWidth(0.1);
+        doc.line(margin, rowY+rowH, W-margin, rowY+rowH);
+    });
+
+    // Footer totals
+    const footY = y + subjects.length * rowH;
+    hexFill(doc, C.navy);
+    doc.rect(margin, footY, W-margin*2, rowH, 'F');
+    hexText(doc, C.white);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(7);
+    doc.text('TOTALS', margin+2, footY+5);
+
+    let tx = margin + subjectColW;
+    terms.forEach(t => {
+        [t.g_tot, '—', t.g_tot, t.percentage != null ? t.percentage.toFixed(1)+'%' : '—'
+        ].forEach(v => {
+            doc.text(v != null ? String(v) : '—', tx+cellW/2, footY+5, {align:'center'});
+            tx += cellW;
+        });
+    });
+
+    const cum = snap.cumulative_totals || {};
+    [snap.overall_grade||'—',
+     '—',
+     cum.annual_pct != null ? cum.annual_pct.toFixed(1)+'%' : '—'
+    ].forEach(v => {
+        hexText(doc, C.gold);
+        doc.text(String(v), tx+cellW/2, footY+5, {align:'center'});
+        tx += cellW;
+    });
+
+    _addVerificationStamp(doc, snap, H);
+    return doc;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MAIN ENTRY
+   ════════════════════════════════════════════════════════════════ */
+async function main() {
+    const params = new URLSearchParams(window.location.search);
+    const token  = params.get('v') || params.get('token');
+
+    if (!token) {
+        showState('stateEmpty');
+        return;
+    }
+
+    if (!navigator.onLine) {
+        showState('stateOffline');
+        return;
+    }
+
+    try {
+        /* Step 1: Token lookup */
+        setStep('step1', 'active');
+        const verifRes = await dbGet('verifications',
+            `token=eq.${encodeURIComponent(token)}&select=*`
+        );
+
+        if (!verifRes) {
+            setStep('step1', 'error');
+            fail('This verification token is invalid or does not exist. The document may not be authentic.');
+            return;
+        }
+        if (!verifRes.is_valid) {
+            setStep('step1', 'error');
+            fail('This document has been invalidated by the school administration.');
+            return;
+        }
+        setStep('step1', 'done');
+
+        /* Step 2: Snapshot fetch */
+        setStep('step2', 'active');
+
+        const tableMap = {
+            report_card : 'report_card_snapshots',
+            receipt     : 'receipt_snapshots',
+            transcript  : 'transcript_snapshots',
+        };
+        const snapTable = tableMap[verifRes.document_type];
+        if (!snapTable) {
+            setStep('step2', 'error');
+            fail('Unknown document type in verification record.');
+            return;
         }
 
-        /* ════════════════════════════════════════════════════════════════
-           MAIN ENTRY
-           ════════════════════════════════════════════════════════════════ */
-        async function main() {
-            const params = new URLSearchParams(window.location.search);
-            const token = params.get('v') || params.get('token');
-
-            if (!token) {
-                showState('stateEmpty');
-                return;
-            }
-
-            if (!navigator.onLine) {
-                showState('stateOffline');
-                return;
-            }
-
-            try {
-                /* Step 1: Token lookup */
-                setStep('step1', 'active');
-                const verifRes = await dbGet('verifications',
-                    `token=eq.${encodeURIComponent(token)}&select=*`
-                );
-
-                if (!verifRes) {
-                    setStep('step1', 'error');
-                    fail('This verification token is invalid or does not exist. The document may not be authentic.');
-                    return;
-                }
-                if (!verifRes.is_valid) {
-                    setStep('step1', 'error');
-                    fail('This document has been invalidated by the school administration.');
-                    return;
-                }
-                setStep('step1', 'done');
-
-                /* Step 2: Snapshot fetch */
-                setStep('step2', 'active');
-
-                const tableMap = {
-                    report_card: 'report_card_snapshots',
-                    receipt: 'receipt_snapshots',
-                    transcript: 'transcript_snapshots',
-                };
-                const snapTable = tableMap[verifRes.document_type];
-                if (!snapTable) {
-                    setStep('step2', 'error');
-                    fail('Unknown document type in verification record.');
-                    return;
-                }
-
-                const snapshot = await dbGet(snapTable,
-                    `id=eq.${verifRes.document_id}&select=*`
-                );
-                if (!snapshot) {
-                    setStep('step2', 'error');
-                    fail('Document snapshot not found. It may have been deleted.');
-                    return;
-                }
-                setStep('step2', 'done');
-
-                // Increment scan count (fire and forget)
-                dbPatch('verifications', verifRes.id, {
-                    scan_count: (verifRes.scan_count || 0) + 1,
-                    last_scanned_at: new Date().toISOString(),
-                });
-
-                /* Step 3: Build PDF */
-                setStep('step3', 'active');
-                await loadScript(JSPDF_CDN);
-
-                let pdfDoc;
-                switch (verifRes.document_type) {
-                    case 'report_card': pdfDoc = buildReportCardPdf(snapshot); break;
-                    case 'receipt': pdfDoc = buildReceiptPdf(snapshot); break;
-                    case 'transcript': pdfDoc = buildTranscriptPdf(snapshot); break;
-                    default:
-                        setStep('step3', 'error');
-                        fail('Cannot build PDF for this document type.');
-                        return;
-                }
-                setStep('step3', 'done');
-
-                /* Step 4: Download */
-                setStep('step4', 'active');
-
-                // Build filename: LastName_FirstName_DocType_YYMMDD_NNNN.pdf
-                const now = new Date();
-                const yy = String(now.getFullYear()).slice(2);
-                const mm = String(now.getMonth() + 1).padStart(2, '0');
-                const dd = String(now.getDate()).padStart(2, '0');
-                const datePart = `${yy}${mm}${dd}`;
-
-                const first = (snapshot.student_first_name || '').toUpperCase().replace(/[^A-Z0-9]/g, '_');
-                const last = (snapshot.student_last_name || '').toUpperCase().replace(/[^A-Z0-9]/g, '_');
-                const typeMap = { report_card: 'ReportCard', receipt: 'Receipt', transcript: 'Transcript' };
-                const docType = typeMap[verifRes.document_type] || 'Document';
-                const receiptNum = snapshot.receipt_number
-                    ? String(snapshot.receipt_number).replace(/[^0-9]/g, '').slice(-4).padStart(4, '0')
-                    : String(Math.floor(Math.random() * 9999) + 1).padStart(4, '0');
-                const filename = `${last}_${first}_${docType}_${datePart}_${receiptNum}.pdf`;
-
-                const pdfBlob = pdfDoc.output('blob');
-                triggerDownload(pdfBlob, filename);
-                setStep('step4', 'done');
-
-                showDownloaded(verifRes.document_type, filename, snapshot);
-
-            } catch (err) {
-                console.error('[QR Verify]', err);
-                if (!navigator.onLine) {
-                    showState('stateOffline');
-                } else {
-                    fail('A network or processing error occurred: ' + (err.message || 'Unknown error.'));
-                }
-            }
+        const snapshot = await dbGet(snapTable,
+            `id=eq.${verifRes.document_id}&select=*`
+        );
+        if (!snapshot) {
+            setStep('step2', 'error');
+            fail('Document snapshot not found. It may have been deleted.');
+            return;
         }
+        setStep('step2', 'done');
 
-        main();
-    </script>
+        // Increment scan count (fire and forget)
+        dbPatch('verifications', verifRes.id, {
+            scan_count     : (verifRes.scan_count || 0) + 1,
+            last_scanned_at: new Date().toISOString(),
+        });
+
+        /* Step 3: Build PDF */
+        setStep('step3', 'active');
+        await loadScript(JSPDF_CDN);
+
+        let pdfDoc;
+        switch (verifRes.document_type) {
+            case 'report_card': pdfDoc = buildReportCardPdf(snapshot); break;
+            case 'receipt':     pdfDoc = buildReceiptPdf(snapshot);    break;
+            case 'transcript':  pdfDoc = buildTranscriptPdf(snapshot); break;
+            default:
+                setStep('step3', 'error');
+                fail('Cannot build PDF for this document type.');
+                return;
+        }
+        setStep('step3', 'done');
+
+        /* Step 4: Download */
+        setStep('step4', 'active');
+
+        // Build filename: LastName_FirstName_DocType_YYMMDD_NNNN.pdf
+        const now    = new Date();
+        const yy     = String(now.getFullYear()).slice(2);
+        const mm     = String(now.getMonth()+1).padStart(2,'0');
+        const dd     = String(now.getDate()).padStart(2,'0');
+        const datePart = `${yy}${mm}${dd}`;
+
+        const first  = (snapshot.student_first_name || '').toUpperCase().replace(/[^A-Z0-9]/g,'_');
+        const last   = (snapshot.student_last_name  || '').toUpperCase().replace(/[^A-Z0-9]/g,'_');
+        const typeMap = { report_card:'ReportCard', receipt:'Receipt', transcript:'Transcript' };
+        const docType = typeMap[verifRes.document_type] || 'Document';
+        const receiptNum = snapshot.receipt_number
+            ? String(snapshot.receipt_number).replace(/[^0-9]/g,'').slice(-4).padStart(4,'0')
+            : String(Math.floor(Math.random()*9999)+1).padStart(4,'0');
+        const filename = `${last}_${first}_${docType}_${datePart}_${receiptNum}.pdf`;
+
+        const pdfBlob = pdfDoc.output('blob');
+        triggerDownload(pdfBlob, filename);
+        setStep('step4', 'done');
+
+        showDownloaded(verifRes.document_type, filename, snapshot);
+
+    } catch (err) {
+        console.error('[QR Verify]', err);
+        if (!navigator.onLine) {
+            showState('stateOffline');
+        } else {
+            fail('A network or processing error occurred: ' + (err.message || 'Unknown error.'));
+        }
+    }
+}
+
+main();
+</script>
 </body>
-
 </html>

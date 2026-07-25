@@ -99,3 +99,9 @@ function renderConflictPanel(invalidEntries) {
 window.checkSlotConflicts = checkSlotConflicts;
 window.checkBatchConflicts = checkBatchConflicts;
 window.renderConflictPanel = renderConflictPanel;
+
+// Router bridge
+window.renderTimetableConflicts = function(container, params) {
+    if (!container) return;
+    container.innerHTML = renderConflictPanel([], { title: 'Conflict Checker' });
+};

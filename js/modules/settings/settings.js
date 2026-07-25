@@ -45,10 +45,15 @@ const SettingsTabs = (() => {
     document.addEventListener('click', (e) => {
         const btn = e.target.closest('[data-settings-nav]');
         if (!btn) return;
-        window.Router?.navigate?.(btn.dataset.settingsNav);
+        navigateTo(btn.dataset.settingsNav);
     });
 
     return { render, TABS };
 })();
 
 window.SettingsTabs = SettingsTabs;
+
+// Router bridge
+window.renderSettings = function(container, params) {
+    return SettingsTabs.render(container, params);
+};

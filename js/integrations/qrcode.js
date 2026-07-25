@@ -28,8 +28,8 @@
 const QRCodeIntegration = (() => {
 
     /* ── CDN loader ─────────────────────────────────────────────── */
-    const CDN_URL = 'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js';
-    let _promise = null;
+    const CDN_URL    = 'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js';
+    let   _promise   = null;
 
     function _isLoaded() {
         return typeof window.QRCode !== 'undefined';
@@ -37,12 +37,12 @@ const QRCodeIntegration = (() => {
 
     function _load() {
         if (_isLoaded()) return Promise.resolve();
-        if (_promise) return _promise;
+        if (_promise)    return _promise;
         _promise = new Promise((resolve, reject) => {
-            const s = document.createElement('script');
-            s.src = CDN_URL;
-            s.onload = () => resolve();
-            s.onerror = () => { _promise = null; reject(new Error('QR library CDN load failed.')); };
+            const s    = document.createElement('script');
+            s.src      = CDN_URL;
+            s.onload   = () => resolve();
+            s.onerror  = () => { _promise = null; reject(new Error('QR library CDN load failed.')); };
             document.head.appendChild(s);
         });
         return _promise;
@@ -50,9 +50,9 @@ const QRCodeIntegration = (() => {
 
     /* ── Badge config ───────────────────────────────────────────── */
     const BADGE = {
-        report_card: { emoji: '🎓', color: '#1a3a5c', label: 'Report' },
-        receipt: { emoji: '💰', color: '#2d6a4f', label: 'Receipt' },
-        transcript: { emoji: '📜', color: '#c99a3b', label: 'Transcript' },
+        report_card : { emoji: '🎓', color: '#1a3a5c', label: 'Report' },
+        receipt     : { emoji: '💰', color: '#2d6a4f', label: 'Receipt' },
+        transcript  : { emoji: '📜', color: '#c99a3b', label: 'Transcript' },
     };
 
     /* ── Core generator ─────────────────────────────────────────── */
@@ -80,24 +80,24 @@ const QRCodeIntegration = (() => {
             document.body.appendChild(wrap);
 
             // Badge dimensions (center square = 22% of QR size)
-            const badgeSize = Math.round(size * 0.22);
+            const badgeSize   = Math.round(size * 0.22);
             const badgeRadius = Math.round(badgeSize * 0.25);
-            const badgePad = Math.round(badgeSize * 0.12);
-            const badge = BADGE[docType] || BADGE.report_card;
+            const badgePad    = Math.round(badgeSize * 0.12);
+            const badge       = BADGE[docType] || BADGE.report_card;
 
             try {
                 new window.QRCode(wrap, {
-                    text: tokenUrl,
-                    width: size,
-                    height: size,
-                    colorDark: '#0f2744',
-                    colorLight: '#ffffff',
-                    correctLevel: window.QRCode.CorrectLevel.H, // H = 30% recovery, needed for badge cutout
+                    text          : tokenUrl,
+                    width         : size,
+                    height        : size,
+                    colorDark     : '#0f2744',
+                    colorLight    : '#ffffff',
+                    correctLevel  : window.QRCode.CorrectLevel.H, // H = 30% recovery, needed for badge cutout
                 });
 
                 // qrcodejs renders a canvas (or img fallback)
                 const canvas = wrap.querySelector('canvas');
-                const img = wrap.querySelector('img');
+                const img    = wrap.querySelector('img');
 
                 if (canvas) {
                     _drawBadge(canvas, badge, badgeSize, badgeRadius, badgePad, size);
@@ -106,9 +106,9 @@ const QRCodeIntegration = (() => {
                     resolve(dataUrl);
                 } else if (img) {
                     // Fallback: draw QR as image onto a new canvas, then add badge
-                    const c = document.createElement('canvas');
-                    c.width = size;
-                    c.height = size;
+                    const c   = document.createElement('canvas');
+                    c.width   = size;
+                    c.height  = size;
                     const ctx = c.getContext('2d');
                     img.onload = () => {
                         ctx.drawImage(img, 0, 0, size, size);
@@ -138,11 +138,11 @@ const QRCodeIntegration = (() => {
      * The badge is a rounded rectangle with the doc-type emoji.
      */
     function _drawBadge(canvas, badge, badgeSize, radius, pad, qrSize) {
-        const ctx = canvas.getContext('2d');
-        const cx = Math.round(qrSize / 2);
-        const cy = Math.round(qrSize / 2);
-        const x = cx - Math.round(badgeSize / 2);
-        const y = cy - Math.round(badgeSize / 2);
+        const ctx  = canvas.getContext('2d');
+        const cx   = Math.round(qrSize / 2);
+        const cy   = Math.round(qrSize / 2);
+        const x    = cx - Math.round(badgeSize / 2);
+        const y    = cy - Math.round(badgeSize / 2);
 
         // White backing square (clears QR modules behind badge)
         ctx.fillStyle = '#ffffff';
@@ -156,8 +156,8 @@ const QRCodeIntegration = (() => {
 
         // Emoji in center
         const fontSize = Math.round(badgeSize * 0.54);
-        ctx.font = `${fontSize}px serif`;
-        ctx.textAlign = 'center';
+        ctx.font       = `${fontSize}px serif`;
+        ctx.textAlign  = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(badge.emoji, cx, cy + Math.round(fontSize * 0.05));
     }
@@ -183,20 +183,20 @@ const QRCodeIntegration = (() => {
      */
     function _placeholderDataUrl(size, docType) {
         const badge = BADGE[docType] || BADGE.report_card;
-        const svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"
+        const svg   = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"
             xmlns="http://www.w3.org/2000/svg">
             <rect width="${size}" height="${size}" fill="#f0ebe6" rx="4"/>
             <!-- QR corner markers -->
             <rect x="10" y="10" width="28" height="28" fill="none" stroke="#0f2744" stroke-width="2.5" rx="3"/>
             <rect x="15" y="15" width="18" height="18" fill="#0f2744" rx="1"/>
-            <rect x="${size - 38}" y="10" width="28" height="28" fill="none" stroke="#0f2744" stroke-width="2.5" rx="3"/>
-            <rect x="${size - 33}" y="15" width="18" height="18" fill="#0f2744" rx="1"/>
-            <rect x="10" y="${size - 38}" width="28" height="28" fill="none" stroke="#0f2744" stroke-width="2.5" rx="3"/>
-            <rect x="15" y="${size - 33}" width="18" height="18" fill="#0f2744" rx="1"/>
+            <rect x="${size-38}" y="10" width="28" height="28" fill="none" stroke="#0f2744" stroke-width="2.5" rx="3"/>
+            <rect x="${size-33}" y="15" width="18" height="18" fill="#0f2744" rx="1"/>
+            <rect x="10" y="${size-38}" width="28" height="28" fill="none" stroke="#0f2744" stroke-width="2.5" rx="3"/>
+            <rect x="15" y="${size-33}" width="18" height="18" fill="#0f2744" rx="1"/>
             <!-- Center badge -->
-            <rect x="${size / 2 - 14}" y="${size / 2 - 14}" width="28" height="28"
+            <rect x="${size/2-14}" y="${size/2-14}" width="28" height="28"
                 fill="${badge.color}" rx="5"/>
-            <text x="${size / 2}" y="${size / 2 + 1}" text-anchor="middle" dominant-baseline="middle"
+            <text x="${size/2}" y="${size/2+1}" text-anchor="middle" dominant-baseline="middle"
                 font-size="16" font-family="serif">${badge.emoji}</text>
         </svg>`;
         return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;

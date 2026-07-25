@@ -78,3 +78,8 @@ const StaffTimetableOverview = (() => {
 })();
 
 window.StaffTimetableOverview = StaffTimetableOverview;
+
+// Router bridge
+window.renderStaffTimetable = function(container, params) {
+    return StaffTimetableOverview.render(container, params);
+};

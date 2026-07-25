@@ -45,7 +45,7 @@ const NAV_SECTIONS = {
     bg: 'rgba(184, 152, 58, 0.12)',
     desc: 'Record, monitor, and analyze daily attendance.',
     items: [
-      { id: 'attendance', label: 'Record Attendance', icon: 'fa-pen-to-square', desc: 'Mark daily attendance in bulk' },
+      { id: 'attendance-entry', label: 'Record Attendance', icon: 'fa-pen-to-square', desc: 'Mark daily attendance in bulk' },
       { id: 'attendance-reports', label: 'Reports', icon: 'fa-file-lines', desc: 'By class and date range, export to Excel' },
       { id: 'attendance-summary', label: 'Summary', icon: 'fa-chart-bar', desc: 'Rates per student and class' },
       { id: 'attendance-analytics', label: 'Analytics', icon: 'fa-chart-line', desc: 'Trends and patterns over time' }
@@ -63,7 +63,7 @@ const NAV_SECTIONS = {
       { id: 'student-details', label: 'Student Profile', icon: 'fa-id-card', desc: 'Academic records, fee history, family info' },
       { id: 'family-management', label: 'Family Management', icon: 'fa-house-chimney-user', desc: 'Sibling linking and family discounts' },
       { id: 'student-archive', label: 'Archive', icon: 'fa-box-archive', desc: 'Graduated or transferred students' },
-      { id: 'student-fee-status', label: 'Student Fee Status', icon: 'fa-coins', desc: 'Live balance view per student' }
+      { id: 'fee-term-status', label: 'Student Fee Status', icon: 'fa-coins', desc: 'Live balance view per student' }
     ]
   },
   academics: {

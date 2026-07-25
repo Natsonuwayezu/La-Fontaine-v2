@@ -685,34 +685,6 @@ function wireStaticNav(container) {
   });
 }
 
-// ─── TOAST HELPER ────────────────────────────────────────────────────
-
-function showToast(message, type = 'info') {
-  const container = document.getElementById('toast-container');
-  if (!container) return;
-
-  const icons = {
-    success: '✅',
-    error: '❌',
-    warning: '⚠️',
-    info: 'ℹ️'
-  };
-
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  toast.innerHTML = `
-        <span class="toast-icon">${icons[type] || 'ℹ️'}</span>
-        <span class="toast-message">${esc(message)}</span>
-    `;
-  container.appendChild(toast);
-
-  setTimeout(() => {
-    toast.classList.add('hiding');
-    setTimeout(() => toast.remove(), 300);
-  }, 3500);
-}
-
-// ─── EXPOSE ──────────────────────────────────────────────────────────
+// ─── EXPOSE ────────────────────────────────────────────────────────── ──────────────────────────────────────────────────────────
 
 window.renderAccountantDashboard = renderAccountantDashboard;
-window.showToast = showToast;

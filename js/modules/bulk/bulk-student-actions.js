@@ -12,7 +12,7 @@
        if (btn.dataset.bulk === 'export') {
          window.Toast?.success('Export started', `Preparing export for ${selectedIds.length} students.`);
        } else {
-         window.Router?.navigate('student-promotion');
+         navigateTo('student-promotion');
        }
 
    That "export" branch shows a success toast with no export behind
@@ -30,7 +30,7 @@
                                          selected students
      promoteSelected(ids)             — navigates to student-promotion
                                          with the selection attached
-                                         (window.Router.navigate('student-promotion', { studentIds: ids }))
+                                         navigateTo('student-promotion', { studentIds: ids })
      updateClassSelected(ids, classId)— reassigns class on window.state
                                          if core/state.js is loaded
      deleteSelected(ids)              — real confirmation flow +
@@ -109,9 +109,7 @@
             return;
         }
 
-        if (window.Router && typeof window.Router.navigate === 'function') {
-            window.Router.navigate('student-promotion', { studentIds: ids });
-        } else {
+        navigateTo('student-promotion', { studentIds: ids }); else {
             notify('Router not loaded — cannot open Student Promotion', 'error');
         }
     }

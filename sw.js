@@ -47,7 +47,7 @@
    stale files forever.
    ───────────────────────────────────────────────────────────────── */
 
-const CACHE_VERSION = 'v9.0.0';
+const CACHE_VERSION = 'v9.0.1';
 const CACHE_NAME = `lafontaine-shell-${CACHE_VERSION}`;
 
 /* ─────────────────────────────────────────────────────────────────
@@ -167,6 +167,7 @@ const PRECACHE_FILES = [
     '/js/core/data-loader.js',
     '/js/core/export-engine.js',
     '/js/core/print-engine.js',
+    '/js/core/verification-engine.js',
     '/js/core/search-engine.js',
     '/js/core/backup-engine.js',
     '/js/core/error-handler.js',

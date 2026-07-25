@@ -443,10 +443,10 @@ window.saveFeeCategoryModal = async function (catId) {
 };
 
 window.deleteFeeCategory = async function (catId, catName) {
-    const confirm = await showConfirmDialog(
+    const confirm = await confirmDialog(
         `Delete category "${catName}"?`,
-        'All fee amounts in this category must be deleted first.',
-        'Delete', 'danger'
+        'Delete Fee Category',
+        { confirmText: 'Delete', confirmClass: 'btn-danger' }
     );
     if (!confirm) return;
 
@@ -696,10 +696,10 @@ window.saveFeeAmountModal = async function (feeId) {
 
 /* ── BULK ASSIGN ────────────────────────────────────────────────── */
 window.bulkAssignFeeToStudents = async function (feeId, feeName) {
-    const confirm = await showConfirmDialog(
+    const confirm = await confirmDialog(
         `Assign "${feeName}" to all applicable students?`,
-        'This will create student_fee rows for every student who matches this fee\'s "Applies To" setting and does not already have it.',
-        'Assign', 'primary'
+        'Bulk Assign Fee',
+        { confirmText: 'Assign', confirmClass: 'btn-primary' }
     );
     if (!confirm) return;
 
@@ -734,18 +734,18 @@ window.confirmDeleteFeeAmount = async function (feeId, feeName) {
     const check = canDeleteFeeAmount(feeId, state.studentFees, state.payments);
 
     if (!check.canDelete) {
-        await showConfirmDialog(
-            `Cannot delete "${feeName}"`,
-            check.reason,
-            'OK', 'neutral'
+        await confirmDialog(
+            `Cannot delete "${feeName}" — ${check.reason}`,
+            'Cannot Delete Fee',
+            { confirmText: 'OK', cancelText: '' }
         );
         return;
     }
 
-    const confirm = await showConfirmDialog(
+    const confirm = await confirmDialog(
         `Delete fee "${feeName}"?`,
-        'This will also remove all student_fee rows for this fee that have not been paid.',
-        'Delete', 'danger'
+        'Delete Fee Amount',
+        { confirmText: 'Delete', confirmClass: 'btn-danger' }
     );
     if (!confirm) return;
 

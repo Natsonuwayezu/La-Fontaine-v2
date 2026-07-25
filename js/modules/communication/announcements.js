@@ -5,7 +5,7 @@
    on school-wide announcements. The consumption/reading side (what
    teachers/parents actually see) is announcement-center.js.
 
-   Rendered into #app-main for the 'announcements' route.
+   Rendered into #moduleContent for the 'announcements' route.
    ═══════════════════════════════════════════════════════════════════ */
 
 const Announcements = (() => {
@@ -268,7 +268,7 @@ const Announcements = (() => {
       window.Toast?.success(data.status === 'draft' ? 'Draft saved' : (data.status === 'scheduled' ? 'Announcement scheduled' : 'Announcement published'));
     }
     window.Modals?.close(modalRecord);
-    const container = document.getElementById('app-main');
+    const container = document.getElementById('moduleContent');
     if (container) renderGrid(container, container.querySelector('#ann-status-filter')?.value || '');
   }
 

@@ -134,3 +134,23 @@ const SiblingLinking = (() => {
 
   return { openPicker };
 })();
+
+// Router bridge — sibling linking opens as a modal/picker, not a full page
+window.renderSiblingLinking = function(container, params) {
+    if (!container) return;
+    container.innerHTML = `
+    <div class="mod-topbar">
+        <div class="mod-topbar-left">
+            <h1 class="mod-title">
+                <i class="fa-solid fa-link"></i>
+                Sibling Linking
+            </h1>
+        </div>
+    </div>
+    <div class="section-card" style="padding:32px;text-align:center;">
+        <p>Use the sibling picker from the student profile to link siblings.</p>
+        <button class="btn btn-primary" onclick="navigateTo('student-list')">
+            Go to Student List
+        </button>
+    </div>`;
+};

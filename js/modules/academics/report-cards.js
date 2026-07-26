@@ -190,7 +190,7 @@
             '<div class="report-decision-banner ' + decision + '">' + decisionLabel(decision) + '</div>' +
             '<div class="report-footer">' +
             '<div class="report-signature-line">Class Teacher</div>' +
-            '<div class="report-qr-block">' + qrMarkup(_qrDataUrl) + '<span class="report-qr-block__label">Scan to verify this report card online</span></div>' +
+            '<div class="report-qr-block">' + qrMarkup(_qrDataUrl) + '<span class="report-qr-block__label">Scan to verify this report card online</span></div>'
             '<div class="report-signature-line">Head Teacher</div>' +
             '</div>' +
             '</div>';
@@ -224,9 +224,90 @@
             state.studentId = parseInt(e.target.value, 10);
             renderPreview();
         });
-        rootEl.querySelector('#rc-print').addEventListener('click', function () {
-            window.print();
+        rootEl.querySelector('#rc-print').addEventListener('click', async function () {
+            const btn = this;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating QR…';
+
+            try {
+                // 1. Build report data from current state
+                const students = getStudents();
+                const student = students.find(s => s.id === state.studentId) || students[0];
+                const ranking = getRanking(students);
+                const myRank = ranking.find(r => r.student.id === student.id);
+                const cls = CLASS_OPTIONS.find(c => c.value === state.classId);
+
+                // 2. Build reportData shape expected by verification-engine.js
+                const reportData = {
+                    student: {
+                        id: student.id,
+                        first_name: (student.name || '').split(' ')[0],
+                        last_name: (student.name || '').split(' ').slice(1).join(' '),
+                        code: student.admissionNo || student.code || '',
+                        class_id: state.classId,
+                        date_of_birth: student.date_of_birth || null,
+                        parent_name: student.parent_name || null,
+                        parent_contact: student.parent_contact || null,
+                        gender: student.gender || null,
+                    },
+                    subjectRows: SUBJECTS.map(subj => ({
+                        subject: { id: subj, name: subj, mg_max: 50, ex_max: 50, code: subj },
+                        mg: student.scores[subj] || null,
+                        ex: null,
+                        tot: student.scores[subj] || null,
+                        pct: student.scores[subj] || null,
+                        grade: gradeLabel(student.scores[subj] || 0),
+                        isPassing: (student.scores[subj] || 0) >= 60,
+                        assessments: [],
+                    })),
+                    gTot: SUBJECTS.reduce((a, s) => a + (student.scores[s] || 0), 0),
+                    gTotMax: SUBJECTS.length * 100,
+                    gTotPct: myRank ? myRank.average : null,
+                    grade: gradeLabel(myRank ? myRank.average : 0),
+                    isPassing: myRank ? myRank.average >= 60 : false,
+                    rank: myRank ? myRank.position : null,
+                    classSize: students.length,
+                };
+
+                // 3. Get active year + term from state
+                const activeYear = getActiveYear ? getActiveYear() : { year_name: '' };
+                const activeTerm = getActiveTerm ? getActiveTerm() : { id: null, term_number: 1 };
+                const phase = 'post_midterm';
+
+                // 4. Save snapshot + get token
+                let tokenUrl = null;
+                if (typeof createReportCardSnapshot === 'function') {
+                    const result = await createReportCardSnapshot(
+                        reportData, activeTerm, activeYear, phase,
+                        null, '', null
+                    );
+                    _qrToken = result.token;
+                    _qrFilename = result.filename;
+                    tokenUrl = result.url;
+                }
+
+                // 5. Generate QR image
+                if (tokenUrl && typeof QRCodeIntegration !== 'undefined') {
+                    _qrDataUrl = await QRCodeIntegration.generate(tokenUrl, 'report_card', 160);
+                }
+
+                // 6. Re-render preview with real QR, then print
+                renderPreview();
+
+                btn.innerHTML = '<i class="fa-solid fa-print"></i> Print';
+                btn.disabled = false;
+
+                setTimeout(() => window.print(), 250);
+
+            } catch (err) {
+                console.error('[ReportCards] QR generation failed:', err.message);
+                // Print without QR rather than blocking
+                window.print();
+                btn.innerHTML = '<i class="fa-solid fa-print"></i> Print';
+                btn.disabled = false;
+            }
         });
+
         rootEl.querySelector('#rc-open-generator').addEventListener('click', function () {
             if (window.navigateTo) window.navigateTo('report-generator');
         });

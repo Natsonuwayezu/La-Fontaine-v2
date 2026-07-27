@@ -919,7 +919,7 @@ function renderStep4(panel, container) {
 
             // 4. Record payment if any amount was paid today
             if (totalPaidToday > 0) {
-                const receiptNumber = `RCP-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${String((state.payments?.length || 0) + 1).padStart(4, '0')}`;
+                const receiptNumber = await generateReceiptNumber();
 
                 const paymentPayload = {
                     student_id: studentId,

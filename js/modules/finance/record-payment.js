@@ -619,21 +619,29 @@ async function renderRecordPayment(container, params = {}) {
                 });
             }
 
-            // Handle overpayment → credit
+            // Handle credit balance: any existing credit that was drawn into
+            // the FIFO pool (creditUsed) must be removed from the family's
+            // stored balance, and any leftover after covering fees
+            // (creditAdded) must be added back — both in the same write,
+            // since "credit was applied" isn't real unless the balance
+            // actually moves.
             const preview = previewFIFOAllocation(total, selectedFeeList, currentCredit);
-            if (preview.creditAdded > 0) {
+            if (preview.creditUsed > 0 || preview.creditAdded > 0) {
                 const existingCredit = (state.creditBalances || []).find(c =>
                     c.student_id === currentStudentId
                 );
+                const newCreditAmount = Math.max(0,
+                    Number(existingCredit?.credit_amount || 0) - preview.creditUsed + preview.creditAdded
+                );
                 if (existingCredit) {
                     await update('student_credit_balance', existingCredit.id, {
-                        credit_amount: Number(existingCredit.credit_amount || 0) + preview.creditAdded,
+                        credit_amount: newCreditAmount,
                         updated_at: now,
                     });
-                } else {
+                } else if (newCreditAmount > 0) {
                     await insert('student_credit_balance', {
                         student_id: currentStudentId,
-                        credit_amount: preview.creditAdded,
+                        credit_amount: newCreditAmount,
                         updated_at: now,
                     });
                 }

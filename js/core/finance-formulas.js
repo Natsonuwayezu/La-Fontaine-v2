@@ -117,11 +117,14 @@ function previewFIFOAllocation(paymentAmount, unpaidFees, creditBalance = 0) {
     let creditUsed = 0;
     const allocations = [];
 
-    // Apply existing credit first
-    if (creditBalance > 0 && remaining > 0) {
-        const creditApplied = Math.min(creditBalance, remaining);
-        creditUsed = creditApplied;
-        remaining -= creditApplied;
+    // Apply existing credit first — credit ADDS to the pool of money
+    // available to pay down fees (payment + credit), it must never
+    // reduce it. The full credit balance is drawn into the pool here;
+    // whatever isn't needed to cover fees flows back out as
+    // `creditAdded` below, so nothing is lost either way.
+    if (creditBalance > 0) {
+        creditUsed = Number(creditBalance);
+        remaining += creditUsed;
     }
 
     // Sort by created_at ascending if not already sorted
@@ -167,7 +170,7 @@ function previewFIFOAllocation(paymentAmount, unpaidFees, creditBalance = 0) {
 
     // Any remaining after all fees = new credit
     const creditAdded = Math.max(0, remaining);
-    const totalAllocated = Number(paymentAmount) - creditAdded;
+    const totalAllocated = (Number(paymentAmount) + creditUsed) - creditAdded;
     const totalOwed = sorted.reduce((sum, f) =>
         sum + Math.max(0,
             Number(f.amount || 0) -

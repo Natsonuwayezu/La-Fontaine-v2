@@ -153,7 +153,7 @@ const MOCK_DATA = {
   quickActions: [
     { id: 'record-payment', label: 'Record Payment', family: 'finance', icon: 'fa-money-bill-wave' },
     { id: 'receipts', label: 'Print Receipt', family: 'finance', icon: 'fa-receipt' },
-    { id: 'student-fee-status', label: 'Student Fees', family: 'students', icon: 'fa-users' },
+    { id: 'student-fees', label: 'Student Fees', family: 'students', icon: 'fa-users' },
     { id: 'fee-structure', label: 'Fee Structure', family: 'finance', icon: 'fa-list-check' },
     { id: 'bulk-export', label: 'Export Report', family: 'analytics', icon: 'fa-file-lines' },
     { id: 'payment-history', label: 'Overdue List', family: 'attendance', icon: 'fa-triangle-exclamation' },

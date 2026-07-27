@@ -114,3 +114,47 @@ describe('computeCollectionStats', () => {
         expect(stats.collectionRate).toBe(0);
     });
 });
+
+describe('previewFIFOAllocation', () => {
+    // Regression coverage for a bug where existing credit was SUBTRACTED
+    // from the payable pool instead of ADDED to it, so a family's stored
+    // credit silently disappeared from the fee ledger instead of paying
+    // fees down.
+    test('existing credit ADDS to the pool available for fees, not subtracts from it', () => {
+        const fees = [{ id: 'f1', amount: 10000, waived_amount: 0, paid_amount: 0, created_at: '2026-01-01' }];
+        // Payment of 5,000 + existing credit of 5,000 should fully cover
+        // the 10,000 fee — if credit were still being subtracted, only
+        // 0 would be allocated and the fee would remain unpaid.
+        const result = previewFIFOAllocation(5000, fees, 5000);
+        expect(result.allocations[0].allocated).toBe(10000);
+        expect(result.allocations[0].isFullyPaid).toBe(true);
+        expect(result.creditUsed).toBe(5000);
+        expect(result.creditAdded).toBe(0);
+    });
+
+    test('credit fully consumed with nothing left over is reported as creditUsed, not silently dropped', () => {
+        const fees = [{ id: 'f1', amount: 8000, waived_amount: 0, paid_amount: 0, created_at: '2026-01-01' }];
+        const result = previewFIFOAllocation(3000, fees, 5000);
+        expect(result.allocations[0].allocated).toBe(8000);
+        expect(result.creditUsed).toBe(5000);
+        expect(result.creditAdded).toBe(0);
+    });
+
+    test('pool exceeding what is owed produces correct leftover credit', () => {
+        const fees = [{ id: 'f1', amount: 6000, waived_amount: 0, paid_amount: 0, created_at: '2026-01-01' }];
+        const result = previewFIFOAllocation(4000, fees, 5000);
+        // pool = 4000 + 5000 = 9000, owed = 6000, leftover = 3000
+        expect(result.allocations[0].allocated).toBe(6000);
+        expect(result.creditUsed).toBe(5000);
+        expect(result.creditAdded).toBe(3000);
+        expect(result.totalAllocated).toBe(6000);
+    });
+
+    test('no existing credit behaves as a plain payment-only allocation', () => {
+        const fees = [{ id: 'f1', amount: 10000, waived_amount: 0, paid_amount: 0, created_at: '2026-01-01' }];
+        const result = previewFIFOAllocation(6000, fees, 0);
+        expect(result.allocations[0].allocated).toBe(6000);
+        expect(result.creditUsed).toBe(0);
+        expect(result.creditAdded).toBe(0);
+    });
+});

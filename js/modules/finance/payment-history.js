@@ -69,7 +69,7 @@ async function renderPaymentHistory(container, params = {}) {
 
     function render() {
         const rows = filteredPayments();
-        const total = rows.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+        const total = rows.reduce((sum, p) => sum + Number(p.total_amount || 0), 0);
         const methods = [...new Set((state.payments || []).map(p => p.payment_method).filter(Boolean))];
 
         container.innerHTML = `
@@ -105,7 +105,7 @@ async function renderPaymentHistory(container, params = {}) {
                                 <td>${esc(p.receipt_number || `RCP-${p.id}`)}</td>
                                 <td>${esc(studentName(p.student_id))}</td>
                                 <td>${esc(className((state.students || []).find(s => s.id === p.student_id)?.class_id))}</td>
-                                <td>${fmtCurrency(p.amount)}</td>
+                                <td>${fmtCurrency(p.total_amount)}</td>
                                 <td><span class="badge">${esc(p.payment_method || '—')}</span></td>
                             </tr>
                         `).join('') || '<tr><td colspan="6" style="text-align:center; padding:24px;">No payments match these filters.</td></tr>'}

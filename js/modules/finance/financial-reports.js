@@ -23,23 +23,25 @@
      computePaymentTrend(payments, groupBy)-> [{ period, total }]
      computeMethodBreakdown(payments)      -> [{ method, total, count, pct }]
 
-   TWO REAL FIELD-NAME MISMATCHES FOUND WHILE GROUNDING THIS FILE
-   (flagging rather than silently working around):
-     1. backend.txt's payments table defines the column as `amount`,
-        but computePaymentTrend()/computeMethodBreakdown() read
-        `p.total_amount`. data-loader.js does not map one to the
-        other anywhere. normalizePayment() below fills total_amount
-        from amount if it's missing, so this report works correctly
-        either way — but the underlying mismatch should be resolved
-        upstream (either rename the column, or have data-loader.js
-        do this mapping once, centrally).
-     2. backend.txt's student_fees table has no numeric waived-amount
-        column at all — only a boolean `is_waived` + `waiver_reason`/
-        `waiver_by`. computeStudentFeeSummary() (called internally by
-        computeCollectionStats) reads `fee.waived_amount` as a number.
-        This defaults safely to 0 (no crash), it just means waived
-        amounts won't reduce "expected" totals unless that column is
-        added or a real amount is derived some other way.
+   FIELD-NAME NOTES (DB schema to be reconciled separately — code is
+   the source of truth for now, per project decision):
+     1. RESOLVED: the codebase standardizes on `total_amount` for a
+        payment's amount (used consistently across finance-formulas.js,
+        export-engine.js, notifications-engine.js, print-engine.js,
+        search-engine.js, offline.js, validators.js, student-fees.js,
+        student-statements.js, and here). payment-history.js and
+        payment-reversals.js previously read the wrong field (`amount`)
+        and have been corrected to match. The live `payments` table
+        needs a `total_amount` column (rename or add) to match.
+        normalizePayment() below is kept as a defensive fallback for
+        any rows that predate this fix.
+     2. The `student_fees` table needs a numeric waived-amount column —
+        currently only a boolean `is_waived` + `waiver_reason`/
+        `waiver_by` exist. computeStudentFeeSummary() (called
+        internally by computeCollectionStats) reads `fee.waived_amount`
+        as a number. This defaults safely to 0 (no crash), it just
+        means waived amounts won't reduce "expected" totals until that
+        column is added.
 
    Uses window.state.payments / .studentFees / .students / .classes
    (core/state.js) when populated; otherwise a small internally

@@ -505,7 +505,9 @@ function calcCompletionRate(teacherId, termId, allAssessments, allMarks) {
     return {
         completed,
         total: teacherAssessments.length,
-        pct: Math.round((completed / teacherAssessments.length) * 100),
+        pct: teacherAssessments.length > 0
+            ? Math.round((completed / teacherAssessments.length) * 100)
+            : 0,
     };
 }
 

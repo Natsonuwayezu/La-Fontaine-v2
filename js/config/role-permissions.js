@@ -267,7 +267,7 @@ const ROLE_PERMISSIONS = {
       'reminders',
       'student-list',
       'student-details',
-      'student-fee-status',
+      'student-fees',
       'family-management',
       'fee-structure',
       'record-payment',

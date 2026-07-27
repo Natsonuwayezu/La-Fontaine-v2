@@ -100,7 +100,7 @@ async function renderPaymentReversals(container, params = {}) {
                                 <td>${esc(p.receipt_number || `RCP-${p.id}`)}</td>
                                 <td>${fmtDate(p.payment_date)}</td>
                                 <td>${esc(studentName(p.student_id))}</td>
-                                <td>${fmtCurrency(p.amount)}</td>
+                                <td>${fmtCurrency(p.total_amount)}</td>
                                 <td><span class="badge">${esc(p.payment_method || '—')}</span></td>
                                 <td><button class="btn btn-sm btn-outline" data-reverse="${p.id}"><i class="fa-solid fa-rotate-left"></i> Reverse</button></td>
                             </tr>
@@ -116,7 +116,7 @@ async function renderPaymentReversals(container, params = {}) {
                             <tr>
                                 <td>${esc(p.receipt_number || `RCP-${p.id}`)}</td>
                                 <td>${esc(studentName(p.student_id))}</td>
-                                <td>${fmtCurrency(p.amount)}</td>
+                                <td>${fmtCurrency(p.total_amount)}</td>
                                 <td>${esc(p.reversed_reason || '—')}</td>
                                 <td>${esc(p.reversed_by_name || '—')}</td>
                                 <td>${fmtDate(p.reversed_at)}</td>

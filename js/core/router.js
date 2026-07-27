@@ -81,10 +81,10 @@ const MODULE_FILE_MAP = {
     'manual-adjustments': 'js/modules/finance/manual-adjustments.js',
     'discounts': 'js/modules/finance/discounts.js',
     'carry-forward': 'js/modules/finance/carry-forward.js',
-    'finance-audit'
+    'finance-audit': 'js/modules/finance/finance-audit.js',
     'help-center': 'js/modules/settings/help-center.js',
     'faq': 'js/modules/settings/help-center.js',
-    'support': 'js/modules/settings/help-center.js',: 'js/modules/finance/finance-audit.js',
+    'support': 'js/modules/settings/help-center.js',
     'financial-reports': 'js/modules/finance/financial-reports.js',
 
     // Holidays (finance)

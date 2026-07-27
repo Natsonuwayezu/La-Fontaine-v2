@@ -109,7 +109,9 @@
             return;
         }
 
-        navigateTo('student-promotion', { studentIds: ids }); else {
+        if (window.navigateTo) {
+            navigateTo('student-promotion', { studentIds: ids });
+        } else {
             notify('Router not loaded — cannot open Student Promotion', 'error');
         }
     }

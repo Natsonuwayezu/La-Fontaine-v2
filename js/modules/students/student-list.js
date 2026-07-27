@@ -10,22 +10,10 @@
 
 const StudentList = (() => {
 
-  // MOCK_DATA — replace with core/api.js
-  const MOCK_STUDENTS = [
-    { id: 'STU-2024-0012', name: 'MUGISHA Jean', classId: 'Primary 4A', status: 'active', feeStatus: 'partial', gender: 'M' },
-    { id: 'STU-2023-0088', name: 'UWERA Grace', classId: 'Primary 5B', status: 'active', feeStatus: 'paid', gender: 'F' },
-    { id: 'STU-2022-0140', name: 'HABIMANA Eric', classId: 'Primary 6', status: 'active', feeStatus: 'unpaid', gender: 'M' },
-    { id: 'STU-2024-0201', name: 'KAMALI Moses', classId: 'Primary 3A', status: 'active', feeStatus: 'paid', gender: 'M' },
-    { id: 'STU-2024-0202', name: 'KAMALI Jean', classId: 'Primary 2', status: 'active', feeStatus: 'partial', gender: 'M' },
-    { id: 'STU-2023-0175', name: 'NIYONZIMA Claude', classId: 'Primary 1', status: 'active', feeStatus: 'paid', gender: 'M' },
-    { id: 'STU-2021-0033', name: 'INGABIRE Sarah', classId: 'Primary 2', status: 'active', feeStatus: 'unpaid', gender: 'F' },
-    { id: 'STU-2020-0004', name: 'MUGABO Patrick', classId: 'Primary 6', status: 'transferred', feeStatus: 'paid', gender: 'M' },
-    { id: 'STU-2019-0210', name: 'TUYISHIME Alice', classId: 'Primary 6', status: 'graduated', feeStatus: 'paid', gender: 'F' }
-  ];
-
   let currentView = 'table';
   let table = null;
   let workerIndexed = false;
+  let feesLoaded = false;
 
   function escapeHTML(str) {
     const div = document.createElement('div');
@@ -37,13 +25,48 @@ const StudentList = (() => {
     return name.split(' ').map(w => w[0]).slice(0, 2).join('');
   }
 
-  function ensureSearchWorker() {
+  /** Real roster, shaped for this page's rendering — resolves class
+   *  name via state.classes and fee status via the shared finance
+   *  formula (same one record-payment.js and student-fees.js use), so
+   *  this page never invents its own math for "is this student paid".
+   */
+  function getRoster() {
+    const classMap = new Map((state.classes || []).map(c => [c.id, c.name]));
+
+    const feesByStudent = new Map();
+    (state.studentFees || []).forEach(f => {
+      if (!feesByStudent.has(f.student_id)) feesByStudent.set(f.student_id, []);
+      feesByStudent.get(f.student_id).push(f);
+    });
+    const creditByStudent = new Map(
+      (state.creditBalances || []).map(c => [c.student_id, Number(c.credit_amount || 0)])
+    );
+
+    return (state.students || [])
+      .filter(s => !s.is_deleted)
+      .map(s => {
+        const fees = feesByStudent.get(s.id) || [];
+        const credit = creditByStudent.get(s.id) || 0;
+        const summary = computeStudentFeeSummary(fees, credit);
+        return {
+          id: s.id,
+          code: s.student_code || '',
+          name: `${s.first_name || ''} ${s.last_name || ''}`.trim() || 'Unnamed Student',
+          classId: s.class_id,
+          className: classMap.get(s.class_id) || '—',
+          status: s.status || 'Active',
+          feeStatus: !fees.length ? 'unknown' : summary.isFullyPaid ? 'paid' : summary.paid > 0 ? 'partial' : 'unpaid',
+        };
+      });
+  }
+
+  function ensureSearchWorker(roster) {
     if (!window.searchWorkerInstance && window.Worker) {
       try { window.searchWorkerInstance = new Worker('js/workers/search-worker.js'); }
       catch { window.searchWorkerInstance = null; }
     }
-    if (window.searchWorkerInstance && !workerIndexed) {
-      window.searchWorkerInstance.postMessage({ type: 'INDEX', payload: { collection: 'students', items: MOCK_STUDENTS, fields: ['name', 'id'] } });
+    if (window.searchWorkerInstance) {
+      window.searchWorkerInstance.postMessage({ type: 'INDEX', payload: { collection: 'students', items: roster, fields: ['name', 'code'] } });
       workerIndexed = true;
     }
   }
@@ -86,7 +109,7 @@ const StudentList = (() => {
     `;
 
     populateClassFilter(container);
-    ensureSearchWorker();
+    ensureSearchWorker(getRoster());
 
     container.querySelector('#stu-enroll-btn').addEventListener('click', () => window.Router?.navigate('enroll-student'));
     container.querySelector('#stu-search').addEventListener('input', () => renderContent(container));
@@ -101,23 +124,35 @@ const StudentList = (() => {
     });
 
     renderContent(container);
+
+    // student_fees/credit balances are lazily loaded (large tables) —
+    // fetch them if this session hasn't already, then re-render so Fee
+    // Status is accurate instead of showing "unknown" indefinitely.
+    if (!feesLoaded && (!state.studentFees || state.studentFees.length === 0)) {
+      window.loadStudentFees?.().then(() => {
+        feesLoaded = true;
+        if (container.isConnected) renderContent(container);
+      }).catch(() => {});
+    } else {
+      feesLoaded = true;
+    }
   }
 
   function populateClassFilter(container) {
     const select = container.querySelector('#stu-class-filter');
-    const classes = [...CLASS_LEVELS.nursery, ...CLASS_LEVELS.primary];
-    select.innerHTML += classes.map(c => `<option value="${c}">${c}</option>`).join('');
+    const classes = [...(state.classes || [])].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    select.innerHTML += classes.map(c => `<option value="${c.id}">${escapeHTML(c.name)}</option>`).join('');
   }
 
   function getFilteredData(container) {
     const search = container.querySelector('#stu-search').value.trim().toLowerCase();
     const classFilter = container.querySelector('#stu-class-filter').value;
-    const statusFilter = container.querySelector('#stu-status-filter').value;
+    const statusFilter = container.querySelector('#stu-status-filter').value.toLowerCase();
 
-    return MOCK_STUDENTS.filter(s => {
-      if (search && !s.name.toLowerCase().includes(search) && !s.id.toLowerCase().includes(search)) return false;
-      if (classFilter && s.classId !== classFilter) return false;
-      if (statusFilter && s.status !== statusFilter) return false;
+    return getRoster().filter(s => {
+      if (search && !s.name.toLowerCase().includes(search) && !s.code.toLowerCase().includes(search)) return false;
+      if (classFilter && String(s.classId) !== String(classFilter)) return false;
+      if (statusFilter && (s.status || '').toLowerCase() !== statusFilter) return false;
       return true;
     });
   }
@@ -147,13 +182,13 @@ const StudentList = (() => {
               <div class="student-list-avatar">${escapeHTML(initials(s.name))}</div>
               <div>
                 <div style="font-weight:600;">${escapeHTML(s.name)}</div>
-                <div style="font-size:0.68rem; color:var(--card-text-muted,#475569);">${escapeHTML(s.id)}</div>
+                <div style="font-size:0.68rem; color:var(--card-text-muted,#475569);">${escapeHTML(s.code)}</div>
               </div>
             </div>`
         },
-        { key: 'classId', label: 'Class', sortable: true },
-        { key: 'status', label: 'Status', align: 'center', render: (s) => `<span class="student-status-badge ${s.status}">${s.status}</span>` },
-        { key: 'feeStatus', label: 'Fee Status', align: 'center', render: (s) => `<span class="fee-status-chip ${s.feeStatus}">${s.feeStatus}</span>` },
+        { key: 'className', label: 'Class', sortable: true },
+        { key: 'status', label: 'Status', align: 'center', render: (s) => `<span class="student-status-badge ${escapeHTML((s.status || '').toLowerCase())}">${escapeHTML(s.status)}</span>` },
+        { key: 'feeStatus', label: 'Fee Status', align: 'center', render: (s) => `<span class="fee-status-chip ${escapeHTML(s.feeStatus)}">${escapeHTML(s.feeStatus)}</span>` },
         {
           key: 'actions', label: '', align: 'right', render: (s) => `
             <button class="btn btn-sm btn-outline" data-view-student="${s.id}">View</button>
@@ -180,10 +215,10 @@ const StudentList = (() => {
       <div class="student-card" data-goto="${s.id}">
         <div class="student-card__avatar">${escapeHTML(initials(s.name))}</div>
         <div class="student-card__name">${escapeHTML(s.name)}</div>
-        <div class="student-card__class">${escapeHTML(s.classId)}</div>
+        <div class="student-card__class">${escapeHTML(s.className)}</div>
         <div class="student-card__badges">
-          <span class="student-status-badge ${s.status}">${s.status}</span>
-          <span class="fee-status-chip ${s.feeStatus}">${s.feeStatus}</span>
+          <span class="student-status-badge ${escapeHTML((s.status || '').toLowerCase())}">${escapeHTML(s.status)}</span>
+          <span class="fee-status-chip ${escapeHTML(s.feeStatus)}">${escapeHTML(s.feeStatus)}</span>
         </div>
       </div>
     `).join('')}</div>`;

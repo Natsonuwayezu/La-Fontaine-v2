@@ -13,154 +13,139 @@
 // don't exist in core/finance-formulas.js and were never called in this file — removed as dead code.
 const OVERDUE_THRESHOLDS_DEFAULT = OVERDUE_THRESHOLDS;
 
-// ─── MOCK DATA (will be replaced with real API calls) ──────────────────
+// ─── REAL DATA ───────────────────────────────────────────────────────
+// Reuses the same shared formulas record-payment.js / student-fees.js /
+// financial-reports.js already use, rather than inventing separate
+// aggregation logic here.
 
-const MOCK_DATA = {
-  stats: [
-    {
-      family: 'finance',
-      icon: '<i class="fa-solid fa-sack-dollar"></i>',
-      value: '12.4M',
-      label: 'Total Fees (Term)',
-      trend: { dir: 'up', text: '8% · +1.2M vs last term' }
-    },
-    {
-      family: 'finance',
-      icon: '<i class="fa-solid fa-circle-check"></i>',
-      value: '9.8M',
-      label: 'Collected',
-      trend: { dir: 'up', text: '79% of total' }
-    },
-    {
-      family: 'attendance',
-      icon: '<i class="fa-solid fa-clock"></i>',
-      value: '2.6M',
-      label: 'Pending',
-      trend: { dir: 'down', text: '21% outstanding' }
-    },
-    {
-      family: 'staff',
-      icon: '<i class="fa-solid fa-triangle-exclamation"></i>',
-      value: '24',
-      label: 'Overdue Students',
-      trend: { dir: 'up', text: '+4 from last week' }
-    },
-    {
-      family: 'analytics',
-      icon: '<i class="fa-solid fa-percent"></i>',
-      value: '79.3%',
-      label: 'Collection Rate',
-      trend: { dir: 'up', text: 'Target 85%' }
-    },
-    {
-      family: 'students',
-      icon: '<i class="fa-solid fa-gift"></i>',
-      value: '245K',
-      label: 'Waived (Term)',
-      trend: { dir: 'up', text: '12 waivers applied' }
-    },
-    {
-      family: 'finance',
-      icon: '<i class="fa-solid fa-calendar-day"></i>',
-      value: '5',
-      label: 'Payments Today',
-      trend: { dir: 'up', text: '150K RWF collected' }
-    }
-  ],
+function getDashboardData() {
+  const termId = window.getActiveTermId ? window.getActiveTermId() : null;
+  const todayStr = todayISO();
 
-  collectionByClass: {
-    labels: ['P1', 'P2', 'P3A', 'P4A', 'P5B', 'P6'],
-    values: [84, 67, 100, 41, 77, 89]
-  },
+  const termFees = (state.studentFees || []).filter(f =>
+    !termId || String(f.term_id) === String(termId)
+  );
+  const termPayments = (state.payments || []).filter(p =>
+    !p.is_reversed && (!termId || String(p.term_id) === String(termId))
+  );
 
-  monthlyTrend: {
-    points: [
-      { x: 1, y: 6.2 },
-      { x: 2, y: 7.1 },
-      { x: 3, y: 6.8 },
-      { x: 4, y: 8.4 },
-      { x: 5, y: 9.1 },
-      { x: 6, y: 9.8 }
-    ],
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
-  },
+  const collection = computeCollectionStats(termFees);
+  const overdueBuckets = classifyOverdueFees(termFees);
+  const allOverdueFees = [...overdueBuckets.critical, ...overdueBuckets.warning, ...overdueBuckets.mild, ...overdueBuckets.recent];
+  const overdueOutstanding = allOverdueFees.reduce((sum, f) => sum + f.remaining, 0);
 
-  todaysPayments: [
-    { time: '10:42', name: 'MUGISHA Jean', classId: 'Primary 4A', amount: 50000, by: 'Admin' },
-    { time: '09:15', name: 'UWERA Grace', classId: 'Primary 5B', amount: 30000, by: 'Admin' },
-    { time: '08:30', name: 'KAMALI Moses', classId: 'Primary 3A', amount: 25000, by: 'Self' },
-    { time: '08:00', name: 'NIYONZIMA C.', classId: 'Primary 1', amount: 20000, by: 'Self' },
-    { time: '07:45', name: 'HABIMANA E.', classId: 'Primary 4A', amount: 25000, by: 'Self' }
-  ],
+  const todaysPayments = (state.payments || [])
+    .filter(p => !p.is_reversed && p.payment_date === todayStr)
+    .sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
+  const paymentsTodayTotal = todaysPayments.reduce((sum, p) => sum + Number(p.total_amount || 0), 0);
 
-  notifications: [
-    {
-      type: 'payment',
-      text: '<strong>Admin</strong> recorded 50,000 RWF for MUGISHA Jean',
-      time: '10:42 AM',
-      action: 'View'
-    },
-    {
-      type: 'overdue',
-      text: '<strong>HABIMANA Eric</strong> overdue 14 days · Balance 45,000 RWF',
-      time: '08:20 AM',
-      action: 'Pay'
-    },
-    {
-      type: 'info',
-      text: '<strong>Collection rate</strong> reached 79.3%',
-      time: 'Yesterday',
-      action: 'Report'
-    },
-    {
-      type: 'overdue',
-      text: '<strong>3 new overdue</strong> students detected',
-      time: 'Yesterday',
-      action: 'View'
-    }
-  ],
+  const waivedTotal = termFees.reduce((sum, f) => sum + Number(f.waived_amount || 0), 0);
+  const waivedCount = termFees.filter(f => f.is_waived).length;
 
-  severityBuckets: [
-    { key: 'critical', label: `Critical >${OVERDUE_THRESHOLDS_DEFAULT?.critical ?? 45}d`, count: 6 },
-    { key: 'high', label: `High ${OVERDUE_THRESHOLDS_DEFAULT?.warning ?? 21}-${(OVERDUE_THRESHOLDS_DEFAULT?.critical ?? 45) - 1}d`, count: 8 },
-    { key: 'medium', label: `Medium ${OVERDUE_THRESHOLDS_DEFAULT?.mild ?? 7}-${(OVERDUE_THRESHOLDS_DEFAULT?.warning ?? 21) - 1}d`, count: 16 },
-    { key: 'recent', label: `Recent 7-13d`, count: 20 }
-  ],
+  const stats = [
+    { family: 'finance', icon: '<i class="fa-solid fa-sack-dollar"></i>', value: formatCurrency(collection.totalExpected), label: 'Total Fees (Term)', trend: { dir: 'up', text: `${collection.totalStudents} student${collection.totalStudents === 1 ? '' : 's'} billed` } },
+    { family: 'finance', icon: '<i class="fa-solid fa-circle-check"></i>', value: formatCurrency(collection.totalCollected), label: 'Collected', trend: { dir: 'up', text: `${collection.collectionRate}% of total` } },
+    { family: 'attendance', icon: '<i class="fa-solid fa-clock"></i>', value: formatCurrency(collection.totalOutstanding), label: 'Pending', trend: { dir: 'down', text: `${collection.totalExpected > 0 ? Math.round((collection.totalOutstanding / collection.totalExpected) * 100) : 0}% outstanding` } },
+    { family: 'staff', icon: '<i class="fa-solid fa-triangle-exclamation"></i>', value: String(overdueBuckets.total), label: 'Overdue Students', trend: { dir: 'up', text: `${formatCurrency(overdueOutstanding)} outstanding` } },
+    { family: 'analytics', icon: '<i class="fa-solid fa-percent"></i>', value: `${collection.collectionRate}%`, label: 'Collection Rate', trend: { dir: collection.collectionRate >= 50 ? 'up' : 'down', text: `${collection.fullPayers} fully paid · ${collection.partialPayers} partial` } },
+    { family: 'students', icon: '<i class="fa-solid fa-gift"></i>', value: formatCurrency(waivedTotal), label: 'Waived (Term)', trend: { dir: 'up', text: `${waivedCount} waiver${waivedCount === 1 ? '' : 's'} applied` } },
+    { family: 'finance', icon: '<i class="fa-solid fa-calendar-day"></i>', value: String(todaysPayments.length), label: 'Payments Today', trend: { dir: 'up', text: `${formatCurrency(paymentsTodayTotal)} collected` } },
+  ];
 
-  overdueStudents: [
-    { name: 'HABIMANA Eric', classId: 'P4A', balance: '85,000 RWF', days: 47, severity: 'critical' },
-    { name: 'INGABIRE Sarah', classId: 'P2B', balance: '60,000 RWF', days: 31, severity: 'high' },
-    { name: 'KAMALI Moses', classId: 'P3A', balance: '45,000 RWF', days: 28, severity: 'medium' },
-    { name: 'UWERA Grace', classId: 'P5B', balance: '30,000 RWF', days: 12, severity: 'recent' }
-  ],
+  // Per-class collection rate — used for both the bar chart and the
+  // ranked list below it.
+  const classMap = new Map((state.classes || []).map(c => [c.id, c.name]));
+  const studentClassMap = new Map((state.students || []).map(s => [s.id, s.class_id]));
+  const feesByClass = new Map();
+  termFees.forEach(f => {
+    const classId = studentClassMap.get(f.student_id);
+    if (classId == null) return;
+    if (!feesByClass.has(classId)) feesByClass.set(classId, []);
+    feesByClass.get(classId).push(f);
+  });
+  const classRanking = [...feesByClass.entries()]
+    .map(([classId, fees]) => ({
+      name: classMap.get(classId) || `Class ${classId}`,
+      rate: computeCollectionStats(fees).collectionRate,
+    }))
+    .sort((a, b) => b.rate - a.rate);
+  const collectionByClass = {
+    labels: classRanking.map(c => c.name),
+    values: classRanking.map(c => c.rate),
+  };
 
-  paymentMethods: [
-    { name: 'Cash', pct: 55, color: '#3a7a5a' },
-    { name: 'Mobile Money', pct: 22, color: '#4a7a8a' },
-    { name: 'Bank Transfer', pct: 18, color: '#7a5a9a' },
-    { name: 'Cheque', pct: 5, color: '#b8983a' }
-  ],
+  const monthlyTrendPoints = computePaymentTrend(state.payments || [], 'month').slice(-6);
+  const monthlyTrend = {
+    labels: monthlyTrendPoints.map(p => {
+      const [, m] = p.period.split('-');
+      return ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][Number(m)] || p.period;
+    }),
+    points: monthlyTrendPoints.map((p, i) => ({ x: i + 1, y: Math.round((p.total / 1000000) * 100) / 100 })),
+  };
 
-  classRanking: [
-    { name: 'Primary 3', rate: 100 },
-    { name: 'Primary 6', rate: 89 },
-    { name: 'Primary 1', rate: 84 },
-    { name: 'Primary 5B', rate: 77 },
-    { name: 'Primary 2', rate: 67 },
-    { name: 'Primary 4A', rate: 41 }
-  ],
+  const studentMap = new Map((state.students || []).map(s => [s.id, s]));
+  const overdueStudentTotals = new Map();
+  allOverdueFees.forEach(f => {
+    const cur = overdueStudentTotals.get(f.student_id) || { balance: 0, days: 0 };
+    cur.balance += f.remaining;
+    cur.days = Math.max(cur.days, f.days_overdue);
+    overdueStudentTotals.set(f.student_id, cur);
+  });
+  const severityKeyFor = (days) => days >= OVERDUE_SEVERITY.CRITICAL ? 'critical'
+    : days >= OVERDUE_SEVERITY.WARNING ? 'high'
+    : days >= OVERDUE_SEVERITY.MILD ? 'medium'
+    : 'recent';
+  const overdueStudents = [...overdueStudentTotals.entries()]
+    .map(([studentId, totals]) => {
+      const s = studentMap.get(studentId);
+      return {
+        name: s ? `${s.first_name || ''} ${s.last_name || ''}`.trim() : `Student #${studentId}`,
+        classId: classMap.get(s?.class_id) || '—',
+        balance: `${formatCurrency(totals.balance)}`,
+        days: totals.days,
+        severity: severityKeyFor(totals.days),
+      };
+    })
+    .sort((a, b) => b.days - a.days)
+    .slice(0, 15);
 
-  quickActions: [
-    { id: 'record-payment', label: 'Record Payment', family: 'finance', icon: 'fa-money-bill-wave' },
-    { id: 'receipts', label: 'Print Receipt', family: 'finance', icon: 'fa-receipt' },
-    { id: 'student-fees', label: 'Student Fees', family: 'students', icon: 'fa-users' },
-    { id: 'fee-structure', label: 'Fee Structure', family: 'finance', icon: 'fa-list-check' },
-    { id: 'bulk-export', label: 'Export Report', family: 'analytics', icon: 'fa-file-lines' },
-    { id: 'payment-history', label: 'Overdue List', family: 'attendance', icon: 'fa-triangle-exclamation' },
-    { id: 'payment-reversals', label: 'Reversal', family: 'finance', icon: 'fa-rotate-left' },
-    { id: 'finance-audit', label: 'Finance Audit', family: 'staff', icon: 'fa-magnifying-glass-chart' }
-  ]
-};
+  const severityBuckets = [
+    { key: 'critical', label: `Critical >${OVERDUE_SEVERITY.CRITICAL}d`, count: overdueBuckets.critical.length },
+    { key: 'high', label: `High ${OVERDUE_SEVERITY.WARNING}-${OVERDUE_SEVERITY.CRITICAL - 1}d`, count: overdueBuckets.warning.length },
+    { key: 'medium', label: `Medium ${OVERDUE_SEVERITY.MILD}-${OVERDUE_SEVERITY.WARNING - 1}d`, count: overdueBuckets.mild.length },
+    { key: 'recent', label: `Recent 1-${OVERDUE_SEVERITY.MILD - 1}d`, count: overdueBuckets.recent.length },
+  ];
+
+  const methodBreakdown = computeMethodBreakdown(termPayments);
+  const METHOD_COLORS = { Cash: '#3a7a5a', 'Mobile Money': '#4a7a8a', 'M-Pesa': '#4a7a8a', 'Bank Transfer': '#7a5a9a', Cheque: '#b8983a' };
+  const paymentMethods = methodBreakdown.map(m => ({ name: m.method, pct: m.pct, color: METHOD_COLORS[m.method] || '#6a6a6a' }));
+
+  const notifications = (state.notifications || []).slice(0, 6).map(n => ({
+    id: n.id,
+    type: n.type || 'info',
+    text: esc(n.message || ''),
+    time: n.created_at ? fmtDate(n.created_at) : '',
+    action: (n.type === 'overdue' || n.type === 'payment') ? 'Pay' : 'View',
+    isRead: !!n.is_read,
+  }));
+
+  return {
+    stats, collectionByClass, monthlyTrend, todaysPayments: todaysPayments.map(p => {
+      const s = studentMap.get(p.student_id);
+      return {
+        time: p.created_at ? new Date(p.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '—',
+        name: s ? `${s.first_name || ''} ${s.last_name || ''}`.trim() : `Student #${p.student_id}`,
+        classId: classMap.get(s?.class_id) || '—',
+        amount: Number(p.total_amount || 0),
+        by: p.recorded_by_name || 'Staff',
+      };
+    }),
+    paymentsTodayTotal,
+    notifications, severityBuckets, overdueStudents, paymentMethods, classRanking,
+    overdueCount: overdueBuckets.total,
+    overdueOutstanding,
+  };
+}
 
 // ─── SEVERITY COLORS ──────────────────────────────────────────────────
 
@@ -182,6 +167,26 @@ const MODULE_ACCENTS = {
   academics: '#8a6aaa'
 };
 
+// ─── QUICK ACTIONS ─────────────────────────────────────────────────────
+// Static navigation shortcuts, not entity data — nothing here to load
+// from the database.
+
+const QUICK_ACTIONS = [
+  { id: 'record-payment', label: 'Record Payment', family: 'finance', icon: 'fa-money-bill-wave' },
+  { id: 'receipts', label: 'Print Receipt', family: 'finance', icon: 'fa-receipt' },
+  { id: 'student-fees', label: 'Student Fees', family: 'students', icon: 'fa-users' },
+  { id: 'fee-structure', label: 'Fee Structure', family: 'finance', icon: 'fa-list-check' },
+  { id: 'bulk-export', label: 'Export Report', family: 'analytics', icon: 'fa-file-lines' },
+  { id: 'payment-history', label: 'Overdue List', family: 'attendance', icon: 'fa-triangle-exclamation' },
+  { id: 'payment-reversals', label: 'Reversal', family: 'finance', icon: 'fa-rotate-left' },
+  { id: 'finance-audit', label: 'Finance Audit', family: 'staff', icon: 'fa-magnifying-glass-chart' }
+];
+
+// Holds the last computed real dataset so each render* helper below can
+// read from it without recomputing or threading it through every call.
+let dashboardData = null;
+let hasTriedLazyLoad = false;
+
 // ─── RENDER FUNCTION ─────────────────────────────────────────────────
 
 function renderAccountantDashboard(container) {
@@ -189,6 +194,8 @@ function renderAccountantDashboard(container) {
     console.warn('[AccountantDashboard] No container provided');
     return;
   }
+
+  dashboardData = getDashboardData();
 
   container.innerHTML = `
         <div class="accountant-dashboard">
@@ -219,19 +226,18 @@ function renderAccountantDashboard(container) {
                 <div class="activity-panel">
                     <div class="panel-head">
                         <span class="title"><i class="fa-solid fa-credit-card" style="color:var(--success);margin-right:6px;"></i> Today's Payments</span>
-                        <span class="badge">${MOCK_DATA.todaysPayments.length} payments</span>
+                        <span class="badge">${dashboardData.todaysPayments.length} payments</span>
                     </div>
                     <div id="todays-payments-list"></div>
                     <div style="margin-top:8px;font-size:11px;color:var(--text-soft);text-align:center;">
-                        <i class="fa-regular fa-clock"></i> ${MOCK_DATA.todaysPayments.length} payments · 150K RWF collected today
-                        <span style="color:var(--success);margin-left:6px;">📈 +20% vs yesterday</span>
+                        <i class="fa-regular fa-clock"></i> ${dashboardData.todaysPayments.length} payments · ${formatCurrency(dashboardData.paymentsTodayTotal)} collected today
                     </div>
                 </div>
 
                 <div class="activity-panel">
                     <div class="panel-head">
                         <span class="title"><i class="fa-regular fa-bell" style="color:var(--gold);margin-right:6px;"></i> Live Notifications</span>
-                        <span class="badge">${MOCK_DATA.notifications.length} unread</span>
+                        <span class="badge">${dashboardData.notifications.filter(n => !n.isRead).length} unread</span>
                     </div>
                     <div id="live-notifications-list"></div>
                 </div>
@@ -242,7 +248,7 @@ function renderAccountantDashboard(container) {
                 <div class="overdue-card">
                     <div class="overdue-head">
                         <span class="title"><i class="fa-solid fa-triangle-exclamation" style="color:var(--danger);margin-right:6px;"></i> Overdue Payments</span>
-                        <span class="badge">${MOCK_DATA.overdueStudents.length} students · 2.6M RWF</span>
+                        <span class="badge">${dashboardData.overdueCount} students · ${formatCurrency(dashboardData.overdueOutstanding)}</span>
                     </div>
 
                     <div class="severity-row" id="severity-buckets"></div>
@@ -310,6 +316,21 @@ function renderAccountantDashboard(container) {
   // ─── Apply animations ──────────────────────────────────────────────
 
   animateBars();
+
+  // student_fees/payments are lazily-loaded large tables — trigger a
+  // load if this session hasn't already, then recompute + re-render so
+  // the dashboard reflects real numbers instead of empty totals.
+  const needsFees = !state.studentFees || state.studentFees.length === 0;
+  const needsPayments = !state.payments || state.payments.length === 0;
+  if (!hasTriedLazyLoad && (needsFees || needsPayments)) {
+    hasTriedLazyLoad = true;
+    Promise.all([
+      needsFees ? window.loadStudentFees?.() : Promise.resolve(),
+      needsPayments ? window.loadPayments?.() : Promise.resolve(),
+    ]).then(() => {
+      if (container.isConnected) renderAccountantDashboard(container);
+    }).catch(() => {});
+  }
 }
 
 // ─── RENDER STATS ─────────────────────────────────────────────────────
@@ -318,7 +339,7 @@ function renderStats(container) {
   const el = container.querySelector('#acc-stats-grid');
   if (!el) return;
 
-  el.innerHTML = MOCK_DATA.stats.map((stat, idx) => {
+  el.innerHTML = dashboardData.stats.map((stat, idx) => {
     const accentClass = `accent-${(idx % 7) + 1}`;
     const trendIcon = stat.trend.dir === 'up' ? '↑' : '↓';
     const trendClass = stat.trend.dir === 'up' ? 'up' : 'down';
@@ -345,7 +366,7 @@ function renderTodaysPayments(container) {
   const el = container.querySelector('#todays-payments-list');
   if (!el) return;
 
-  el.innerHTML = MOCK_DATA.todaysPayments.map(p => `
+  el.innerHTML = dashboardData.todaysPayments.map(p => `
         <div class="payment-item">
             <span class="time">${esc(p.time)}</span>
             <div class="info">
@@ -363,22 +384,45 @@ function renderTodaysPayments(container) {
 const NOTIF_ICONS = {
   payment: '<i class="fa-solid fa-money-bill-wave"></i>',
   overdue: '<i class="fa-solid fa-triangle-exclamation"></i>',
-  info: '<i class="fa-regular fa-circle-check"></i>'
+  info: '<i class="fa-regular fa-circle-check"></i>',
+  marks: '<i class="fa-solid fa-pen-to-square"></i>',
+  attendance: '<i class="fa-solid fa-clipboard-check"></i>',
+  student: '<i class="fa-solid fa-user-graduate"></i>',
+  system: '<i class="fa-solid fa-gear"></i>',
+  announcement: '<i class="fa-solid fa-bullhorn"></i>',
+  reminder: '<i class="fa-regular fa-bell"></i>',
+  urgent: '<i class="fa-solid fa-circle-exclamation"></i>',
+  warning: '<i class="fa-solid fa-triangle-exclamation"></i>',
 };
+const NOTIF_ICON_DEFAULT = '<i class="fa-regular fa-bell"></i>';
 
 const NOTIF_COLORS = {
   payment: 'var(--success)',
   overdue: 'var(--danger)',
-  info: 'var(--info)'
+  info: 'var(--info)',
+  marks: 'var(--accent)',
+  attendance: 'var(--warning)',
+  student: 'var(--info)',
+  system: 'var(--text-soft)',
+  announcement: 'var(--gold)',
+  reminder: 'var(--warning)',
+  urgent: 'var(--danger)',
+  warning: 'var(--warning)',
 };
+const NOTIF_COLOR_DEFAULT = 'var(--text-soft)';
 
 function renderNotifications(container) {
   const el = container.querySelector('#live-notifications-list');
   if (!el) return;
 
-  el.innerHTML = MOCK_DATA.notifications.map((n, i) => `
-        <div class="notif-item">
-            <div class="notif-icon ${n.type}" style="color:${NOTIF_COLORS[n.type]};">${NOTIF_ICONS[n.type]}</div>
+  if (!dashboardData.notifications.length) {
+    el.innerHTML = `<div style="padding:24px;text-align:center;color:var(--text-soft);font-size:0.8rem;">No notifications yet.</div>`;
+    return;
+  }
+
+  el.innerHTML = dashboardData.notifications.map((n, i) => `
+        <div class="notif-item" style="${n.isRead ? 'opacity:0.6;' : ''}">
+            <div class="notif-icon ${n.type}" style="color:${NOTIF_COLORS[n.type] || NOTIF_COLOR_DEFAULT};">${NOTIF_ICONS[n.type] || NOTIF_ICON_DEFAULT}</div>
             <div class="notif-body">
                 <div class="text">${n.text}</div>
                 <div class="time">${esc(n.time)}</div>
@@ -389,11 +433,14 @@ function renderNotifications(container) {
 
   el.querySelectorAll('[data-notif-action]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const n = MOCK_DATA.notifications[parseInt(btn.dataset.notifAction, 10)];
-      if (n.type === 'overdue' && n.action === 'Pay') {
-        window.navigateTo('record-payment');
-      } else {
+      const n = dashboardData.notifications[parseInt(btn.dataset.notifAction, 10)];
+      if (n.id != null) window.markNotificationRead?.(n.id);
+      if (n.type === 'overdue' || n.type === 'payment') {
         window.navigateTo('payment-history');
+      } else if (n.type === 'marks') {
+        window.navigateTo('marks-database');
+      } else if (n.type === 'attendance') {
+        window.navigateTo('attendance-reports');
       }
     });
   });
@@ -405,13 +452,12 @@ function renderSeverityBuckets(container) {
   const el = container.querySelector('#severity-buckets');
   if (!el) return;
 
-  el.innerHTML = MOCK_DATA.severityBuckets.map(b => {
+  el.innerHTML = dashboardData.severityBuckets.map(b => {
     const color = SEVERITY_COLORS[b.key]?.color || 'var(--text-soft)';
     return `
             <div class="severity-item ${b.key}">
                 <div class="sev-label">${esc(b.label)}</div>
                 <div class="sev-count" style="color:${color}">${b.count}</div>
-                <div class="sev-trend"><span class="arrow">${b.key === 'critical' || b.key === 'recent' ? '↑' : '↓'}</span> ${b.key === 'critical' ? '+2' : b.key === 'recent' ? '+1' : '-1'}</div>
             </div>
         `;
   }).join('');
@@ -423,7 +469,7 @@ function renderOverdueTable(container) {
   const el = container.querySelector('#overdue-table-container');
   if (!el) return;
 
-  const rows = MOCK_DATA.overdueStudents.map(s => {
+  const rows = dashboardData.overdueStudents.map(s => {
     const sev = SEVERITY_COLORS[s.severity] || SEVERITY_COLORS.medium;
     return `
             <tr>
@@ -476,7 +522,7 @@ function renderPaymentMethods(container) {
   const el = container.querySelector('#payment-methods-list');
   if (!el) return;
 
-  el.innerHTML = MOCK_DATA.paymentMethods.map(m => `
+  el.innerHTML = dashboardData.paymentMethods.map(m => `
         <div class="method-item">
             <div class="icon ${m.name.toLowerCase().replace(/\s/g, '')}"><i class="fa-solid ${m.icon || 'fa-money-bill'}"></i></div>
             <div class="info">
@@ -511,7 +557,7 @@ function renderClassRanking(container) {
     return statusMap[statusMap.length - 1];
   };
 
-  el.innerHTML = MOCK_DATA.classRanking.map((c, i) => {
+  el.innerHTML = dashboardData.classRanking.map((c, i) => {
     const medal = medals[i] || `${i + 1}`;
     const status = getStatus(c.rate);
     return `
@@ -542,7 +588,7 @@ function renderQuickActions(container) {
     academics: 'var(--accent)'
   };
 
-  el.innerHTML = MOCK_DATA.quickActions.map(a => {
+  el.innerHTML = QUICK_ACTIONS.map(a => {
     const color = accentColors[a.family] || 'var(--text-soft)';
     return `
             <button class="quick-btn" data-nav="${a.id}">
@@ -563,10 +609,10 @@ function renderCharts(container) {
     new Chart(ctx1, {
       type: 'bar',
       data: {
-        labels: MOCK_DATA.collectionByClass.labels,
+        labels: dashboardData.collectionByClass.labels,
         datasets: [{
           label: 'Collection Rate (%)',
-          data: MOCK_DATA.collectionByClass.values,
+          data: dashboardData.collectionByClass.values,
           backgroundColor: colors,
           borderRadius: 6
         }]
@@ -603,10 +649,10 @@ function renderCharts(container) {
     new Chart(ctx2, {
       type: 'line',
       data: {
-        labels: MOCK_DATA.monthlyTrend.labels,
+        labels: dashboardData.monthlyTrend.labels,
         datasets: [{
           label: 'Collected (M RWF)',
-          data: MOCK_DATA.monthlyTrend.points.map(p => p.y),
+          data: dashboardData.monthlyTrend.points.map(p => p.y),
           borderColor: '#3a7a5a',
           backgroundColor: function (context) {
             const ctx = context.chart.ctx;
@@ -676,10 +722,10 @@ function wireStaticNav(container) {
   container.querySelectorAll('[data-bulk-remind]').forEach(btn => {
     btn.addEventListener('click', async () => {
       const confirmed = confirm(
-        `Send payment reminders to all ${MOCK_DATA.overdueStudents.length} overdue families?`
+        `Send payment reminders to all ${dashboardData.overdueStudents.length} overdue families?`
       );
       if (confirmed) {
-        showToast(`📨 Reminders sent to ${MOCK_DATA.overdueStudents.length} families`, 'success');
+        showToast(`📨 Reminders sent to ${dashboardData.overdueStudents.length} families`, 'success');
       }
     });
   });

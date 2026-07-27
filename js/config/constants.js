@@ -25,6 +25,7 @@ const APP_CONFIG = {
   maxLoginAttempts: 5,
   lockoutDuration: 15 * 60 * 1000,          // 15 minutes
   cacheTTL: 5 * 60 * 1000,                  // 5 minutes
+  settingsCacheTTL: 10 * 60 * 1000,            // 10 minutes — school settings rarely change
   maxImportRows: 500,
   maxUploadSize: 2 * 1024 * 1024,           // 2 MB
   receiptPrefix: 'RCP',

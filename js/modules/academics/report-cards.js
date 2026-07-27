@@ -53,7 +53,7 @@
 
     // ─── STATE ───────────────────────────────────────────────────────
 
-    let state = { classId: 'p4a', studentId: 1 };
+    let reportState = { classId: 'p4a', studentId: 1 };
     let rootEl = null;
 
     // ─── COMPUTATION ─────────────────────────────────────────────────
@@ -124,10 +124,10 @@
             '<div class="report-cards-page">' +
             '<div class="reports-toolbar">' +
             '<select class="marks-toolbar__select" id="rc-class">' +
-            CLASS_OPTIONS.map(function (o) { return '<option value="' + o.value + '"' + (o.value === state.classId ? ' selected' : '') + '>' + esc(o.label) + '</option>'; }).join('') +
+            CLASS_OPTIONS.map(function (o) { return '<option value="' + o.value + '"' + (o.value === reportState.classId ? ' selected' : '') + '>' + esc(o.label) + '</option>'; }).join('') +
             '</select>' +
             '<select class="marks-toolbar__select" id="rc-student">' +
-            students.map(function (s) { return '<option value="' + s.id + '"' + (s.id === state.studentId ? ' selected' : '') + '>' + esc(s.name) + '</option>'; }).join('') +
+            students.map(function (s) { return '<option value="' + s.id + '"' + (s.id === reportState.studentId ? ' selected' : '') + '>' + esc(s.name) + '</option>'; }).join('') +
             '</select>' +
             '<span class="reports-toolbar__spacer"></span>' +
             '<button class="btn btn-outline-primary btn-sm" id="rc-open-generator"><i class="fa-solid fa-layer-group"></i> Batch Generate</button>' +
@@ -145,11 +145,11 @@
         if (!el) return;
 
         const students = getStudents();
-        const student = students.filter(function (s) { return s.id === state.studentId; })[0] || students[0];
+        const student = students.filter(function (s) { return s.id === reportState.studentId; })[0] || students[0];
         const ranking = getRanking(students);
         const myRank = ranking.filter(function (r) { return r.student.id === student.id; })[0];
         const decision = decisionFor(myRank.average);
-        const classLabel = CLASS_OPTIONS.filter(function (c) { return c.value === state.classId; })[0].label;
+        const classLabel = CLASS_OPTIONS.filter(function (c) { return c.value === reportState.classId; })[0].label;
         const total = SUBJECTS.reduce(function (a, s) { return a + student.scores[s]; }, 0);
 
         el.innerHTML =
@@ -217,11 +217,11 @@
 
     function wireToolbar() {
         rootEl.querySelector('#rc-class').addEventListener('change', function (e) {
-            state.classId = e.target.value;
+            reportState.classId = e.target.value;
             renderPreview();
         });
         rootEl.querySelector('#rc-student').addEventListener('change', function (e) {
-            state.studentId = parseInt(e.target.value, 10);
+            reportState.studentId = parseInt(e.target.value, 10);
             renderPreview();
         });
         rootEl.querySelector('#rc-print').addEventListener('click', async function () {

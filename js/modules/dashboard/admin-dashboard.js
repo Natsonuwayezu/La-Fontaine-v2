@@ -4,6 +4,7 @@
    Rendered into #app-main by core/router.js when navigating to
    'admin-dashboard'.
 
+   TODO: Replace MOCK_DATA with real DB queries once finance/analytics modules are complete.
    All data below is MOCK_DATA clearly marked for replacement once
    core/api.js can query Supabase — the render logic itself is real
    and won't need to change shape when that swap happens, since it

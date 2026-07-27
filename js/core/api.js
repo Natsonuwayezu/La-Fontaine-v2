@@ -225,7 +225,7 @@ async function getCount(table, filterStr = '') {
         headers: { ...apiHeaders(), 'Prefer': 'count=exact' },
     }).catch(() => null);
 
-    if (!res) return 0;
+    if (!res || !res.ok) return 0;
 
     const range = res.headers.get('Content-Range');
     if (range) {

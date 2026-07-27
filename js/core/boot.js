@@ -89,16 +89,16 @@ async function boot() {
         }
 
         // Start background sync polling
-        startSyncPolling();
+        if (typeof startSyncPolling === 'function') startSyncPolling();
 
         // Update offline badge
-        updateOfflineBadge().catch(() => { });
+        if (typeof updateOfflineBadge === 'function') updateOfflineBadge().catch(() => { });
 
     } else {
         // No session — show login page
         console.info('[Boot] No session found. Showing login.');
-        hideSidebar();
-        renderLoginPage();
+        if (typeof hideSidebar === 'function') hideSidebar();
+        if (typeof renderLoginPage === 'function') renderLoginPage();
     }
 
     console.info('[Boot] Boot sequence complete.');

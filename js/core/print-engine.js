@@ -44,18 +44,17 @@ function openPrintWindow(bodyHTML, title = APP_NAME, extraCSS = '') {
         extraCSS ? `<link rel="stylesheet" href="${esc(extraCSS)}">` : '',
     ].filter(Boolean).join('\n');
 
-    win.document.write(`<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${esc(title)}</title>
-${cssLinks}
-</head>
-<body class="print-body">
-${bodyHTML}
-</body>
-</html>`);
+    const doc = win.document;
+    doc.open();
+    doc.write('<!DOCTYPE html><html lang="en"><head>' +
+        '<meta charset="UTF-8">' +
+        '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+        '<title>' + esc(title) + '</title>' +
+        cssLinks +
+        '</head><body class="print-body">' +
+        bodyHTML +
+        '</body></html>');
+    doc.close();
 
     win.document.close();
 

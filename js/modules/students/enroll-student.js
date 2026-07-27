@@ -16,13 +16,7 @@
    - state.js: state
    ═══════════════════════════════════════════════════════════════════ */
 
-/* ─── Constants ───────────────────────────────────────────────────── */
-
-const CLASS_LEVELS = {
-    nursery: ['NURSERY 1', 'NURSERY 2', 'NURSERY 3'],
-    primary: ['PRIMARY 1', 'PRIMARY 2', 'PRIMARY 3', 'PRIMARY 4', 'PRIMARY 5', 'PRIMARY 6']
-};
-
+// CLASS_LEVELS is defined in js/config/constants.js
 /* ─── Module State ────────────────────────────────────────────────── */
 
 const enrollState = {
@@ -52,11 +46,7 @@ function getLevelForClass(classId) {
     return 'primary';
 }
 
-function generateStudentCode() {
-    const year = new Date().getFullYear();
-    const count = (state.students || []).filter(s => s.status === 'Active').length + 1;
-    return `STU-${year}-${String(count).padStart(4, '0')}`;
-}
+// generateStudentCode() is defined in js/core/api.js
 
 function getDefaultFeesForLevel(level) {
     // Query the fee_categories table for the given level

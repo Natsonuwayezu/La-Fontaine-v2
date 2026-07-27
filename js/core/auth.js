@@ -128,7 +128,11 @@ function _saveSession(user) {
  * Update lastActive timestamp in session.
  * Called by _resetIdleTimer() on every interaction.
  */
+let _lastTouchTime = 0;
 function _touchSession() {
+    const now = Date.now();
+    if (now - _lastTouchTime < 5000) return; // Throttle: max once per 5s
+    _lastTouchTime = now;
     try {
         const raw = localStorage.getItem(APP_CONFIG.sessionKey);
         if (!raw) return;
@@ -154,7 +158,7 @@ function _readSession() {
         const lastActive = new Date(session.lastActive).getTime();
         const elapsed = Date.now() - lastActive;
 
-        if (elapsed > APP_CONFIG.sessionDuration) {
+        if (isNaN(elapsed) || elapsed > APP_CONFIG.sessionDuration) {
             localStorage.removeItem(APP_CONFIG.sessionKey);
             return null;
         }

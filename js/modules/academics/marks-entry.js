@@ -22,7 +22,8 @@
 
 // ─── MOCK DATA ─────────────────────────────────────────────────────
 
-const CLASS_OPTIONS = [
+// TODO: Replace with state.classes from DB
+const CLASS_OPTIONS = (state.classes && state.classes.length > 0) ? state.classes.map(c=>({value:c.id,label:c.name})) : [
     { value: 'p4a', label: 'Primary 4A' },
     { value: 'p3', label: 'Primary 3' },
     { value: 'p5b', label: 'Primary 5B' },

@@ -134,9 +134,20 @@ function updateStateBatch(updates) {
  * @param {string} [key] - if given, only clears that specific cache map
  */
 function invalidateCache(key) {
-    if (key && state.cache[key] instanceof Map) {
-        state.cache[key].clear();
+    if (key) {
+        // Only clear the specific cache requested
+        if (state.cache[key] instanceof Map) {
+            state.cache[key].clear();
+        }
+        // Also clear derived caches that depend on this key
+        const derived = { students: true, marks: true, payments: true, studentFees: true };
+        if (derived[key]) {
+            state.cache.studentBalances.clear();
+            state.cache.classStats.clear();
+            state.cache.ranks.clear();
+        }
     } else {
+        // No key = clear everything
         state.cache.studentBalances.clear();
         state.cache.classStats.clear();
         state.cache.ranks.clear();

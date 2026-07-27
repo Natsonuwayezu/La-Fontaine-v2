@@ -1,13 +1,6 @@
-/**
- * ECOLE LA FONTAINE — Help Center Templates
- * HTML templates for the help center
- * Last updated: 2026-07-06
- */
+'use strict';
 
-import { HELP_CATEGORIES, HELP_ARTICLES, QUICK_ACTIONS } from './help-data.js';
-import { esc } from '../../core/utils.js';
-
-export function renderHelpHTML() {
+function renderHelpHTML() {
     return `
         <div class="help-center-container show" id="help-center-container-inner">
             <!-- Header -->
@@ -116,3 +109,5 @@ export function renderHelpHTML() {
         </div>
     `;
 }
+
+window.renderHelpHTML = renderHelpHTML;

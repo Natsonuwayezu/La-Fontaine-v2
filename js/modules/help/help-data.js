@@ -1,5 +1,8 @@
-/**
- * ECOLE LA FONTAINE — Help Center Data
+'use strict';
+
+'use strict';
+
+* ECOLE LA FONTAINE — Help Center Data
  * All help content, categories, articles, and quick actions
  * Last updated: 2026-07-06
  */
@@ -8,7 +11,7 @@
 // HELP CATEGORIES
 // ──────────────────────────────────────────────────────────────────────
 
-export const HELP_CATEGORIES = [
+const HELP_CATEGORIES = [
     { id: 'getting-started', label: '🚀 Getting Started', icon: 'fa-rocket', color: '#3b82f6' },
     { id: 'academics', label: '📚 Academics', icon: 'fa-graduation-cap', color: '#f59e0b' },
     { id: 'finance', label: '💰 Finance', icon: 'fa-sack-dollar', color: '#10b981' },
@@ -22,7 +25,7 @@ export const HELP_CATEGORIES = [
 // HELP ARTICLES
 // ──────────────────────────────────────────────────────────────────────
 
-export const HELP_ARTICLES = [
+const HELP_ARTICLES = [
     {
         id: 'getting-started-1',
         category: 'getting-started',
@@ -185,7 +188,7 @@ export const HELP_ARTICLES = [
 // QUICK ACTIONS
 // ──────────────────────────────────────────────────────────────────────
 
-export const QUICK_ACTIONS = [
+const QUICK_ACTIONS = [
     {
         id: 'reset-password',
         label: 'Reset Password',
@@ -256,7 +259,7 @@ export const QUICK_ACTIONS = [
 // RECENTLY ACCESSED (Default)
 // ──────────────────────────────────────────────────────────────────────
 
-export const RECENTLY_ACCESSED = [
+const RECENTLY_ACCESSED = [
     {
         moduleId: 'marks-entry',
         label: 'Marks Entry',

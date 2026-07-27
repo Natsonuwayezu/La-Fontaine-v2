@@ -1,17 +1,4 @@
-/**
- * ECOLE LA FONTAINE — Help Center Module
- * Complete help and search interface with keyboard shortcuts
- * Last updated: 2026-07-07
- */
-
-import { state, getCurrentUser } from '../../core/state.js';
-import { navigateTo } from '../../core/router.js';
-import { esc } from '../../core/utils.js';
-import { showToast } from '../../ui/toast.js';
-import { toggleTheme, getCurrentTheme } from '../../ui/theme.js';
-import { showChangePasswordModal, showProfileModal } from '../../ui/modals.js';
-import { HELP_CATEGORIES, HELP_ARTICLES, QUICK_ACTIONS, RECENTLY_ACCESSED } from './help-data.js';
-import { renderHelpHTML } from './help-templates.js';
+'use strict';
 
 let isOpen = false;
 let searchTimeout = null;
@@ -20,7 +7,7 @@ let searchTimeout = null;
 // MAIN RENDER FUNCTION (Called by router)
 // ──────────────────────────────────────────────────────────────────────
 
-export function renderHelpCenter(container) {
+function renderHelpCenter(container) {
     if (!container) return;
 
     // If we're rendering in the main content area, use full layout
@@ -53,7 +40,7 @@ export function renderHelpCenter(container) {
 // OPEN HELP CENTER (Global)
 // ──────────────────────────────────────────────────────────────────────
 
-export function openHelpCenter() {
+function openHelpCenter() {
     // Check if already open in overlay mode
     const existingContainer = document.getElementById('help-center-container');
     if (existingContainer && isOpen) {
@@ -131,7 +118,7 @@ function updateThemeToggleText() {
 // CLOSE HELP CENTER
 // ──────────────────────────────────────────────────────────────────────
 
-export function closeHelpCenter() {
+function closeHelpCenter() {
     isOpen = false;
 
     const overlay = document.getElementById('help-center-overlay');

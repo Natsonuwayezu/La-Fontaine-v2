@@ -1,10 +1,4 @@
-/**
- * ECOLE LA FONTAINE — Help Search Engine
- * Fast client-side search for modules, articles, and actions
- * Last updated: 2026-07-06
- */
-
-import { HELP_ARTICLES, QUICK_ACTIONS } from './help-data.js';
+'use strict';
 
 // ──────────────────────────────────────────────────────────────────────
 // SEARCH INDEX
@@ -53,7 +47,7 @@ function buildSearchIndex() {
 // PERFORM SEARCH
 // ──────────────────────────────────────────────────────────────────────
 
-export function searchHelp(query) {
+function searchHelp(query) {
     if (!searchIndex.length) buildSearchIndex();
 
     query = query.toLowerCase().trim();
@@ -93,7 +87,7 @@ export function searchHelp(query) {
 // GET SEARCH SUGGESTIONS
 // ──────────────────────────────────────────────────────────────────────
 
-export function getSearchSuggestions(query) {
+function getSearchSuggestions(query) {
     const results = searchHelp(query);
     return results.slice(0, 5).map(r => ({
         text: r.title,
@@ -106,7 +100,7 @@ export function getSearchSuggestions(query) {
 // NAVIGATE TO RESULT
 // ──────────────────────────────────────────────────────────────────────
 
-export function navigateToSearchResult(result) {
+function navigateToSearchResult(result) {
     if (result.type === 'article') {
         // Show article detail
         showArticleDetail(result.data);

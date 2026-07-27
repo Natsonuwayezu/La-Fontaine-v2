@@ -7,6 +7,138 @@
     <meta name="theme-color" content="#0a1628" />
     <meta name="description" content="ECOLE LA FONTAINE · Complete School Management System" />
     <title>ECOLE LA FONTAINE · School Management System</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- Tabler Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/tabler-icons.min.css" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=DM+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="css/base/reset.css" />
+    <link rel="stylesheet" href="css/base/variables.css" />
+    <link rel="stylesheet" href="css/base/typography.css" />
+    <link rel="stylesheet" href="css/themes/dark.css" />
+    <link rel="stylesheet" href="css/themes/light.css" />
+    <link rel="stylesheet" href="css/layouts/grid.css" />
+    <link rel="stylesheet" href="css/layouts/spacing.css" />
+    <link rel="stylesheet" href="css/layouts/positioning.css" />
+
+    <!-- Components -->
+    <link rel="stylesheet" href="css/components/alerts.css" />
+    <link rel="stylesheet" href="css/components/badges.css" />
+    <link rel="stylesheet" href="css/components/buttons.css" />
+    <link rel="stylesheet" href="css/components/cards.css" />
+    <link rel="stylesheet" href="css/components/dropdown.css" />
+    <link rel="stylesheet" href="css/components/forms.css" />
+    <link rel="stylesheet" href="css/components/loaders.css" />
+    <link rel="stylesheet" href="css/components/modals.css" />
+    <link rel="stylesheet" href="css/components/pagination.css" />
+    <link rel="stylesheet" href="css/components/sidebar.css" />
+    <link rel="stylesheet" href="css/components/skeleton.css" />
+    <link rel="stylesheet" href="css/components/tables.css" />
+    <link rel="stylesheet" href="css/components/tabs.css" />
+    <link rel="stylesheet" href="css/components/toast.css" />
+    <link rel="stylesheet" href="css/components/topbar.css" />
+
+    <!-- Responsive -->
+    <link rel="stylesheet" href="css/responsive/tablet.css" />
+    <link rel="stylesheet" href="css/responsive/mobile.css" />
+    <link rel="stylesheet" href="css/responsive/touch.css" />
+    <link rel="stylesheet" href="css/responsive/responsive-sidebar.css" />
+    <link rel="stylesheet" href="css/responsive/responsive-topbar.css" />
+
+
+    <!-- Module CSS -->
+    <link rel="stylesheet" href="css/modules/login.css" />
+    <link rel="stylesheet" href="css/modules/dashboard.css" />
+    <link rel="stylesheet" href="css/modules/finance.css" />
+    <link rel="stylesheet" href="css/modules/settings.css" />
+    <link rel="stylesheet" href="css/modules/students.css" />
+    <link rel="stylesheet" href="css/modules/marks.css" />
+    <link rel="stylesheet" href="css/modules/assessments.css" />
+    <link rel="stylesheet" href="css/modules/class-register.css" />
+    <link rel="stylesheet" href="css/modules/reports.css" />
+    <link rel="stylesheet" href="css/modules/attendance.css" />
+    <link rel="stylesheet" href="css/modules/teachers.css" />
+    <link rel="stylesheet" href="css/modules/timetable.css" />
+    <link rel="stylesheet" href="css/modules/notifications.css" />
+    <link rel="stylesheet" href="css/modules/analytics.css" />
+    <link rel="stylesheet" href="css/modules/statistics.css" />
+    <link rel="stylesheet" href="css/modules/help-center.css" />
+
+    <!-- Print -->
+    <link rel="stylesheet" href="css/print/print.css" media="print" />
+</head>
+
+<body>
+
+    <div id="app">
+        <!-- ===== SIDEBAR ===== -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header" id="sidebarHeader">
+                <!-- Rendered by js/ui/sidebar.js -->
+            </div>
+            <nav class="sidebar-nav" id="sidebarNav">
+                <!-- Rendered by js/ui/sidebar.js -->
+            </nav>
+            <div class="sidebar-footer" id="sidebarFooter">
+                <!-- Rendered by js/ui/sidebar.js -->
+            </div>
+        </aside>
+
+        <!-- Sidebar Overlay (mobile) -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- ===== MAIN CONTENT ===== -->
+        <div class="main-content" id="mainContent">
+            <!-- Topbar -->
+            <header class="topbar" id="topbar">
+                <!-- Rendered by js/ui/topbar.js -->
+            </header>
+
+            <!-- Page Body -->
+            <div class="page-body" id="pageBody">
+                <div id="moduleContent">
+                    <!-- Dynamic content rendered here -->
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="app-footer" id="appFooter">
+                <!-- Rendered by js/ui/shell.js -->
+            </footer>
+        </div>
+    </div>
+
+    <!-- ===== TOAST CONTAINER ===== -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ===== MODAL CONTAINER ===== -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-panel" id="modalPanel">
+            <div class="modal-header" id="modalHeader">
+                <h2 id="modalTitle">Modal Title</h2>
+                <button class="close-modal" onclick="window.closeModal && closeModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer" id="modalFooter"></div>
+        </div>
+    </div>
+
+    <!-- ===== CONFIRM DIALOG ===== -->
+    <div class="confirm-overlay" id="confirmOverlay">
+        <div class="confirm-box">
+            <div class="icon" id="confirmIcon"><i class="fa-solid fa-triangle-exclamation"></i></div>
             <div class="title" id="confirmTitle">Confirm Action</div>
             <div class="message" id="confirmMessage">Are you sure?</div>
             <div class="actions">
@@ -96,7 +228,13 @@
     <script src="js/mobile/mobile-navigation.js"></script>
     <script src="js/mobile/mobile-modals.js"></script>
 
-    <!-- Boot (LAST of all core files, per its own documented load order) -->
+    <!-- Help Center (data before templates/search/center) -->
+    <script src="js/modules/help/help-data.js"></script>
+    <script src="js/modules/help/help-templates.js"></script>
+    <script src="js/modules/help/help-search.js"></script>
+    <script src="js/modules/help/help-center.js"></script>
+
+    <!-- Boot (after all core + UI + help files) -->
     <script src="js/core/boot.js"></script>
 
     <!-- Window Exports (LAST) -->
@@ -105,7 +243,6 @@
     <!-- Main Entry -->
     <script src="js/main.js"></script>
 
-    <script src="js/modules/settings/help-center.js"></script>
 </body>
 
 </html>

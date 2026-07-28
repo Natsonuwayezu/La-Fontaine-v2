@@ -528,3 +528,13 @@ window.closeHelpCenter = closeHelpCenter;
 window.renderHelpCenter = renderHelpCenter;
 
 console.log('✅ Help Center module loaded — press Ctrl+K to open');
+
+// Router bridges — faq and support both open the help center
+function renderFaq(container, params) {
+    return renderHelpCenter(container, Object.assign({}, params, { section: 'faq' }));
+}
+function renderSupport(container, params) {
+    return renderHelpCenter(container, Object.assign({}, params, { section: 'support' }));
+}
+window.renderFaq     = renderFaq;
+window.renderSupport = renderSupport;

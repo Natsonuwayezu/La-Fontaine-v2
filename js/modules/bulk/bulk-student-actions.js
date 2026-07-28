@@ -244,3 +244,10 @@
         sendMessageToSelected: sendMessageToSelected
     };
 })();
+
+// Router bridge
+function renderBulkStudentActions(container, params) {
+    if (typeof renderStudentList === 'function') return renderStudentList(container, params);
+    if (container) container.innerHTML = '<div class="section-card"><div class="empty-state"><div class="es-title">Bulk Student Actions</div><div class="es-sub">Select students from the student list to apply bulk actions.</div></div></div>';
+}
+window.renderBulkStudentActions = renderBulkStudentActions;

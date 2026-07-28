@@ -132,3 +132,10 @@
         classifyDecision: classifyDecision
     };
 })();
+
+// Router bridge — ranking engine is a utility module
+function renderRankingEngine(container, params) {
+    if (typeof renderRankings === 'function') return renderRankings(container, params);
+    if (container) container.innerHTML = '<div class="section-card"><div class="empty-state"><div class="es-title">Rankings</div><div class="es-sub">Navigate to Class Register → Rankings to view rankings.</div></div></div>';
+}
+window.renderRankingEngine = renderRankingEngine;

@@ -143,3 +143,11 @@ const NotificationCenter = (() => {
 })();
 
 window.NotificationCenter = NotificationCenter;
+
+// Router bridge — notification-center is a topbar widget, not a full page
+// When navigated to directly, render the notifications page instead
+function renderNotificationCenter(container, params) {
+    if (typeof renderNotifications === 'function') return renderNotifications(container, params);
+    if (container) container.innerHTML = '<div class="section-card"><div class="empty-state"><div class="es-title">Notifications</div><div class="es-sub">Loading notifications…</div></div></div>';
+}
+window.renderNotificationCenter = renderNotificationCenter;

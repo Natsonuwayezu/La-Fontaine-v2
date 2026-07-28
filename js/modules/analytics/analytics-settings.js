@@ -172,3 +172,12 @@
     window.openAnalyticsSettings = openAnalyticsSettings;
     window.closeAnalyticsSettings = closeAnalyticsSettings;
 })();
+
+// Router bridge
+function renderAnalyticsSettings(container, params) {
+    if (container) {
+        container.innerHTML = '<div class="section-card"><div class="empty-state"><div class="es-title">Analytics Settings</div><div class="es-sub"><button class="btn btn-primary" onclick="openAnalyticsSettings && openAnalyticsSettings()">Open Settings</button></div></div></div>';
+    }
+    if (typeof openAnalyticsSettings === 'function') openAnalyticsSettings();
+}
+window.renderAnalyticsSettings = renderAnalyticsSettings;

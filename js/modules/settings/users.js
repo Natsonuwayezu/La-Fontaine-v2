@@ -102,3 +102,10 @@ window.createUser = createUser;
 window.updateUser = updateUser;
 window.setUserActive = setUserActive;
 window.deleteUser = deleteUser;
+
+// Router bridge — users is a utility module used by user-management.js
+function renderUsers(container, params) {
+    if (typeof renderUserManagement === 'function') return renderUserManagement(container, params);
+    if (container) container.innerHTML = '<div class="section-card"><div class="empty-state"><div class="es-title">User Management</div><div class="es-sub">Loading…</div></div></div>';
+}
+window.renderUsers = renderUsers;

@@ -50,3 +50,10 @@ window.listTeachersByRole = listTeachersByRole;
 window.getTeacherById = getTeacherById;
 window.teacherFullName = teacherFullName;
 window.activeTeachersOnly = activeTeachersOnly;
+
+// Router bridge — teachers is a utility module, redirect to user-management
+function renderTeachers(container, params) {
+    if (typeof renderUserManagement === 'function') return renderUserManagement(container, params);
+    if (container) container.innerHTML = '<div class="section-card"><div class="empty-state"><div class="es-title">Loading staff management…</div></div></div>';
+}
+window.renderTeachers = renderTeachers;

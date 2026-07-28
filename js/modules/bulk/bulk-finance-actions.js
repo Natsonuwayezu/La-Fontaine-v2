@@ -200,3 +200,10 @@
         exportSelectedBalances: exportSelectedBalances
     };
 })();
+
+// Router bridge
+function renderBulkFinanceActions(container, params) {
+    if (typeof renderBulkExport === 'function') return renderBulkExport(container, params);
+    if (container) container.innerHTML = '<div class="section-card"><div class="empty-state"><div class="es-title">Bulk Finance Actions</div><div class="es-sub">Select students from the student list to apply bulk actions.</div></div></div>';
+}
+window.renderBulkFinanceActions = renderBulkFinanceActions;

@@ -156,3 +156,11 @@ window.createTerm = createTerm;
 window.updateTerm = updateTerm;
 window.setTermStatus = setTermStatus;
 window.deleteTerm = deleteTerm;
+
+// Router bridge — academic-years is a utility module used by settings.js
+// When navigated to directly, delegate to the settings page
+function renderAcademicYears(container, params) {
+    if (typeof renderSettings === 'function') return renderSettings(container, Object.assign({}, params, { tab: 'academic-years' }));
+    if (container) container.innerHTML = '<div class="section-card"><div class="empty-state"><div class="es-title">Academic Years</div><div class="es-sub">Use Settings → Academic Years to manage years and terms.</div></div></div>';
+}
+window.renderAcademicYears = renderAcademicYears;

@@ -174,8 +174,9 @@ function showMarkValidationPopup({ score, maxScore, studentName, assessmentName,
             saveLabel = 'Save as-is';
         }
 
-        // Render the popup inside #modal-overlay
-        const overlay = document.getElementById('modal-overlay');
+        // Render the popup inside #modalOverlay (the real shared modal
+        // container defined in index.html)
+        const overlay = document.getElementById('modalOverlay');
         if (!overlay) {
             // Fallback if modal overlay isn't in DOM yet
             const choice = window.confirm(`${title}\n${studentName}: ${score} (max ${maxScore})\n\nOK = save anyway | Cancel = correct it`);

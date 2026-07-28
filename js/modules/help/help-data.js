@@ -1,8 +1,7 @@
 'use strict';
 
-'use strict';
-
-* ECOLE LA FONTAINE — Help Center Data
+/**
+ * ECOLE LA FONTAINE — Help Center Data
  * All help content, categories, articles, and quick actions
  * Last updated: 2026-07-06
  */

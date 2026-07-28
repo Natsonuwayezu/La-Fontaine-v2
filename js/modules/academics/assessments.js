@@ -9,91 +9,112 @@
    assessment-type-badge) and the shared modal component
    (css/components/modals.css) for the creation form.
 
-   MOCK_DATA stands in for the real Supabase table until core/api.js
-   is wired up.
+   Reads/writes the real `assessments` table via core/api.js. Field
+   names and the two real phase values ('pre_midterm'/'post_midterm')
+   match what core/academic-formulas.js's grading engine already
+   expects (a.type against the real ASSESSMENT_TYPES list, a.subject_id,
+   a.max_score, a.date, a.locked, a.name) -- chosen deliberately so this
+   data is usable by that engine once report-cards.js/class-register.js
+   are wired up to call it, rather than inventing a shape that would
+   need re-migrating later.
 
-   Last updated: 2026-07-14
+   Last updated: 2026-07-27
    ═══════════════════════════════════════════════════════════════════ */
 
-// esc is a plain-script global from core/utils.js, loaded earlier in index.html.
-
-// ─── MOCK DATA ─────────────────────────────────────────────────────
-
-const CLASS_OPTIONS = [
-    { value: 'all', label: 'All Classes' },
-    { value: 'p4a', label: 'Primary 4A' },
-    { value: 'p3', label: 'Primary 3' },
-    { value: 'p5b', label: 'Primary 5B' },
-    { value: 'p6', label: 'Primary 6' },
-    { value: 'p1', label: 'Primary 1' },
-    { value: 'p2', label: 'Primary 2' }
-];
-
-const SUBJECT_OPTIONS = [
-    { value: 'math', label: 'Mathematics' },
-    { value: 'eng', label: 'English' },
-    { value: 'kiny', label: 'Kinyarwanda' },
-    { value: 'sci', label: 'Science' },
-    { value: 'fr', label: 'French' },
-    { value: 'soc', label: 'Social Studies' }
-];
-
-const TYPE_OPTIONS = ['quiz', 'assignment', 'exam', 'project'];
-
-let assessmentsData = [
-    { id: 1, name: 'Quiz 4', classId: 'p4a', className: 'Primary 4A', subject: 'Mathematics', type: 'quiz', phase: 'Post-Midterm', maxMarks: 50, dueDate: '2026-06-26', entered: 22, total: 28, locked: false },
-    { id: 2, name: 'Mid-Term Exam', classId: 'p4a', className: 'Primary 4A', subject: 'Mathematics', type: 'exam', phase: 'Post-Midterm', maxMarks: 100, dueDate: '2026-06-20', entered: 28, total: 28, locked: true },
-    { id: 3, name: 'Composition 3', classId: 'p5b', className: 'Primary 5B', subject: 'English', type: 'assignment', phase: 'Post-Midterm', maxMarks: 30, dueDate: '2026-06-24', entered: 16, total: 31, locked: false },
-    { id: 4, name: 'Science Fair Project', classId: 'p6', className: 'Primary 6', subject: 'Science', type: 'project', phase: 'Annual', maxMarks: 40, dueDate: '2026-07-10', entered: 0, total: 26, locked: false },
-    { id: 5, name: 'Quiz 3', classId: 'p3', className: 'Primary 3', subject: 'Kinyarwanda', type: 'quiz', phase: 'Post-Midterm', maxMarks: 20, dueDate: '2026-06-18', entered: 24, total: 24, locked: true },
-    { id: 6, name: 'Final Exam', classId: 'p1', className: 'Primary 1', subject: 'Mathematics', type: 'exam', phase: 'Annual', maxMarks: 100, dueDate: '2026-07-15', entered: 0, total: 22, locked: false },
-    { id: 7, name: 'French Homework 5', classId: 'p2', className: 'Primary 2', subject: 'French', type: 'assignment', phase: 'Pre-Midterm', maxMarks: 20, dueDate: '2026-05-30', entered: 20, total: 20, locked: true },
-    { id: 8, name: 'Social Studies Quiz 2', classId: 'p4a', className: 'Primary 4A', subject: 'Social Studies', type: 'quiz', phase: 'Pre-Midterm', maxMarks: 20, dueDate: '2026-05-15', entered: 28, total: 28, locked: true }
-];
-
-let nextId = 9;
+// esc, notify-equivalents (showToast) are plain-script globals from
+// core/utils.js, loaded earlier in index.html.
 
 // ─── STATE ───────────────────────────────────────────────────────────
 
 let filters = { classId: 'all', phase: 'all' };
 let formOpen = false;
-let formPhaseSelection = 'Post-Midterm';
+let formPhaseSelection = 'pre_midterm';
+let hasTriedLazyLoad = false;
 
-const PHASES = ['Pre-Midterm', 'Post-Midterm', 'Annual'];
+const PHASES = [
+  { value: 'pre_midterm', label: 'Pre-Midterm' },
+  { value: 'post_midterm', label: 'Post-Midterm' },
+];
+const phaseLabel = (value) => PHASES.find(p => p.value === value)?.label || value;
+
+// Maps the real ASSESSMENT_TYPES values to the CSS-safe, single-word
+// modifier classes assessments.css already defines colors for.
+const TYPE_BADGE_CLASS = {
+  'Quiz': 'quiz',
+  'Assignment': 'homework',
+  'Mid-term': 'exam',
+  'Exam': 'exam',
+  'Final Exam': 'exam',
+};
 
 // ─── HELPERS ─────────────────────────────────────────────────────────
 
-function getFiltered() {
-    return assessmentsData.filter(a => {
-        if (filters.classId !== 'all' && a.classId !== filters.classId) return false;
-        if (filters.phase !== 'all' && a.phase !== filters.phase) return false;
-        return true;
-    });
+function getClassOptions() {
+  return [...(state.classes || [])].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 }
 
-function completionPct(a) {
-    return a.total ? Math.round((a.entered / a.total) * 100) : 0;
+function getSubjectOptions() {
+  return [...(state.subjects || [])].sort((a, b) => (a.sort_order || 99) - (b.sort_order || 99));
+}
+
+function getFiltered() {
+  const termId = window.getActiveTermId ? window.getActiveTermId() : null;
+  return (state.assessments || [])
+    .filter(a => !termId || String(a.term_id) === String(termId))
+    .filter(a => {
+      if (filters.classId !== 'all' && String(a.class_id) !== String(filters.classId)) return false;
+      if (filters.phase !== 'all' && a.phase !== filters.phase) return false;
+      return true;
+    })
+    .sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
+}
+
+/** Roster size for a class = active, non-deleted students in it. */
+function rosterSize(classId) {
+  return (state.students || []).filter(s =>
+    String(s.class_id) === String(classId) && !s.is_deleted && (s.status || 'Active') === 'Active'
+  ).length;
+}
+
+/** How many distinct students have at least one mark recorded for this
+ *  assessment, out of the class roster. */
+function completionCounts(assessment) {
+  const total = rosterSize(assessment.class_id);
+  const entered = new Set(
+    (state.marks || [])
+      .filter(m => m.assessment_id === assessment.id && m.score !== null && m.score !== undefined)
+      .map(m => m.student_id)
+  ).size;
+  return { entered, total };
+}
+
+function completionPct({ entered, total }) {
+  return total ? Math.round((entered / total) * 100) : 0;
 }
 
 // ─── RENDER ────────────────────────────────────────────────────────
 
 function renderAssessments(container) {
-    if (!container) {
-        console.warn('[Assessments] No container provided');
-        return;
-    }
+  if (!container) {
+    console.warn('[Assessments] No container provided');
+    return;
+  }
 
-    container.innerHTML = `
+  const classOptions = getClassOptions();
+  const subjectOptions = getSubjectOptions();
+
+  container.innerHTML = `
         <div class="assessments-page">
 
             <!-- ═══ TOOLBAR ═══ -->
             <div class="assessment-toolbar">
                 <select class="marks-toolbar__select" id="as-class-filter">
-                    ${CLASS_OPTIONS.map(o => `<option value="${o.value}" ${o.value === filters.classId ? 'selected' : ''}>${esc(o.label)}</option>`).join('')}
+                    <option value="all">All Classes</option>
+                    ${classOptions.map(c => `<option value="${c.id}" ${String(c.id) === String(filters.classId) ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}
                 </select>
                 <select class="marks-toolbar__select" id="as-phase-filter">
                     <option value="all" ${filters.phase === 'all' ? 'selected' : ''}>All Phases</option>
-                    ${PHASES.map(p => `<option value="${esc(p)}" ${p === filters.phase ? 'selected' : ''}>${esc(p)}</option>`).join('')}
+                    ${PHASES.map(p => `<option value="${esc(p.value)}" ${p.value === filters.phase ? 'selected' : ''}>${esc(p.label)}</option>`).join('')}
                 </select>
                 <span class="assessment-toolbar__spacer"></span>
                 <button class="btn btn-primary btn-sm" id="as-new-btn"><i class="fa-solid fa-plus"></i> New Assessment</button>
@@ -116,23 +137,23 @@ function renderAssessments(container) {
                         <div class="field">
                             <label>Class</label>
                             <select id="as-form-class">
-                                ${CLASS_OPTIONS.filter(o => o.value !== 'all').map(o => `<option value="${o.value}">${esc(o.label)}</option>`).join('')}
+                                ${classOptions.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}
                             </select>
                         </div>
                         <div class="field">
                             <label>Subject</label>
                             <select id="as-form-subject">
-                                ${SUBJECT_OPTIONS.map(o => `<option value="${o.value}">${esc(o.label)}</option>`).join('')}
+                                ${subjectOptions.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('')}
                             </select>
                         </div>
                         <div class="field">
                             <label>Type</label>
                             <select id="as-form-type">
-                                ${TYPE_OPTIONS.map(t => `<option value="${t}">${t.charAt(0).toUpperCase() + t.slice(1)}</option>`).join('')}
+                                ${(window.ASSESSMENT_TYPES || ['Quiz', 'Assignment', 'Mid-term', 'Exam', 'Final Exam']).map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('')}
                             </select>
                         </div>
                         <div class="field">
-                            <label>Max Marks</label>
+                            <label>Max Score</label>
                             <input type="number" id="as-form-max" value="50" min="1" />
                         </div>
                         <div class="field span-2">
@@ -146,7 +167,7 @@ function renderAssessments(container) {
                         <div class="field span-2">
                             <label>Phase</label>
                             <div class="phase-chip-select" id="as-form-phase-select">
-                                ${PHASES.map(p => `<span class="phase-chip ${p === formPhaseSelection ? 'selected' : ''}" data-phase="${esc(p)}">${esc(p)}</span>`).join('')}
+                                ${PHASES.map(p => `<span class="phase-chip ${p.value === formPhaseSelection ? 'selected' : ''}" data-phase="${esc(p.value)}">${esc(p.label)}</span>`).join('')}
                             </div>
                         </div>
                     </div>
@@ -159,44 +180,60 @@ function renderAssessments(container) {
         </div>
     `;
 
-    renderGrid();
-    wireToolbar(container);
-    wireModal(container);
+  renderGrid();
+  wireToolbar(container);
+  wireModal(container);
+
+  // assessments/marks for the active term are lazily loaded -- trigger
+  // once per visit if this session hasn't already, then re-render with
+  // real completion counts once available.
+  const termId = window.getActiveTermId ? window.getActiveTermId() : null;
+  const needsAssessments = termId && !(state.assessments || []).some(a => String(a.term_id) === String(termId));
+  if (!hasTriedLazyLoad && termId && needsAssessments) {
+    hasTriedLazyLoad = true;
+    window.loadAllAssessmentsForTerm?.(termId)
+      .then(() => window.loadAllMarksForTerm?.(termId))
+      .then(() => { if (container.isConnected) renderGrid(); })
+      .catch(() => {});
+  }
 }
 
 function renderGrid() {
-    const grid = document.getElementById('as-grid');
-    if (!grid) return;
+  const grid = document.getElementById('as-grid');
+  if (!grid) return;
 
-    const filtered = getFiltered();
+  const classMap = new Map((state.classes || []).map(c => [c.id, c.name]));
+  const subjectMap = new Map((state.subjects || []).map(s => [s.id, s.name]));
+  const filtered = getFiltered();
 
-    if (!filtered.length) {
-        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text-soft);">No assessments match these filters.</div>`;
-        return;
-    }
+  if (!filtered.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text-soft);">No assessments match these filters.</div>`;
+    return;
+  }
 
-    grid.innerHTML = filtered.map(a => {
-        const pct = completionPct(a);
-        return `
+  grid.innerHTML = filtered.map(a => {
+    const counts = completionCounts(a);
+    const pct = completionPct(counts);
+    return `
             <div class="assessment-card">
                 <div class="assessment-card-header">
                     <div>
                         <div class="assessment-card-title">${esc(a.name)}</div>
-                        <div class="assessment-card-sub">${esc(a.className)} · ${esc(a.subject)}</div>
+                        <div class="assessment-card-sub">${esc(classMap.get(a.class_id) || '—')} · ${esc(subjectMap.get(a.subject_id) || '—')}</div>
                     </div>
-                    <span class="assessment-type-badge ${a.type}">${esc(a.type)}</span>
+                    <span class="assessment-type-badge ${TYPE_BADGE_CLASS[a.type] || ''}">${esc(a.type)}</span>
                 </div>
                 <div class="assessment-card-body">
-                    <div class="assessment-meta-row"><span class="k">Phase</span><span class="v">${esc(a.phase)}</span></div>
-                    <div class="assessment-meta-row"><span class="k">Max Marks</span><span class="v">${a.maxMarks}</span></div>
-                    <div class="assessment-meta-row"><span class="k">Due</span><span class="v">${esc(a.dueDate)}</span></div>
+                    <div class="assessment-meta-row"><span class="k">Phase</span><span class="v">${esc(phaseLabel(a.phase))}</span></div>
+                    <div class="assessment-meta-row"><span class="k">Max Score</span><span class="v">${esc(a.max_score)}</span></div>
+                    <div class="assessment-meta-row"><span class="k">Due</span><span class="v">${a.date ? esc(fmtDate(a.date)) : '—'}</span></div>
                     <div class="assessment-completion">
                         <div class="progress-bar" style="height:6px;border-radius:99px;background:rgba(255,255,255,0.08);overflow:hidden;">
                             <div style="height:100%;width:${pct}%;background:var(--academics-accent, #8b5cf6);border-radius:99px;"></div>
                         </div>
                         <span class="assessment-completion__pct">${pct}%</span>
                     </div>
-                    <div class="assessment-meta-row"><span class="k">Entered</span><span class="v">${a.entered}/${a.total}</span></div>
+                    <div class="assessment-meta-row"><span class="k">Entered</span><span class="v">${counts.entered}/${counts.total}</span></div>
                 </div>
                 <div class="assessment-card-footer">
                     <div class="lock-toggle ${a.locked ? 'locked' : ''}" data-toggle-lock="${a.id}">
@@ -207,118 +244,140 @@ function renderGrid() {
                 </div>
             </div>
         `;
-    }).join('');
+  }).join('');
 
-    grid.querySelectorAll('[data-toggle-lock]').forEach(el => {
-        el.addEventListener('click', () => {
-            const id = parseInt(el.dataset.toggleLock, 10);
-            const a = assessmentsData.find(x => x.id === id);
-            if (!a) return;
-            a.locked = !a.locked;
-            renderGrid();
-            notify(a.locked ? `${a.name} locked` : `${a.name} unlocked`, 'info');
-        });
+  grid.querySelectorAll('[data-toggle-lock]').forEach(el => {
+    el.addEventListener('click', async () => {
+      const id = parseInt(el.dataset.toggleLock, 10);
+      const a = (state.assessments || []).find(x => x.id === id);
+      if (!a) return;
+      const nextLocked = !a.locked;
+      try {
+        await update('assessments', id, { locked: nextLocked });
+        a.locked = nextLocked;
+        renderGrid();
+        notify(nextLocked ? `${a.name} locked` : `${a.name} unlocked`, 'info');
+      } catch (err) {
+        notify(`Could not update lock status: ${err.message}`, 'error');
+      }
     });
+  });
 
-    grid.querySelectorAll('[data-open-entry]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            navigateTo('marks-entry');
-        });
+  grid.querySelectorAll('[data-open-entry]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = parseInt(btn.dataset.openEntry, 10);
+      window.navigateTo('marks-entry', { assessmentId: id });
     });
+  });
 }
 
 // ─── TOOLBAR / FILTERS ───────────────────────────────────────────────
 
 function wireToolbar(container) {
-    container.querySelector('#as-class-filter')?.addEventListener('change', (e) => {
-        filters.classId = e.target.value;
-        renderGrid();
-    });
-    container.querySelector('#as-phase-filter')?.addEventListener('change', (e) => {
-        filters.phase = e.target.value;
-        renderGrid();
-    });
-    container.querySelector('#as-new-btn')?.addEventListener('click', () => openModal());
+  container.querySelector('#as-class-filter')?.addEventListener('change', (e) => {
+    filters.classId = e.target.value;
+    renderGrid();
+  });
+  container.querySelector('#as-phase-filter')?.addEventListener('change', (e) => {
+    filters.phase = e.target.value;
+    renderGrid();
+  });
+  container.querySelector('#as-new-btn')?.addEventListener('click', () => openModal());
 }
 
 // ─── MODAL ───────────────────────────────────────────────────────────
 
 function openModal() {
-    const overlay = document.getElementById('as-modal-overlay');
-    if (overlay) overlay.style.display = 'flex';
-    formOpen = true;
+  const overlay = document.getElementById('as-modal-overlay');
+  if (overlay) overlay.style.display = 'flex';
+  formOpen = true;
 }
 
 function closeAssessmentModal() {
-    const overlay = document.getElementById('as-modal-overlay');
-    if (overlay) overlay.style.display = 'none';
-    formOpen = false;
+  const overlay = document.getElementById('as-modal-overlay');
+  if (overlay) overlay.style.display = 'none';
+  formOpen = false;
 }
 
 function wireModal(container) {
-    container.querySelector('#as-modal-close')?.addEventListener('click', closeAssessmentModal);
-    container.querySelector('#as-form-cancel')?.addEventListener('click', closeAssessmentModal);
-    container.querySelector('#as-modal-overlay')?.addEventListener('click', (e) => {
-        if (e.target.id === 'as-modal-overlay') closeAssessmentModal();
-    });
+  container.querySelector('#as-modal-close')?.addEventListener('click', closeAssessmentModal);
+  container.querySelector('#as-form-cancel')?.addEventListener('click', closeAssessmentModal);
+  container.querySelector('#as-modal-overlay')?.addEventListener('click', (e) => {
+    if (e.target.id === 'as-modal-overlay') closeAssessmentModal();
+  });
 
-    container.querySelector('#as-form-phase-select')?.addEventListener('click', (e) => {
-        const chip = e.target.closest('.phase-chip');
-        if (!chip) return;
-        formPhaseSelection = chip.dataset.phase;
-        container.querySelectorAll('.phase-chip').forEach(c => c.classList.toggle('selected', c === chip));
-    });
+  container.querySelector('#as-form-phase-select')?.addEventListener('click', (e) => {
+    const chip = e.target.closest('.phase-chip');
+    if (!chip) return;
+    formPhaseSelection = chip.dataset.phase;
+    container.querySelectorAll('.phase-chip').forEach(c => c.classList.toggle('selected', c === chip));
+  });
 
-    container.querySelector('#as-form-submit')?.addEventListener('click', () => {
-        const classSel = document.getElementById('as-form-class');
-        const subjectSel = document.getElementById('as-form-subject');
-        const typeSel = document.getElementById('as-form-type');
-        const maxInput = document.getElementById('as-form-max');
-        const nameInput = document.getElementById('as-form-name');
-        const dateInput = document.getElementById('as-form-date');
+  container.querySelector('#as-form-submit')?.addEventListener('click', async (e) => {
+    const submitBtn = e.currentTarget;
+    const classSel = document.getElementById('as-form-class');
+    const subjectSel = document.getElementById('as-form-subject');
+    const typeSel = document.getElementById('as-form-type');
+    const maxInput = document.getElementById('as-form-max');
+    const nameInput = document.getElementById('as-form-name');
+    const dateInput = document.getElementById('as-form-date');
 
-        const name = nameInput.value.trim();
-        if (!name) {
-            notify('Assessment name is required', 'warning');
-            return;
-        }
+    const name = nameInput.value.trim();
+    if (!name) {
+      notify('Assessment name is required', 'warning');
+      return;
+    }
+    if (!classSel.value || !subjectSel.value) {
+      notify('Class and subject are required', 'warning');
+      return;
+    }
 
-        const classLabel = CLASS_OPTIONS.find(c => c.value === classSel.value)?.label || classSel.value;
-        const subjectLabel = SUBJECT_OPTIONS.find(s => s.value === subjectSel.value)?.label || subjectSel.value;
+    const termId = window.getActiveTermId ? window.getActiveTermId() : null;
+    if (!termId) {
+      notify('No active academic term is set -- cannot create an assessment', 'error');
+      return;
+    }
 
-        assessmentsData.unshift({
-            id: nextId++,
-            name,
-            classId: classSel.value,
-            className: classLabel,
-            subject: subjectLabel,
-            type: typeSel.value,
-            phase: formPhaseSelection,
-            maxMarks: parseInt(maxInput.value, 10) || 100,
-            dueDate: dateInput.value || '—',
-            entered: 0,
-            total: 28,
-            locked: false
-        });
+    const payload = {
+      name,
+      class_id: parseInt(classSel.value, 10),
+      subject_id: parseInt(subjectSel.value, 10),
+      type: typeSel.value,
+      phase: formPhaseSelection,
+      max_score: parseInt(maxInput.value, 10) || 100,
+      date: dateInput.value || null,
+      term_id: termId,
+      created_by: state.currentUser?.id ?? null,
+      locked: false,
+    };
 
-        closeAssessmentModal();
-        renderGrid();
-        notify(`${name} created`, 'success');
-    });
+    submitBtn.disabled = true;
+    try {
+      const created = await insert('assessments', payload);
+      state.assessments = [...(state.assessments || []), created];
+      closeAssessmentModal();
+      renderGrid();
+      notify(`${name} created`, 'success');
+    } catch (err) {
+      notify(`Could not create assessment: ${err.message}`, 'error');
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
 }
 
 // ─── TOAST HELPER ────────────────────────────────────────────────────
 
 function notify(message, type = 'info') {
-    if (typeof window.showToast === 'function') {
-        window.showToast(message, type);
-    }
+  if (typeof window.showToast === 'function') {
+    window.showToast(message, type);
+  }
 }
 
 // ─── DESTROY ─────────────────────────────────────────────────────────
 
 function destroyAssessments() {
-    closeAssessmentModal();
+  closeAssessmentModal();
 }
 
 // ─── EXPOSE ──────────────────────────────────────────────────────────

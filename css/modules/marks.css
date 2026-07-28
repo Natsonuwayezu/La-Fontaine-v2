@@ -32,6 +32,14 @@
   flex: 1;
 }
 
+.marks-toolbar__info {
+  font-size: 0.82rem;
+  color: var(--card-text-muted, #94a3b8);
+}
+.marks-toolbar__info strong {
+  color: var(--card-text, #e2e8f0);
+}
+
 /* ── Phase tabs (Pre-Midterm / Post-Midterm / Annual) ── */
 .phase-tabs {
   display: flex;

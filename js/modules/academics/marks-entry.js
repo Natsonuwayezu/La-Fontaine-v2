@@ -2,115 +2,46 @@
    js/modules/academics/marks-entry.js
    ═══════════════════════════════════════════════════════════════════
    Rendered into #mainContent by core/router.js for 'marks-entry'.
+   Accepts an optional { assessmentId } param (set when navigating here
+   from academics/assessments.js's "Enter Marks" button); without one,
+   shows a class + assessment picker first.
 
-   Teacher-facing grid for entering marks against a single assessment
-   (class + subject + type + max marks). Styled with the real project
-   CSS: css/modules/marks.css (toolbar, phase tabs, entry table, mark
+   Teacher-facing grid for entering marks against a single assessment.
+   Styled with css/modules/marks.css (toolbar, entry table, mark
    inputs, validation popup, save bar) plus the shared component
-   library (css/components/badges.css grade pills, buttons.css,
-   pagination.css). No native prompt()/confirm() — the 3-choice
-   validation popup replaces it per the marks.css header comment.
+   library. Uses the shared validateMarkValue()/showMarkValidationPopup()
+   from core/validators.js for the 3-choice out-of-range flow (no
+   native prompt()/confirm()) instead of a separate ad-hoc popup.
 
-   MOCK_DATA below stands in for the real class roster + assessment
-   record until core/api.js can query Supabase; the shape mirrors
-   what the eventual API response should look like.
+   Reads/writes the real `marks` table (student_id, assessment_id,
+   score, is_absent, entered_by, entered_at) via core/api.js. The
+   assessment itself (class/subject/type/name/max_score/date/phase) is
+   defined on the Assessments page, not here -- this page only edits
+   scores and the locked flag for whichever assessment is selected.
 
-   Last updated: 2026-07-14
+   Last updated: 2026-07-28
    ═══════════════════════════════════════════════════════════════════ */
 
-// esc is a plain-script global defined in core/utils.js, loaded earlier in index.html.
-
-// ─── MOCK DATA ─────────────────────────────────────────────────────
-
-// TODO: Replace with state.classes from DB
-const CLASS_OPTIONS = (state.classes && state.classes.length > 0) ? state.classes.map(c=>({value:c.id,label:c.name})) : [
-    { value: 'p4a', label: 'Primary 4A' },
-    { value: 'p3', label: 'Primary 3' },
-    { value: 'p5b', label: 'Primary 5B' },
-    { value: 'p6', label: 'Primary 6' },
-    { value: 'p1', label: 'Primary 1' },
-    { value: 'p2', label: 'Primary 2' }
-];
-
-const SUBJECT_OPTIONS = [
-    { value: 'math', label: 'Mathematics' },
-    { value: 'eng', label: 'English' },
-    { value: 'kiny', label: 'Kinyarwanda' },
-    { value: 'sci', label: 'Science' },
-    { value: 'fr', label: 'French' },
-    { value: 'soc', label: 'Social Studies' }
-];
-
-const TYPE_OPTIONS = [
-    { value: 'quiz', label: 'Quiz' },
-    { value: 'assignment', label: 'Assignment' },
-    { value: 'midterm', label: 'Mid-Term' },
-    { value: 'exam', label: 'Exam' },
-    { value: 'final', label: 'Final Exam' }
-];
-
-const PHASES = ['Pre-Midterm', 'Post-Midterm', 'Annual'];
-
-function buildMockStudents() {
-    return [
-        { id: 1, name: 'HABIMANA Eric', score: 48, absent: false },
-        { id: 2, name: 'INGABIRE Sarah', score: 45, absent: false },
-        { id: 3, name: 'KAMALI Moses', score: 42, absent: false },
-        { id: 4, name: 'MUGISHA Jean', score: 38, absent: false },
-        { id: 5, name: 'NIYONZIMA Claire', score: 35, absent: false },
-        { id: 6, name: 'UWERA Grace', score: 28, absent: false },
-        { id: 7, name: 'ISHIMWE Jean', score: 25, absent: false },
-        { id: 8, name: 'MUKAMANA Ange', score: 18, absent: false },
-        { id: 9, name: 'MUGISHA Paul', score: null, absent: true },
-        { id: 10, name: 'NKURUNZIZA Alice', score: 12, absent: false },
-        { id: 11, name: 'HABIMANA Jean', score: 47, absent: false },
-        { id: 12, name: 'KAMALI Grace', score: 30, absent: false },
-        { id: 13, name: 'MUGISHA Grace', score: 22, absent: false },
-        { id: 14, name: 'UWIMANA Alice', score: 40, absent: false },
-        { id: 15, name: 'BIZIMANA Eric', score: null, absent: false },
-        { id: 16, name: 'NSHIMIYE Paul', score: 33, absent: false },
-        { id: 17, name: 'MUTONI Divine', score: 44, absent: false },
-        { id: 18, name: 'KAGABO Fabrice', score: null, absent: false },
-        { id: 19, name: 'UMUTONI Aline', score: 41, absent: false },
-        { id: 20, name: 'NIYOMUGABO Eric', score: 19, absent: false },
-        { id: 21, name: 'MUKANDAYISENGA Jo', score: null, absent: false },
-        { id: 22, name: 'HAKIZIMANA Paul', score: 36, absent: false },
-        { id: 23, name: 'IRADUKUNDA Sonia', score: null, absent: false },
-        { id: 24, name: 'RUTAYISIRE Eric', score: 29, absent: false },
-        { id: 25, name: 'UWASE Diane', score: 46, absent: false },
-        { id: 26, name: 'NDAYISABA Alex', score: 15, absent: false },
-        { id: 27, name: 'KWIZERA Blaise', score: 39, absent: false },
-        { id: 28, name: 'AKIMANA Belise', score: 37, absent: false }
-    ];
-}
+// esc, fmtDate, notify-equivalents (showToast) are plain-script globals
+// from core/utils.js, loaded earlier in index.html.
 
 // ─── STATE ───────────────────────────────────────────────────────────
-// Real state (not MOCK_DATA) — the current entry session.
 
-let assessment = {
-    classId: 'p4a',
-    subject: 'math',
-    type: 'quiz',
-    name: 'Quiz 4',
-    maxMarks: 50,
-    date: '2026-06-26',
-    phase: 'Post-Midterm',
-    locked: false
-};
-
-let students = buildMockStudents();
+let currentAssessmentId = null;
+let currentAssessment = null;
+let roster = [];              // [{ student_id, name, score, is_absent, markId }]
 let currentPage = 1;
 const ITEMS_PER_PAGE = 10;
-let dirtyCount = 0;
+let dirtyStudentIds = new Set();
 let lastSavedAt = null;
 let chartInstances = { distribution: null };
-let activePopup = null;
+let hasTriedLazyLoad = false;
 
 // ─── GRADE / STATUS LOGIC ────────────────────────────────────────────
 
 function getGrade(score) {
-    if (score === null || score === undefined) return { grade: '—', cls: '' };
-    const pct = (score / assessment.maxMarks) * 100;
+    if (score === null || score === undefined || !currentAssessment) return { grade: '—', cls: '' };
+    const pct = (score / currentAssessment.max_score) * 100;
     if (pct >= 90) return { grade: 'A+', cls: 'grade-Ap' };
     if (pct >= 80) return { grade: 'A', cls: 'grade-A' };
     if (pct >= 70) return { grade: 'B', cls: 'grade-B' };
@@ -122,7 +53,7 @@ function getGrade(score) {
 function getStatus(score, isAbsent) {
     if (isAbsent) return { label: 'Absent', badgeCls: 'badge-neutral' };
     if (score === null || score === undefined) return { label: '—', badgeCls: 'badge-light' };
-    const pct = (score / assessment.maxMarks) * 100;
+    const pct = (score / currentAssessment.max_score) * 100;
     if (pct >= 60) return { label: 'Pass', badgeCls: 'badge-success' };
     if (pct >= 50) return { label: 'Low', badgeCls: 'badge-warning' };
     return { label: 'Fail', badgeCls: 'badge-danger' };
@@ -131,55 +62,83 @@ function getStatus(score, isAbsent) {
 function getInputClass(score, isAbsent) {
     if (isAbsent) return '';
     if (score === null || score === undefined) return 'mark-empty';
-    const pct = (score / assessment.maxMarks) * 100;
+    const pct = (score / currentAssessment.max_score) * 100;
     if (pct >= 60) return 'mark-pass';
     if (pct >= 50) return 'mark-borderline';
     return 'mark-fail';
 }
 
+// ─── DATA ────────────────────────────────────────────────────────────
+
+function buildRoster() {
+    const marksByStudent = new Map(
+        (state.marks || [])
+            .filter(m => m.assessment_id === currentAssessment.id)
+            .map(m => [m.student_id, m])
+    );
+
+    return (state.students || [])
+        .filter(s => String(s.class_id) === String(currentAssessment.class_id) && !s.is_deleted && (s.status || 'Active') === 'Active')
+        .map(s => {
+            const mark = marksByStudent.get(s.id);
+            return {
+                student_id: s.id,
+                name: `${s.first_name || ''} ${s.last_name || ''}`.trim() || `Student #${s.id}`,
+                score: mark ? mark.score : null,
+                is_absent: mark ? !!mark.is_absent : false,
+                markId: mark ? mark.id : null,
+            };
+        })
+        .sort((a, b) => a.name.localeCompare(b.name));
+}
+
 // ─── RENDER ────────────────────────────────────────────────────────
 
-function renderMarksEntry(container) {
+function renderMarksEntry(container, params = {}) {
     if (!container) {
         console.warn('[MarksEntry] No container provided');
         return;
     }
+
+    if (params.assessmentId) currentAssessmentId = params.assessmentId;
+
+    currentAssessment = currentAssessmentId
+        ? (state.assessments || []).find(a => a.id === currentAssessmentId)
+        : null;
+
+    if (!currentAssessment) {
+        renderPicker(container);
+        return;
+    }
+
+    roster = buildRoster();
+    currentPage = 1;
+    dirtyStudentIds = new Set();
+    lastSavedAt = null;
+
+    const classMap = new Map((state.classes || []).map(c => [c.id, c.name]));
+    const subjectMap = new Map((state.subjects || []).map(s => [s.id, s.name]));
 
     container.innerHTML = `
         <div class="marks-entry-page">
 
             <!-- ═══ TOOLBAR ═══ -->
             <div class="marks-toolbar">
-                <select class="marks-toolbar__select" id="me-class">
-                    ${CLASS_OPTIONS.map(o => `<option value="${o.value}" ${o.value === assessment.classId ? 'selected' : ''}>${esc(o.label)}</option>`).join('')}
-                </select>
-                <select class="marks-toolbar__select" id="me-subject">
-                    ${SUBJECT_OPTIONS.map(o => `<option value="${o.value}" ${o.value === assessment.subject ? 'selected' : ''}>${esc(o.label)}</option>`).join('')}
-                </select>
-                <select class="marks-toolbar__select" id="me-type">
-                    ${TYPE_OPTIONS.map(o => `<option value="${o.value}" ${o.value === assessment.type ? 'selected' : ''}>${esc(o.label)}</option>`).join('')}
-                </select>
-                <input type="text" id="me-name" value="${esc(assessment.name)}" placeholder="Assessment name" style="min-width:140px;" />
-                <input type="number" id="me-max" value="${assessment.maxMarks}" min="1" style="width:80px;" title="Max marks" />
-                <input type="date" id="me-date" value="${esc(assessment.date)}" />
-
-                <div class="phase-tabs" id="me-phase-tabs">
-                    ${PHASES.map(p => `<span class="phase-tab ${p === assessment.phase ? 'active' : ''}" data-phase="${esc(p)}">${esc(p)}</span>`).join('')}
-                </div>
+                <button class="btn btn-ghost btn-sm" id="me-change-assessment"><i class="fa-solid fa-arrow-left"></i> Change Assessment</button>
+                <span class="marks-toolbar__info"><strong>${esc(currentAssessment.name)}</strong> · ${esc(classMap.get(currentAssessment.class_id) || '—')} · ${esc(subjectMap.get(currentAssessment.subject_id) || '—')} · ${esc(currentAssessment.type)} · Max ${esc(currentAssessment.max_score)}${currentAssessment.date ? ' · ' + esc(fmtDate(currentAssessment.date)) : ''}</span>
 
                 <span class="marks-toolbar__spacer"></span>
 
-                <span class="assessment-lock-badge ${assessment.locked ? 'locked' : 'open'}" id="me-lock-badge">
-                    <i class="fa-solid ${assessment.locked ? 'fa-lock' : 'fa-lock-open'}"></i>
-                    ${assessment.locked ? 'Locked' : 'Open'}
+                <span class="assessment-lock-badge ${currentAssessment.locked ? 'locked' : 'open'}" id="me-lock-badge">
+                    <i class="fa-solid ${currentAssessment.locked ? 'fa-lock' : 'fa-lock-open'}"></i>
+                    ${currentAssessment.locked ? 'Locked' : 'Open'}
                 </span>
-                <button class="btn btn-secondary btn-sm" id="me-load-btn">
-                    <i class="fa-solid fa-users"></i> Load Students
-                </button>
-                <button class="btn ${assessment.locked ? 'btn-outline-warning' : 'btn-outline-danger'} btn-sm" id="me-lock-btn">
-                    <i class="fa-solid ${assessment.locked ? 'fa-lock-open' : 'fa-lock'}"></i> ${assessment.locked ? 'Unlock' : 'Lock'}
+                <button class="btn ${currentAssessment.locked ? 'btn-outline-warning' : 'btn-outline-danger'} btn-sm" id="me-lock-btn">
+                    <i class="fa-solid ${currentAssessment.locked ? 'fa-lock-open' : 'fa-lock'}"></i> ${currentAssessment.locked ? 'Unlock' : 'Lock'}
                 </button>
             </div>
+
+            ${currentAssessment.locked ? `<div class="alert alert-warning" style="margin-bottom:16px;"><i class="fa-solid fa-lock"></i> This assessment is locked. Unlock it above to make changes.</div>` : ''}
 
             <!-- ═══ STAT STRIP ═══ -->
             <div class="card" style="padding:4px 0;margin-bottom:16px;">
@@ -200,7 +159,7 @@ function renderMarksEntry(container) {
                         <tr>
                             <th class="col-num">#</th>
                             <th>Student</th>
-                            <th>Score / <span id="me-max-label">${assessment.maxMarks}</span></th>
+                            <th>Score / <span id="me-max-label">${currentAssessment.max_score}</span></th>
                             <th>%</th>
                             <th>Grade</th>
                             <th>Absent</th>
@@ -230,7 +189,6 @@ function renderMarksEntry(container) {
             <div class="marks-save-bar">
                 <div style="display:flex;gap:8px;">
                     <button class="btn btn-primary btn-sm" id="me-save"><i class="fa-solid fa-floppy-disk"></i> Save Marks</button>
-                    <button class="btn btn-ghost btn-sm" id="me-review"><i class="fa-regular fa-file-lines"></i> Review &amp; Summary</button>
                     <button class="btn btn-outline-danger btn-sm" id="me-clear"><i class="fa-regular fa-trash-can"></i> Clear All</button>
                 </div>
                 <div class="marks-save-bar__status" id="me-save-status"></div>
@@ -243,6 +201,103 @@ function renderMarksEntry(container) {
     renderDistributionChart();
     wireToolbar(container);
     wireFooter(container);
+
+    // marks/assessments for the active term are lazily loaded — trigger
+    // once per visit if this session hasn't already, then rebuild the
+    // roster with real data once available.
+    const termId = currentAssessment.term_id;
+    const needsMarks = !(state.marks || []).some(m => m.assessment_id === currentAssessment.id);
+    if (!hasTriedLazyLoad && needsMarks && termId) {
+        hasTriedLazyLoad = true;
+        window.loadMarksForClass?.(currentAssessment.class_id, termId)
+            .then(() => {
+                if (!container.isConnected) return;
+                roster = buildRoster();
+                renderTable();
+                renderDistributionChart();
+            })
+            .catch(() => {});
+    }
+}
+
+// ─── ASSESSMENT PICKER (shown when no assessment is selected) ───────
+
+function renderPicker(container) {
+    const classOptions = [...(state.classes || [])].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    const termId = window.getActiveTermId ? window.getActiveTermId() : null;
+
+    container.innerHTML = `
+        <div class="marks-entry-page">
+            <div class="card" style="max-width:480px;margin:40px auto;padding:24px;">
+                <h3 style="margin-bottom:16px;"><i class="fa-solid fa-pen-to-square" style="color:var(--academics-accent, #8b5cf6);"></i> Select an Assessment</h3>
+                <div class="field" style="margin-bottom:14px;">
+                    <label>Class</label>
+                    <select id="me-picker-class" style="width:100%;">
+                        <option value="">Choose a class…</option>
+                        ${classOptions.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="field" style="margin-bottom:14px;">
+                    <label>Assessment</label>
+                    <select id="me-picker-assessment" style="width:100%;" disabled>
+                        <option value="">Choose a class first…</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary btn-sm" id="me-picker-go" style="width:100%;" disabled>Open</button>
+                <div style="margin-top:16px;text-align:center;">
+                    <button class="btn btn-ghost btn-sm" id="me-picker-new"><i class="fa-solid fa-plus"></i> Create a new assessment instead</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const classSel = container.querySelector('#me-picker-class');
+    const assessmentSel = container.querySelector('#me-picker-assessment');
+    const goBtn = container.querySelector('#me-picker-go');
+
+    classSel.addEventListener('change', () => {
+        const classId = classSel.value;
+        assessmentSel.innerHTML = '';
+        if (!classId) {
+            assessmentSel.disabled = true;
+            assessmentSel.innerHTML = `<option value="">Choose a class first…</option>`;
+            goBtn.disabled = true;
+            return;
+        }
+        const forClass = (state.assessments || []).filter(a =>
+            String(a.class_id) === String(classId) && (!termId || String(a.term_id) === String(termId))
+        );
+        if (!forClass.length) {
+            assessmentSel.disabled = true;
+            assessmentSel.innerHTML = `<option value="">No assessments for this class yet</option>`;
+            goBtn.disabled = true;
+            return;
+        }
+        assessmentSel.disabled = false;
+        assessmentSel.innerHTML = forClass.map(a => `<option value="${a.id}">${esc(a.name)} (${esc(a.type)})</option>`).join('');
+        goBtn.disabled = false;
+    });
+
+    goBtn.addEventListener('click', () => {
+        const id = parseInt(assessmentSel.value, 10);
+        if (!id) return;
+        currentAssessmentId = id;
+        renderMarksEntry(container);
+    });
+
+    container.querySelector('#me-picker-new')?.addEventListener('click', () => {
+        window.navigateTo('assessments');
+    });
+
+    // assessments for the active term may not be loaded yet
+    const needsAssessments = termId && !(state.assessments || []).some(a => String(a.term_id) === String(termId));
+    if (needsAssessments) {
+        window.loadAllAssessmentsForTerm?.(termId).then(() => {
+            if (container.isConnected && classSel.value) {
+                classSel.dispatchEvent(new Event('change'));
+            }
+        }).catch(() => {});
+    }
 }
 
 // ─── TABLE ────────────────────────────────────────────────────────
@@ -252,33 +307,34 @@ function renderTable() {
     if (!tbody) return;
 
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    const end = Math.min(start + ITEMS_PER_PAGE, students.length);
-    const pageData = students.slice(start, end);
+    const end = Math.min(start + ITEMS_PER_PAGE, roster.length);
+    const pageData = roster.slice(start, end);
+    const locked = currentAssessment.locked;
 
     tbody.innerHTML = pageData.map((s, idx) => {
         const globalIdx = start + idx + 1;
         const grade = getGrade(s.score);
-        const status = getStatus(s.score, s.absent);
+        const status = getStatus(s.score, s.is_absent);
         const displayScore = s.score !== null && s.score !== undefined ? s.score : '';
 
         return `
-            <tr data-row-id="${s.id}">
+            <tr data-row-id="${s.student_id}">
                 <td class="student-num-cell">${globalIdx}</td>
                 <td class="student-name-cell">${esc(s.name)}</td>
                 <td>
                     <input
                         type="number"
-                        class="marks-input ${getInputClass(s.score, s.absent)}"
+                        class="marks-input ${getInputClass(s.score, s.is_absent)}"
                         value="${displayScore}"
                         min="0"
-                        max="${assessment.maxMarks}"
-                        data-id="${s.id}"
-                        ${s.absent ? 'disabled' : ''}
-                    /> / ${assessment.maxMarks}
+                        max="${currentAssessment.max_score}"
+                        data-id="${s.student_id}"
+                        ${s.is_absent || locked ? 'disabled' : ''}
+                    /> / ${currentAssessment.max_score}
                 </td>
-                <td>${s.score !== null && s.score !== undefined ? Math.round((s.score / assessment.maxMarks) * 100) + '%' : '—'}</td>
+                <td>${s.score !== null && s.score !== undefined ? Math.round((s.score / currentAssessment.max_score) * 100) + '%' : '—'}</td>
                 <td><span class="badge ${grade.cls}">${grade.grade}</span></td>
-                <td><input type="checkbox" class="checkbox" data-absent-id="${s.id}" ${s.absent ? 'checked' : ''} /></td>
+                <td><input type="checkbox" class="checkbox" data-absent-id="${s.student_id}" ${s.is_absent ? 'checked' : ''} ${locked ? 'disabled' : ''} /></td>
                 <td><span class="badge ${status.badgeCls}">${esc(status.label)}</span></td>
             </tr>
         `;
@@ -290,13 +346,12 @@ function renderTable() {
     tbody.querySelectorAll('[data-absent-id]').forEach(cb => {
         cb.addEventListener('change', (e) => {
             const id = parseInt(e.target.dataset.absentId, 10);
-            const student = students.find(s => s.id === id);
+            const student = roster.find(s => s.student_id === id);
             if (!student) return;
-            student.absent = e.target.checked;
-            if (student.absent) student.score = null;
-            markDirty();
+            student.is_absent = e.target.checked;
+            if (student.is_absent) student.score = null;
+            markDirty(id);
             renderTable();
-            renderStatStrip();
             renderDistributionChart();
         });
     });
@@ -305,88 +360,45 @@ function renderTable() {
     renderStatStrip();
 }
 
-function handleScoreChange(input) {
+async function handleScoreChange(input) {
     const id = parseInt(input.dataset.id, 10);
-    const student = students.find(s => s.id === id);
+    const student = roster.find(s => s.student_id === id);
     if (!student) return;
 
     const raw = input.value.trim();
     const numeric = raw === '' ? null : Number(raw);
+    const validation = validateMarkValue(raw, currentAssessment.max_score);
 
-    if (numeric !== null && (Number.isNaN(numeric) || numeric > assessment.maxMarks || numeric < 0)) {
-        showValidationPopup(input, student, numeric);
+    if (!validation.valid) {
+        const choice = await showMarkValidationPopup({
+            score: raw,
+            maxScore: currentAssessment.max_score,
+            studentName: student.name,
+            assessmentName: currentAssessment.name,
+            issue: validation.issue,
+        });
+
+        if (choice === 'correct') {
+            input.value = student.score !== null && student.score !== undefined ? student.score : '';
+            return;
+        }
+        if (choice === 'absent') {
+            student.is_absent = true;
+            student.score = null;
+        } else {
+            // 'save' — record the out-of-range value as-is
+            student.score = numeric;
+        }
+        markDirty(id);
+        renderTable();
+        renderDistributionChart();
         return;
     }
 
     student.score = numeric;
-    markDirty();
+    markDirty(id);
     renderTable();
     renderDistributionChart();
-}
-
-// ─── VALIDATION POPUP (replaces native prompt/confirm) ─────────────
-
-function closeValidationPopup() {
-    if (activePopup) {
-        activePopup.remove();
-        activePopup = null;
-    }
-}
-
-function showValidationPopup(input, student, attemptedValue) {
-    closeValidationPopup();
-
-    const outOfRange = attemptedValue !== null && !Number.isNaN(attemptedValue);
-    const clamped = outOfRange ? Math.max(0, Math.min(assessment.maxMarks, attemptedValue)) : 0;
-
-    const popup = document.createElement('div');
-    popup.className = 'mark-validation-popup';
-    popup.innerHTML = `
-        <div class="mark-validation-popup__msg">
-            ${outOfRange
-            ? `<strong>${esc(String(attemptedValue))}</strong> is outside the valid range (0–${assessment.maxMarks}) for ${esc(student.name)}.`
-            : `That doesn't look like a valid number for ${esc(student.name)}.`}
-        </div>
-        <div class="mark-validation-popup__choices">
-            ${outOfRange ? `<button class="mark-validation-popup__choice primary" data-action="clamp">Use ${clamped}/${assessment.maxMarks}</button>` : ''}
-            <button class="mark-validation-popup__choice" data-action="retry">Re-enter</button>
-            <button class="mark-validation-popup__choice cancel" data-action="cancel">Cancel</button>
-        </div>
-    `;
-
-    const rect = input.getBoundingClientRect();
-    popup.style.position = 'fixed';
-    popup.style.top = `${rect.bottom + 6}px`;
-    popup.style.left = `${rect.left}px`;
-    document.body.appendChild(popup);
-    activePopup = popup;
-
-    popup.querySelector('[data-action="clamp"]')?.addEventListener('click', () => {
-        student.score = clamped;
-        markDirty();
-        closeValidationPopup();
-        renderTable();
-        renderDistributionChart();
-    });
-    popup.querySelector('[data-action="retry"]').addEventListener('click', () => {
-        closeValidationPopup();
-        input.value = student.score !== null && student.score !== undefined ? student.score : '';
-        input.focus();
-    });
-    popup.querySelector('[data-action="cancel"]').addEventListener('click', () => {
-        closeValidationPopup();
-        input.value = student.score !== null && student.score !== undefined ? student.score : '';
-    });
-
-    setTimeout(() => {
-        document.addEventListener('click', onDocClickCloseValidation, { once: true });
-    }, 0);
-}
-
-function onDocClickCloseValidation(e) {
-    if (activePopup && !activePopup.contains(e.target)) {
-        closeValidationPopup();
-    }
 }
 
 // ─── STAT STRIP ──────────────────────────────────────────────────────
@@ -395,12 +407,12 @@ function renderStatStrip() {
     const el = document.getElementById('me-stat-strip');
     if (!el) return;
 
-    const total = students.length;
-    const entered = students.filter(s => s.score !== null && s.score !== undefined).length;
-    const missing = total - entered - students.filter(s => s.absent).length;
-    const scored = students.filter(s => s.score !== null && s.score !== undefined);
+    const total = roster.length;
+    const entered = roster.filter(s => s.score !== null && s.score !== undefined).length;
+    const missing = total - entered - roster.filter(s => s.is_absent).length;
+    const scored = roster.filter(s => s.score !== null && s.score !== undefined);
     const avg = scored.length ? (scored.reduce((sum, s) => sum + s.score, 0) / scored.length) : 0;
-    const passCount = scored.filter(s => (s.score / assessment.maxMarks) * 100 >= 60).length;
+    const passCount = scored.filter(s => (s.score / currentAssessment.max_score) * 100 >= 60).length;
     const passRate = scored.length ? (passCount / scored.length) * 100 : 0;
     const highest = scored.length ? Math.max(...scored.map(s => s.score)) : 0;
 
@@ -408,7 +420,7 @@ function renderStatStrip() {
         { value: total, label: 'Students' },
         { value: entered, label: 'Entered' },
         { value: Math.max(missing, 0), label: 'Missing' },
-        { value: `${avg.toFixed(1)}<span class="suffix">/${assessment.maxMarks}</span>`, label: 'Average' },
+        { value: `${avg.toFixed(1)}<span class="suffix">/${currentAssessment.max_score}</span>`, label: 'Average' },
         { value: `${passRate.toFixed(1)}<span class="suffix">%</span>`, label: 'Pass Rate' },
         { value: highest, label: 'Highest' }
     ];
@@ -428,11 +440,11 @@ function renderPagination() {
     const controls = document.getElementById('me-pagination');
     if (!info || !controls) return;
 
-    const totalPages = Math.max(1, Math.ceil(students.length / ITEMS_PER_PAGE));
+    const totalPages = Math.max(1, Math.ceil(roster.length / ITEMS_PER_PAGE));
     const start = (currentPage - 1) * ITEMS_PER_PAGE + 1;
-    const end = Math.min(currentPage * ITEMS_PER_PAGE, students.length);
+    const end = Math.min(currentPage * ITEMS_PER_PAGE, roster.length);
 
-    info.innerHTML = `Showing <span class="range">${start}–${end}</span> of <span class="total">${students.length}</span> students`;
+    info.innerHTML = `Showing <span class="range">${roster.length ? start : 0}–${end}</span> of <span class="total">${roster.length}</span> students`;
 
     let html = `<button class="page-btn ${currentPage === 1 ? 'disabled' : ''}" data-page-delta="-1"><i class="fa-solid fa-chevron-left"></i></button>`;
     for (let i = 1; i <= totalPages; i++) {
@@ -449,7 +461,7 @@ function renderPagination() {
     });
     controls.querySelectorAll('[data-page-delta]').forEach(btn => {
         btn.addEventListener('click', () => {
-            const totalP = Math.max(1, Math.ceil(students.length / ITEMS_PER_PAGE));
+            const totalP = Math.max(1, Math.ceil(roster.length / ITEMS_PER_PAGE));
             const next = currentPage + parseInt(btn.dataset.pageDelta, 10);
             if (next < 1 || next > totalP) return;
             currentPage = next;
@@ -469,11 +481,11 @@ function computeDistribution() {
         { key: 'D', min: 50, color: '#7a3a1a' },
         { key: 'F', min: 0, color: '#8a2a1a' }
     ];
-    const scored = students.filter(s => s.score !== null && s.score !== undefined);
-    const counts = bands.map(b => 0);
+    const scored = roster.filter(s => s.score !== null && s.score !== undefined);
+    const counts = bands.map(() => 0);
 
     scored.forEach(s => {
-        const pct = (s.score / assessment.maxMarks) * 100;
+        const pct = (s.score / currentAssessment.max_score) * 100;
         const idx = bands.findIndex(b => pct >= b.min);
         counts[idx === -1 ? bands.length - 1 : idx]++;
     });
@@ -526,51 +538,32 @@ function renderDistributionChart() {
 // ─── TOOLBAR WIRING ──────────────────────────────────────────────────
 
 function wireToolbar(container) {
-    container.querySelector('#me-class')?.addEventListener('change', (e) => {
-        assessment.classId = e.target.value;
-        loadStudentsForContext();
-    });
-    container.querySelector('#me-subject')?.addEventListener('change', (e) => {
-        assessment.subject = e.target.value;
-    });
-    container.querySelector('#me-type')?.addEventListener('change', (e) => {
-        assessment.type = e.target.value;
-    });
-    container.querySelector('#me-name')?.addEventListener('change', (e) => {
-        assessment.name = e.target.value;
-    });
-    container.querySelector('#me-max')?.addEventListener('change', (e) => {
-        const val = parseInt(e.target.value, 10);
-        assessment.maxMarks = Number.isFinite(val) && val > 0 ? val : assessment.maxMarks;
-        document.getElementById('me-max-label').textContent = assessment.maxMarks;
-        renderTable();
-        renderDistributionChart();
-    });
-    container.querySelector('#me-date')?.addEventListener('change', (e) => {
-        assessment.date = e.target.value;
-    });
-
-    container.querySelector('#me-phase-tabs')?.addEventListener('click', (e) => {
-        const tab = e.target.closest('.phase-tab');
-        if (!tab) return;
-        assessment.phase = tab.dataset.phase;
-        container.querySelectorAll('.phase-tab').forEach(t => t.classList.toggle('active', t === tab));
-    });
-
-    container.querySelector('#me-load-btn')?.addEventListener('click', () => loadStudentsForContext());
-
-    container.querySelector('#me-lock-btn')?.addEventListener('click', () => {
-        assessment.locked = !assessment.locked;
+    container.querySelector('#me-change-assessment')?.addEventListener('click', () => {
+        currentAssessmentId = null;
+        currentAssessment = null;
         renderMarksEntry(container);
-        notify(assessment.locked ? 'Assessment locked' : 'Assessment unlocked', 'info');
+    });
+
+    container.querySelector('#me-lock-btn')?.addEventListener('click', async () => {
+        const nextLocked = !currentAssessment.locked;
+        try {
+            await update('assessments', currentAssessment.id, { locked: nextLocked });
+            currentAssessment.locked = nextLocked;
+            renderMarksEntry(container);
+            notify(nextLocked ? 'Assessment locked' : 'Assessment unlocked', 'info');
+        } catch (err) {
+            notify(`Could not update lock status: ${err.message}`, 'error');
+        }
     });
 
     container.querySelector('#me-select-all')?.addEventListener('click', () => {
-        document.querySelectorAll('.marks-entry-table [data-absent-id]').forEach(cb => { cb.checked = true; });
-        notify('All rows selected', 'info');
+        if (currentAssessment.locked) return;
+        document.querySelectorAll('.marks-entry-table [data-absent-id]').forEach(cb => { cb.checked = true; cb.dispatchEvent(new Event('change')); });
+        notify('All visible rows marked absent-checked — review before saving', 'info');
     });
 
     container.querySelector('#me-mark-absent')?.addEventListener('click', () => {
+        if (currentAssessment.locked) return;
         const checked = Array.from(document.querySelectorAll('.marks-entry-table [data-absent-id]:checked'));
         if (!checked.length) {
             notify('Select students first', 'warning');
@@ -578,12 +571,10 @@ function wireToolbar(container) {
         }
         checked.forEach(cb => {
             const id = parseInt(cb.dataset.absentId, 10);
-            const student = students.find(s => s.id === id);
-            if (student) { student.absent = true; student.score = null; }
+            const student = roster.find(s => s.student_id === id);
+            if (student) { student.is_absent = true; student.score = null; markDirty(id); }
         });
-        markDirty();
         renderTable();
-        renderStatStrip();
         renderDistributionChart();
         notify(`${checked.length} students marked absent`, 'success');
     });
@@ -591,63 +582,58 @@ function wireToolbar(container) {
     container.querySelector('#me-save-all')?.addEventListener('click', () => saveMarks());
 }
 
-function loadStudentsForContext() {
-    // TODO: replace with a real API call keyed on assessment.classId/subject/type
-    students = buildMockStudents();
-    currentPage = 1;
-    dirtyCount = 0;
-    renderTable();
-    renderDistributionChart();
-    notify('Students loaded', 'success');
-}
-
 // ─── FOOTER WIRING ───────────────────────────────────────────────────
 
 function wireFooter(container) {
     container.querySelector('#me-save')?.addEventListener('click', () => saveMarks());
-    container.querySelector('#me-review')?.addEventListener('click', () => {
-        notify('Review & Summary is not wired to a real view yet', 'info');
-    });
     container.querySelector('#me-clear')?.addEventListener('click', () => {
-        showClearAllConfirm();
+        showClearAllConfirm(container);
     });
 
     renderSaveStatus();
 }
 
-function showClearAllConfirm() {
-    closeValidationPopup();
-    const popup = document.createElement('div');
-    popup.className = 'mark-validation-popup';
-    popup.style.position = 'fixed';
-    popup.style.top = '50%';
-    popup.style.left = '50%';
-    popup.style.transform = 'translate(-50%, -50%)';
-    popup.innerHTML = `
-        <div class="mark-validation-popup__msg">
-            Clear all <strong>${students.length}</strong> entered marks for this assessment? This cannot be undone.
-        </div>
-        <div class="mark-validation-popup__choices">
-            <button class="mark-validation-popup__choice primary" data-action="confirm-clear">Clear All</button>
-            <button class="mark-validation-popup__choice cancel" data-action="cancel-clear">Cancel</button>
+function showClearAllConfirm(container) {
+    if (currentAssessment.locked) {
+        notify('This assessment is locked', 'warning');
+        return;
+    }
+    const overlay = document.getElementById('modalOverlay');
+    if (!overlay) {
+        if (window.confirm(`Clear all ${roster.length} entered marks for this assessment? This cannot be undone.`)) {
+            doClearAll();
+        }
+        return;
+    }
+    overlay.innerHTML = `
+        <div class="modal-panel modal-sm" style="max-width:420px;">
+            <div class="modal-header"><h2>Clear All Marks</h2></div>
+            <div class="modal-body">
+                <p>Clear all <strong>${roster.length}</strong> entered marks for this assessment? This cannot be undone.</p>
+            </div>
+            <div class="modal-footer" style="display:flex;gap:8px;">
+                <button class="btn btn-danger" id="me-confirm-clear" style="flex:1;">Clear All</button>
+                <button class="btn btn-secondary" id="me-cancel-clear" style="flex:1;">Cancel</button>
+            </div>
         </div>
     `;
-    document.body.appendChild(popup);
-    activePopup = popup;
-
-    popup.querySelector('[data-action="confirm-clear"]').addEventListener('click', () => {
-        students.forEach(s => { if (!s.absent) s.score = null; });
-        markDirty();
-        closeValidationPopup();
-        renderTable();
-        renderDistributionChart();
-        notify('All marks cleared', 'warning');
-    });
-    popup.querySelector('[data-action="cancel-clear"]').addEventListener('click', closeValidationPopup);
+    overlay.classList.add('show');
+    const cleanup = () => { overlay.classList.remove('show'); overlay.innerHTML = ''; };
+    document.getElementById('me-confirm-clear').addEventListener('click', () => { cleanup(); doClearAll(); });
+    document.getElementById('me-cancel-clear').addEventListener('click', cleanup);
 }
 
-function markDirty() {
-    dirtyCount++;
+function doClearAll() {
+    roster.forEach(s => {
+        if (!s.is_absent) { s.score = null; markDirty(s.student_id); }
+    });
+    renderTable();
+    renderDistributionChart();
+    notify('All marks cleared locally — click Save to persist', 'warning');
+}
+
+function markDirty(studentId) {
+    dirtyStudentIds.add(studentId);
     renderSaveStatus();
 }
 
@@ -655,9 +641,9 @@ function renderSaveStatus() {
     const el = document.getElementById('me-save-status');
     if (!el) return;
 
-    if (dirtyCount > 0) {
+    if (dirtyStudentIds.size > 0) {
         el.className = 'marks-save-bar__status dirty';
-        el.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${dirtyCount} unsaved change${dirtyCount === 1 ? '' : 's'}`;
+        el.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${dirtyStudentIds.size} unsaved change${dirtyStudentIds.size === 1 ? '' : 's'}`;
     } else if (lastSavedAt) {
         el.className = 'marks-save-bar__status saved';
         el.innerHTML = `<i class="fa-solid fa-circle-check"></i> Saved at ${lastSavedAt}`;
@@ -667,13 +653,77 @@ function renderSaveStatus() {
     }
 }
 
-function saveMarks() {
-    // TODO: replace with a real API call persisting `students` for this assessment
-    dirtyCount = 0;
-    const now = new Date();
-    lastSavedAt = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-    renderSaveStatus();
-    notify('Marks saved', 'success');
+async function saveMarks() {
+    if (currentAssessment.locked) {
+        notify('This assessment is locked — unlock it first', 'warning');
+        return;
+    }
+    if (dirtyStudentIds.size === 0) {
+        notify('No changes to save', 'info');
+        return;
+    }
+
+    const saveBtn = document.getElementById('me-save');
+    const saveAllBtn = document.getElementById('me-save-all');
+    if (saveBtn) saveBtn.disabled = true;
+    if (saveAllBtn) saveAllBtn.disabled = true;
+
+    const dirty = roster.filter(s => dirtyStudentIds.has(s.student_id));
+    const toInsert = dirty.filter(s => !s.markId);
+    const toUpdate = dirty.filter(s => s.markId);
+    const now = new Date().toISOString();
+
+    try {
+        const jobs = [];
+
+        if (toInsert.length) {
+            jobs.push(insertMany('marks', toInsert.map(s => ({
+                student_id: s.student_id,
+                assessment_id: currentAssessment.id,
+                score: s.score,
+                is_absent: s.is_absent,
+                entered_by: state.currentUser?.id ?? null,
+                entered_at: now,
+            }))));
+        }
+
+        toUpdate.forEach(s => {
+            jobs.push(update('marks', s.markId, {
+                score: s.score,
+                is_absent: s.is_absent,
+                entered_by: state.currentUser?.id ?? null,
+                entered_at: now,
+            }));
+        });
+
+        const results = await Promise.all(jobs);
+
+        // Merge newly-inserted rows into state.marks (and this roster)
+        // so their real IDs are known for the next save without a
+        // full reload, and so other pages reading state.marks see them.
+        if (toInsert.length) {
+            const inserted = results[0]; // insertMany() resolves to an array
+            state.marks = [...(state.marks || []), ...inserted];
+            inserted.forEach(row => {
+                const s = roster.find(r => r.student_id === row.student_id);
+                if (s) s.markId = row.id;
+            });
+        }
+        toUpdate.forEach(s => {
+            const existing = (state.marks || []).find(m => m.id === s.markId);
+            if (existing) { existing.score = s.score; existing.is_absent = s.is_absent; }
+        });
+
+        dirtyStudentIds = new Set();
+        lastSavedAt = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        renderSaveStatus();
+        notify(`Saved ${dirty.length} mark${dirty.length === 1 ? '' : 's'}`, 'success');
+    } catch (err) {
+        notify(`Could not save marks: ${err.message}`, 'error');
+    } finally {
+        if (saveBtn) saveBtn.disabled = false;
+        if (saveAllBtn) saveAllBtn.disabled = false;
+    }
 }
 
 // ─── TOAST HELPER (defers to the real toast.js if present) ─────────
@@ -691,8 +741,6 @@ function destroyMarksEntry() {
         chartInstances.distribution.destroy();
         chartInstances.distribution = null;
     }
-    closeValidationPopup();
-    document.removeEventListener('click', onDocClickCloseValidation);
 }
 
 // ─── EXPOSE ──────────────────────────────────────────────────────────

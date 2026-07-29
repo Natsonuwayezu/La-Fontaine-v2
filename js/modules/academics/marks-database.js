@@ -4,103 +4,54 @@
    Rendered into #mainContent by core/router.js for 'marks-database'.
 
    Read-only, filterable, searchable cross-tab of every recorded mark
-   for a class/subject — one row per student, one column per
-   assessment. Styled with css/modules/marks.css (marks-db-filters,
-   grade-pill, subject-chip, marks-stat-strip) and the shared
-   component library (badges.css, buttons.css, pagination.css).
+   for a class — one row per student, one column per assessment.
+   Styled with css/modules/marks.css (marks-db-filters, grade-pill,
+   subject-chip, marks-stat-strip) and the shared component library.
 
-   MOCK_DATA stands in for the real Supabase query until core/api.js
-   is wired up; the shape mirrors what the eventual API response
-   should look like (one row per student, keyed scores per assessment id).
+   Reads real state.students/classes/subjects/terms/assessments/marks
+   (the same tables js/modules/academics/marks-entry.js writes to).
+   Since a "row per student, column per assessment" layout only makes
+   sense within a single class (different classes have different
+   assessments), the Class filter is required — this page prompts for
+   one instead of defaulting to a cross-class table that wouldn't line
+   up. Subject/Term narrow which assessments show as columns.
 
-   Last updated: 2026-07-14
+   Last updated: 2026-07-28
    ═══════════════════════════════════════════════════════════════════ */
 
 // esc is a plain-script global defined in core/utils.js, loaded earlier in index.html.
 
-// ─── MOCK DATA ─────────────────────────────────────────────────────
-
-const CLASS_OPTIONS = [
-    { value: 'all', label: 'All Classes' },
-    { value: 'p4a', label: 'Primary 4A' },
-    { value: 'p3', label: 'Primary 3' },
-    { value: 'p5b', label: 'Primary 5B' },
-    { value: 'p6', label: 'Primary 6' }
-];
-
-const SUBJECT_OPTIONS = [
-    { value: 'all', label: 'All Subjects', color: '#8b5cf6' },
-    { value: 'math', label: 'Mathematics', color: '#3a7a5a' },
-    { value: 'eng', label: 'English', color: '#4a7a8a' },
-    { value: 'kiny', label: 'Kinyarwanda', color: '#b8983a' },
-    { value: 'sci', label: 'Science', color: '#c45a4a' }
-];
-
-const TERM_OPTIONS = [
-    { value: 'all', label: 'All Terms' },
-    { value: '3', label: 'Term 3' },
-    { value: '2', label: 'Term 2' },
-    { value: '1', label: 'Term 1' }
-];
-
-const ASSESSMENTS = [
-    { id: 'quiz1', label: 'Quiz 1', max: 20 },
-    { id: 'quiz2', label: 'Quiz 2', max: 20 },
-    { id: 'quiz3', label: 'Quiz 3', max: 20 },
-    { id: 'quiz4', label: 'Quiz 4', max: 50 },
-    { id: 'midterm', label: 'Mid-Term', max: 100 },
-    { id: 'assignment', label: 'Assignment', max: 30 },
-    { id: 'exam1', label: 'Exam 1', max: 100 }
-];
-
-function buildMockRows() {
-    // Deterministic-looking mock scores per student per assessment.
-    // Some cells are intentionally null to represent "not entered".
-    const names = [
-        'HABIMANA Eric', 'INGABIRE Sarah', 'KAMALI Moses', 'MUGISHA Jean',
-        'NIYONZIMA Claire', 'UWERA Grace', 'ISHIMWE Jean', 'MUKAMANA Ange',
-        'MUGISHA Paul', 'NKURUNZIZA Alice', 'HABIMANA Jean', 'KAMALI Grace',
-        'MUGISHA Grace', 'UWIMANA Alice', 'BIZIMANA Eric', 'NSHIMIYE Paul',
-        'MUTONI Divine', 'KAGABO Fabrice', 'UMUTONI Aline', 'NIYOMUGABO Eric',
-        'MUKANDAYISENGA Jo', 'HAKIZIMANA Paul', 'IRADUKUNDA Sonia',
-        'RUTAYISIRE Eric', 'UWASE Diane', 'NDAYISABA Alex', 'KWIZERA Blaise',
-        'AKIMANA Belise'
-    ];
-
-    let seed = 17;
-    const rand = () => {
-        seed = (seed * 9301 + 49297) % 233280;
-        return seed / 233280;
-    };
-
-    return names.map((name, idx) => {
-        const scores = {};
-        ASSESSMENTS.forEach(a => {
-            const skip = rand() < 0.08;
-            scores[a.id] = skip ? null : Math.round(a.max * (0.35 + rand() * 0.62));
-        });
-        return {
-            id: idx + 1,
-            name,
-            classId: 'p4a',
-            subject: 'math',
-            term: '3',
-            scores
-        };
-    });
-}
-
 // ─── STATE ───────────────────────────────────────────────────────────
 
-let rows = buildMockRows();
-let filters = { classId: 'all', subject: 'all', term: 'all', assessment: 'all', search: '' };
+let filters = { classId: '', subjectId: 'all', termId: '', assessmentId: 'all', search: '' };
 let currentPage = 1;
 const ITEMS_PER_PAGE = 8;
+let hasTriedLazyLoad = false;
+
+// ─── OPTIONS (real) ──────────────────────────────────────────────────
+
+function getClassOptions() {
+    return [...(state.classes || [])].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+}
+
+function getSubjectOptions() {
+    return [...(state.subjects || [])].sort((a, b) => (a.sort_order || 99) - (b.sort_order || 99));
+}
+
+function getTermOptions() {
+    return [...(state.terms || [])].sort((a, b) => (a.term_number || 0) - (b.term_number || 0));
+}
+
+const SUBJECT_COLORS = ['#3a7a5a', '#4a7a8a', '#b8983a', '#c45a4a', '#7a5a9a', '#4a5a9a', '#8a6a3a'];
+function subjectColor(subjectId) {
+    const idx = getSubjectOptions().findIndex(s => s.id === subjectId);
+    return SUBJECT_COLORS[idx % SUBJECT_COLORS.length] || '#6a6a6a';
+}
 
 // ─── GRADE HELPERS ───────────────────────────────────────────────────
 
 function getGradeClass(score, max) {
-    if (score === null || score === undefined) return '';
+    if (score === null || score === undefined || !max) return '';
     const pct = (score / max) * 100;
     if (pct >= 90) return 'grade-Ap';
     if (pct >= 80) return 'grade-A';
@@ -111,7 +62,7 @@ function getGradeClass(score, max) {
 }
 
 function getGradeLabel(score, max) {
-    if (score === null || score === undefined) return '—';
+    if (score === null || score === undefined || !max) return '—';
     const pct = (score / max) * 100;
     if (pct >= 90) return 'A+';
     if (pct >= 80) return 'A';
@@ -121,21 +72,52 @@ function getGradeLabel(score, max) {
     return 'F';
 }
 
-// ─── FILTERING ───────────────────────────────────────────────────────
+// ─── DATA ────────────────────────────────────────────────────────────
 
-function getFilteredRows() {
-    return rows.filter(r => {
-        if (filters.classId !== 'all' && r.classId !== filters.classId) return false;
-        if (filters.subject !== 'all' && r.subject !== filters.subject) return false;
-        if (filters.term !== 'all' && r.term !== filters.term) return false;
-        if (filters.search && !r.name.toLowerCase().includes(filters.search.toLowerCase())) return false;
+/** Real assessments matching the current class/subject/term filters,
+ *  used as the table's columns. */
+function getVisibleAssessments() {
+    if (!filters.classId) return [];
+    return (state.assessments || []).filter(a => {
+        if (String(a.class_id) !== String(filters.classId)) return false;
+        if (filters.termId && String(a.term_id) !== String(filters.termId)) return false;
+        if (filters.subjectId !== 'all' && String(a.subject_id) !== String(filters.subjectId)) return false;
+        if (filters.assessmentId !== 'all' && String(a.id) !== String(filters.assessmentId)) return false;
         return true;
-    });
+    }).sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
 }
 
-function getVisibleAssessments() {
-    if (filters.assessment === 'all') return ASSESSMENTS;
-    return ASSESSMENTS.filter(a => a.id === filters.assessment);
+/** Real, active students in the selected class, each carrying a
+ *  scores map keyed by assessment_id built from real state.marks. */
+function getFilteredRows() {
+    if (!filters.classId) return [];
+    const cols = getVisibleAssessments();
+    const marksByAssessment = new Map();
+    (state.marks || []).forEach(m => {
+        if (!marksByAssessment.has(m.assessment_id)) marksByAssessment.set(m.assessment_id, new Map());
+        marksByAssessment.get(m.assessment_id).set(m.student_id, m);
+    });
+
+    return (state.students || [])
+        .filter(s => String(s.class_id) === String(filters.classId) && !s.is_deleted && (s.status || 'Active') === 'Active')
+        .filter(s => {
+            if (!filters.search) return true;
+            const name = `${s.first_name || ''} ${s.last_name || ''}`.toLowerCase();
+            return name.includes(filters.search.toLowerCase());
+        })
+        .map(s => {
+            const scores = {};
+            cols.forEach(a => {
+                const mark = marksByAssessment.get(a.id)?.get(s.id);
+                scores[a.id] = mark && !mark.is_absent ? mark.score : (mark && mark.is_absent ? 'ABS' : null);
+            });
+            return {
+                id: s.id,
+                name: `${s.first_name || ''} ${s.last_name || ''}`.trim() || `Student #${s.id}`,
+                scores,
+            };
+        })
+        .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 // ─── RENDER ────────────────────────────────────────────────────────
@@ -146,23 +128,45 @@ function renderMarksDatabase(container) {
         return;
     }
 
+    if (!filters.classId) {
+        const firstClass = getClassOptions()[0];
+        if (firstClass) filters.classId = String(firstClass.id);
+    }
+    if (!filters.termId && window.getActiveTermId) {
+        filters.termId = String(window.getActiveTermId() || '');
+    }
+
+    const classOptions = getClassOptions();
+    const subjectOptions = getSubjectOptions();
+    const termOptions = getTermOptions();
+    const assessmentOptions = filters.classId
+        ? (state.assessments || []).filter(a =>
+            String(a.class_id) === String(filters.classId) &&
+            (!filters.termId || String(a.term_id) === String(filters.termId)) &&
+            (filters.subjectId === 'all' || String(a.subject_id) === String(filters.subjectId))
+        )
+        : [];
+
     container.innerHTML = `
         <div class="marks-database-page">
 
             <!-- ═══ FILTERS ═══ -->
             <div class="marks-db-filters">
                 <select class="marks-toolbar__select" id="db-class">
-                    ${CLASS_OPTIONS.map(o => `<option value="${o.value}" ${o.value === filters.classId ? 'selected' : ''}>${esc(o.label)}</option>`).join('')}
+                    <option value="">Choose a class…</option>
+                    ${classOptions.map(c => `<option value="${c.id}" ${String(c.id) === String(filters.classId) ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}
                 </select>
                 <select class="marks-toolbar__select" id="db-subject">
-                    ${SUBJECT_OPTIONS.map(o => `<option value="${o.value}" ${o.value === filters.subject ? 'selected' : ''}>${esc(o.label)}</option>`).join('')}
+                    <option value="all">All Subjects</option>
+                    ${subjectOptions.map(s => `<option value="${s.id}" ${String(s.id) === String(filters.subjectId) ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}
                 </select>
                 <select class="marks-toolbar__select" id="db-term">
-                    ${TERM_OPTIONS.map(o => `<option value="${o.value}" ${o.value === filters.term ? 'selected' : ''}>${esc(o.label)}</option>`).join('')}
+                    <option value="">All Terms</option>
+                    ${termOptions.map(t => `<option value="${t.id}" ${String(t.id) === String(filters.termId) ? 'selected' : ''}>Term ${esc(t.term_number)}</option>`).join('')}
                 </select>
                 <select class="marks-toolbar__select" id="db-assessment">
-                    <option value="all" ${filters.assessment === 'all' ? 'selected' : ''}>All Assessments</option>
-                    ${ASSESSMENTS.map(a => `<option value="${a.id}" ${a.id === filters.assessment ? 'selected' : ''}>${esc(a.label)}</option>`).join('')}
+                    <option value="all">All Assessments</option>
+                    ${assessmentOptions.map(a => `<option value="${a.id}" ${String(a.id) === String(filters.assessmentId) ? 'selected' : ''}>${esc(a.name)}</option>`).join('')}
                 </select>
                 <input type="text" id="db-search" placeholder="Search student..." value="${esc(filters.search)}" style="min-width:180px;" />
                 <button class="btn btn-primary btn-sm" id="db-search-btn"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
@@ -203,16 +207,32 @@ function renderMarksDatabase(container) {
     renderSubjectLegend(container);
     renderAll();
     wireFilters(container);
+
+    // assessments/marks for the active term are lazily loaded — trigger
+    // once per visit if this session hasn't already, then re-render with
+    // real data once available.
+    const termId = filters.termId;
+    const needsAssessments = termId && !(state.assessments || []).some(a => String(a.term_id) === String(termId));
+    if (!hasTriedLazyLoad && termId && needsAssessments) {
+        hasTriedLazyLoad = true;
+        window.loadAllAssessmentsForTerm?.(termId)
+            .then(() => window.loadAllMarksForTerm?.(termId))
+            .then(() => { if (container.isConnected) renderMarksDatabase(container); })
+            .catch(() => {});
+    }
 }
 
 function renderSubjectLegend(container) {
     const el = container.querySelector('#db-subject-legend');
     if (!el) return;
-    el.innerHTML = SUBJECT_OPTIONS.filter(s => s.value !== 'all').map(s => `
-        <span class="subject-chip" style="background:${s.color}1f;color:${s.color};">
-            <span class="subject-chip__dot" style="background:${s.color};"></span>${esc(s.label)}
+    el.innerHTML = getSubjectOptions().map(s => {
+        const color = subjectColor(s.id);
+        return `
+        <span class="subject-chip" style="background:${color}1f;color:${color};">
+            <span class="subject-chip__dot" style="background:${color};"></span>${esc(s.name)}
         </span>
-    `).join('');
+    `;
+    }).join('');
 }
 
 function renderAll() {
@@ -232,7 +252,7 @@ function renderTableHead() {
     thead.innerHTML = `
         <tr>
             <th style="position:sticky;left:0;z-index:2;background:var(--bg-card, #fcfaf8);text-align:left;padding:10px 12px;">Student</th>
-            ${cols.map(a => `<th style="text-align:center;padding:10px 12px;white-space:nowrap;">${esc(a.label)}<div style="font-weight:400;font-size:0.65rem;opacity:0.6;">/${a.max}</div></th>`).join('')}
+            ${cols.map(a => `<th style="text-align:center;padding:10px 12px;white-space:nowrap;">${esc(a.name)}<div style="font-weight:400;font-size:0.65rem;opacity:0.6;">/${esc(a.max_score)}</div></th>`).join('')}
         </tr>
     `;
 }
@@ -244,12 +264,23 @@ function renderTableBody() {
     const countBadge = document.getElementById('db-count-badge');
     if (!tbody) return;
 
+    if (!filters.classId) {
+        tbody.innerHTML = `<tr><td style="text-align:center;padding:32px;color:var(--text-soft);">Choose a class above to see its marks.</td></tr>`;
+        if (countBadge) countBadge.textContent = '';
+        return;
+    }
+
     const filtered = getFilteredRows();
     const cols = getVisibleAssessments();
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     const pageRows = filtered.slice(start, start + ITEMS_PER_PAGE);
 
     if (countBadge) countBadge.textContent = `Showing ${pageRows.length} of ${filtered.length} students`;
+
+    if (!cols.length) {
+        tbody.innerHTML = `<tr><td style="text-align:center;padding:24px;color:var(--text-soft);">No assessments recorded yet for this class/subject/term.</td></tr>`;
+        return;
+    }
 
     if (!pageRows.length) {
         tbody.innerHTML = `<tr><td colspan="${cols.length + 1}" style="text-align:center;padding:24px;color:var(--text-soft);">No matching students.</td></tr>`;
@@ -261,12 +292,15 @@ function renderTableBody() {
             <td class="student-name-cell" style="position:sticky;left:0;background:var(--bg-card, #fcfaf8);font-weight:600;padding:8px 12px;white-space:nowrap;">${esc(r.name)}</td>
             ${cols.map(a => {
         const score = r.scores[a.id];
-        const gradeCls = getGradeClass(score, a.max);
-        const gradeLabel = getGradeLabel(score, a.max);
+        if (score === 'ABS') {
+            return `<td class="grade-cell" style="text-align:center;padding:8px 12px;"><span class="badge badge-neutral" title="Absent">ABS</span></td>`;
+        }
+        const gradeCls = getGradeClass(score, a.max_score);
+        const gradeLabel = getGradeLabel(score, a.max_score);
         return `
                     <td class="grade-cell" style="text-align:center;padding:8px 12px;">
                         ${score !== null && score !== undefined
-                ? `<span class="grade-pill ${gradeCls}" title="${score}/${a.max}">${score}</span> <span style="font-size:0.65rem;opacity:0.6;">${gradeLabel}</span>`
+                ? `<span class="grade-pill ${gradeCls}" title="${esc(score)}/${esc(a.max_score)}">${esc(score)}</span> <span style="font-size:0.65rem;opacity:0.6;">${gradeLabel}</span>`
                 : `<span style="color:var(--text-muted);">—</span>`}
                     </td>
                 `;
@@ -286,7 +320,7 @@ function renderStatStrip() {
     const allScores = [];
     filtered.forEach(r => cols.forEach(a => {
         const s = r.scores[a.id];
-        if (s !== null && s !== undefined) allScores.push((s / a.max) * 100);
+        if (s !== null && s !== undefined && s !== 'ABS' && a.max_score) allScores.push((s / a.max_score) * 100);
     }));
 
     const total = allScores.length;
@@ -358,18 +392,21 @@ function renderPagination() {
 function wireFilters(container) {
     container.querySelector('#db-class')?.addEventListener('change', (e) => {
         filters.classId = e.target.value;
-        applyFilters();
+        filters.assessmentId = 'all';
+        renderMarksDatabase(container);
     });
     container.querySelector('#db-subject')?.addEventListener('change', (e) => {
-        filters.subject = e.target.value;
-        applyFilters();
+        filters.subjectId = e.target.value;
+        filters.assessmentId = 'all';
+        renderMarksDatabase(container);
     });
     container.querySelector('#db-term')?.addEventListener('change', (e) => {
-        filters.term = e.target.value;
-        applyFilters();
+        filters.termId = e.target.value;
+        filters.assessmentId = 'all';
+        renderMarksDatabase(container);
     });
     container.querySelector('#db-assessment')?.addEventListener('change', (e) => {
-        filters.assessment = e.target.value;
+        filters.assessmentId = e.target.value;
         renderTableHead();
         applyFilters();
     });
@@ -399,7 +436,11 @@ function applyFilters() {
 function exportCsv() {
     const filtered = getFilteredRows();
     const cols = getVisibleAssessments();
-    const header = ['Student', ...cols.map(c => c.label)].join(',');
+    if (!filtered.length || !cols.length) {
+        notify('Nothing to export for the current filters', 'warning');
+        return;
+    }
+    const header = ['Student', ...cols.map(c => c.name)].join(',');
     const lines = filtered.map(r => {
         const cells = cols.map(a => {
             const s = r.scores[a.id];

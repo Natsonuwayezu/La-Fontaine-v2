@@ -145,6 +145,41 @@ function getSupabaseCredentials() {
    EXPOSE TO WINDOW (for debugging and legacy onclick handlers)
    ═══════════════════════════════════════════════════════════════════ */
 
+/**
+ * Alias for isSupabaseConfigured() — called by boot.js step 5.
+ */
+function hasSupabaseCredentials() {
+    return isSupabaseConfigured();
+}
+
+/**
+ * Test the Supabase connection with a lightweight request.
+ * Returns { ok: boolean, error: string|null }
+ */
+async function testSupabaseConnection() {
+    try {
+        const url = getSupabaseUrl();
+        const key = getSupabaseKey();
+        if (!url || !key) return { ok: false, error: 'No credentials configured' };
+        const res = await fetch(`${url}/rest/v1/`, {
+            method : 'GET',
+            headers: { 'apikey': key, 'Authorization': `Bearer ${key}` },
+        });
+        // 200 = connected, 400 = connected but bad path, both mean server reachable
+        if (res.ok || res.status === 400) return { ok: true, error: null };
+        return { ok: false, error: `HTTP ${res.status}` };
+    } catch (err) {
+        return { ok: false, error: err.message };
+    }
+}
+
+/**
+ * Alias for setSupabaseCredentials() — called by boot.js API setup screen.
+ */
+function saveSupabaseCredentials(url, key) {
+    return setSupabaseCredentials(url, key);
+}
+
 window.SUPABASE_URL = getSupabaseUrl();
 window.SUPABASE_KEY = getSupabaseKey();
 window.SUPABASE_DEFAULT_URL = DEFAULT_SUPABASE_URL;
@@ -158,3 +193,6 @@ window.getSupabaseKey = getSupabaseKey;
 window.getSupabaseCredentials = getSupabaseCredentials;
 window.setSupabaseCredentials = setSupabaseCredentials;
 window.resetSupabaseCredentials = resetSupabaseCredentials;
+window.hasSupabaseCredentials  = hasSupabaseCredentials;
+window.testSupabaseConnection  = testSupabaseConnection;
+window.saveSupabaseCredentials = saveSupabaseCredentials;

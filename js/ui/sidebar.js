@@ -233,7 +233,7 @@ function renderBadgeRow() {
   });
 
   document.getElementById('sidebar-help-btn')?.addEventListener('click', () => {
-    if (window.Router) window.Router.navigate('help');
+    navigateTo('help-center');
     closeBadgeDropdowns();
   });
 
@@ -523,7 +523,7 @@ function navigate(moduleId) {
 
   // Use Router if available
   if (window.Router) {
-    window.Router.navigate(moduleId);
+    navigateTo(moduleId);
   } else {
     console.log('[Sidebar] Navigate to:', moduleId);
   }

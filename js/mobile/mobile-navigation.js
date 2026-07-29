@@ -134,9 +134,7 @@ const MobileNavigation = (() => {
     }
 
     // Navigate to the module
-    if (window.Router && typeof window.Router.navigate === 'function') {
-      window.Router.navigate(id);
-    } else if (window.navigateTo) {
+    navigateTo(id); else if (window.navigateTo) {
       window.navigateTo(id);
     } else if (window.loadModule) {
       window.loadModule(id);

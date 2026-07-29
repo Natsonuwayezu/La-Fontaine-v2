@@ -172,7 +172,7 @@ const Topbar = (() => {
     // ── Notifications ──────────────────────────────────────────
     document.getElementById('topbar-notif-btn')?.addEventListener('click', () => {
       if (window.Router) {
-        window.Router.navigate('notifications');
+        navigateTo('notifications');
       }
     });
 

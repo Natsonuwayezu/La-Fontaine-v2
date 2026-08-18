@@ -5,23 +5,37 @@
    manually archived). Restorable back to active status with a
    confirmation, since restoring affects class rosters and fee
    assignments going forward.
+
+   Reads real state.students where status != 'Active'. There's no
+   dedicated archive_reason/archived_at column on the real students
+   table yet (a real gap worth adding later) -- "Date" uses updated_at
+   as the best available proxy for when the status last changed, and
+   "Reason" shows s.archive_reason if present, '—' otherwise, rather
+   than fabricating one.
+
+   Last updated: 2026-07-29
    ═══════════════════════════════════════════════════════════════════ */
 
 const StudentArchive = (() => {
-
-  // MOCK_DATA — replace with core/api.js (status != 'active')
-  const MOCK_ARCHIVED = [
-    { id: 'STU-2019-0210', name: 'TUYISHIME Alice', classId: 'Primary 6', status: 'graduated', date: '2026-06-28', reason: 'Completed Primary 6' },
-    { id: 'STU-2020-0004', name: 'MUGABO Patrick', classId: 'Primary 6', status: 'transferred', date: '2026-05-15', reason: 'Family relocated to Kigali' },
-    { id: 'STU-2018-0077', name: 'NDAYAMBAJE Eric', classId: 'Primary 5B', status: 'transferred', date: '2026-03-02', reason: 'Transferred to St. Joseph School' },
-    { id: 'STU-2017-0012', name: 'UWIMANA Claudine', classId: 'Primary 6', status: 'graduated', date: '2025-11-20', reason: 'Completed Primary 6' },
-    { id: 'STU-2021-0303', name: 'HAKIZIMANA Paul', classId: 'Primary 3A', status: 'archived', date: '2026-02-10', reason: 'Withdrawn \u2014 non-payment' }
-  ];
 
   function escapeHTML(str) {
     const div = document.createElement('div');
     div.textContent = str ?? '';
     return div.innerHTML;
+  }
+
+  function getArchived() {
+    const classMap = new Map((state.classes || []).map(c => [c.id, c.name]));
+    return (state.students || [])
+      .filter(s => !s.is_deleted && (s.status || 'Active') !== 'Active')
+      .map(s => ({
+        id: s.id,
+        name: `${s.first_name || ''} ${s.last_name || ''}`.trim() || `Student #${s.id}`,
+        classId: classMap.get(s.class_id) || '—',
+        status: s.status,
+        date: s.updated_at ? s.updated_at.slice(0, 10) : '—',
+        reason: s.archive_reason || '—',
+      }));
   }
 
   function render(container) {
@@ -34,10 +48,10 @@ const StudentArchive = (() => {
             <input type="text" class="form-input" id="arch-search" placeholder="Search archived students..." />
           </div>
           <select class="form-select" id="arch-reason-filter">
-            <option value="">All reasons</option>
-            <option value="graduated">Graduated</option>
-            <option value="transferred">Transferred</option>
-            <option value="archived">Withdrawn / Other</option>
+            <option value="">All statuses</option>
+            <option value="Graduated">Graduated</option>
+            <option value="Transferred">Transferred</option>
+            <option value="Archived">Withdrawn / Other</option>
           </select>
           <span class="result-count" id="arch-count"></span>
         </div>
@@ -53,10 +67,10 @@ const StudentArchive = (() => {
 
   function filtered(container) {
     const q = container.querySelector('#arch-search').value.trim().toLowerCase();
-    const reason = container.querySelector('#arch-reason-filter').value;
-    return MOCK_ARCHIVED.filter(s => {
-      if (q && !s.name.toLowerCase().includes(q) && !s.id.toLowerCase().includes(q)) return false;
-      if (reason && s.status !== reason) return false;
+    const status = container.querySelector('#arch-reason-filter').value;
+    return getArchived().filter(s => {
+      if (q && !s.name.toLowerCase().includes(q)) return false;
+      if (status && s.status !== status) return false;
       return true;
     });
   }
@@ -70,45 +84,49 @@ const StudentArchive = (() => {
       rowKey: 'id',
       pageSize: 20,
       columns: [
-        { key: 'name', label: 'Student', sortable: true, render: (s) => `<div style="font-weight:600;">${escapeHTML(s.name)}</div><div style="font-size:0.68rem; color:var(--card-text-muted,#475569);">${escapeHTML(s.id)}</div>` },
+        { key: 'name', label: 'Student', sortable: true, render: (s) => `<div style="font-weight:600;">${escapeHTML(s.name)}</div>` },
         { key: 'classId', label: 'Last Class', sortable: true },
-        { key: 'status', label: 'Status', align: 'center', render: (s) => `<span class="student-status-badge ${s.status}">${s.status}</span>` },
-        { key: 'date', label: 'Date', sortable: true },
+        { key: 'status', label: 'Status', align: 'center', render: (s) => `<span class="student-status-badge ${escapeHTML((s.status || '').toLowerCase())}">${escapeHTML(s.status)}</span>` },
+        { key: 'date', label: 'Date', sortable: true, render: (s) => s.date !== '—' ? esc(fmtDate(s.date)) : '—' },
         { key: 'reason', label: 'Reason', render: (s) => `<span class="archive-reason-badge">${escapeHTML(s.reason)}</span>` },
         { key: 'actions', label: '', align: 'right', render: (s) => `<button class="btn btn-sm btn-outline" data-restore="${s.id}">Restore</button>` }
       ],
       data,
-      onRowClick: (row) => window.Router?.navigate('student-profile', { studentId: row.id }),
+      onRowClick: (row) => window.navigateTo('student-profile', { studentId: row.id }),
       emptyState: { title: 'No archived students', message: 'Graduated, transferred, or withdrawn students will appear here.' }
     });
 
     wrap.querySelectorAll('[data-restore]').forEach(btn => {
-      btn.addEventListener('click', (e) => { e.stopPropagation(); restoreStudent(container, btn.dataset.restore); });
+      btn.addEventListener('click', (e) => { e.stopPropagation(); restoreStudent(container, parseInt(btn.dataset.restore, 10)); });
     });
   }
 
   async function restoreStudent(container, studentId) {
-    const student = MOCK_ARCHIVED.find(s => s.id === studentId);
-    const confirmed = await window.Modals?.confirm({
-      title: 'Restore this student?',
-      message: `${student.name} will be reactivated into ${student.classId} with active status. Fee assignments for the current term will need to be reviewed.`,
-      confirmLabel: 'Restore',
-      tone: 'info'
-    });
+    const student = getArchived().find(s => s.id === studentId);
+    if (!student) return;
+
+    const confirmed = await window.confirmDialog(
+      `${student.name} will be reactivated into ${student.classId} with active status. Fee assignments for the current term will need to be reviewed.`,
+      'Restore this student?',
+      { confirmText: 'Restore' }
+    );
     if (!confirmed) return;
 
-    // TODO(api): core/api.js status update back to 'active'
-    window.Toast?.success('Student restored', `${student.name} is now active in ${student.classId}.`);
-    renderTable(container);
+    try {
+      await update('students', studentId, { status: 'Active' });
+      const raw = (state.students || []).find(s => s.id === studentId);
+      if (raw) raw.status = 'Active';
+      window.Toast?.success('Student restored', `${student.name} is now active in ${student.classId}.`);
+      renderTable(container);
+    } catch (err) {
+      window.Toast?.error('Could not restore student', err?.message);
+    }
   }
 
   return { render };
 })();
 
 // ─── EXPOSE ─────────────────────────────────────────────────────────
-// window.StudentArchive was never assigned anywhere in this file, and the router
-// looks up window.renderStudentArchive specifically (see core/router.js's
-// moduleIdToRenderFn) — this page was completely unreachable via navigation
-// despite being fully built.
+
 window.StudentArchive = StudentArchive;
 window.renderStudentArchive = StudentArchive.render;

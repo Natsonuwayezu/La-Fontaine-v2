@@ -351,7 +351,7 @@ const StudentProfile = (() => {
               <div class="payment-category-item__balance">Balance: <strong>${fmtCurrency(f.balance)}</strong></div>
             </div>
             <div class="payment-category-item__amount-wrap disabled">
-              <input type="text" class="payment-category-item__amount-input" data-fee-amount="${f.id}" data-currency placeholder="0" />
+              <input type="number" class="payment-category-item__amount-input" data-fee-amount="${f.id}" min="0" max="${f.balance}" step="100" placeholder="0" disabled />
               <span class="payment-category-item__currency">RWF</span>
             </div>
             <span class="payment-category-item__max-btn" data-fee-max="${f.id}" data-max-value="${f.balance}">Pay full</span>
@@ -372,16 +372,18 @@ const StudentProfile = (() => {
       cb.addEventListener('change', () => {
         selections[feeId].checked = cb.checked;
         const row = list.querySelector(`[data-fee-row="${feeId}"]`);
+        const input = list.querySelector(`[data-fee-amount="${feeId}"]`);
         row.classList.toggle('checked', cb.checked);
         row.querySelector('.payment-category-item__amount-wrap').classList.toggle('disabled', !cb.checked);
+        input.disabled = !cb.checked;
+        if (!cb.checked) { input.value = ''; selections[feeId].amount = 0; }
         recalc();
       });
     });
 
     list.querySelectorAll('[data-fee-amount]').forEach(input => {
-      window.Forms?.bindCurrencyInput(input);
       input.addEventListener('input', () => {
-        selections[input.dataset.feeAmount].amount = parseInt(input.dataset.rawValue || '0', 10);
+        selections[input.dataset.feeAmount].amount = parseInt(input.value || '0', 10);
         recalc();
       });
     });
@@ -394,8 +396,7 @@ const StudentProfile = (() => {
         const checkbox = list.querySelector(`[data-fee-check="${feeId}"]`);
         checkbox.checked = true;
         checkbox.dispatchEvent(new Event('change'));
-        input.dataset.rawValue = value;
-        input.value = fmtCurrency(value).replace(/\s*RWF\s*/i, '').trim();
+        input.value = value;
         selections[feeId].amount = value;
         recalc();
       });

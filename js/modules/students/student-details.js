@@ -92,55 +92,53 @@ const StudentDetails = (() => {
     };
   }
 
-  window.Modals?.register('student-details-drawer', () => {
-    const s = _activeStudent;
-    return {
-      title: s.name,
-      subtitle: `${s.id} \u00b7 ${s.classId}`,
-      size: 'sm',
-      body: `
-        <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
-          <div class="student-card__avatar" style="margin:0;">${escapeHTML(initials(s.name))}</div>
-          <div>
-            <div style="display:flex; gap:6px;">
-              <span class="student-status-badge ${escapeHTML((s.status || '').toLowerCase())}">${escapeHTML(s.status)}</span>
-              <span class="fee-status-chip ${escapeHTML(s.feeStatus)}">${escapeHTML(s.feeStatus)}</span>
-            </div>
+  function drawerContent(s) {
+    return `
+      <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
+        <div class="student-card__avatar" style="margin:0;">${escapeHTML(initials(s.name))}</div>
+        <div>
+          <div style="font-weight:600;">${escapeHTML(s.name)}</div>
+          <div style="display:flex; gap:6px; margin-top:4px;">
+            <span class="student-status-badge ${escapeHTML((s.status || '').toLowerCase())}">${escapeHTML(s.status)}</span>
+            <span class="fee-status-chip ${escapeHTML(s.feeStatus)}">${escapeHTML(s.feeStatus)}</span>
           </div>
         </div>
-        <div class="profile-info-grid" style="grid-template-columns:1fr 1fr;">
-          <div class="profile-info-item"><span class="k">Gender</span><span class="v">${s.gender === 'M' ? 'Male' : (s.gender === 'F' ? 'Female' : '\u2014')}</span></div>
-          <div class="profile-info-item"><span class="k">Date of Birth</span><span class="v">${s.dob ? esc(fmtDate(s.dob)) : '\u2014'}</span></div>
-          <div class="profile-info-item"><span class="k">Guardian</span><span class="v">${escapeHTML(s.guardianName)}</span></div>
-          <div class="profile-info-item"><span class="k">Phone</span><span class="v">${escapeHTML(s.guardianPhone)}</span></div>
-          <div class="profile-info-item"><span class="k">Fee Balance</span><span class="v" style="color:${s.feeStatus === 'unpaid' ? 'var(--danger)' : 'var(--card-text,#e2e8f0)'};">${escapeHTML(s.balance)}</span></div>
-          <div class="profile-info-item"><span class="k">Class Average</span><span class="v">${s.average}%</span></div>
-        </div>
-        ${s.attendanceRate !== null ? `
-        <div class="stats-inline-bar" style="margin-top:12px;">
-          <span style="font-size:0.72rem; color:var(--card-text-muted,#475569); min-width:90px;">Attendance</span>
-          <div class="stats-inline-bar__track"><div class="stats-inline-bar__fill" style="width:${s.attendanceRate}%; background:var(--attendance-accent, #f59e0b);"></div></div>
-          <span class="stats-inline-bar__value">${s.attendanceRate}%</span>
-        </div>` : ''}
-      `,
-      footer: `
-        <button class="btn btn-outline" data-modal-close>Close</button>
-        <button class="btn btn-primary" data-open-full>Open Full Profile</button>
-      `,
-      onMount(modal, record) {
-        modal.querySelector('[data-open-full]').addEventListener('click', () => {
-          window.Modals?.close(record);
-          window.navigateTo('student-profile', { studentId: s.id });
-        });
-      }
-    };
-  });
-
-  let _activeStudent = null;
+      </div>
+      <div class="profile-info-grid" style="grid-template-columns:1fr 1fr;">
+        <div class="profile-info-item"><span class="k">Gender</span><span class="v">${s.gender === 'M' ? 'Male' : (s.gender === 'F' ? 'Female' : '\u2014')}</span></div>
+        <div class="profile-info-item"><span class="k">Date of Birth</span><span class="v">${s.dob ? esc(fmtDate(s.dob)) : '\u2014'}</span></div>
+        <div class="profile-info-item"><span class="k">Guardian</span><span class="v">${escapeHTML(s.guardianName)}</span></div>
+        <div class="profile-info-item"><span class="k">Phone</span><span class="v">${escapeHTML(s.guardianPhone)}</span></div>
+        <div class="profile-info-item"><span class="k">Fee Balance</span><span class="v" style="color:${s.feeStatus === 'unpaid' ? 'var(--danger)' : 'var(--card-text,#e2e8f0)'};">${escapeHTML(s.balance)}</span></div>
+        <div class="profile-info-item"><span class="k">Class Average</span><span class="v">${s.average}%</span></div>
+      </div>
+      ${s.attendanceRate !== null ? `
+      <div class="stats-inline-bar" style="margin-top:12px;">
+        <span style="font-size:0.72rem; color:var(--card-text-muted,#475569); min-width:90px;">Attendance</span>
+        <div class="stats-inline-bar__track"><div class="stats-inline-bar__fill" style="width:${s.attendanceRate}%; background:var(--attendance-accent, #f59e0b);"></div></div>
+        <span class="stats-inline-bar__value">${s.attendanceRate}%</span>
+      </div>` : ''}
+    `;
+  }
 
   async function open(studentId) {
-    _activeStudent = await fetchStudent(studentId);
-    window.Modals?.open('student-details-drawer');
+    const s = await fetchStudent(studentId);
+    const modalId = window.showModal(drawerContent(s), {
+      title: s.name,
+      size: 'sm',
+      closeOnOutside: true,
+      closeOnEscape: true,
+      footer: `
+        <button class="btn btn-outline" id="sd-close-btn">Close</button>
+        <button class="btn btn-primary" id="sd-open-full-btn">Open Full Profile</button>
+      `,
+    });
+    const modalEl = document.getElementById(modalId);
+    modalEl?.querySelector('#sd-close-btn')?.addEventListener('click', () => window.closeModal(modalId));
+    modalEl?.querySelector('#sd-open-full-btn')?.addEventListener('click', () => {
+      window.closeModal(modalId);
+      window.navigateTo('student-profile', { studentId: s.id });
+    });
   }
 
   // Router support: if 'student-details' is ever navigated to directly

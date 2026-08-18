@@ -2,11 +2,19 @@
    js/modules/students/student-promotion.js
    ═══════════════════════════════════════════════════════════════════
    End-of-year batch workflow: pick a class, review each student's
-   pre-filled decision (Promote/Repeat/Transfer/Graduate, seeded from
-   their pass/fail decision per Section 3.2), adjust individually if
-   needed, then execute as one batch with a determinate progress
-   overlay (this is exactly the kind of long-running bulk action
-   js/ui/loaders.js's task overlay exists for).
+   pre-filled decision seeded from the real, shared getPromotionDecision()
+   formula (core/formulas.js — the same one used elsewhere in the
+   grading engine), adjust individually if needed, then execute as one
+   real batch of database updates with a determinate progress overlay.
+
+   "Next class" is resolved via the real classes table's sort_order
+   column (state.classes, confirmed in js/modules/settings/
+   class-management.js as the school's actual progression ordering) —
+   the class with sort_order = current.sort_order + 1 — rather than a
+   hardcoded name-string chain that only worked for one specific set of
+   class names.
+
+   Last updated: 2026-07-29
    ═══════════════════════════════════════════════════════════════════ */
 
 const StudentPromotion = (() => {
@@ -18,25 +26,18 @@ const StudentPromotion = (() => {
     { value: 'graduate', label: 'Graduate', color: 'var(--academics-accent, #8b5cf6)' }
   ];
 
-  // Which class a promoted student moves into
-  const NEXT_CLASS = {
-    'Baby Class': 'Middle Class', 'Middle Class': 'Top Class', 'Top Class': 'Primary 1',
-    'Primary 1': 'Primary 2', 'Primary 2': 'Primary 3', 'Primary 3': 'Primary 4',
-    'Primary 4': 'Primary 5', 'Primary 5': 'Primary 6', 'Primary 6': null // graduates
+  // Maps the real getPromotionDecision() formula's decision codes to
+  // this page's editable dropdown values -- teachers can still override
+  // (e.g. to "transfer" instead of "repeat"), the formula just seeds a
+  // sensible starting point instead of everyone defaulting to "promote".
+  const FORMULA_TO_OPTION = {
+    PROMOTED: 'promote',
+    GRADUATED: 'graduate',
+    REMEDIAL: 'repeat',
+    REPEATED: 'repeat',
   };
 
-  // MOCK_DATA — replace with core/api.js (students + their final average/decision)
-  const MOCK_ROSTER = {
-    'Primary 3': [
-      { id: 'STU-2024-0201', name: 'KAMALI Moses', average: 81, decision: 'promote' },
-      { id: 'STU-2024-0202', name: 'KAMALI Jean', average: 52, decision: 'promote' },
-      { id: 'STU-2023-0175', name: 'NIYONZIMA Claude', average: 38, decision: 'repeat' },
-      { id: 'STU-2022-0099', name: 'BIZIMANA Eric', average: 64, decision: 'promote' },
-      { id: 'STU-2021-0044', name: 'MUKAMANA Alice', average: 45, decision: 'repeat' }
-    ]
-  };
-
-  let selectedClass = null;
+  let selectedClassId = null;
   let roster = [];
 
   function escapeHTML(str) {
@@ -45,14 +46,67 @@ const StudentPromotion = (() => {
     return div.innerHTML;
   }
 
+  function getClassOptions() {
+    return [...(state.classes || [])].sort((a, b) => (a.sort_order || 99) - (b.sort_order || 99));
+  }
+
+  function getNextClass(currentClass) {
+    if (!currentClass) return null;
+    return (state.classes || []).find(c => c.sort_order === (currentClass.sort_order || 0) + 1) || null;
+  }
+
+  // ─── DATA ────────────────────────────────────────────────────────
+
+  /** Real students in the class, with a real annual average (across
+   *  every real mark for this student in the active academic year,
+   *  not just the current term) and a decision seeded from the real
+   *  shared getPromotionDecision() formula. */
+  function buildRoster(classId) {
+    const cls = (state.classes || []).find(c => c.id === Number(classId));
+    if (!cls) return [];
+
+    const yearTermIds = new Set((state.terms || [])
+      .filter(t => !window.getActiveYearId || t.academic_year_id === window.getActiveYearId())
+      .map(t => t.id));
+    const yearAssessmentIds = new Set((state.assessments || [])
+      .filter(a => yearTermIds.has(a.term_id))
+      .map(a => a.id));
+
+    return (state.students || [])
+      .filter(s => String(s.class_id) === String(classId) && !s.is_deleted && (s.status || 'Active') === 'Active')
+      .map(s => {
+        const myMarks = (state.marks || []).filter(m =>
+          m.student_id === s.id && yearAssessmentIds.has(m.assessment_id) && !m.is_absent && m.score !== null && m.score !== undefined
+        );
+        const pcts = myMarks.map(m => {
+          const a = (state.assessments || []).find(x => x.id === m.assessment_id);
+          return a?.max_score ? (m.score / a.max_score) * 100 : null;
+        }).filter(p => p !== null);
+        const average = pcts.length ? Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length) : 0;
+
+        const formulaResult = getPromotionDecision(average, cls.name);
+        return {
+          id: s.id,
+          name: `${s.first_name || ''} ${s.last_name || ''}`.trim() || `Student #${s.id}`,
+          average,
+          hasMarks: pcts.length > 0,
+          decision: FORMULA_TO_OPTION[formulaResult.decision] || 'promote',
+        };
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  // ─── RENDER ────────────────────────────────────────────────────────
+
   function render(container) {
     if (!container) return;
+    const classOptions = getClassOptions();
     container.innerHTML = `
       <div class="dashboard-page">
         <div class="reports-toolbar">
           <select class="form-select" id="promo-class-select" style="min-width:220px;">
             <option value="">Select a class...</option>
-            ${[...CLASS_LEVELS.nursery, ...CLASS_LEVELS.primary].map(c => `<option value="${c}">${c}</option>`).join('')}
+            ${classOptions.map(c => `<option value="${c.id}">${escapeHTML(c.name)}</option>`).join('')}
           </select>
           <div class="reports-toolbar__spacer"></div>
           <span class="result-count" id="promo-count"></span>
@@ -65,11 +119,12 @@ const StudentPromotion = (() => {
   }
 
   function loadClass(container, classId) {
-    selectedClass = classId;
+    selectedClassId = classId;
     const body = container.querySelector('#promo-body');
     if (!classId) { body.innerHTML = ''; container.querySelector('#promo-count').textContent = ''; return; }
 
-    roster = (MOCK_ROSTER[classId] || []).map(s => ({ ...s })); // clone so edits don't mutate mock source
+    const cls = (state.classes || []).find(c => c.id === Number(classId));
+    roster = buildRoster(classId);
     container.querySelector('#promo-count').textContent = `${roster.length} students`;
 
     if (!roster.length) {
@@ -77,10 +132,12 @@ const StudentPromotion = (() => {
       return;
     }
 
+    const nextClass = getNextClass(cls);
+
     body.innerHTML = `
       <div class="dash-card">
         <div class="dash-card-header">
-          <span class="dash-card-title">${escapeHTML(classId)} \u2192 ${NEXT_CLASS[classId] ? escapeHTML(NEXT_CLASS[classId]) : 'Graduation'}</span>
+          <span class="dash-card-title">${escapeHTML(cls.name)} \u2192 ${nextClass ? escapeHTML(nextClass.name) : 'Graduation'}</span>
           <div style="display:flex; gap:8px;">
             <button class="btn btn-sm btn-outline" data-bulk-set="promote">Set all: Promote</button>
             <button class="btn btn-sm btn-outline" data-bulk-set="repeat">Set all: Repeat</button>
@@ -112,8 +169,8 @@ const StudentPromotion = (() => {
         <thead><tr><th>Student</th><th style="text-align:center;">Average</th><th style="text-align:center;">Decision</th></tr></thead>
         <tbody>${roster.map(s => `
           <tr>
-            <td>${escapeHTML(s.name)} <span style="color:var(--card-text-muted,#475569); font-size:0.7rem;">${s.id}</span></td>
-            <td style="text-align:center; color:${s.average < 50 ? 'var(--danger)' : 'var(--success)'};">${s.average}%</td>
+            <td>${escapeHTML(s.name)}</td>
+            <td style="text-align:center; color:${s.average < 50 ? 'var(--danger)' : 'var(--success)'};">${s.hasMarks ? `${s.average}%` : '<span style="color:var(--text-soft);">No marks</span>'}</td>
             <td style="text-align:center;">
               <select class="form-select" data-decision="${s.id}" style="min-width:130px;">
                 ${DECISION_OPTIONS.map(o => `<option value="${o.value}" ${s.decision === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
@@ -125,21 +182,25 @@ const StudentPromotion = (() => {
     `;
     wrap.querySelectorAll('[data-decision]').forEach(sel => {
       sel.addEventListener('change', () => {
-        roster.find(s => s.id === sel.dataset.decision).decision = sel.value;
+        roster.find(s => s.id === parseInt(sel.dataset.decision, 10)).decision = sel.value;
       });
     });
   }
+
+  // ─── EXECUTE (real batch DB updates) ─────────────────────────────────
 
   async function executePromotion(container) {
     const summary = roster.reduce((acc, s) => { acc[s.decision] = (acc[s.decision] || 0) + 1; return acc; }, {});
     const summaryText = Object.entries(summary).map(([k, v]) => `${v} ${DECISION_OPTIONS.find(o => o.value === k)?.label.toLowerCase()}`).join(', ');
 
-    const confirmed = await window.Modals?.confirm({
-      title: `Promote ${roster.length} students?`,
-      message: `${summaryText}. This updates each student's class assignment for the new academic year and cannot be easily undone in bulk.`,
-      confirmLabel: 'Execute Promotion',
-      tone: 'warning'
-    });
+    const cls = (state.classes || []).find(c => c.id === Number(selectedClassId));
+    const nextClass = getNextClass(cls);
+
+    const confirmed = await window.confirmDialog(
+      `${summaryText}. This updates each student's class assignment for the new academic year and cannot be easily undone in bulk.`,
+      `Promote ${roster.length} students?`,
+      { confirmText: 'Execute Promotion', confirmClass: 'btn-danger' }
+    );
     if (!confirmed) return;
 
     const handle = window.Loaders?.task?.show('students', {
@@ -148,15 +209,50 @@ const StudentPromotion = (() => {
       determinate: true
     });
 
+    let failCount = 0;
+
     for (let i = 0; i < roster.length; i++) {
-      // TODO(api): core/api.js batch update per student's class_id / status
-      await new Promise(res => setTimeout(res, 80));
+      const s = roster[i];
+      try {
+        if (s.decision === 'promote') {
+          if (nextClass) {
+            await update('students', s.id, { class_id: nextClass.id });
+            const raw = (state.students || []).find(x => x.id === s.id);
+            if (raw) raw.class_id = nextClass.id;
+          } else {
+            // Promoting out of the top class with no defined next class
+            // is effectively a graduation.
+            await update('students', s.id, { status: 'Graduated' });
+            const raw = (state.students || []).find(x => x.id === s.id);
+            if (raw) raw.status = 'Graduated';
+          }
+        } else if (s.decision === 'graduate') {
+          await update('students', s.id, { status: 'Graduated' });
+          const raw = (state.students || []).find(x => x.id === s.id);
+          if (raw) raw.status = 'Graduated';
+        } else if (s.decision === 'transfer') {
+          await update('students', s.id, { status: 'Transferred' });
+          const raw = (state.students || []).find(x => x.id === s.id);
+          if (raw) raw.status = 'Transferred';
+        }
+        // 'repeat' — student stays in the same class_id, nothing to write.
+      } catch (err) {
+        failCount++;
+        console.warn(`[StudentPromotion] failed to update student ${s.id}:`, err.message);
+      }
+
       handle?.setProgress(Math.round(((i + 1) / roster.length) * 100));
       handle?.setSub(`${i + 1} / ${roster.length} students`);
     }
 
     handle?.hide();
-    window.Toast?.success('Promotion complete', `${roster.length} students in ${selectedClass} processed: ${summaryText}.`);
+
+    if (failCount > 0) {
+      window.Toast?.warning('Promotion completed with errors', `${roster.length - failCount} of ${roster.length} students updated successfully; ${failCount} failed — check the console and retry those individually.`);
+    } else {
+      window.Toast?.success('Promotion complete', `${roster.length} students in ${escapeHTML(cls.name)} processed: ${summaryText}.`);
+    }
+
     container.querySelector('#promo-class-select').value = '';
     container.querySelector('#promo-body').innerHTML = '';
     container.querySelector('#promo-count').textContent = '';
@@ -164,12 +260,8 @@ const StudentPromotion = (() => {
 
   return { render };
 })();
- 
 
 // ─── EXPOSE ─────────────────────────────────────────────────────────
-// window.StudentPromotion was never assigned anywhere in this file, and the router
-// looks up window.renderStudentPromotion specifically (see core/router.js's
-// moduleIdToRenderFn) — this page was completely unreachable via navigation
-// despite being fully built.
+
 window.StudentPromotion = StudentPromotion;
 window.renderStudentPromotion = StudentPromotion.render;

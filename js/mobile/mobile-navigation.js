@@ -134,11 +134,7 @@ const MobileNavigation = (() => {
     }
 
     // Navigate to the module
-    navigateTo(id); else if (window.navigateTo) {
-      window.navigateTo(id);
-    } else if (window.loadModule) {
-      window.loadModule(id);
-    }
+    navigateTo(id);
 
     // Update active state
     setActive(id);

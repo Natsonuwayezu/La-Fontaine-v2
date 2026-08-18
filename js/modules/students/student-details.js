@@ -10,18 +10,18 @@
    Also handles the 'student-details' route directly (router passing
    { studentId } falls through to open() then redirects back, since
    this is a drawer, not really a full page).
+
+   Reads the real state.students/studentFees/creditBalances/marks/
+   assessments, plus a lightweight on-demand fetch of this one
+   student's attendance records for the active term (attendance isn't
+   part of global state — every real attendance module queries it
+   directly, so this follows the same pattern rather than caching a
+   whole extra table just for a summary bar).
+
+   Last updated: 2026-07-29
    ═══════════════════════════════════════════════════════════════════ */
 
 const StudentDetails = (() => {
-
-  // MOCK_DATA — same shape core/api.js will return for a single student
-  const MOCK_STUDENT_LOOKUP = {
-    'STU-2024-0012': {
-      id: 'STU-2024-0012', name: 'MUGISHA Jean', classId: 'Primary 4A', status: 'active',
-      gender: 'M', dob: '2016-03-14', guardianName: 'MUGISHA Emmanuel', guardianPhone: '+250 788 123 456',
-      feeStatus: 'partial', balance: '35,000 RWF', average: 74, attendanceRate: 92
-    }
-  };
 
   function escapeHTML(str) {
     const div = document.createElement('div');
@@ -33,12 +33,62 @@ const StudentDetails = (() => {
     return name.split(' ').map(w => w[0]).slice(0, 2).join('');
   }
 
-  function fetchStudent(studentId) {
-    // TODO(api): replace with core/api.js lookup
-    return MOCK_STUDENT_LOOKUP[studentId] || {
-      id: studentId, name: 'Unknown Student', classId: '\u2014', status: 'active',
-      gender: '\u2014', dob: '\u2014', guardianName: '\u2014', guardianPhone: '\u2014',
-      feeStatus: 'unpaid', balance: '\u2014', average: 0, attendanceRate: 0
+  async function fetchStudent(studentId) {
+    const raw = (state.students || []).find(s => s.id === studentId);
+    if (!raw) {
+      return {
+        id: studentId, name: 'Unknown Student', classId: '—', status: 'Active',
+        gender: '—', dob: '—', guardianName: '—', guardianPhone: '—',
+        feeStatus: 'unknown', balance: '—', average: 0, attendanceRate: null,
+      };
+    }
+
+    const classMap = new Map((state.classes || []).map(c => [c.id, c.name]));
+    const yearId = window.getActiveYearId ? window.getActiveYearId() : null;
+    const termId = window.getActiveTermId ? window.getActiveTermId() : null;
+
+    // Fees
+    const myFees = (state.studentFees || []).filter(f => f.student_id === raw.id && (!yearId || f.academic_year_id === yearId));
+    const creditRow = (state.creditBalances || []).find(c => c.student_id === raw.id);
+    const credit = creditRow ? Number(creditRow.credit_amount || 0) : 0;
+    const summary = computeStudentFeeSummary(myFees, credit);
+    const feeStatus = !myFees.length ? 'unknown' : summary.isFullyPaid ? 'paid' : summary.paid > 0 ? 'partial' : 'unpaid';
+
+    // Academics: average % across real marks in the active term
+    const termAssessmentIds = new Set((state.assessments || []).filter(a => !termId || String(a.term_id) === String(termId)).map(a => a.id));
+    const myMarks = (state.marks || []).filter(m => m.student_id === raw.id && termAssessmentIds.has(m.assessment_id) && !m.is_absent && m.score !== null && m.score !== undefined);
+    const pcts = myMarks.map(m => {
+      const a = (state.assessments || []).find(x => x.id === m.assessment_id);
+      return a?.max_score ? (m.score / a.max_score) * 100 : null;
+    }).filter(p => p !== null);
+    const average = pcts.length ? Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length) : 0;
+
+    // Attendance: real on-demand fetch (not part of global state)
+    let attendanceRate = null;
+    try {
+      const filters = [`student_id=eq.${raw.id}`];
+      if (termId) filters.push(`term_id=eq.${termId}`);
+      const records = await window.getWhere('attendance', filters.join('&'));
+      if (records && records.length) {
+        attendanceRate = computeAttendanceRate(countAttendance(records));
+      }
+    } catch (err) {
+      console.warn('[StudentDetails] attendance fetch failed:', err.message);
+    }
+
+    return {
+      id: raw.id,
+      name: `${raw.first_name || ''} ${raw.last_name || ''}`.trim() || `Student #${raw.id}`,
+      classId: classMap.get(raw.class_id) || '—',
+      status: raw.status || 'Active',
+      gender: raw.gender,
+      dob: raw.date_of_birth,
+      guardianName: raw.guardian_name || '—',
+      guardianPhone: raw.guardian_phone || '—',
+      feeStatus,
+      balance: fmtCurrency(summary.outstanding),
+      average,
+      attendanceRate,
     };
   }
 
@@ -53,24 +103,25 @@ const StudentDetails = (() => {
           <div class="student-card__avatar" style="margin:0;">${escapeHTML(initials(s.name))}</div>
           <div>
             <div style="display:flex; gap:6px;">
-              <span class="student-status-badge ${s.status}">${s.status}</span>
-              <span class="fee-status-chip ${s.feeStatus}">${s.feeStatus}</span>
+              <span class="student-status-badge ${escapeHTML((s.status || '').toLowerCase())}">${escapeHTML(s.status)}</span>
+              <span class="fee-status-chip ${escapeHTML(s.feeStatus)}">${escapeHTML(s.feeStatus)}</span>
             </div>
           </div>
         </div>
         <div class="profile-info-grid" style="grid-template-columns:1fr 1fr;">
           <div class="profile-info-item"><span class="k">Gender</span><span class="v">${s.gender === 'M' ? 'Male' : (s.gender === 'F' ? 'Female' : '\u2014')}</span></div>
-          <div class="profile-info-item"><span class="k">Date of Birth</span><span class="v">${escapeHTML(s.dob)}</span></div>
+          <div class="profile-info-item"><span class="k">Date of Birth</span><span class="v">${s.dob ? esc(fmtDate(s.dob)) : '\u2014'}</span></div>
           <div class="profile-info-item"><span class="k">Guardian</span><span class="v">${escapeHTML(s.guardianName)}</span></div>
           <div class="profile-info-item"><span class="k">Phone</span><span class="v">${escapeHTML(s.guardianPhone)}</span></div>
           <div class="profile-info-item"><span class="k">Fee Balance</span><span class="v" style="color:${s.feeStatus === 'unpaid' ? 'var(--danger)' : 'var(--card-text,#e2e8f0)'};">${escapeHTML(s.balance)}</span></div>
           <div class="profile-info-item"><span class="k">Class Average</span><span class="v">${s.average}%</span></div>
         </div>
+        ${s.attendanceRate !== null ? `
         <div class="stats-inline-bar" style="margin-top:12px;">
           <span style="font-size:0.72rem; color:var(--card-text-muted,#475569); min-width:90px;">Attendance</span>
           <div class="stats-inline-bar__track"><div class="stats-inline-bar__fill" style="width:${s.attendanceRate}%; background:var(--attendance-accent, #f59e0b);"></div></div>
           <span class="stats-inline-bar__value">${s.attendanceRate}%</span>
-        </div>
+        </div>` : ''}
       `,
       footer: `
         <button class="btn btn-outline" data-modal-close>Close</button>
@@ -79,7 +130,7 @@ const StudentDetails = (() => {
       onMount(modal, record) {
         modal.querySelector('[data-open-full]').addEventListener('click', () => {
           window.Modals?.close(record);
-          window.Router?.navigate('student-profile', { studentId: s.id });
+          window.navigateTo('student-profile', { studentId: s.id });
         });
       }
     };
@@ -87,8 +138,8 @@ const StudentDetails = (() => {
 
   let _activeStudent = null;
 
-  function open(studentId) {
-    _activeStudent = fetchStudent(studentId);
+  async function open(studentId) {
+    _activeStudent = await fetchStudent(studentId);
     window.Modals?.open('student-details-drawer');
   }
 
@@ -103,9 +154,6 @@ const StudentDetails = (() => {
 })();
 
 // ─── EXPOSE ─────────────────────────────────────────────────────────
-// window.StudentDetails was never assigned anywhere in this file, and the router
-// looks up window.renderStudentDetails specifically (see core/router.js's
-// moduleIdToRenderFn) — this page was completely unreachable via navigation
-// despite being fully built.
+
 window.StudentDetails = StudentDetails;
 window.renderStudentDetails = StudentDetails.render;

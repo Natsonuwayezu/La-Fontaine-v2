@@ -392,18 +392,56 @@ const USER_ROLE_LABELS = {
    ───────────────────────────────────────────────────────────────── */
 
 const HOLIDAY_CONFIG = {
-  // localStorage key to persist holiday session state
-  sessionKey: 'lf_holiday_session',
-  // Banner text shown during holiday mode
-  bannerText: 'HOLIDAY SESSION ACTIVE — Data recorded here goes to separate holiday tables and does NOT affect the normal academic year.',
-  bannerColor: '#c44536',
-  // Holiday fees are applied at next term start
-  feesApplyAt: 'next_term_start',
-  // Tables used during holiday mode (separate from main tables)
-  marksTable: 'holiday_marks',
-  feesTable: 'holiday_fees',
-  studentsTable: 'holiday_enrollments', // only students enrolled in holiday program
-  subjectsTable: 'holiday_subjects',    // custom holiday subjects
+  /* ── Storage keys ──────────────────────────────────────────────── */
+  sessionKey        : 'lf_holiday_session',        // stores { sessionId, name, startDate }
+  modeKey           : 'lf_holiday_mode',            // 'normal' | 'holiday'
+  activeSessionKey  : 'lf_active_holiday_session_id',
+
+  /* ── Visual theming ─────────────────────────────────────────────── */
+  bannerColor       : '#d97706',                    // amber
+  bannerBg          : '#451a03',
+  icon              : '🏖️',
+  themeClass        : 'theme-holiday',              // added to <body> in holiday mode
+
+  /* ── Banner text ────────────────────────────────────────────────── */
+  bannerText        : 'HOLIDAY SESSION ACTIVE — Marks and fees recorded here are separate from the academic year.',
+
+  /* ── DB tables used in holiday mode ────────────────────────────── */
+  marksTable        : 'holiday_marks',
+  feesTable         : 'holiday_fees',
+  enrollmentsTable  : 'holiday_enrollments',
+  subjectsTable     : 'holiday_subjects',
+  sessionsTable     : 'holiday_sessions',
+
+  /* ── Holiday session-specific tables ───────────────────────────── */
+  sessionClassesTable    : 'session_classes',
+  sessionSubjectsTable   : 'session_subjects',
+  sessionTeachersTable   : 'session_teacher_assignments',
+  sessionAssessmentsTable: 'session_assessments',
+
+  /* ── Fee approval config ────────────────────────────────────────── */
+  feesRequireApproval   : true,            // ALL enrollment-created fees go through approval
+  holidayFeesRequireApproval: true,
+
+  /* ── Auto-switching thresholds ─────────────────────────────────── */
+  // Days AFTER a term ends to wait before auto-activating holiday mode
+  autoActivateAfterTermDays : 0,           // immediately when term status → completed
+  // Days BEFORE next term starts to auto-deactivate holiday mode
+  autoDeactivateBeforeTermDays : 1,        // 1 day before next term starts
+};
+
+/* ─────────────────────────────────────────────────────────────────
+   PERIOD MODE CONSTANTS
+   Normal mode = academic term | Holiday mode = holiday session
+   ───────────────────────────────────────────────────────────────── */
+const PERIOD_MODES = {
+  NORMAL  : 'normal',
+  HOLIDAY : 'holiday',
+};
+
+const PERIOD_THEME = {
+  normal  : { class: '',               color: 'var(--primary)',  label: 'Academic Term'    },
+  holiday : { class: 'theme-holiday',  color: '#d97706',         label: 'Holiday Session'  },
 };
 
 /* ─────────────────────────────────────────────────────────────────
@@ -569,8 +607,12 @@ const BACKUP_ALL_TABLES = [
   'student_credit_balance', 'payments', 'payment_allocations',
   'fee_waivers', 'notifications', 'announcements', 'system_logs',
   'grading_scale', 'student_promotions', 'student_promotion_records',
-  // Holiday tables
-  'holiday_marks', 'holiday_fees', 'holiday_enrollments', 'holiday_subjects',
+  // Holiday tables (session-specific)
+  'holiday_sessions', 'holiday_marks', 'holiday_fees',
+  'holiday_enrollments', 'holiday_subjects',
+  'session_classes', 'session_subjects',
+  'session_teacher_assignments', 'session_assessments',
+  'fee_approval_log',
   // QR verification snapshot tables
   'verifications', 'report_card_snapshots',
   'receipt_snapshots', 'transcript_snapshots',

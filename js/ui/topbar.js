@@ -136,6 +136,27 @@ const Topbar = (() => {
                 <div class="term-badge">
                     <strong id="topbar-term-label">—</strong>
                 </div>
+
+                <!-- Period Switcher — hidden in normal mode, visible when holiday sessions exist -->
+                <div class="period-switcher" id="topbar-period-switcher" style="display:none;">
+                    <button class="period-btn" id="topbar-period-btn"
+                            onclick="window.TopbarPeriod?.toggle()">
+                        <span id="topbar-period-icon">📚</span>
+                        <span id="topbar-period-label">Academic Term</span>
+                        <i class="fa-solid fa-chevron-down" style="font-size:10px;"></i>
+                    </button>
+                    <div class="period-dropdown" id="topbar-period-dropdown" style="display:none;">
+                        <div class="period-dropdown-title">Switch Period</div>
+                        <div id="topbar-period-options"></div>
+                    </div>
+                </div>
+
+                <!-- Holiday mode banner — shown when holiday mode is active -->
+                <div class="holiday-banner" id="topbar-holiday-banner" style="display:none;">
+                    <i class="fa-solid fa-umbrella-beach"></i>
+                    <span id="topbar-holiday-session-name">Holiday Session</span>
+                </div>
+
                 <div class="progress-container">
                     <div class="progress-bar">
                         <div class="progress-fill" id="topbar-progress-fill" style="width:0%"></div>
@@ -524,6 +545,13 @@ const Topbar = (() => {
     clockTimer = setInterval(tickClock, 30000);
 
     console.log('[Topbar] Initialized');
+
+    // Close period dropdown on outside click
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#topbar-period-switcher')) {
+        TopbarPeriod.close();
+      }
+    });
   }
 
   function destroy() {
@@ -559,6 +587,124 @@ if (document.readyState === 'loading') {
 } else {
   Topbar.init();
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   PERIOD SWITCHER — TopbarPeriod
+   Manages the academic term ↔ holiday session switcher in the topbar.
+   ═══════════════════════════════════════════════════════════════ */
+const TopbarPeriod = {
+  refresh() {
+    const sessions   = state.holidaySessions || [];
+    const switcher   = document.getElementById('topbar-period-switcher');
+    const banner     = document.getElementById('topbar-holiday-banner');
+    const btnIcon    = document.getElementById('topbar-period-icon');
+    const btnLabel   = document.getElementById('topbar-period-label');
+    const bannerName = document.getElementById('topbar-holiday-session-name');
+    if (!switcher) return;
+
+    const inHoliday     = isHolidayMode();
+    const activeSession = getActiveHolidaySession();
+
+    switcher.style.display = sessions.length > 0 ? '' : 'none';
+
+    if (inHoliday && activeSession) {
+      btnIcon.textContent    = activeSession.icon || '🏖️';
+      btnLabel.textContent   = activeSession.name;
+      if (bannerName) bannerName.textContent = activeSession.name;
+      if (banner)     banner.style.display   = '';
+      document.body.classList.add('mode-holiday');
+      document.body.classList.remove('mode-normal');
+    } else {
+      const activeTerm = getActiveTerm();
+      const activeYear = getActiveYear();
+      btnIcon.textContent  = '📚';
+      btnLabel.textContent = activeTerm
+        ? `Term ${activeTerm.term_number} — ${activeYear?.year_name || ''}`
+        : 'Academic Term';
+      if (banner) banner.style.display = 'none';
+      document.body.classList.add('mode-normal');
+      document.body.classList.remove('mode-holiday');
+    }
+
+    this._buildOptions(sessions, inHoliday, activeSession);
+  },
+
+  _buildOptions(sessions, inHoliday, activeSession) {
+    const wrap = document.getElementById('topbar-period-options');
+    if (!wrap) return;
+    const isNormal = !inHoliday;
+    let html = `
+    <button class="period-option ${isNormal ? 'active' : ''}"
+            onclick="window.TopbarPeriod?.selectNormal()">
+      <span class="period-option-icon">📚</span>
+      <div class="period-option-info">
+        <span class="period-option-name">Academic Term</span>
+        <span class="period-option-meta">${esc(getActiveYear()?.year_name || 'Current Year')}</span>
+      </div>
+      ${isNormal ? '<i class="fa-solid fa-check"></i>' : ''}
+    </button>`;
+
+    sessions.forEach(s => {
+      const isActive = inHoliday && activeSession?.id === s.id;
+      const statusLabel = s.status === 'active' ? 'Active Now'
+        : s.status === 'upcoming' ? 'Upcoming' : 'Completed';
+      html += `
+    <button class="period-option ${isActive ? 'active' : ''} period-option-holiday"
+            onclick="window.TopbarPeriod?.selectSession(${s.id})">
+      <span class="period-option-icon">${esc(s.icon || '🏖️')}</span>
+      <div class="period-option-info">
+        <span class="period-option-name">${esc(s.name)}</span>
+        <span class="period-option-meta">${esc(statusLabel)} · ${esc(s.start_date || '')}</span>
+      </div>
+      ${isActive ? '<i class="fa-solid fa-check"></i>' : ''}
+    </button>`;
+    });
+    wrap.innerHTML = html;
+  },
+
+  toggle() {
+    const dd = document.getElementById('topbar-period-dropdown');
+    if (!dd) return;
+    const open = dd.style.display !== 'none';
+    dd.style.display = open ? 'none' : 'block';
+    if (!open) this._buildOptions(
+      state.holidaySessions || [], isHolidayMode(), getActiveHolidaySession()
+    );
+  },
+
+  close() {
+    const dd = document.getElementById('topbar-period-dropdown');
+    if (dd) dd.style.display = 'none';
+  },
+
+  selectNormal() {
+    deactivateHolidayMode();
+    this.close();
+    this.refresh();
+    if (typeof loadAllData === 'function') loadAllData({ silent: true });
+    showToast('Switched to Academic Term mode.', 'info', { duration: 2500 });
+  },
+
+  selectSession(sessionId) {
+    const session = (state.holidaySessions || []).find(s => s.id === sessionId);
+    if (!session) return;
+    activateHolidayMode(session);
+    this.close();
+    this.refresh();
+    if (typeof loadDataForHolidaySession === 'function') {
+      loadDataForHolidaySession(session.id);
+    }
+    showToast(`Switched to ${esc(session.name)}.`, 'info', { duration: 2500 });
+  },
+};
+
+window.TopbarPeriod = TopbarPeriod;
+
+// Close period dropdown on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#topbar-period-switcher')) TopbarPeriod.close();
+});
 
 // ─── EXPOSE TO WINDOW ───────────────────────────────────────────────
 window.Topbar = Topbar;

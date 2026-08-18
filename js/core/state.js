@@ -62,11 +62,21 @@ const state = {
 
     /* ── Holiday Session Data ────────────────────────────────────── */
     // Separate collections — never mix with normal academic data.
-    // Populated only when isHolidayMode() returns true.
-    holidayMarks: [],   // holiday_marks table rows
-    holidayFees: [],   // holiday_fees table rows
-    holidayEnrollments: [],   // holiday_enrollments — students in holiday program
-    holidaySubjects: [],   // holiday_subjects — custom subjects for holiday
+    // Every item is tagged with holiday_session_id.
+    holidaySessions     : [],   // all holiday_sessions rows
+    activeHolidaySession: null, // the current holiday_session row (status=active)
+    holidayMarks        : [],   // holiday_marks rows (current session only)
+    holidayFees         : [],   // holiday_fees rows (current session only)
+    holidayEnrollments  : [],   // holiday_enrollments (current session only)
+    holidaySubjects     : [],   // holiday_subjects (legacy, current session)
+    sessionClasses      : [],   // session_classes (current session)
+    sessionSubjects     : [],   // session_subjects (current session)
+    sessionAssessments  : [],   // session_assessments (current session)
+    sessionTeachers     : [],   // session_teacher_assignments (current session)
+
+    /* ── Period mode ─────────────────────────────────────────────── */
+    periodMode          : 'normal',  // 'normal' | 'holiday'
+    pendingFeeApprovals : [],        // student_fees rows where is_approved = false
 
     /* ── UI State ────────────────────────────────────────────────── */
     loading: false,
@@ -305,45 +315,168 @@ function getCurrentPhase() {
  * This is the main gate checked by every data-writing module
  * before deciding which table to write to.
  */
+/* ─────────────────────────────────────────────────────────────────
+   PERIOD / HOLIDAY MODE SYSTEM
+   ─────────────────────────────────────────────────────────────────
+   periodMode: 'normal' — standard academic term, uses regular tables
+   periodMode: 'holiday' — holiday session active, uses session_* tables
+
+   isHolidayMode()        → boolean — quick check
+   getCurrentPeriodMode() → 'normal' | 'holiday'
+   setCurrentPeriodMode() → manually override + persist
+   getActiveHolidaySession() → the active holiday_sessions row
+   setActiveHolidaySession() → set which session we're viewing
+   resolveTable(table)    → returns the correct table name for current mode
+   ───────────────────────────────────────────────────────────────── */
+
+/**
+ * Primary holiday mode check. True when:
+ *  a) Manually activated (admin forced via localStorage), OR
+ *  b) There is an active holiday_session with status='active'
+ *     AND today falls within its start/end_date range.
+ */
 function isHolidayMode() {
-    // 1. Admin can manually force holiday mode via localStorage
-    const forced = localStorage.getItem(HOLIDAY_CONFIG.sessionKey);
-    if (forced === 'true') return true;
+    // 1. Manual override (admin pressed "Enter Holiday Mode" button)
+    if (localStorage.getItem(HOLIDAY_CONFIG.modeKey) === PERIOD_MODES.HOLIDAY) return true;
 
-    // 2. Check if all 3 terms in the active year are completed
-    const activeYear = getActiveYear();
-    if (!activeYear) return false;
+    // 2. Auto: check if there is an active holiday_session for today
+    if (state.activeHolidaySession) return true;
 
-    const yearTerms = state.terms.filter(t => t.academic_year_id === activeYear.id);
-    if (yearTerms.length < 3) return false;
-
-    const allCompleted = yearTerms.every(t => t.status === 'completed');
-    if (!allCompleted) return false;
-
-    // 3. Check if today falls within a registered holiday block
+    // 3. Auto-detect: look through all sessions for one that covers today
     const today = todayString();
-    const inHolidayBlock = state.holidays.some(h => {
-        if (!h.start_date || !h.end_date) return false;
-        return today >= h.start_date && today <= h.end_date;
-    });
+    const active = (state.holidaySessions || []).find(s =>
+        s.status === 'active' &&
+        s.start_date <= today &&
+        (!s.end_date || s.end_date >= today)
+    );
+    if (active) {
+        state.activeHolidaySession = active;
+        return true;
+    }
 
-    // If all terms are done AND we're in a holiday block → holiday mode
-    if (inHolidayBlock) return true;
-
-    // 4. If all terms are completed but we are NOT in a registered holiday
-    //    block (e.g. between terms), return false — normal mode.
     return false;
 }
+
+/**
+ * Get current period mode string.
+ */
+function getCurrentPeriodMode() {
+    return isHolidayMode() ? PERIOD_MODES.HOLIDAY : PERIOD_MODES.NORMAL;
+}
+
+/**
+ * Get the active holiday session row. Returns null in normal mode.
+ */
+function getActiveHolidaySession() {
+    if (!isHolidayMode()) return null;
+    if (state.activeHolidaySession) return state.activeHolidaySession;
+    const today = todayString();
+    return (state.holidaySessions || []).find(s =>
+        s.status === 'active' &&
+        s.start_date <= today &&
+        (!s.end_date || s.end_date >= today)
+    ) || null;
+}
+
+/**
+ * Get the active holiday session ID. Returns null in normal mode.
+ */
+function getActiveHolidaySessionId() {
+    return getActiveHolidaySession()?.id || null;
+}
+
+/**
+ * Manually set which holiday session we are viewing.
+ * Used by the period switcher in the topbar.
+ */
+function setActiveHolidaySession(session) {
+    state.activeHolidaySession = session || null;
+    if (session) {
+        localStorage.setItem(HOLIDAY_CONFIG.activeSessionKey, String(session.id));
+        state.periodMode = PERIOD_MODES.HOLIDAY;
+    } else {
+        localStorage.removeItem(HOLIDAY_CONFIG.activeSessionKey);
+        state.periodMode = PERIOD_MODES.NORMAL;
+    }
+    _notifySubscribers('periodMode');
+}
+
+/**
+ * Resolve the correct DB table for the current mode.
+ * In normal mode → regular table names.
+ * In holiday mode → holiday session-specific table names.
+ *
+ * @param {string} table - logical table name (e.g. 'marks', 'student_fees')
+ * @returns {string} actual table name to query
+ */
+function resolveTable(table) {
+    if (!isHolidayMode()) return table;
+
+    const map = {
+        marks               : HOLIDAY_CONFIG.marksTable,         // 'holiday_marks'
+        student_fees        : HOLIDAY_CONFIG.feesTable,          // 'holiday_fees'
+        holiday_fees        : HOLIDAY_CONFIG.feesTable,
+        students            : HOLIDAY_CONFIG.enrollmentsTable,   // 'holiday_enrollments'
+        holiday_enrollments : HOLIDAY_CONFIG.enrollmentsTable,
+        subjects            : HOLIDAY_CONFIG.subjectsTable,      // 'holiday_subjects'
+        assessments         : HOLIDAY_CONFIG.sessionAssessmentsTable,
+        classes             : HOLIDAY_CONFIG.sessionClassesTable,
+        teacher_assignments : HOLIDAY_CONFIG.sessionTeachersTable,
+    };
+    return map[table] || table;
+}
+
+/**
+ * Check if we should auto-switch TO holiday mode.
+ * Called by boot.js and by the period switcher check.
+ * Returns the holiday_session that should be activated, or null.
+ */
+function checkAutoHolidayActivation() {
+    if (isHolidayMode()) return null; // already in holiday mode
+
+    const today = todayString();
+    const session = (state.holidaySessions || []).find(s =>
+        s.status === 'active' &&
+        s.auto_activate !== false &&
+        s.start_date <= today &&
+        (!s.end_date || s.end_date >= today)
+    );
+    return session || null;
+}
+
+/**
+ * Check if we should auto-switch BACK TO normal mode.
+ * Called periodically. Returns true if holiday mode should end.
+ */
+function checkAutoHolidayDeactivation() {
+    if (!isHolidayMode()) return false;
+
+    const session = getActiveHolidaySession();
+    if (!session) return true; // no active session → deactivate
+
+    const today = todayString();
+    if (session.end_date && today > session.end_date) return true;
+    if (session.status === 'completed') return true;
+
+    return false;
+}
+
 
 /**
  * Allow the admin to manually activate holiday mode regardless of dates.
  * Used by Settings → Academic Calendar when admin clicks
  * "Start Holiday Session".
  */
-function activateHolidayMode() {
-    localStorage.setItem(HOLIDAY_CONFIG.sessionKey, 'true');
-    state.currentPhase = null; // reset phase — not applicable in holiday mode
-    console.info('[Holiday] Holiday mode manually activated.');
+function activateHolidayMode(session = null) {
+    localStorage.setItem(HOLIDAY_CONFIG.modeKey, PERIOD_MODES.HOLIDAY);
+    state.periodMode = PERIOD_MODES.HOLIDAY;
+    if (session) {
+        state.activeHolidaySession = session;
+        localStorage.setItem(HOLIDAY_CONFIG.activeSessionKey, String(session.id));
+    }
+    state.currentPhase = null; // phase not applicable in holiday mode
+    _notifySubscribers('periodMode');
+    console.info('[Holiday] Holiday mode activated.', session?.name || '');
 }
 
 /**
@@ -351,8 +484,12 @@ function activateHolidayMode() {
  * Called when admin starts a new term.
  */
 function deactivateHolidayMode() {
-    localStorage.removeItem(HOLIDAY_CONFIG.sessionKey);
-    console.info('[Holiday] Holiday mode deactivated.');
+    localStorage.removeItem(HOLIDAY_CONFIG.modeKey);
+    localStorage.removeItem(HOLIDAY_CONFIG.activeSessionKey);
+    state.periodMode = PERIOD_MODES.NORMAL;
+    state.activeHolidaySession = null;
+    _notifySubscribers('periodMode');
+    console.info('[Holiday] Holiday mode deactivated — back to normal academic mode.');
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -596,9 +733,16 @@ window.getTermProgress = getTermProgress;
 window.isStateLoaded = isStateLoaded;
 window.resetState = resetState;
 
-window.isHolidayMode = isHolidayMode;
-window.activateHolidayMode = activateHolidayMode;
-window.deactivateHolidayMode = deactivateHolidayMode;
+window.isHolidayMode               = isHolidayMode;
+window.getCurrentPeriodMode        = getCurrentPeriodMode;
+window.getActiveHolidaySession     = getActiveHolidaySession;
+window.getActiveHolidaySessionId   = getActiveHolidaySessionId;
+window.setActiveHolidaySession     = setActiveHolidaySession;
+window.resolveTable                = resolveTable;
+window.checkAutoHolidayActivation  = checkAutoHolidayActivation;
+window.checkAutoHolidayDeactivation= checkAutoHolidayDeactivation;
+window.activateHolidayMode         = activateHolidayMode;
+window.deactivateHolidayMode       = deactivateHolidayMode;
 
 window.getClass = getClass;
 window.getSubject = getSubject;

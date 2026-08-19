@@ -37,21 +37,24 @@ const NotificationCenter = (() => {
     return `${Math.floor(hrs / 24)}d`;
   }
 
-  // Reads the same underlying list Notifications (notifications.js) owns,
-  // if that module has already been loaded; otherwise falls back to a
-  // small local preview set so this widget still works if attached
-  // before the full inbox module has ever been navigated to.
+  const TYPE_LABELS = {
+    payment: 'Payment', overdue: 'Overdue', marks: 'Marks', attendance: 'Attendance',
+    system: 'System', student: 'Student', announcement: 'Announcement', reminder: 'Reminder',
+    urgent: 'Urgent', warning: 'Warning', info: 'Notice',
+  };
+
+  // Reads the same real state.notifications Notifications (notifications.js)
+  // reads, if that module has already been loaded; otherwise an empty
+  // list (state.notifications is loaded per-user at boot regardless of
+  // whether the full inbox page has been visited, so this is only ever
+  // empty very briefly before boot finishes).
   function getPreviewItems() {
     if (window.Notifications?.__previewList) return window.Notifications.__previewList();
-    return [
-      { id: 'n1', type: 'payment', title: 'Payment received', message: '50,000 RWF from MUGISHA Jean', time: new Date(Date.now() - 20 * 60000).toISOString(), read: false },
-      { id: 'n2', type: 'overdue', title: 'Overdue balance', message: 'HABIMANA Eric \u2014 85,000 RWF, 47 days', time: new Date(Date.now() - 3 * 3600000).toISOString(), read: false },
-      { id: 'n3', type: 'marks', title: 'Marks saved', message: 'Primary 4A \u00b7 Mathematics Quiz 4', time: new Date(Date.now() - 26 * 3600000).toISOString(), read: true }
-    ];
+    return [...(state.notifications || [])].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }
 
   function unreadCount() {
-    return window.Notifications?.unreadCount?.() ?? getPreviewItems().filter(n => !n.read).length;
+    return window.Notifications?.unreadCount?.() ?? getPreviewItems().filter(n => !n.is_read).length;
   }
 
   let openPanel = null;
@@ -78,12 +81,12 @@ const NotificationCenter = (() => {
       <div class="dropdown-divider"></div>
       ${items.length ? items.map(n => `
         <button class="dropdown-item" data-notif="${n.id}" style="align-items:flex-start;">
-          <span class="icon">${!n.read ? '<span style="width:6px;height:6px;border-radius:50%;background:var(--danger);display:inline-block;"></span>' : ''}</span>
+          <span class="icon">${!n.is_read ? '<span style="width:6px;height:6px;border-radius:50%;background:var(--danger);display:inline-block;"></span>' : ''}</span>
           <span class="label" style="white-space:normal;">
-            <strong>${escapeHTML(n.title)}</strong><br/>
+            <strong>${escapeHTML(TYPE_LABELS[n.type] || n.type || 'Notice')}</strong><br/>
             <span style="color:var(--dropdown-text,#94a3b8); font-size:0.72rem;">${escapeHTML(n.message)}</span>
           </span>
-          <span class="shortcut">${timeAgo(n.time)}</span>
+          <span class="shortcut">${timeAgo(n.created_at)}</span>
         </button>
       `).join('') : `<div class="dropdown-item" style="color:var(--dropdown-text,#94a3b8);">No notifications</div>`}
       <div class="dropdown-divider"></div>
@@ -97,14 +100,16 @@ const NotificationCenter = (() => {
       close();
       navigateTo('notifications');
     });
-    panel.querySelector('[data-mark-all]').addEventListener('click', (e) => {
+    panel.querySelector('[data-mark-all]').addEventListener('click', async (e) => {
       e.stopPropagation();
-      window.Notifications ? window.Notifications.markAllReadExternal?.() : null;
+      await window.markAllNotificationsRead?.();
       close();
       window.Toast?.success('All notifications marked as read');
     });
     panel.querySelectorAll('[data-notif]').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
+        const id = parseInt(btn.dataset.notif, 10);
+        await window.markNotificationRead?.(id);
         close();
         navigateTo('notifications');
       });

@@ -18,17 +18,12 @@ const Notifications = (() => {
     overdue:   { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>', color: 'var(--danger)', route: 'payment-history' }
   };
 
-  // MOCK_DATA — replace with core/api.js / core/notifications-engine.js
-  let notifications = [
-    { id: 'n1', type: 'payment', title: 'Payment received', message: '50,000 RWF from MUGISHA Jean \u00b7 Receipt R-042', time: '2026-07-14T10:42:00', read: false },
-    { id: 'n2', type: 'overdue', title: 'Overdue balance', message: 'HABIMANA Eric is 47 days overdue \u00b7 85,000 RWF balance', time: '2026-07-14T08:20:00', read: false },
-    { id: 'n3', type: 'marks', title: 'Marks saved', message: '28 marks saved for Primary 4A \u00b7 Mathematics Quiz 4', time: '2026-07-13T15:10:00', read: true },
-    { id: 'n4', type: 'attendance', title: 'Low attendance alert', message: 'Primary 1 attendance dropped below 85% this week', time: '2026-07-13T09:00:00', read: false },
-    { id: 'n5', type: 'system', title: 'Backup completed', message: 'Automatic backup created \u00b7 12.8 MB', time: '2026-07-12T02:00:00', read: true },
-    { id: 'n6', type: 'payment', title: 'Payment received', message: '30,000 RWF from UWERA Grace \u00b7 Receipt R-041', time: '2026-07-12T09:15:00', read: true },
-    { id: 'n7', type: 'marks', title: 'Assessment locked', message: 'Mid-Term assessment locked for Primary 5B', time: '2026-07-11T16:00:00', read: true },
-    { id: 'n8', type: 'system', title: 'New student enrolled', message: 'HABIMANA Grace enrolled in Primary 2', time: '2026-07-11T11:30:00', read: true }
-  ];
+  // Real state.notifications, loaded per-user at boot by
+  // core/notifications-engine.js's loadUserNotifications() (or lazily
+  // triggered below if this session hasn't loaded them yet).
+  function getNotifications() {
+    return state.notifications || [];
+  }
 
   let pager = null;
   let activeFilter = '';
@@ -91,10 +86,10 @@ const Notifications = (() => {
   function filteredList(container) {
     const type = container.querySelector('#notif-type-filter').value;
     const unreadOnly = container.querySelector('#notif-unread-only').checked;
-    return notifications
+    return getNotifications()
       .filter(n => !type || n.type === type)
-      .filter(n => !unreadOnly || !n.read)
-      .sort((a, b) => new Date(b.time) - new Date(a.time));
+      .filter(n => !unreadOnly || !n.is_read)
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }
 
   function renderList(container) {
@@ -128,14 +123,14 @@ const Notifications = (() => {
     listEl.innerHTML = pageItems.map(n => {
       const meta = TYPE_META[n.type] || TYPE_META.system;
       return `
-        <div class="activity-item" style="${n.read ? '' : `background:${meta.color}0d;`}" data-id="${n.id}">
+        <div class="activity-item" style="${n.is_read ? '' : `background:${meta.color}0d;`}" data-id="${n.id}">
           <div class="activity-icon" style="background:${meta.color}22; color:${meta.color};">${meta.icon}</div>
           <div class="activity-body">
             <div class="activity-text">
-              ${!n.read ? `<span style="width:6px;height:6px;border-radius:50%;background:${meta.color};display:inline-block;margin-right:6px;"></span>` : ''}
-              <strong>${escapeHTML(n.title)}</strong> \u2014 ${escapeHTML(n.message)}
+              ${!n.is_read ? `<span style="width:6px;height:6px;border-radius:50%;background:${meta.color};display:inline-block;margin-right:6px;"></span>` : ''}
+              <strong>${escapeHTML(meta.label || n.type)}</strong> \u2014 ${escapeHTML(n.message)}
             </div>
-            <div class="activity-time">${timeAgo(n.time)}</div>
+            <div class="activity-time">${timeAgo(n.created_at)}</div>
           </div>
           <button class="btn btn-sm btn-outline" data-view="${n.id}">View</button>
           <button class="modal-close" data-dismiss="${n.id}" title="Dismiss" style="margin-left:4px;">
@@ -146,49 +141,52 @@ const Notifications = (() => {
     }).join('');
 
     listEl.querySelectorAll('[data-view]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const n = notifications.find(x => x.id === btn.dataset.view);
-        n.read = true;
-        window.Router?.navigate((TYPE_META[n.type] || TYPE_META.system).route);
+      btn.addEventListener('click', async () => {
+        const id = parseInt(btn.dataset.view, 10);
+        const n = getNotifications().find(x => x.id === id);
+        if (!n) return;
+        if (!n.is_read) {
+          await window.markNotificationRead?.(id);
+          n.is_read = true;
+        }
+        window.navigateTo((TYPE_META[n.type] || TYPE_META.system).route);
       });
     });
     listEl.querySelectorAll('[data-dismiss]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        notifications = notifications.filter(x => x.id !== btn.dataset.dismiss);
-        renderList(container);
+      btn.addEventListener('click', async () => {
+        const id = parseInt(btn.dataset.dismiss, 10);
+        try {
+          await window.remove('notifications', id);
+          state.notifications = getNotifications().filter(x => x.id !== id);
+          renderList(container);
+        } catch (err) {
+          window.Toast?.error('Could not dismiss notification', err?.message);
+        }
       });
     });
   }
 
-  function markAllRead(container) {
-    notifications.forEach(n => { n.read = true; });
+  async function markAllRead(container) {
+    await window.markAllNotificationsRead?.();
     renderList(container);
     window.Toast?.success('All notifications marked as read');
   }
 
   function unreadCount() {
-    return notifications.filter(n => !n.read).length;
+    return getNotifications().filter(n => !n.is_read).length;
   }
 
   // Small hooks consumed by notification-center.js's compact dropdown,
-  // so it can preview/act on the same underlying data this full inbox
-  // page owns rather than keeping a separate mock list once this module
-  // has actually been loaded.
+  // so it can preview/act on the same real state.notifications this
+  // full inbox page reads, rather than keeping a separate mock list.
   function previewList() {
-    return [...notifications].sort((a, b) => new Date(b.time) - new Date(a.time));
+    return [...getNotifications()].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }
 
-  function markAllReadExternal() {
-    notifications.forEach(n => { n.read = true; });
-  }
-
-  return { render, unreadCount, __previewList: previewList, markAllReadExternal };
+  return { render, unreadCount, __previewList: previewList };
 })();
 
 // ─── EXPOSE ─────────────────────────────────────────────────────────
-// window.Notifications was never assigned anywhere in this file, and the router
-// looks up window.renderNotifications specifically (see core/router.js's
-// moduleIdToRenderFn) — this page was completely unreachable via navigation
-// despite being fully built.
+
 window.Notifications = Notifications;
 window.renderNotifications = Notifications.render;

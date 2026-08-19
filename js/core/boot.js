@@ -70,6 +70,9 @@ async function boot() {
             console.error('[Boot] Shell render failed:', err.message);
         });
     }
+    // Show app div (hidden on load to prevent flash before auth)
+    const _appEl = document.getElementById('app');
+    if (_appEl) _appEl.style.display = '';
 
     // ── Step 8: Check for existing session ────────────────────────
     const sessionRestored = await checkSession();

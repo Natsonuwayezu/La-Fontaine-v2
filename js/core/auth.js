@@ -711,6 +711,7 @@ function renderLoginPage() {
 
     const app = document.getElementById('app');
     if (!app) return;
+    app.style.display = ''; // show app (was hidden on load to prevent flash)
 
     const schoolName = state.schoolSettings?.school_name || SCHOOL_DEFAULTS.school_name;
     const schoolMotto = state.schoolSettings?.school_motto || SCHOOL_DEFAULTS.school_motto;

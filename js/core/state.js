@@ -760,3 +760,47 @@ window.getStudentFees = getStudentFees;
 window.getStudentCredit = getStudentCredit;
 window.getUnreadNotificationCount = getUnreadNotificationCount;
 window.todayString = todayString;
+/* ─────────────────────────────────────────────────────────────────
+   MISSING HELPERS — referenced throughout codebase, now defined here
+   ───────────────────────────────────────────────────────────────── */
+
+/** Get a term by ID from state.terms */
+function getTermById(id) {
+    return (state.terms || []).find(t => t.id === id || t.id === parseInt(id)) || null;
+}
+
+/** Get session subjects for a holiday class */
+function getSessionSubjectsForClass(classId) {
+    return (state.sessionSubjects || []).filter(s =>
+        s.session_class_id === classId || s.session_class_id === parseInt(classId)
+    );
+}
+
+/** Get historical roster for a class+year using marks as a proxy */
+function getRosterForClassAndYear(classId, yearId) {
+    const currentYear = getActiveYear();
+    const isCurrentYear = !yearId || yearId === currentYear?.id;
+
+    if (isCurrentYear) {
+        return (state.students || []).filter(s =>
+            s.class_id === classId && s.status !== 'Archived'
+        );
+    }
+
+    // Historical: derive from marks on assessments for this class+year
+    const classAssessments = (state.assessments || []).filter(a =>
+        a.class_id == classId && a.academic_year_id == yearId
+    );
+    const assessmentIds = new Set(classAssessments.map(a => a.id));
+    const studentIds    = new Set(
+        (state.marks || [])
+            .filter(m => assessmentIds.has(m.assessment_id))
+            .map(m => m.student_id)
+    );
+    return (state.students || []).filter(s => studentIds.has(s.id));
+}
+
+
+window.getTermById = getTermById;
+window.getSessionSubjectsForClass = getSessionSubjectsForClass;
+window.getRosterForClassAndYear = getRosterForClassAndYear;

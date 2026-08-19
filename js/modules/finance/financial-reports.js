@@ -44,11 +44,12 @@
         column is added.
 
    Uses window.state.payments / .studentFees / .students / .classes
-   (core/state.js) when populated; otherwise a small internally
-   consistent mock set shaped exactly like the real backend.txt
-   columns (not the formula functions' expected names) so the
-   normalization shim is genuinely exercised here too, not just
-   assumed to work.
+   (core/state.js). student_fees/payments are lazily-loaded large
+   tables — if either is empty when this page renders, it triggers the
+   real loadStudentFees()/loadPayments()/loadAllData() lazy-loaders and
+   re-renders once available, rather than showing zeros or fabricating
+   data (the mock generators this file used to fall back to when state
+   was empty have been removed).
 
    No dedicated CSS exists for a "reports" layout in
    css/modules/finance.css (confirmed — that file only covers
@@ -78,70 +79,11 @@
         return new Date(y, m - 1, d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     };
 
-    // ─── MOCK DATA (shaped exactly like backend.txt's real columns —
-    //     amount / payment_method, NOT total_amount — so the
-    //     normalization shim below is genuinely exercised) ──────────
-
-    const MOCK_CLASSES = [
-        { id: 4, name: 'PRIMARY 1' }, { id: 5, name: 'PRIMARY 2' }, { id: 6, name: 'PRIMARY 3' },
-        { id: 7, name: 'PRIMARY 4' }, { id: 8, name: 'PRIMARY 5' }, { id: 9, name: 'PRIMARY 6' }
-    ];
-
-    const MOCK_STUDENTS = [
-        { id: 1, name: 'HABIMANA Eric', class_id: 4 }, { id: 2, name: 'INGABIRE Sarah', class_id: 4 },
-        { id: 3, name: 'KAMALI Moses', class_id: 5 }, { id: 4, name: 'MUGISHA Jean', class_id: 5 },
-        { id: 5, name: 'NIYONZIMA Claire', class_id: 6 }, { id: 6, name: 'UWERA Grace', class_id: 6 },
-        { id: 7, name: 'ISHIMWE Jean', class_id: 7 }, { id: 8, name: 'MUKAMANA Ange', class_id: 7 },
-        { id: 9, name: 'UWIMANA Alice', class_id: 8 }, { id: 10, name: 'BIZIMANA Eric', class_id: 8 },
-        { id: 11, name: 'NSHIMIYE Paul', class_id: 9 }, { id: 12, name: 'MUTONI Divine', class_id: 9 }
-    ];
-
-    function buildMockStudentFees() {
-        let seed = 53;
-        const rand = function () { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
-        const fees = [];
-        let fid = 1;
-        MOCK_STUDENTS.forEach(function (s) {
-            const cls = MOCK_CLASSES.filter(function (c) { return c.id === s.class_id; })[0];
-            const tuition = 120000;
-            const paidRatio = rand();
-            const paid = paidRatio > 0.85 ? tuition : paidRatio > 0.4 ? Math.round(tuition * paidRatio) : 0;
-            fees.push({
-                id: fid++, student_id: s.id, fee_category_id: 1, term_id: 6,
-                amount: tuition, paid_amount: paid, is_paid: paid >= tuition,
-                is_waived: false, waiver_reason: null
-            });
-        });
-        return fees;
-    }
-
-    function buildMockPayments() {
-        let seed = 71;
-        const rand = function () { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
-        const methods = ['Cash', 'Mobile Money', 'Bank Transfer', 'Cheque'];
-        const payments = [];
-        let pid = 1;
-        for (let day = 1; day <= 30; day++) {
-            const paymentsToday = Math.floor(rand() * 3);
-            for (let i = 0; i < paymentsToday; i++) {
-                const student = MOCK_STUDENTS[Math.floor(rand() * MOCK_STUDENTS.length)];
-                payments.push({
-                    id: pid, receipt_number: 'RCP-202606' + String(day).padStart(2, '0') + '-' + String(pid).padStart(3, '0'),
-                    student_id: student.id, amount: Math.round((20000 + rand() * 100000) / 1000) * 1000,
-                    payment_date: '2026-06-' + String(day).padStart(2, '0'),
-                    payment_method: methods[Math.floor(rand() * methods.length)],
-                    is_reversed: false
-                });
-                pid++;
-            }
-        }
-        return payments;
-    }
-
     // ─── NORMALIZATION SHIM ──────────────────────────────────────────
-    // Bridges the real backend.txt column names to the field names
-    // core/finance-formulas.js's functions actually read, per the
-    // mismatch documented in the header comment above.
+    // Defensive fallback for any rows written before this codebase
+    // standardized on total_amount/waived_amount (see the earlier
+    // record-payment.js/payment-history.js fixes this session) — not
+    // mock data, just tolerance for older rows.
 
     function normalizePayment(p) {
         return Object.assign({}, p, {
@@ -155,31 +97,28 @@
         });
     }
 
-    // ─── DATA ACCESS ─────────────────────────────────────────────────
+    // ─── DATA ACCESS (real state only — lazy-loaded on render below
+    //     if empty, rather than falling back to fabricated data) ──────
 
     function getClasses() {
-        if (window.state && Array.isArray(window.state.classes) && window.state.classes.length) {
-            return window.state.classes;
-        }
-        return MOCK_CLASSES;
+        return (window.state && Array.isArray(window.state.classes)) ? window.state.classes : [];
     }
 
     function getStudents() {
-        if (window.state && Array.isArray(window.state.students) && window.state.students.length) {
-            return window.state.students;
-        }
-        return MOCK_STUDENTS;
+        return (window.state && Array.isArray(window.state.students)) ? window.state.students : [];
+    }
+
+    function studentName(s) {
+        return ((s.first_name || '') + ' ' + (s.last_name || '')).trim() || ('Student #' + s.id);
     }
 
     function getStudentFees() {
-        const raw = (window.state && Array.isArray(window.state.studentFees) && window.state.studentFees.length)
-            ? window.state.studentFees : buildMockStudentFees();
+        const raw = (window.state && Array.isArray(window.state.studentFees)) ? window.state.studentFees : [];
         return raw.map(normalizeFee);
     }
 
     function getPayments() {
-        const raw = (window.state && Array.isArray(window.state.payments) && window.state.payments.length)
-            ? window.state.payments : buildMockPayments();
+        const raw = (window.state && Array.isArray(window.state.payments)) ? window.state.payments : [];
         return raw.map(normalizePayment);
     }
 
@@ -193,9 +132,16 @@
 
     // ─── STATE ───────────────────────────────────────────────────────
 
-    let filters = { from: '2026-06-01', to: '2026-06-30', classId: 'all' };
+    let filters = { from: last30DaysStart(), to: (window.todayISO ? window.todayISO() : new Date().toISOString().slice(0, 10)), classId: 'all' };
     let rootEl = null;
     let chartInstances = { trend: null, method: null };
+    let hasTriedLazyLoad = false;
+
+    function last30DaysStart() {
+        const d = new Date();
+        d.setDate(d.getDate() - 30);
+        return d.toISOString().slice(0, 10);
+    }
 
     // ─── FILTERING ───────────────────────────────────────────────────
 
@@ -280,6 +226,23 @@
 
         wireToolbar();
         runReport();
+
+        // These are lazily-loaded (or, for classes/students, may simply
+        // not have finished loading yet at boot) — trigger once per
+        // visit if needed, then re-render with real numbers.
+        const needsCore = getClasses().length === 0 || getStudents().length === 0;
+        const needsFees = getStudentFees().length === 0;
+        const needsPayments = getPayments().length === 0;
+        if (!hasTriedLazyLoad && (needsCore || needsFees || needsPayments)) {
+            hasTriedLazyLoad = true;
+            Promise.all([
+                needsCore ? (window.loadAllData ? window.loadAllData({ silent: true }) : Promise.resolve()) : Promise.resolve(),
+                needsFees ? (window.loadStudentFees ? window.loadStudentFees() : Promise.resolve()) : Promise.resolve(),
+                needsPayments ? (window.loadPayments ? window.loadPayments() : Promise.resolve()) : Promise.resolve(),
+            ]).then(function () {
+                if (rootEl && rootEl.isConnected) { renderFinancialReports(rootEl); }
+            }).catch(function () {});
+        }
     }
 
     function wireToolbar() {
@@ -474,7 +437,7 @@
 
         const students = getStudents();
         const studentNameMap = {};
-        students.forEach(function (s) { studentNameMap[s.id] = s.name; });
+        students.forEach(function (s) { studentNameMap[s.id] = studentName(s); });
 
         const header = 'Receipt,Student,Amount,Method,Date';
         const lines = payments.map(function (p) {

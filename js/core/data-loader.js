@@ -223,35 +223,97 @@ async function _loadPhase3() {
  * holidaySubjects — never to the normal academic data keys.
  */
 async function _loadHolidayData() {
-    const activeYearId = getActiveYearId();
-    const yearFilter = activeYearId ? `academic_year_id=eq.${activeYearId}` : '';
+    // 1. Always load all holiday_sessions so the topbar period switcher
+    //    can show every available session regardless of mode
+    const allSessions = await getAllRecords('holiday_sessions',
+        'order=start_date.desc').catch(() => []);
+    state.holidaySessions = allSessions;
 
-    console.info('[DataLoader] Holiday mode detected — loading holiday tables.');
+    // 2. Resolve the active session
+    let activeSession = state.activeHolidaySession;
+    if (!activeSession) {
+        const today = todayISO ? todayISO() : new Date().toISOString().split('T')[0];
+        activeSession = allSessions.find(s =>
+            s.status === 'active' &&
+            s.start_date <= today &&
+            (!s.end_date || s.end_date >= today)
+        ) || null;
+        state.activeHolidaySession = activeSession;
+    }
+
+    // 3. Restore saved active session from localStorage if not auto-detected
+    if (!activeSession) {
+        const savedId = parseInt(localStorage.getItem(HOLIDAY_CONFIG.activeSessionKey) || '0');
+        if (savedId) {
+            activeSession = allSessions.find(s => s.id === savedId) || null;
+            state.activeHolidaySession = activeSession;
+        }
+    }
+
+    if (!activeSession) {
+        console.info('[DataLoader] No active holiday session — sessions loaded for switcher only.');
+        return;
+    }
+
+    console.info('[DataLoader] Loading holiday session:', activeSession.name);
+    await loadDataForHolidaySession(activeSession.id);
+}
+
+/**
+ * Load all data for a specific holiday session.
+ * Called when switching sessions from the period switcher.
+ */
+async function loadDataForHolidaySession(sessionId) {
+    const filter = `holiday_session_id=eq.${sessionId}`;
 
     const [
+        sessionClasses,
+        sessionSubjects,
+        sessionAssessments,
+        sessionTeachers,
+        holidayEnrollments,
         holidayMarks,
         holidayFees,
-        holidayEnrollments,
         holidaySubjects,
     ] = await Promise.all([
-        getAllRecords('holiday_marks', yearFilter).catch(() => []),
-        getAllRecords('holiday_fees', yearFilter).catch(() => []),
-        getAll('holiday_enrollments', yearFilter).catch(() => []),
-        getAll('holiday_subjects', yearFilter).catch(() => []),
+        getAll('session_classes',            `${filter}&order=display_order.asc`).catch(() => []),
+        getAll('session_subjects',           `${filter}&order=display_order.asc`).catch(() => []),
+        getAll('session_assessments',        filter).catch(() => []),
+        getAll('session_teacher_assignments',filter).catch(() => []),
+        getAll('holiday_enrollments',        filter).catch(() => []),
+        getAllRecords('holiday_marks',        filter).catch(() => []),
+        getAllRecords('holiday_fees',         filter).catch(() => []),
+        getAll('holiday_subjects',           filter).catch(() => []),
     ]);
 
     updateStateBatch({
+        sessionClasses,
+        sessionSubjects,
+        sessionAssessments,
+        sessionTeachers,
+        holidayEnrollments,
         holidayMarks,
         holidayFees,
-        holidayEnrollments,
         holidaySubjects,
     });
 
-    console.info('[DataLoader] Holiday data loaded:', {
+    // Load pending fee approvals for this session
+    const pendingApprovals = await getAll('student_fees',
+        `requires_approval=is.true&is_approved=is.false&source=eq.holiday_enrollment`
+    ).catch(() => []);
+    state.pendingFeeApprovals = pendingApprovals;
+
+    // Refresh topbar period switcher
+    if (window.TopbarPeriod) window.TopbarPeriod.refresh();
+
+    console.info('[DataLoader] Holiday session data loaded:', {
+        sessionId,
+        classes: sessionClasses.length,
+        subjects: sessionSubjects.length,
+        enrollments: holidayEnrollments.length,
         marks: holidayMarks.length,
         fees: holidayFees.length,
-        enrollments: holidayEnrollments.length,
-        subjects: holidaySubjects.length,
+        pendingApprovals: pendingApprovals.length,
     });
 }
 

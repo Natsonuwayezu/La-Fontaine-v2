@@ -1,238 +1,332 @@
 /* ═══════════════════════════════════════════════════════════════════
-   js/modules/holidays/holidays-marks.js
-   ═══════════════════════════════════════════════════════════════════
-   Remedial/holiday coursework marks (Section 3.5) — these NEVER touch
-   the regular class register, rankings, or report cards. Unlike the
-   regular marks flow (which routes through resolveTable() and only
-   goes to holiday_marks when the global holiday-mode toggle is on),
-   this module writes directly to the holiday_marks table always,
-   since it's a dedicated isolated screen regardless of that toggle's
-   current state — a head teacher reviewing/entering holiday marks in
-   September shouldn't require flipping a global "we're on holiday"
-   flag just to use this page.
-
-   Reuses css/modules/marks.css's .marks-toolbar/.marks-entry-table/
-   .marks-input for visual consistency with the regular marks-entry
-   screen, with an amber accent to keep the isolation visible.
+   js/modules/holidays/holidays-marks.js — Session-aware holiday marks
+   Two tabs: Marks Entry | Marks Register
+   Every mark tagged with holiday_session_id — never mixed.
    ═══════════════════════════════════════════════════════════════════ */
+'use strict';
 
-const HolidaysMarks = (() => {
+let _hmTab = 'entry', _hmSessionId = null, _hmClassId = null,
+    _hmSubjectId = null, _hmAssessId = null;
 
-    function esc(str) {
-        if (window.esc) return window.esc(str);
-        const div = document.createElement('div');
-        div.textContent = str ?? '';
-        return div.innerHTML;
+async function renderHolidaysMarks(container, params = {}) {
+    if (!container) return;
+    await ensureStateLoaded();
+    const sessions = state.holidaySessions || [];
+    _hmSessionId = params.sessionId || getActiveHolidaySessionId() || sessions[0]?.id || null;
+    if (_hmSessionId && !(state.sessionClasses||[]).some(c=>c.holiday_session_id===_hmSessionId))
+        await loadDataForHolidaySession(_hmSessionId);
+    if (!sessions.length) {
+        container.innerHTML = `<div class="module-wrap"><div class="mod-topbar"><div class="mod-topbar-left">
+            <h1 class="mod-title"><i class="fa-solid fa-book-open"></i> Holiday Marks</h1></div></div>
+            <div class="section-card"><div class="empty-state" style="padding:60px;">
+            <div class="es-icon"><i class="fa-solid fa-umbrella-beach" style="font-size:48px;opacity:.3;"></i></div>
+            <div class="es-title">No Holiday Sessions</div>
+            <div class="es-sub">Create a holiday session in Settings → Holidays first.</div>
+            </div></div></div>`; return;
     }
+    _hmShell(container, sessions);
+}
 
-    let roster = []; // [{ id, name, holidayMarkId|null, score }]
-
-    function render(container) {
-        if (!container) return;
-        container.innerHTML = `
-      <div class="dashboard-page">
-        <div class="dash-card" style="margin-bottom:16px; border-color:rgba(245,158,11,0.3); background:rgba(245,158,11,0.04);">
-          <div class="dash-card-body" style="display:flex; align-items:center; gap:10px;">
-            <i class="fa-solid fa-umbrella-beach" style="color:var(--warning); font-size:1.1rem;"></i>
-            <span style="font-size:0.85rem; color:var(--card-text,#e2e8f0);">
-              Marks entered here are stored in a separate holiday-only table and never appear in the regular class register, rankings, or report cards.
-            </span>
-          </div>
+function _hmShell(container, sessions) {
+    const cur = sessions.find(s=>s.id===_hmSessionId)||sessions[0];
+    const classes = (state.sessionClasses||[]).filter(c=>c.holiday_session_id===_hmSessionId);
+    container.innerHTML = `
+    <div class="module-wrap">
+      <div class="mod-topbar">
+        <div class="mod-topbar-left">
+          <h1 class="mod-title"><i class="fa-solid fa-book-open"></i> Holiday Marks</h1>
+          <span class="badge" style="background:rgba(217,119,6,.15);color:#d97706;margin-left:8px;">
+            🏖️ ${esc(cur?.name||'—')}</span>
         </div>
-
-        <div class="marks-toolbar">
-          <select class="form-select marks-toolbar__select" id="hm-class-select">
-            <option value="">Select a class...</option>${classOptions()}
+        <div class="mod-topbar-right">
+          <select class="select select-sm" onchange="hmPickSession(parseInt(this.value))">
+            ${sessions.map(s=>`<option value="${s.id}"${s.id===_hmSessionId?' selected':''}>
+              ${esc(s.name)}${s.status==='active'?' ●':''}</option>`).join('')}
           </select>
-          <select class="form-select marks-toolbar__select" id="hm-subject-select">
-            <option value="">Select a holiday subject...</option>
-          </select>
-          <div class="marks-toolbar__spacer"></div>
-          <button class="btn btn-outline btn-sm" id="hm-manage-subjects-btn"><i class="fa-solid fa-plus"></i> New Holiday Subject</button>
         </div>
-
+      </div>
+      <div class="tabs" style="margin-bottom:0;">
+        <button class="tab-btn${_hmTab==='entry'?' active':''}" onclick="hmTab('entry')">
+          <i class="fa-solid fa-pen-to-square"></i> Marks Entry</button>
+        <button class="tab-btn${_hmTab==='register'?' active':''}" onclick="hmTab('register')">
+          <i class="fa-solid fa-table-cells"></i> Marks Register</button>
+      </div>
+      <div class="section-card" style="border-top-left-radius:0;margin-top:0;">
         <div id="hm-body"></div>
       </div>
-    `;
+    </div>`;
+    if (classes.length) _hmDraw();
+    else document.getElementById('hm-body').innerHTML =
+        `<div class="empty-state" style="padding:40px;">
+         <div class="es-title">No holiday classes for this session</div>
+         <div class="es-sub">Add classes in Settings → Holidays.</div></div>`;
+}
 
-        populateSubjects(container);
-        container.querySelector('#hm-class-select').addEventListener('change', () => loadRoster(container));
-        container.querySelector('#hm-subject-select').addEventListener('change', () => loadRoster(container));
-        container.querySelector('#hm-manage-subjects-btn').addEventListener('click', () => createHolidaySubject(container));
-    }
+function _hmDraw() {
+    const el = document.getElementById('hm-body');
+    if (!el) return;
+    if (_hmTab==='entry') _hmEntry(el);
+    else _hmRegister(el);
+}
 
-    function classOptions() {
-        if (window.state?.classes?.length) {
-            return window.state.classes.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
-        }
-        return [...CLASS_LEVELS.nursery, ...CLASS_LEVELS.primary].map(c => `<option value="${c}">${c}</option>`).join('');
-    }
+window.hmTab = t => { _hmTab=t; _hmDraw(); };
+window.hmPickSession = async id => {
+    _hmSessionId=id; _hmClassId=_hmSubjectId=_hmAssessId=null;
+    await loadDataForHolidaySession(id);
+    const s=state.holidaySessions||[];
+    const c=document.querySelector('.module-wrap');
+    if(c) _hmShell(c.parentElement,s);
+};
 
-    function populateSubjects(container) {
-        const sel = container.querySelector('#hm-subject-select');
-        const subjects = window.state?.holidaySubjects || [];
-        sel.innerHTML = `<option value="">Select a holiday subject...</option>` +
-            subjects.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('');
-        if (!subjects.length) {
-            console.warn('HolidaysMarks: no holiday_subjects loaded yet — create one with "New Holiday Subject" first.');
-        }
-    }
+/* ── ENTRY ── */
+function _hmEntry(el) {
+    const classes   = (state.sessionClasses  ||[]).filter(c=>c.holiday_session_id===_hmSessionId);
+    const subjects  = (state.sessionSubjects ||[]).filter(s=>s.session_class_id===_hmClassId);
+    const assmnts   = (state.sessionAssessments||[]).filter(a=>
+        a.session_class_id===_hmClassId && a.session_subject_id===_hmSubjectId);
+    const enrollments=(state.holidayEnrollments||[]).filter(e=>
+        e.holiday_session_id===_hmSessionId && e.session_class_id===_hmClassId);
+    const students  = (state.students||[]).filter(s=>enrollments.some(e=>e.student_id===s.id))
+        .sort((a,b)=>(a.last_name||'').localeCompare(b.last_name||''));
+    const markMap   = {};
+    (state.holidayMarks||[]).filter(m=>m.session_assessment_id===_hmAssessId&&m.holiday_session_id===_hmSessionId)
+        .forEach(m=>{markMap[m.student_id]=m;});
+    const assessment = assmnts.find(a=>a.id===_hmAssessId);
 
-    function createHolidaySubject(container) {
-        openSubjectModal();
-    }
-
-    window.Modals?.register('holiday-subject-editor', () => ({
-        title: 'New Holiday Subject',
-        subtitle: 'e.g. "Remedial Mathematics" or "Summer Reading Club"',
-        size: 'sm',
-        body: `
-      <div class="form-group">
-        <label>Subject name <span class="required">*</span></label>
-        <input type="text" class="form-input" data-field="name" placeholder="e.g. Remedial Mathematics" />
-        <div class="form-hint"></div>
+    el.innerHTML = `
+    <div class="form-row" style="margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+      <div class="field" style="min-width:160px;">
+        <label class="field-label">Class *</label>
+        <select class="select" onchange="hmClass(parseInt(this.value))">
+          <option value="">— Select —</option>
+          ${classes.map(c=>`<option value="${c.id}"${c.id===_hmClassId?' selected':''}>${esc(c.name)}</option>`).join('')}
+        </select>
       </div>
-    `,
-        footer: `
-      <button class="btn btn-outline" data-modal-close>Cancel</button>
-      <button class="btn btn-primary" data-save>Create</button>
-    `,
-        onMount(modal, record) {
-            modal.querySelector('[data-save]').addEventListener('click', async () => {
-                const result = window.Forms?.validate(modal, { name: [window.Forms.rules.required('A subject name is required')] });
-                if (result && !result.valid) return;
-                const name = modal.querySelector('[data-field="name"]').value.trim();
-
-                try {
-                    const row = await window.insert?.('holiday_subjects', { name, academic_year_id: window.getActiveYearId?.() });
-                    if (row?.id && window.state) window.state.holidaySubjects = [...(window.state.holidaySubjects || []), row];
-                    window.Toast?.success('Holiday subject created', name);
-                    window.Modals?.close(record);
-                    const container = document.getElementById('moduleContent');
-                    if (container) populateSubjects(container);
-                } catch (err) {
-                    window.Toast?.error('Could not create subject', err?.message);
-                }
-            });
-        }
-    }));
-
-    function openSubjectModal() {
-        window.Modals?.open('holiday-subject-editor');
-    }
-
-    async function loadRoster(container) {
-        const classId = container.querySelector('#hm-class-select').value;
-        const subjectId = container.querySelector('#hm-subject-select').value;
-        const body = container.querySelector('#hm-body');
-
-        if (!classId || !subjectId) { body.innerHTML = ''; return; }
-        if (window.Skeletons) window.Skeletons.showIn(body, 'list', 5);
-
-        const students = await fetchHolidayRoster(classId);
-        const existing = await fetchExistingMarks(subjectId, students.map(s => s.id));
-
-        roster = students.map(s => {
-            const record = existing.find(m => m.student_id === s.id);
-            return { id: s.id, name: s.name, holidayMarkId: record?.id || null, score: record?.score ?? '' };
-        });
-
-        renderTable(body, subjectId);
-    }
-
-    async function fetchHolidayRoster(classId) {
-        if (window.state?.holidayEnrollments?.length && window.state?.students?.length) {
-            const enrolledIds = new Set(window.state.holidayEnrollments.filter(e => e.class_id === classId).map(e => e.student_id));
-            return window.state.students.filter(s => enrolledIds.has(s.id))
-                .map(s => ({ id: s.id, name: s.full_name || `${s.first_name || ''} ${s.last_name || ''}`.trim() }));
-        }
-        if (window.getStudentsInClass && window.state?.students?.length) {
-            return window.getStudentsInClass(classId).map(s => ({ id: s.id, name: s.full_name || `${s.first_name || ''} ${s.last_name || ''}`.trim() }));
-        }
-        console.warn('HolidaysMarks: no real holiday roster available yet.');
-        return [];
-    }
-
-    async function fetchExistingMarks(subjectId, studentIds) {
-        if (!window.getWhere || !studentIds.length) return [];
-        try {
-            return await window.getWhere('holiday_marks', `subject_id=eq.${subjectId}&student_id=in.(${studentIds.join(',')})`);
-        } catch (err) {
-            console.warn('HolidaysMarks: getWhere(holiday_marks) failed', err);
-            return [];
-        }
-    }
-
-    function renderTable(body, subjectId) {
-        if (!roster.length) {
-            window.EmptyStates?.renderPreset(body, 'noData', { title: 'No holiday-enrolled students', message: 'No students are enrolled in the holiday program for this class.' });
-            return;
-        }
-
-        body.innerHTML = `
-      <div class="marks-entry-wrap">
-        <table class="marks-entry-table">
-          <thead><tr><th class="col-num">Score</th><th>Student</th></tr></thead>
-          <tbody>
-            ${roster.map((s, i) => `
-              <tr>
-                <td style="text-align:center;"><input type="text" inputmode="decimal" class="marks-input" data-idx="${i}" value="${s.score}" placeholder="\u2014" /></td>
-                <td class="student-name-cell">${esc(s.name)}<div class="student-num-cell">${esc(s.id)}</div></td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
+      <div class="field" style="min-width:160px;">
+        <label class="field-label">Subject *</label>
+        <select class="select" onchange="hmSubject(parseInt(this.value))"${!_hmClassId?' disabled':''}>
+          <option value="">— Select —</option>
+          ${subjects.map(s=>`<option value="${s.id}"${s.id===_hmSubjectId?' selected':''}>${esc(s.name)}</option>`).join('')}
+        </select>
       </div>
-      <div class="marks-save-bar">
-        <span class="marks-save-status" id="hm-save-status">${roster.length} students</span>
-        <button class="btn btn-primary" id="hm-save-btn"><i class="fa-solid fa-floppy-disk"></i> Save Holiday Marks</button>
+      <div class="field" style="min-width:160px;">
+        <label class="field-label">Assessment *</label>
+        <select class="select" onchange="hmAssess(parseInt(this.value))"${!_hmSubjectId?' disabled':''}>
+          <option value="">— Select —</option>
+          ${assmnts.map(a=>`<option value="${a.id}"${a.id===_hmAssessId?' selected':''}>${esc(a.name)} (/${a.max_marks})</option>`).join('')}
+        </select>
       </div>
-    `;
+      ${_hmClassId&&_hmSubjectId?`
+      <div class="field" style="align-self:flex-end;">
+        <button class="btn btn-secondary" onclick="hmNewAssess()">
+          <i class="fa-solid fa-plus"></i> New Assessment</button>
+      </div>`:''}
+    </div>
+    <div id="hm-marks-body">
+      ${!_hmAssessId
+        ? `<div class="empty-state" style="padding:32px;"><div class="es-title">Select class, subject and assessment</div></div>`
+        : students.length===0
+        ? `<div class="empty-state" style="padding:32px;"><div class="es-title">No enrolled students</div>
+           <div class="es-sub">Enroll students first in Holiday Enrollment.</div></div>`
+        : _hmMarksTable(students,markMap,assessment)}
+    </div>`;
+}
 
-        body.querySelectorAll('[data-idx]').forEach(input => {
-            input.addEventListener('input', () => {
-                const val = input.value.trim();
-                roster[+input.dataset.idx].score = val;
-                const statusEl = body.querySelector('#hm-save-status');
-                statusEl.textContent = `${roster.length} students`;
-                statusEl.classList.add('dirty');
-            });
-        });
+function _hmMarksTable(students, markMap, assessment) {
+    const max = assessment?.max_marks||100;
+    return `
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Student</th><th style="width:70px;text-align:center;">Absent</th>
+          <th style="width:130px;">Score /${max}</th><th style="width:70px;">Grade</th></tr></thead>
+        <tbody>
+        ${students.map(s=>{
+            const m=markMap[s.id], absent=m?.is_absent||false, score=m?.score??'';
+            return `<tr>
+              <td><div class="student-cell">
+                <span class="student-name">${esc(s.last_name)}, ${esc(s.first_name)}</span>
+                <span class="student-code">${esc(s.code||'')}</span></div></td>
+              <td style="text-align:center;">
+                <input type="checkbox" ${absent?'checked':''} onchange="hmAbsent(${s.id},this.checked)"
+                  style="width:16px;height:16px;cursor:pointer;"></td>
+              <td><input type="number" class="input" min="0" max="${max}" step="0.5"
+                  placeholder="—" value="${absent?'':esc(String(score))}"
+                  ${absent?'disabled':''}
+                  id="hm-s-${s.id}" onchange="hmGrade(${s.id},this.value,${max})"></td>
+              <td id="hm-g-${s.id}" style="font-size:12px;color:var(--text-muted);">
+                ${score!==''&&!absent?esc(getGrade((Number(score)/max)*100)):'—'}</td>
+            </tr>`;}).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;align-items:center;">
+      <button class="btn btn-primary" onclick="hmSaveAll()">
+        <i class="fa-solid fa-floppy-disk"></i> Save All Marks</button>
+      <span style="font-size:12px;color:var(--text-muted);">
+        ${students.length} student${students.length!==1?'s':''} · max ${max}</span>
+    </div>`;
+}
 
-        body.querySelector('#hm-save-btn').addEventListener('click', () => saveMarks(body, subjectId));
+window.hmClass   = id => { _hmClassId=id||null; _hmSubjectId=_hmAssessId=null; _hmDraw(); };
+window.hmSubject = id => { _hmSubjectId=id||null; _hmAssessId=null; _hmDraw(); };
+window.hmAssess  = id => { _hmAssessId=id||null; _hmDraw(); };
+window.hmAbsent  = (sid,v) => {
+    const inp=document.getElementById(`hm-s-${sid}`),g=document.getElementById(`hm-g-${sid}`);
+    if(inp){inp.disabled=v;if(v)inp.value='';}
+    if(g) g.textContent='—';
+};
+window.hmGrade   = (sid,val,max) => {
+    const g=document.getElementById(`hm-g-${sid}`);
+    if(g){const s=parseFloat(val);g.textContent=isNaN(s)?'—':esc(getGrade((s/max)*100));}
+};
+
+window.hmSaveAll = async () => {
+    if(!_hmAssessId||!_hmClassId||!_hmSessionId) return;
+    const enrollments=(state.holidayEnrollments||[]).filter(e=>
+        e.holiday_session_id===_hmSessionId&&e.session_class_id===_hmClassId);
+    const students=(state.students||[]).filter(s=>enrollments.some(e=>e.student_id===s.id));
+    const now=new Date().toISOString(); let saved=0,errors=0;
+    for(const s of students){
+        const inp=document.getElementById(`hm-s-${s.id}`);
+        const cb=inp?.closest('tr')?.querySelector('input[type="checkbox"]');
+        const absent=cb?.checked||false;
+        const score=absent?null:(parseFloat(inp?.value)??null);
+        const existing=(state.holidayMarks||[]).find(m=>
+            m.student_id===s.id&&m.session_assessment_id===_hmAssessId&&m.holiday_session_id===_hmSessionId);
+        const payload={student_id:s.id,holiday_session_id:_hmSessionId,
+            session_assessment_id:_hmAssessId,session_class_id:_hmClassId,
+            session_subject_id:_hmSubjectId,score,is_absent:absent,
+            entered_by:state.currentUser?.id||null,entered_at:now,updated_at:now};
+        try{
+            if(existing) await update('holiday_marks',existing.id,payload);
+            else{ payload.created_at=now; await insert('holiday_marks',payload);}
+            saved++;
+        }catch(e){errors++;}
     }
+    showToast(`${saved} mark${saved!==1?'s':''} saved.${errors?` ${errors} error(s).`:''}`,
+        errors?'warning':'success');
+    await loadDataForHolidaySession(_hmSessionId);
+    _hmDraw();
+};
 
-    async function saveMarks(body, subjectId) {
-        const btn = body.querySelector('#hm-save-btn');
-        window.Loaders?.button?.start(btn);
+window.hmNewAssess = () => {
+    showModal(`
+    <div class="form-group"><label>Assessment Name *</label>
+      <input type="text" id="hm-na-name" class="input" placeholder="Test 1, Final Exam…"></div>
+    <div class="form-group"><label>Max Marks *</label>
+      <input type="number" id="hm-na-max" class="input" value="100" min="1"></div>
+    <div class="form-group"><label>Date</label>
+      <input type="date" id="hm-na-date" class="input"></div>`,
+    {title:'New Assessment',footer:`
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="hmSubmitAssess()">Create</button>`});
+};
 
-        try {
-            const toSave = roster.filter(s => s.score !== '' && !isNaN(parseFloat(s.score)));
-            await Promise.all(toSave.map(s => {
-                const payload = { student_id: s.id, subject_id: subjectId, score: parseFloat(s.score), updated_at: new Date().toISOString() };
-                if (s.holidayMarkId) {
-                    return window.update ? window.update('holiday_marks', s.holidayMarkId, payload) : Promise.resolve();
-                }
-                return window.insert ? window.insert('holiday_marks', payload).then(row => { if (row?.id) s.holidayMarkId = row.id; }) : Promise.resolve();
-            }));
+window.hmSubmitAssess = async () => {
+    const name=cleanInput(document.getElementById('hm-na-name')?.value);
+    const max=parseFloat(document.getElementById('hm-na-max')?.value)||100;
+    const date=document.getElementById('hm-na-date')?.value||null;
+    if(!name){showToast('Assessment name required.','warning');return;}
+    try{
+        await insert('session_assessments',{holiday_session_id:_hmSessionId,
+            session_class_id:_hmClassId,session_subject_id:_hmSubjectId,
+            name,max_marks:max,date,is_locked:false,
+            created_by:state.currentUser?.id||null,created_at:new Date().toISOString()});
+        showToast(`"${name}" created.`,'success'); closeModal();
+        await loadDataForHolidaySession(_hmSessionId); _hmDraw();
+    }catch(e){handleApiError(e,'create assessment');}
+};
 
-            body.querySelector('#hm-save-status').textContent = `${toSave.length} marks saved`;
-            body.querySelector('#hm-save-status').classList.remove('dirty');
-            window.Toast?.success('Holiday marks saved', `${toSave.length} mark${toSave.length === 1 ? '' : 's'} saved.`);
-        } catch (err) {
-            window.Toast?.error('Could not save holiday marks', err?.message || 'Please try again.');
-        } finally {
-            window.Loaders?.button?.stop(btn);
-        }
-    }
+/* ── REGISTER ── */
+function _hmRegister(el) {
+    const classes=(state.sessionClasses||[]).filter(c=>c.holiday_session_id===_hmSessionId);
+    el.innerHTML = `
+    <div class="form-row" style="margin-bottom:14px;">
+      <div class="field" style="min-width:180px;">
+        <label class="field-label">Class</label>
+        <select class="select" onchange="hmRegClass(parseInt(this.value))">
+          <option value="">— Select —</option>
+          ${classes.map(c=>`<option value="${c.id}"${c.id===_hmClassId?' selected':''}>${esc(c.name)}</option>`).join('')}
+        </select>
+      </div>
+      ${_hmClassId?`
+      <div class="field" style="align-self:flex-end;">
+        <button class="btn btn-secondary" onclick="hmExportReg(${_hmClassId},${_hmSessionId})">
+          <i class="fa-solid fa-download"></i> Export CSV</button>
+      </div>`:''}
+    </div>
+    <div id="hm-reg-grid">${_hmRegGrid()}</div>`;
+}
 
-    return { render };
-})();
+window.hmRegClass = id => { _hmClassId=id||null; _hmDraw(); };
 
-// ─── EXPOSE ─────────────────────────────────────────────────────────
-// window.HolidaysMarks was never assigned anywhere in this file, and the router
-// looks up window.renderHolidaysMarks specifically (see core/router.js's
-// moduleIdToRenderFn) — this page was completely unreachable via navigation
-// despite being fully built.
-window.HolidaysMarks = HolidaysMarks;
-window.renderHolidaysMarks = HolidaysMarks.render;
+function _hmRegGrid() {
+    if(!_hmClassId) return `<div class="empty-state" style="padding:32px;">
+        <div class="es-title">Select a class</div></div>`;
+    const enrolls  =(state.holidayEnrollments||[]).filter(e=>e.holiday_session_id===_hmSessionId&&e.session_class_id===_hmClassId);
+    const students =(state.students||[]).filter(s=>enrolls.some(e=>e.student_id===s.id)).sort((a,b)=>(a.last_name||'').localeCompare(b.last_name||''));
+    const subjects =(state.sessionSubjects||[]).filter(s=>s.session_class_id===_hmClassId);
+    const assmnts  =(state.sessionAssessments||[]).filter(a=>a.session_class_id===_hmClassId&&a.holiday_session_id===_hmSessionId);
+    const markMap  ={};
+    (state.holidayMarks||[]).filter(m=>m.session_class_id===_hmClassId&&m.holiday_session_id===_hmSessionId)
+        .forEach(m=>{markMap[`${m.student_id}-${m.session_assessment_id}`]=m;});
+
+    if(!students.length) return `<div class="empty-state" style="padding:32px;"><div class="es-title">No enrolled students</div></div>`;
+    if(!assmnts.length)  return `<div class="empty-state" style="padding:32px;"><div class="es-title">No assessments yet</div></div>`;
+
+    const headers = assmnts.map(a=>{
+        const subj=subjects.find(s=>s.id===a.session_subject_id);
+        return `<th title="${esc(subj?.name||'')} · ${esc(a.name)}" style="min-width:60px;font-size:11px;">
+            <div style="opacity:.7;">${esc((subj?.name||'').slice(0,5))}</div>
+            <div>${esc(a.name.slice(0,8))}</div>
+            <div style="opacity:.5;">/${a.max_marks}</div></th>`;}).join('');
+
+    const rows = students.map((s,i)=>{
+        const cells=assmnts.map(a=>{
+            const m=markMap[`${s.id}-${a.id}`];
+            const pct=(!m?.is_absent&&m?.score!=null)?(m.score/a.max_marks)*100:null;
+            const col=pct===null?'':pct>=80?'color:var(--color-success);':pct<50?'color:var(--color-danger);':'';
+            return `<td class="text-center" style="${col}font-size:12px;">
+                ${m?.is_absent?'ABS':m?.score!=null?m.score:'—'}</td>`;}).join('');
+        const valid=assmnts.map(a=>{const m=markMap[`${s.id}-${a.id}`];return(!m||m.is_absent||m.score==null)?null:{score:m.score,max:a.max_marks};}).filter(Boolean);
+        const avgPct=valid.length?valid.reduce((sum,m)=>sum+(m.score/m.max)*100,0)/valid.length:null;
+        return `<tr>
+            <td style="font-size:11px;color:var(--text-muted);">${i+1}</td>
+            <td><div class="student-name" style="font-size:13px;">${esc(s.last_name)}, ${esc(s.first_name)}</div>
+                <div class="student-code">${esc(s.code||'')}</div></td>
+            ${cells}
+            <td class="text-center" style="font-weight:700;font-size:12px;color:${avgPct===null?'inherit':avgPct>=50?'var(--color-success)':'var(--color-danger)'};">
+                ${avgPct!==null?fmtPct(avgPct,1):'—'}</td>
+            <td class="text-center" style="font-size:12px;">${avgPct!==null?esc(getGrade(avgPct)):'—'}</td>
+        </tr>`;}).join('');
+
+    return `<div style="overflow-x:auto;">
+        <table class="data-table" style="font-size:12px;">
+          <thead><tr>
+            <th style="width:28px;">#</th><th style="min-width:140px;">Student</th>
+            ${headers}<th style="min-width:55px;">Avg%</th><th style="min-width:50px;">Grade</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+        <div class="table-footer"><span>${students.length} students · ${assmnts.length} assessments</span></div>`;
+}
+
+window.hmExportReg = (classId,sessionId) => {
+    const cls    =(state.sessionClasses||[]).find(c=>c.id===classId);
+    const sess   =(state.holidaySessions||[]).find(s=>s.id===sessionId);
+    const assmnts=(state.sessionAssessments||[]).filter(a=>a.session_class_id===classId);
+    const enrolls=(state.holidayEnrollments||[]).filter(e=>e.session_class_id===classId);
+    const studs  =(state.students||[]).filter(s=>enrolls.some(e=>e.student_id===s.id));
+    const markMap={};
+    (state.holidayMarks||[]).filter(m=>m.session_class_id===classId)
+        .forEach(m=>{markMap[`${m.student_id}-${m.session_assessment_id}`]=m;});
+    const data=studs.map(s=>{
+        const row={'Code':s.code||'','Last Name':s.last_name,'First Name':s.first_name};
+        assmnts.forEach(a=>{const m=markMap[`${s.id}-${a.id}`];
+            row[`${a.name}/${a.max_marks}`]=m?.is_absent?'ABS':(m?.score??'');});
+        return row;});
+    if(typeof exportAsCSV==='function') exportAsCSV(data,`Holiday_Register_${cls?.name||''}_${sess?.name||''}`);
+    else showToast('Export not available.','warning');
+};
+
+window.renderHolidaysMarks = renderHolidaysMarks;

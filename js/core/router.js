@@ -60,6 +60,7 @@ const MODULE_FILE_MAP = {
     'academic-reports': 'js/modules/academics/academic-reports.js',
 
     // Holidays (academic)
+    'holidays-enrollment': 'js/modules/holidays/holidays-enrollment.js',
     'holidays-marks': 'js/modules/holidays/holidays-marks.js',
 
     // Finance
@@ -72,6 +73,7 @@ const MODULE_FILE_MAP = {
     'receipts': 'js/modules/finance/receipts.js',
     'overdue-payments': 'js/modules/finance/overdue-payments.js',
     'fee-waivers': 'js/modules/finance/fee-waivers.js',
+    'fee-approvals': 'js/modules/finance/fee-approvals.js',
     'credit-balances': 'js/modules/finance/credit-balances.js',
     'balances': 'js/modules/finance/balances.js',
     'student-fees': 'js/modules/finance/student-fees.js',

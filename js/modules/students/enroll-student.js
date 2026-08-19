@@ -889,21 +889,49 @@ function renderStep4(panel, container) {
 
                 if (!categoryId) continue;
 
+                // Discount logic:
+                // If the entered amount < fee.amount → the difference is a waiver (discount).
+                // The fee is still created for the full fee.amount but waived_amount is set.
+                const enteredAmount   = sel.amountPaid || 0;
+                const isFullAmount    = enteredAmount >= fee.amount;
+                const discountAmount  = isFullAmount ? 0 : Math.max(0, fee.amount - enteredAmount);
+                const effectiveAmount = fee.amount - discountAmount; // net amount student owes
+                const isPaid          = enteredAmount >= effectiveAmount && effectiveAmount > 0;
+
+                // Fees from enrollment always require approval (unless already fully paid today)
+                const needsApproval = !isPaid;
+
                 const feePayload = {
-                    student_id: studentId,
-                    fee_category_id: categoryId,
-                    term_id: state.currentTerm?.id || null,
-                    academic_year_id: state.currentAcadYear?.id || null,
-                    amount: fee.amount,
-                    paid_amount: sel.amountPaid || 0,
-                    is_paid: (sel.amountPaid || 0) >= fee.amount,
-                    is_waived: false,
-                    due_date: state.currentTerm?.end_date || null,
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
+                    student_id       : studentId,
+                    fee_category_id  : categoryId,
+                    fee_name         : fee.name,
+                    term_id          : state.currentTerm?.id || null,
+                    academic_year_id : state.currentAcadYear?.id || null,
+                    amount           : fee.amount,
+                    paid_amount      : enteredAmount > 0 ? enteredAmount : 0,
+                    waived_amount    : discountAmount,
+                    is_paid          : isPaid,
+                    is_waived        : false,
+                    due_date         : state.currentTerm?.end_date || null,
+                    requires_approval: needsApproval,
+                    is_approved      : isPaid ? true : false,  // auto-approve if paid in full
+                    source           : 'enrollment',
+                    created_at       : new Date().toISOString(),
+                    updated_at       : new Date().toISOString()
                 };
 
-                await insert('student_fees', feePayload);
+                const feeResult = await insert('student_fees', feePayload);
+
+                // Log auto-approval if paid in full
+                if (isPaid && feeResult?.id) {
+                    await insert('fee_approval_log', {
+                        student_fee_id : feeResult.id,
+                        student_id     : studentId,
+                        action         : 'auto_approved',
+                        acted_at       : new Date().toISOString(),
+                        note           : 'Auto-approved: paid in full at enrollment.',
+                    }).catch(() => {});
+                }
                 feeCategoryIds.push(categoryId);
             }
 

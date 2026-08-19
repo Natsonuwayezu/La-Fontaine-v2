@@ -89,8 +89,9 @@ const NAV_SECTIONS = {
     bg: 'rgba(184, 152, 58, 0.12)',
     desc: 'Holiday-only marks and fees — isolated from the regular term tables.',
     items: [
-      { id: 'holidays-marks', label: 'Holiday Marks', icon: 'fa-book-open', desc: 'Remedial/holiday coursework marks, kept separate from the register' },
-      { id: 'holidays-fees', label: 'Holiday Fees', icon: 'fa-money-bill', desc: 'Fees specific to the holiday period (e.g. holiday camp)' }
+      { id: 'holidays-enrollment', label: 'Holiday Enrollment', icon: 'fa-user-plus', desc: 'Enroll students into holiday session classes and assign fees' },
+      { id: 'holidays-marks', label: 'Holiday Marks Entry', icon: 'fa-pen-to-square', desc: 'Enter marks per assessment for enrolled holiday students' },
+      { id: 'holidays-fees', label: 'Holiday Fees', icon: 'fa-money-bill', desc: 'Fees specific to the holiday period' }
     ]
   },
   finance: {
@@ -106,6 +107,7 @@ const NAV_SECTIONS = {
       { id: 'payment-history', label: 'Payment History', icon: 'fa-clock-rotate-left', desc: 'Filter by student, class, date, method' },
       { id: 'receipts', label: 'Receipts', icon: 'fa-receipt', desc: 'Print, reprint, export' },
       { id: 'fee-waivers', label: 'Waivers / Discounts', icon: 'fa-tag', desc: 'With reason and audit trail' },
+      { id: 'fee-approvals', label: 'Fee Approvals', icon: 'fa-clipboard-check', desc: 'Review and approve enrollment fees pending review' },
       { id: 'payment-reversals', label: 'Reversals', icon: 'fa-rotate-left', desc: 'Reverse with balance recalculation' },
       { id: 'finance-audit', label: 'Finance Audit', icon: 'fa-magnifying-glass-chart', desc: 'Audit trail for all transactions' },
       { id: 'family-fee-summary', label: 'Family Fee Summary', icon: 'fa-users-rectangle', desc: 'By family group' }

@@ -1,0 +1,227 @@
+/* ═══════════════════════════════════════════════════════════════════
+   css/themes/holiday.css — Holiday Mode Theme
+   Applied when body has class "mode-holiday"
+   Amber/orange palette, distinct from normal navy theme.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Root overrides in holiday mode ────────────────────────────── */
+body.mode-holiday {
+  --holiday-primary   : #d97706;
+  --holiday-dark      : #92400e;
+  --holiday-light     : #fef3c7;
+  --holiday-border    : rgba(217,119,6,0.25);
+  --holiday-bg        : rgba(217,119,6,0.06);
+}
+
+/* ── Sidebar accent line ────────────────────────────────────────── */
+body.mode-holiday .sidebar {
+  border-right-color  : var(--holiday-primary);
+}
+body.mode-holiday .sidebar-header {
+  border-bottom       : 2px solid var(--holiday-primary);
+}
+body.mode-holiday .sidebar-nav .nav-item.active,
+body.mode-holiday .sidebar-nav .nav-item:focus {
+  background          : rgba(217,119,6,0.12);
+  color               : var(--holiday-primary);
+  border-left-color   : var(--holiday-primary);
+}
+
+/* ── Topbar holiday banner ──────────────────────────────────────── */
+.holiday-banner {
+  display             : flex;
+  align-items         : center;
+  gap                 : 6px;
+  padding             : 4px 12px;
+  border-radius       : 999px;
+  background          : rgba(217,119,6,0.15);
+  color               : #d97706;
+  font-size           : 12px;
+  font-weight         : 700;
+  white-space         : nowrap;
+  border              : 1px solid rgba(217,119,6,0.3);
+}
+
+/* ── Period switcher ────────────────────────────────────────────── */
+.period-switcher {
+  position            : relative;
+}
+
+.period-btn {
+  display             : flex;
+  align-items         : center;
+  gap                 : 6px;
+  padding             : 5px 12px;
+  border-radius       : 8px;
+  border              : 1px solid var(--card-border, rgba(255,255,255,0.08));
+  background          : rgba(255,255,255,0.04);
+  color               : var(--text, #e2e8f0);
+  font-size           : 13px;
+  font-weight         : 600;
+  cursor              : pointer;
+  transition          : .15s;
+  white-space         : nowrap;
+}
+.period-btn:hover { background: rgba(255,255,255,0.08); }
+
+body.mode-holiday .period-btn {
+  border-color        : rgba(217,119,6,0.4);
+  background          : rgba(217,119,6,0.10);
+  color               : #fcd34d;
+}
+
+.period-dropdown {
+  position            : absolute;
+  top                 : calc(100% + 6px);
+  right               : 0;
+  min-width           : 240px;
+  background          : var(--card-bg, #111d2e);
+  border              : 1px solid var(--card-border, rgba(255,255,255,0.08));
+  border-radius       : 12px;
+  box-shadow          : 0 16px 40px rgba(0,0,0,0.5);
+  z-index             : 1000;
+  overflow            : hidden;
+}
+
+.period-dropdown-title {
+  padding             : 10px 14px 6px;
+  font-size           : 11px;
+  font-weight         : 700;
+  text-transform      : uppercase;
+  letter-spacing      : .5px;
+  color               : var(--text-muted, #475569);
+}
+
+.period-option {
+  display             : flex;
+  align-items         : center;
+  gap                 : 10px;
+  padding             : 10px 14px;
+  width               : 100%;
+  background          : none;
+  border              : none;
+  cursor              : pointer;
+  color               : var(--text, #e2e8f0);
+  text-align          : left;
+  transition          : background .12s;
+}
+.period-option:hover { background: rgba(255,255,255,0.05); }
+.period-option.active {
+  background          : rgba(255,255,255,0.06);
+  font-weight         : 600;
+}
+.period-option-holiday.active {
+  background          : rgba(217,119,6,0.10);
+  color               : #fcd34d;
+}
+.period-option-icon { font-size: 18px; flex-shrink: 0; }
+.period-option-info {
+  flex                : 1;
+  display             : flex;
+  flex-direction      : column;
+  gap                 : 1px;
+}
+.period-option-name { font-size: 13px; font-weight: 600; }
+.period-option-meta { font-size: 11px; color: var(--text-muted, #475569); }
+
+/* ── Holiday mode indicator bar (below topbar) ──────────────────── */
+body.mode-holiday .page-body::before {
+  content             : '🏖️  HOLIDAY SESSION ACTIVE — Marks and fees are kept separate from the academic year';
+  display             : block;
+  padding             : 6px 20px;
+  background          : rgba(217,119,6,0.12);
+  border-bottom       : 1px solid rgba(217,119,6,0.25);
+  color               : #fcd34d;
+  font-size           : 12px;
+  font-weight         : 600;
+  text-align          : center;
+  letter-spacing      : .3px;
+}
+
+/* ── Module wrap in holiday mode ────────────────────────────────── */
+.module-wrap.holiday-mode .mod-title { color: #fcd34d; }
+.module-wrap.holiday-mode .mod-title i { color: #d97706; }
+
+/* ── Holiday badge inline ───────────────────────────────────────── */
+.holiday-badge-inline {
+  display             : inline-flex;
+  align-items         : center;
+  gap                 : 4px;
+  padding             : 2px 10px;
+  border-radius       : 999px;
+  background          : rgba(217,119,6,0.15);
+  color               : #d97706;
+  font-size           : 12px;
+  font-weight         : 700;
+  border              : 1px solid rgba(217,119,6,0.25);
+}
+
+/* ── Holiday session cards in settings ─────────────────────────── */
+.holiday-session-card {
+  border              : 1px solid var(--card-border, rgba(255,255,255,0.07));
+  border-radius       : 10px;
+  padding             : 14px 16px;
+  display             : flex;
+  align-items         : center;
+  justify-content     : space-between;
+  gap                 : 12px;
+  margin-bottom       : 8px;
+  transition          : border-color .15s;
+}
+.holiday-session-card.status-active {
+  border-color        : rgba(217,119,6,0.4);
+  background          : rgba(217,119,6,0.05);
+}
+.holiday-session-card.status-completed {
+  opacity             : .65;
+}
+.hsc-name { font-size: 14px; font-weight: 700; }
+.hsc-meta { font-size: 12px; color: var(--text-muted, #475569); margin-top: 2px; }
+.hsc-status {
+  font-size           : 11px;
+  font-weight         : 700;
+  padding             : 2px 8px;
+  border-radius       : 999px;
+}
+.hsc-status.active   { background: rgba(217,119,6,0.2); color: #d97706; }
+.hsc-status.upcoming { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.hsc-status.completed{ background: rgba(74,222,128,0.1); color: #4ade80; }
+
+/* ── Fee approval pending badge in sidebar ──────────────────────── */
+.approval-pending-dot {
+  display             : inline-block;
+  width               : 8px;
+  height              : 8px;
+  border-radius       : 50%;
+  background          : #f59e0b;
+  margin-left         : 6px;
+  vertical-align      : middle;
+  animation           : pulse-amber 1.5s ease-in-out infinite;
+}
+@keyframes pulse-amber {
+  0%,100% { opacity:1; transform:scale(1); }
+  50%      { opacity:.5; transform:scale(.8); }
+}
+
+/* ── Fee approval list items ────────────────────────────────────── */
+.fappr-row {
+  display             : grid;
+  grid-template-columns: 1fr 1fr auto auto auto;
+  align-items         : center;
+  gap                 : 12px;
+  padding             : 10px 14px;
+  border-bottom       : 1px solid var(--card-border, rgba(255,255,255,0.06));
+}
+.fappr-row:last-child { border-bottom: none; }
+.fappr-source-holiday {
+  font-size           : 11px;
+  font-weight         : 700;
+  padding             : 2px 8px;
+  border-radius       : 4px;
+  background          : rgba(217,119,6,0.15);
+  color               : #d97706;
+}
+
+/* ── Normal mode — reset ────────────────────────────────────────── */
+body.mode-normal .page-body::before { display: none; }
+body.mode-normal .holiday-banner    { display: none !important; }

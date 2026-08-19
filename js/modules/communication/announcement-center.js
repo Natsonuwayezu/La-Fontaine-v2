@@ -3,36 +3,28 @@
    ═══════════════════════════════════════════════════════════════════
    The reading experience — what a teacher/accountant actually sees
    when they open announcements, distinct from announcements.js (the
-   admin CRUD/scheduling/analytics view). Marks announcements read as
-   they're expanded, which is what feeds the readCount/totalRecipients
-   progress bar back on the admin side.
+   admin CRUD/publish view).
+
+   Reads real state.announcements, filtered to status: 'published' and
+   to the current user's role via target_roles (the same field
+   announcements.js writes and notifyAnnouncementPublished() reads).
+
+   Per-user read tracking: there's no dedicated announcement_reads
+   table, but publishing an announcement already creates a real
+   notification row per recipient (type: 'announcement', with
+   meta.announcement_id linking back) via notifyAnnouncementPublished().
+   This reuses that real link rather than inventing a second, separate
+   read-tracking mechanism — expanding an announcement marks its linked
+   notification read via the same real markNotificationRead() function
+   notifications.js already uses.
 
    Can render as a full page ('announcement-center' route) or be
-   embedded inline in a dashboard widget via AnnouncementCenter.renderInto(el, { compact: true, limit: 3 }).
+   embedded inline in a dashboard widget via
+   AnnouncementCenter.renderInto(el, { compact: true, limit: 3 }).
+   Last updated: 2026-07-29
    ═══════════════════════════════════════════════════════════════════ */
 
 const AnnouncementCenter = (() => {
-
-  // MOCK_DATA — in the real system this reads from the same backing
-  // store as announcements.js (core/api.js), filtered to status:
-  // 'published' and to the current user's audience.
-  const feed = [
-    {
-      id: 'ann-1', title: 'Term 3 Midterm Exam Schedule',
-      body: 'Midterm exams begin Monday, August 4th. Please review the attached timetable with your class teacher. Students should arrive 15 minutes early on exam days, and all electronic devices must be left with the class teacher during the exam period.',
-      audience: 'all', publishedAt: '2026-07-10T08:00:00', read: false, family: 'academics'
-    },
-    {
-      id: 'ann-2', title: 'Staff Meeting \u2014 Friday 3PM',
-      body: 'Mandatory staff meeting this Friday at 3:00 PM in the staff room to discuss the promotion criteria for this year.',
-      audience: 'teachers', publishedAt: '2026-07-08T14:30:00', read: true, family: 'staff'
-    },
-    {
-      id: 'ann-5', title: 'New Library Books Arrived',
-      body: 'A new shipment of French and English reading books has arrived for the Primary section library. Classes are welcome to book a library visit slot with the front office.',
-      audience: 'all', publishedAt: '2026-07-05T10:00:00', read: true, family: 'academics'
-    }
-  ];
 
   function escapeHTML(str) {
     const div = document.createElement('div');
@@ -41,12 +33,36 @@ const AnnouncementCenter = (() => {
   }
 
   function timeAgo(iso) {
+    if (!iso) return '\u2014';
     const diffMs = Date.now() - new Date(iso).getTime();
     const days = Math.floor(diffMs / 86400000);
     if (days === 0) return 'Today';
     if (days === 1) return 'Yesterday';
     if (days < 7) return `${days} days ago`;
     return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+  }
+
+  /** Published announcements addressed to the current user's role. */
+  function getFeed() {
+    const myRole = state.currentUser?.role;
+    return (state.announcements || [])
+      .filter(a => a.status === 'published')
+      .filter(a => {
+        const roles = a.target_roles || ['all'];
+        return roles.includes('all') || roles.includes(myRole) || (myRole === 'teacher' && roles.includes('teachers')) || (myRole === 'accountant' && roles.includes('accountants')) || (myRole === 'admin' && roles.includes('admin'));
+      })
+      .sort((a, b) => String(b.published_at || '').localeCompare(String(a.published_at || '')));
+  }
+
+  /** The real notification linked to this announcement for the
+   *  current user, if any — used to know/mark whether I've read it. */
+  function linkedNotification(announcementId) {
+    return (state.notifications || []).find(n => n.type === 'announcement' && n.meta?.announcement_id === announcementId);
+  }
+
+  function isRead(announcementId) {
+    const n = linkedNotification(announcementId);
+    return n ? !!n.is_read : true; // no linked notification (e.g. I authored it) — nothing to mark unread
   }
 
   function render(container) {
@@ -65,17 +81,24 @@ const AnnouncementCenter = (() => {
     container.querySelector('#ac-mark-all').addEventListener('click', () => markAllRead(container));
     renderInto(container.querySelector('#ac-feed'));
     updateUnreadCount(container);
+
+    if (!state.announcements || state.announcements.length === 0) {
+      window.loadAllData?.({ silent: true }).then(() => {
+        if (container.isConnected) { renderInto(container.querySelector('#ac-feed')); updateUnreadCount(container); }
+      }).catch(() => {});
+    }
   }
 
   function updateUnreadCount(scope) {
     const el = scope.querySelector('#ac-unread-count');
     if (!el) return;
-    const unread = feed.filter(a => !a.read).length;
+    const unread = getFeed().filter(a => !isRead(a.id)).length;
     el.textContent = unread > 0 ? `${unread} unread` : 'All caught up';
   }
 
   function renderInto(target, opts = {}) {
     const { compact = false, limit = null } = opts;
+    const feed = getFeed();
     const items = limit ? feed.slice(0, limit) : feed;
 
     if (!items.length) {
@@ -83,31 +106,35 @@ const AnnouncementCenter = (() => {
       return;
     }
 
-    target.innerHTML = items.map(a => `
-      <div class="dash-card ${compact ? '' : ''}" style="margin-bottom:12px; ${a.read ? '' : `border-color:${MODULE_ACCENTS?.[a.family] || 'var(--accent)'}55;`}" data-ann-id="${a.id}">
+    target.innerHTML = items.map(a => {
+      const read = isRead(a.id);
+      const accent = MODULE_ACCENTS?.academics || 'var(--accent)';
+      return `
+      <div class="dash-card" style="margin-bottom:12px; ${read ? '' : `border-color:${accent}55;`}" data-ann-id="${a.id}">
         <div class="dash-card-header" style="cursor:pointer;" data-toggle="${a.id}">
           <span class="dash-card-title">
-            ${!a.read ? `<span style="width:8px;height:8px;border-radius:50%;background:${MODULE_ACCENTS?.[a.family] || 'var(--accent)'};display:inline-block;margin-right:8px;"></span>` : ''}
+            ${!read ? `<span style="width:8px;height:8px;border-radius:50%;background:${accent};display:inline-block;margin-right:8px;"></span>` : ''}
             ${escapeHTML(a.title)}
           </span>
-          <span class="dash-card-action">${timeAgo(a.publishedAt)}</span>
+          <span class="dash-card-action">${timeAgo(a.published_at)}</span>
         </div>
         <div class="dash-card-body" data-body="${a.id}" style="${compact ? 'display:none;' : ''}">
           <p style="font-size:0.82rem; line-height:1.6; color:var(--card-text-muted,#94a3b8);">${escapeHTML(a.body)}</p>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     if (!compact) {
       target.querySelectorAll('[data-toggle]').forEach(header => {
-        header.addEventListener('click', () => {
-          const id = header.dataset.toggle;
-          const item = feed.find(a => a.id === id);
+        header.addEventListener('click', async () => {
+          const id = Number(header.dataset.toggle);
           const body = target.querySelector(`[data-body="${id}"]`);
           const isHidden = body.style.display === 'none';
           body.style.display = isHidden ? '' : 'none';
-          if (isHidden && !item.read) {
-            item.read = true;
+          if (isHidden && !isRead(id)) {
+            const n = linkedNotification(id);
+            if (n) { await window.markNotificationRead?.(n.id); n.is_read = true; }
             renderInto(target, opts); // re-render to drop the unread dot
             updateUnreadCount(document);
           }
@@ -116,29 +143,28 @@ const AnnouncementCenter = (() => {
     } else {
       target.querySelectorAll('.dash-card').forEach(card => {
         card.style.cursor = 'pointer';
-        card.addEventListener('click', () => window.Router?.navigate('announcement-center'));
+        card.addEventListener('click', () => window.navigateTo('announcement-center'));
       });
     }
   }
 
-  function markAllRead(container) {
-    feed.forEach(a => { a.read = true; });
+  async function markAllRead(container) {
+    const unreadIds = getFeed().filter(a => !isRead(a.id)).map(a => linkedNotification(a.id)?.id).filter(Boolean);
+    await Promise.all(unreadIds.map(id => window.markNotificationRead?.(id)));
+    unreadIds.forEach(id => { const n = (state.notifications || []).find(x => x.id === id); if (n) n.is_read = true; });
     renderInto(container.querySelector('#ac-feed'));
     updateUnreadCount(container);
     window.Toast?.success('All announcements marked as read');
   }
 
   function unreadCount() {
-    return feed.filter(a => !a.read).length;
+    return getFeed().filter(a => !isRead(a.id)).length;
   }
 
   return { render, renderInto, unreadCount };
 })();
 
 // ─── EXPOSE ─────────────────────────────────────────────────────────
-// window.AnnouncementCenter was never assigned anywhere in this file, and the router
-// looks up window.renderAnnouncementCenter specifically (see core/router.js's
-// moduleIdToRenderFn) — this page was completely unreachable via navigation
-// despite being fully built.
+
 window.AnnouncementCenter = AnnouncementCenter;
 window.renderAnnouncementCenter = AnnouncementCenter.render;

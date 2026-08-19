@@ -5,20 +5,23 @@
    (school-wide broadcast) and notifications (system-generated
    alerts). Grouped into Overdue / Today / Upcoming / Completed.
 
+   Reads/writes a `reminders` table (id, user_id, title, due_date,
+   linked_module, is_done, created_at). Unlike the other communication
+   files fixed this session, no other real code anywhere references a
+   reminders table to confirm field names against — this establishes
+   the schema, following the same naming conventions already used
+   throughout (snake_case, is_ prefix for booleans, _id suffix for
+   foreign keys). The live table itself still needs creating, same as
+   the other schema gaps already noted this session.
+
    Rendered into #app-main for the 'reminders' route.
+   Last updated: 2026-07-29
    ═══════════════════════════════════════════════════════════════════ */
 
 const Reminders = (() => {
 
-  // MOCK_DATA — replace with core/api.js, scoped to the signed-in user
-  let reminders = [
-    { id: 'r1', title: 'Finish Primary 4A marks entry', dueDate: '2026-07-12', linkedModule: 'marks-entry', done: false },
-    { id: 'r2', title: 'Call MUGISHA family re: overdue balance', dueDate: '2026-07-14', linkedModule: 'record-payment', done: false },
-    { id: 'r3', title: 'Prepare Term 3 midterm question papers', dueDate: '2026-07-14', linkedModule: null, done: false },
-    { id: 'r4', title: 'Submit attendance summary to head teacher', dueDate: '2026-07-16', linkedModule: 'attendance-reports', done: false },
-    { id: 'r5', title: 'Order new library books', dueDate: '2026-07-25', linkedModule: null, done: false },
-    { id: 'r6', title: 'Review Term 2 report cards', dueDate: '2026-06-30', linkedModule: 'report-cards', done: true }
-  ];
+  let reminders = [];
+  let loaded = false;
 
   function escapeHTML(str) {
     const div = document.createElement('div');
@@ -26,28 +29,36 @@ const Reminders = (() => {
     return div.innerHTML;
   }
 
-  function todayISO() {
-    return new Date().toISOString().slice(0, 10);
+  async function loadReminders() {
+    if (!state.currentUser?.id) return;
+    try {
+      reminders = await window.getWhere('reminders', `user_id=eq.${state.currentUser.id}`);
+    } catch (err) {
+      console.warn('[Reminders] could not load reminders:', err.message);
+      reminders = [];
+    }
+    loaded = true;
   }
 
   function groupReminders() {
     const today = todayISO();
     const groups = { overdue: [], today: [], upcoming: [], completed: [] };
     reminders.forEach(r => {
-      if (r.done) groups.completed.push(r);
-      else if (r.dueDate < today) groups.overdue.push(r);
-      else if (r.dueDate === today) groups.today.push(r);
+      if (r.is_done) groups.completed.push(r);
+      else if (r.due_date < today) groups.overdue.push(r);
+      else if (r.due_date === today) groups.today.push(r);
       else groups.upcoming.push(r);
     });
-    Object.values(groups).forEach(list => list.sort((a, b) => a.dueDate.localeCompare(b.dueDate)));
+    Object.values(groups).forEach(list => list.sort((a, b) => String(a.due_date || '').localeCompare(String(b.due_date || ''))));
     return groups;
   }
 
   function formatDate(iso) {
+    if (!iso) return '\u2014';
     return new Date(iso + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
   }
 
-  function render(container) {
+  async function render(container) {
     if (!container) return;
     container.innerHTML = `
       <div class="dashboard-page">
@@ -60,6 +71,8 @@ const Reminders = (() => {
       </div>
     `;
     container.querySelector('#rem-new-btn').addEventListener('click', () => openEditor(container));
+
+    if (!loaded) await loadReminders();
     renderGroups(container);
   }
 
@@ -99,12 +112,12 @@ const Reminders = (() => {
       groupEl.innerHTML = list.map(r => `
         <div class="reminder-row" style="display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid var(--card-border, rgba(255,255,255,0.05));">
           <label class="checkbox">
-            <input type="checkbox" data-toggle="${r.id}" ${r.done ? 'checked' : ''} />
+            <input type="checkbox" data-toggle="${r.id}" ${r.is_done ? 'checked' : ''} />
             <span class="checkbox__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
           </label>
           <div style="flex:1; min-width:0;">
-            <div style="font-size:0.85rem; color:var(--card-text,#e2e8f0); ${r.done ? 'text-decoration:line-through; opacity:0.6;' : ''}">${escapeHTML(r.title)}</div>
-            <div style="font-size:0.7rem; color:var(--card-text-muted,#475569);">${formatDate(r.dueDate)}${r.linkedModule ? ` \u00b7 <a data-goto="${r.linkedModule}" style="color:var(--accent-light,#60a5fa); cursor:pointer;">Open</a>` : ''}</div>
+            <div style="font-size:0.85rem; color:var(--card-text,#e2e8f0); ${r.is_done ? 'text-decoration:line-through; opacity:0.6;' : ''}">${escapeHTML(r.title)}</div>
+            <div style="font-size:0.7rem; color:var(--card-text-muted,#475569);">${formatDate(r.due_date)}${r.linked_module ? ` \u00b7 <a data-goto="${r.linked_module}" style="color:var(--accent-light,#60a5fa); cursor:pointer;">Open</a>` : ''}</div>
           </div>
           <button class="btn btn-sm btn-outline" data-edit="${r.id}">Edit</button>
           <button class="modal-close" data-delete="${r.id}" title="Delete">
@@ -115,93 +128,110 @@ const Reminders = (() => {
     });
 
     wrap.querySelectorAll('[data-toggle]').forEach(cb => {
-      cb.addEventListener('change', () => {
-        const r = reminders.find(x => x.id === cb.dataset.toggle);
-        r.done = cb.checked;
-        renderGroups(container);
-        if (cb.checked) window.Toast?.success('Reminder completed', r.title);
+      cb.addEventListener('change', async () => {
+        const id = Number(cb.dataset.toggle);
+        const r = reminders.find(x => x.id === id);
+        if (!r) return;
+        try {
+          await update('reminders', id, { is_done: cb.checked });
+          r.is_done = cb.checked;
+          renderGroups(container);
+          if (cb.checked) window.Toast?.success('Reminder completed', r.title);
+        } catch (err) {
+          cb.checked = !cb.checked;
+          window.Toast?.error('Could not update reminder', err?.message);
+        }
       });
     });
     wrap.querySelectorAll('[data-edit]').forEach(btn => {
-      btn.addEventListener('click', () => openEditor(container, reminders.find(r => r.id === btn.dataset.edit)));
+      btn.addEventListener('click', () => openEditor(container, reminders.find(r => r.id === Number(btn.dataset.edit))));
     });
     wrap.querySelectorAll('[data-delete]').forEach(btn => {
       btn.addEventListener('click', async () => {
-        const r = reminders.find(x => x.id === btn.dataset.delete);
-        const confirmed = await window.Modals?.confirm({
-          title: 'Delete reminder?', message: `"${r.title}" will be removed.`, confirmLabel: 'Delete', tone: 'danger', danger: true
-        });
+        const id = Number(btn.dataset.delete);
+        const r = reminders.find(x => x.id === id);
+        if (!r) return;
+        const confirmed = await window.confirmDialog(`"${r.title}" will be removed.`, 'Delete reminder?', { confirmText: 'Delete', confirmClass: 'btn-danger' });
         if (!confirmed) return;
-        reminders = reminders.filter(x => x.id !== r.id);
-        renderGroups(container);
+        try {
+          await window.remove('reminders', id);
+          reminders = reminders.filter(x => x.id !== id);
+          renderGroups(container);
+        } catch (err) {
+          window.Toast?.error('Could not delete reminder', err?.message);
+        }
       });
     });
     wrap.querySelectorAll('[data-goto]').forEach(link => {
-      link.addEventListener('click', () => window.Router?.navigate(link.dataset.goto));
+      link.addEventListener('click', () => window.navigateTo(link.dataset.goto));
     });
   }
 
-  let _editingReminder = null;
-  let _editingContainer = null;
+  // ─── EDITOR MODAL ────────────────────────────────────────────────
 
-  window.Modals?.register('reminder-editor', () => {
-    const existing = _editingReminder;
-    return {
-      title: existing ? 'Edit Reminder' : 'New Reminder',
-      size: 'sm',
-      body: `
+  function openEditor(container, existing) {
+    const modalId = window.showModal(`
         <div style="display:flex; flex-direction:column; gap:14px;">
           <div class="form-group">
             <label>What needs to be done? <span class="required">*</span></label>
             <input type="text" class="form-input" data-field="title" value="${existing ? escapeHTML(existing.title) : ''}" placeholder="e.g. Finish marks entry for Primary 4A" />
-            <div class="form-hint"></div>
           </div>
           <div class="form-group">
             <label>Due date <span class="required">*</span></label>
-            <input type="date" class="form-input" data-field="dueDate" value="${existing?.dueDate || todayISO()}" />
+            <input type="date" class="form-input" data-field="due_date" value="${existing?.due_date || todayISO()}" />
           </div>
         </div>
-      `,
+      `, {
+      title: existing ? 'Edit Reminder' : 'New Reminder',
+      size: 'sm',
+      closeOnOutside: true,
+      closeOnEscape: true,
       footer: `
-        <button class="btn btn-outline" data-modal-close>Cancel</button>
-        <button class="btn btn-primary" data-save>${existing ? 'Save Changes' : 'Add Reminder'}</button>
+        <button class="btn btn-outline" id="rem-modal-cancel">Cancel</button>
+        <button class="btn btn-primary" id="rem-modal-save">${existing ? 'Save Changes' : 'Add Reminder'}</button>
       `,
-      onMount(modal, record) {
-        modal.querySelector('[data-save]').addEventListener('click', () => {
-          const result = window.Forms?.validate(modal, { title: [window.Forms.rules.required('A title is required')] });
-          if (result && !result.valid) return;
+    });
 
-          const title = modal.querySelector('[data-field="title"]').value;
-          const dueDate = modal.querySelector('[data-field="dueDate"]').value;
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
 
-          if (existing) {
-            existing.title = title;
-            existing.dueDate = dueDate;
-            window.Toast?.success('Reminder updated');
-          } else {
-            reminders.push({ id: `r${Date.now()}`, title, dueDate, linkedModule: null, done: false });
-            window.Toast?.success('Reminder added');
-          }
-          window.Modals?.close(record);
-          renderGroups(_editingContainer);
-        });
+    modal.querySelector('#rem-modal-cancel')?.addEventListener('click', () => window.closeModal(modalId));
+    modal.querySelector('#rem-modal-save')?.addEventListener('click', async () => {
+      const title = modal.querySelector('[data-field="title"]').value.trim();
+      const dueDate = modal.querySelector('[data-field="due_date"]').value;
+      if (!title || !dueDate) {
+        window.Toast?.warning('A title and due date are both required');
+        return;
       }
-    };
-  });
 
-  function openEditor(container, existing) {
-    _editingReminder = existing || null;
-    _editingContainer = container;
-    window.Modals?.open('reminder-editor');
+      try {
+        if (existing) {
+          await update('reminders', existing.id, { title, due_date: dueDate });
+          existing.title = title;
+          existing.due_date = dueDate;
+          window.Toast?.success('Reminder updated');
+        } else {
+          const created = await insert('reminders', {
+            user_id: state.currentUser?.id ?? null,
+            title, due_date: dueDate,
+            linked_module: null, is_done: false,
+            created_at: new Date().toISOString(),
+          });
+          reminders.push(created);
+          window.Toast?.success('Reminder added');
+        }
+        window.closeModal(modalId);
+        renderGroups(container);
+      } catch (err) {
+        window.Toast?.error('Could not save reminder', err?.message);
+      }
+    });
   }
 
   return { render };
 })();
 
 // ─── EXPOSE ─────────────────────────────────────────────────────────
-// window.Reminders was never assigned anywhere in this file, and the router
-// looks up window.renderReminders specifically (see core/router.js's
-// moduleIdToRenderFn) — this page was completely unreachable via navigation
-// despite being fully built.
+
 window.Reminders = Reminders;
 window.renderReminders = Reminders.render;

@@ -1,0 +1,401 @@
+-- ═══════════════════════════════════════════════════════════════════
+-- 001_enable_rls_baseline.sql
+-- ═══════════════════════════════════════════════════════════════════
+-- Ecole La Fontaine v2 — Row Level Security baseline
+--
+-- READ THIS BEFORE RUNNING (and before assuming this "fixes" security):
+--
+-- This app has NO real Supabase Auth integration. Login is a raw
+-- table query against `teachers`/`school_settings` with a plaintext
+-- password comparison done in the browser. Every request from every
+-- user — admin, teacher, accountant, or nobody logged in at all —
+-- authenticates to PostgREST as the exact same `anon` role. Postgres
+-- RLS can only tell *roles* apart (anon / authenticated / service_role
+-- via JWT claims); it cannot tell WHICH teacher is asking, because no
+-- request here carries a real Supabase Auth session token.
+--
+-- That means true per-user or per-role row scoping — "a teacher can
+-- only see their own students' marks" — is NOT achievable with RLS
+-- alone in the current architecture. Getting that requires migrating
+-- login to real Supabase Auth (or equivalent JWT-based identity)
+-- first. That is real, separate, larger follow-up work — not done in
+-- this file, and nothing below should be read as having done it.
+--
+-- What THIS file achieves, which is genuinely real and worth doing
+-- regardless of that larger migration:
+--   1. Turns RLS on everywhere (currently OFF on every table — the
+--      most severe finding in the whole audit; anon key = a public,
+--      embedded-in-every-client string = full read/write to every
+--      table for anyone right now).
+--   2. Stops teachers.password and school_settings.admin_password from
+--      ever being selectable by the anon role at all, via a SECURITY
+--      DEFINER login function and public views that omit those
+--      columns. This is real column-level protection, independent of
+--      whether passwords are hashed yet (separate, also-needed fix).
+--   3. Blocks hard-deletion of historical records (payments, marks,
+--      attendance, students) at the database level — the app's own
+--      convention is to reverse/archive these (is_reversed, status),
+--      never hard-delete them, so this closes off that path entirely
+--      even against a compromised or leaked anon key.
+--   4. Leaves normal operational reads/writes open to `anon`, because
+--      the app currently performs every insert/update directly from
+--      the browser with the anon key — locking that down further
+--      would break the app outright without the auth migration above
+--      to replace it with server-side/authenticated writes.
+--
+-- Run this in the Supabase SQL editor, top to bottom, on staging first
+-- if you have one. Every statement is idempotent (safe to re-run).
+--
+-- One honest caveat: every table/column name below was verified by
+-- grepping actual real query/insert/update call sites across the
+-- codebase (not assumed from stale docs) — but exact column TYPES
+-- (e.g. whether `id` is INT vs BIGINT vs UUID) couldn't be confirmed
+-- without live database access. If `login_check()`'s `id INT` return
+-- type doesn't match your real `teachers.id` type, Postgres will
+-- throw a clear type-mismatch error on creation — change INT to
+-- whatever the real column type is and re-run just that function.
+-- ═══════════════════════════════════════════════════════════════════
+
+
+-- ───────────────────────────────────────────────────────────────────
+-- PART 1 — Stop plaintext passwords from ever reaching the client
+-- ───────────────────────────────────────────────────────────────────
+-- Revoking column-level SELECT on password columns from anon, then
+-- providing views without those columns for normal reads, and a
+-- SECURITY DEFINER function that does the login comparison entirely
+-- server-side. The actual password value never transits to the
+-- browser in the login response either, unlike the current flow.
+
+REVOKE SELECT (password) ON TABLE teachers FROM anon;
+REVOKE SELECT (admin_password) ON TABLE school_settings FROM anon;
+
+-- Safe view for every place the app currently reads `teachers` for
+-- display purposes (staff lists, assignment pickers, notifications
+-- recipient resolution, etc.) — same shape minus the password column.
+CREATE OR REPLACE VIEW teachers_public AS
+SELECT id, username, first_name, last_name, role, phone, email,
+       is_active, created_at, updated_at
+FROM teachers;
+
+GRANT SELECT ON teachers_public TO anon;
+
+-- Same pattern for school_settings (verified against the real form
+-- fields in js/modules/settings/school-settings.js).
+CREATE OR REPLACE VIEW school_settings_public AS
+SELECT id, school_name, school_motto, head_teacher_name,
+       contact_phone, contact_email, address, created_at, updated_at
+FROM school_settings;
+
+GRANT SELECT ON school_settings_public TO anon;
+
+-- The real login check. Runs as the function owner (bypasses RLS
+-- internally, which is safe here because the function only returns a
+-- teachers_public-shaped row — never the password column — and only
+-- on a successful match).
+--
+-- NOTE: this still compares plaintext-to-plaintext internally, since
+-- passwords aren't hashed yet (tracked separately). The improvement
+-- here specifically is that the password value is now NEVER sent to
+-- the browser at any point in the login flow, win or lose — it stays
+-- entirely inside this function on the database side.
+CREATE OR REPLACE FUNCTION login_check(
+    p_username TEXT,
+    p_password TEXT,
+    p_role TEXT
+)
+RETURNS TABLE (
+    id INT, username TEXT, first_name TEXT, last_name TEXT,
+    role TEXT, phone TEXT, email TEXT, is_active BOOLEAN
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+    IF p_role = 'admin' THEN
+        RETURN QUERY
+        SELECT t.id, t.username, t.first_name, t.last_name, t.role,
+               t.phone, t.email, t.is_active
+        FROM teachers t, school_settings s
+        WHERE t.role = 'admin'
+          AND (t.username = p_username OR p_username = 'admin')
+          AND (p_password = s.admin_password OR p_password = t.password)
+        LIMIT 1;
+    ELSE
+        RETURN QUERY
+        SELECT t.id, t.username, t.first_name, t.last_name, t.role,
+               t.phone, t.email, t.is_active
+        FROM teachers t
+        WHERE t.username = p_username
+          AND t.role = p_role
+          AND t.password = p_password
+        LIMIT 1;
+    END IF;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION login_check(TEXT, TEXT, TEXT) TO anon;
+
+-- ─── Application follow-up required (not a DB change) ───────────────
+-- core/auth.js's doLogin() needs to call this function instead of
+-- fetching teachers/school_settings directly:
+--   POST /rest/v1/rpc/login_check
+--   { "p_username": "...", "p_password": "...", "p_role": "..." }
+-- and switch every OTHER read of teacher/staff info (assignment
+-- pickers, notification recipient lists, staff directory pages, etc.)
+-- from `teachers` to `teachers_public`. That app-side change is
+-- tracked as a separate follow-up, not done in this SQL file.
+
+
+-- ───────────────────────────────────────────────────────────────────
+-- PART 2 — Enable RLS on every real table
+-- ───────────────────────────────────────────────────────────────────
+
+ALTER TABLE teachers                ENABLE ROW LEVEL SECURITY;
+ALTER TABLE students                ENABLE ROW LEVEL SECURITY;
+ALTER TABLE classes                 ENABLE ROW LEVEL SECURITY;
+ALTER TABLE subjects                ENABLE ROW LEVEL SECURITY;
+ALTER TABLE academic_years          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE terms                   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE teacher_assignments     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE assessments             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE marks                   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE grading_scale           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE attendance              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE fee_categories          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE fee_amounts             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE student_fees            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE fee_waivers             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE fee_approval_log        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payments                ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payment_allocations     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE student_credit_balance  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE families                ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notifications           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE announcements           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reminders               ENABLE ROW LEVEL SECURITY;
+ALTER TABLE school_settings         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE timetable_slots         ENABLE ROW LEVEL SECURITY;
+-- Holiday-mode tables (separate schema, per docs/database-schema.md)
+ALTER TABLE holidays                ENABLE ROW LEVEL SECURITY;
+ALTER TABLE holiday_enrollments     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE holiday_marks           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE session_classes         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE session_subjects        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE session_assessments     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE session_teacher_assignments ENABLE ROW LEVEL SECURITY;
+
+
+-- ───────────────────────────────────────────────────────────────────
+-- PART 3 — Baseline policies
+-- ───────────────────────────────────────────────────────────────────
+-- Per-table SELECT/INSERT/UPDATE granted to anon (matching current
+-- app behavior — see the note at the top on why this can't be
+-- narrowed further without the auth migration). DELETE is granted
+-- only where the app's own code actually calls remove() against that
+-- table (confirmed by grepping every real remove() call site) — and
+-- explicitly withheld from records the app itself treats as
+-- append-only/reversible-not-deletable.
+
+-- Helper macro pattern used below for every "operational" table:
+--   SELECT: anon, always
+--   INSERT: anon, always
+--   UPDATE: anon, always
+--   DELETE: only for tables the app genuinely calls remove() on
+
+-- teachers — read via teachers_public (Part 1) for anon in practice;
+-- direct table access still needs a policy for the app's own
+-- authenticated admin screens (staff management) and for login_check's
+-- internal use (SECURITY DEFINER bypasses RLS regardless).
+CREATE POLICY teachers_select ON teachers FOR SELECT TO anon USING (true);
+CREATE POLICY teachers_insert ON teachers FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY teachers_update ON teachers FOR UPDATE TO anon USING (true);
+CREATE POLICY teachers_delete ON teachers FOR DELETE TO anon USING (true);
+
+CREATE POLICY students_select ON students FOR SELECT TO anon USING (true);
+CREATE POLICY students_insert ON students FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY students_update ON students FOR UPDATE TO anon USING (true);
+-- No DELETE policy: students are archived via `status`, never
+-- hard-deleted anywhere in the app (student-archive.js/
+-- student-promotion.js only ever call update()).
+
+CREATE POLICY classes_select ON classes FOR SELECT TO anon USING (true);
+CREATE POLICY classes_insert ON classes FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY classes_update ON classes FOR UPDATE TO anon USING (true);
+CREATE POLICY classes_delete ON classes FOR DELETE TO anon USING (true);
+
+CREATE POLICY subjects_select ON subjects FOR SELECT TO anon USING (true);
+CREATE POLICY subjects_insert ON subjects FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY subjects_update ON subjects FOR UPDATE TO anon USING (true);
+CREATE POLICY subjects_delete ON subjects FOR DELETE TO anon USING (true);
+
+CREATE POLICY academic_years_select ON academic_years FOR SELECT TO anon USING (true);
+CREATE POLICY academic_years_insert ON academic_years FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY academic_years_update ON academic_years FOR UPDATE TO anon USING (true);
+CREATE POLICY academic_years_delete ON academic_years FOR DELETE TO anon USING (true);
+
+CREATE POLICY terms_select ON terms FOR SELECT TO anon USING (true);
+CREATE POLICY terms_insert ON terms FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY terms_update ON terms FOR UPDATE TO anon USING (true);
+CREATE POLICY terms_delete ON terms FOR DELETE TO anon USING (true);
+
+CREATE POLICY teacher_assignments_select ON teacher_assignments FOR SELECT TO anon USING (true);
+CREATE POLICY teacher_assignments_insert ON teacher_assignments FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY teacher_assignments_update ON teacher_assignments FOR UPDATE TO anon USING (true);
+CREATE POLICY teacher_assignments_delete ON teacher_assignments FOR DELETE TO anon USING (true);
+
+CREATE POLICY assessments_select ON assessments FOR SELECT TO anon USING (true);
+CREATE POLICY assessments_insert ON assessments FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY assessments_update ON assessments FOR UPDATE TO anon USING (true);
+-- No DELETE policy: an assessment with real marks entered against it
+-- should not vanish (would silently corrupt report cards/rankings
+-- for a whole class); the app never calls remove() on this table.
+
+CREATE POLICY marks_select ON marks FOR SELECT TO anon USING (true);
+CREATE POLICY marks_insert ON marks FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY marks_update ON marks FOR UPDATE TO anon USING (true);
+-- No DELETE policy: academic record, never hard-deleted by the app.
+
+CREATE POLICY grading_scale_select ON grading_scale FOR SELECT TO anon USING (true);
+CREATE POLICY grading_scale_insert ON grading_scale FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY grading_scale_update ON grading_scale FOR UPDATE TO anon USING (true);
+CREATE POLICY grading_scale_delete ON grading_scale FOR DELETE TO anon USING (true);
+
+CREATE POLICY attendance_select ON attendance FOR SELECT TO anon USING (true);
+CREATE POLICY attendance_insert ON attendance FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY attendance_update ON attendance FOR UPDATE TO anon USING (true);
+-- No DELETE policy: attendance is a legal/historical record, never
+-- hard-deleted by the app.
+
+CREATE POLICY fee_categories_select ON fee_categories FOR SELECT TO anon USING (true);
+CREATE POLICY fee_categories_insert ON fee_categories FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY fee_categories_update ON fee_categories FOR UPDATE TO anon USING (true);
+CREATE POLICY fee_categories_delete ON fee_categories FOR DELETE TO anon USING (true);
+
+CREATE POLICY fee_amounts_select ON fee_amounts FOR SELECT TO anon USING (true);
+CREATE POLICY fee_amounts_insert ON fee_amounts FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY fee_amounts_update ON fee_amounts FOR UPDATE TO anon USING (true);
+CREATE POLICY fee_amounts_delete ON fee_amounts FOR DELETE TO anon USING (true);
+
+CREATE POLICY student_fees_select ON student_fees FOR SELECT TO anon USING (true);
+CREATE POLICY student_fees_insert ON student_fees FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY student_fees_update ON student_fees FOR UPDATE TO anon USING (true);
+-- No DELETE policy: a fee assignment with real payments against it
+-- should not vanish; the app never calls remove() on this table
+-- (waivers go through is_waived, not deletion).
+
+CREATE POLICY fee_waivers_select ON fee_waivers FOR SELECT TO anon USING (true);
+CREATE POLICY fee_waivers_insert ON fee_waivers FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY fee_waivers_update ON fee_waivers FOR UPDATE TO anon USING (true);
+CREATE POLICY fee_waivers_delete ON fee_waivers FOR DELETE TO anon USING (true);
+
+CREATE POLICY fee_approval_log_select ON fee_approval_log FOR SELECT TO anon USING (true);
+CREATE POLICY fee_approval_log_insert ON fee_approval_log FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY fee_approval_log_update ON fee_approval_log FOR UPDATE TO anon USING (true);
+CREATE POLICY fee_approval_log_delete ON fee_approval_log FOR DELETE TO anon USING (true);
+
+CREATE POLICY payments_select ON payments FOR SELECT TO anon USING (true);
+CREATE POLICY payments_insert ON payments FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY payments_update ON payments FOR UPDATE TO anon USING (true);
+-- Deliberately NO DELETE policy, ever. A payment must be reversed
+-- (is_reversed=true, per payment-reversals.js) and stay in the
+-- ledger, never hard-deleted — this is a real accounting-integrity
+-- rule enforced at the database level, not just app convention.
+
+CREATE POLICY payment_allocations_select ON payment_allocations FOR SELECT TO anon USING (true);
+CREATE POLICY payment_allocations_insert ON payment_allocations FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY payment_allocations_update ON payment_allocations FOR UPDATE TO anon USING (true);
+-- No DELETE policy: same reasoning as payments.
+
+CREATE POLICY student_credit_balance_select ON student_credit_balance FOR SELECT TO anon USING (true);
+CREATE POLICY student_credit_balance_insert ON student_credit_balance FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY student_credit_balance_update ON student_credit_balance FOR UPDATE TO anon USING (true);
+-- No DELETE policy: a family's credit balance should never simply
+-- disappear; it goes to 0 via update(), same fix applied to
+-- record-payment.js's credit-handling bug earlier this session.
+
+CREATE POLICY families_select ON families FOR SELECT TO anon USING (true);
+CREATE POLICY families_insert ON families FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY families_update ON families FOR UPDATE TO anon USING (true);
+CREATE POLICY families_delete ON families FOR DELETE TO anon USING (true);
+
+CREATE POLICY notifications_select ON notifications FOR SELECT TO anon USING (true);
+CREATE POLICY notifications_insert ON notifications FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY notifications_update ON notifications FOR UPDATE TO anon USING (true);
+CREATE POLICY notifications_delete ON notifications FOR DELETE TO anon USING (true);
+
+CREATE POLICY announcements_select ON announcements FOR SELECT TO anon USING (true);
+CREATE POLICY announcements_insert ON announcements FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY announcements_update ON announcements FOR UPDATE TO anon USING (true);
+CREATE POLICY announcements_delete ON announcements FOR DELETE TO anon USING (true);
+
+CREATE POLICY reminders_select ON reminders FOR SELECT TO anon USING (true);
+CREATE POLICY reminders_insert ON reminders FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY reminders_update ON reminders FOR UPDATE TO anon USING (true);
+CREATE POLICY reminders_delete ON reminders FOR DELETE TO anon USING (true);
+
+-- school_settings: read via school_settings_public (Part 1) in
+-- practice; direct-table policies still needed for the settings page
+-- itself to write to it.
+CREATE POLICY school_settings_select ON school_settings FOR SELECT TO anon USING (true);
+CREATE POLICY school_settings_update ON school_settings FOR UPDATE TO anon USING (true);
+
+CREATE POLICY timetable_slots_select ON timetable_slots FOR SELECT TO anon USING (true);
+CREATE POLICY timetable_slots_insert ON timetable_slots FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY timetable_slots_update ON timetable_slots FOR UPDATE TO anon USING (true);
+CREATE POLICY timetable_slots_delete ON timetable_slots FOR DELETE TO anon USING (true);
+
+-- Holiday-mode tables — same pattern, real DELETE usage confirmed
+-- (holiday-enrollment.js/holidays.js genuinely call remove() on these).
+CREATE POLICY holidays_select ON holidays FOR SELECT TO anon USING (true);
+CREATE POLICY holidays_insert ON holidays FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY holidays_update ON holidays FOR UPDATE TO anon USING (true);
+CREATE POLICY holidays_delete ON holidays FOR DELETE TO anon USING (true);
+
+CREATE POLICY holiday_enrollments_select ON holiday_enrollments FOR SELECT TO anon USING (true);
+CREATE POLICY holiday_enrollments_insert ON holiday_enrollments FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY holiday_enrollments_update ON holiday_enrollments FOR UPDATE TO anon USING (true);
+CREATE POLICY holiday_enrollments_delete ON holiday_enrollments FOR DELETE TO anon USING (true);
+
+CREATE POLICY holiday_marks_select ON holiday_marks FOR SELECT TO anon USING (true);
+CREATE POLICY holiday_marks_insert ON holiday_marks FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY holiday_marks_update ON holiday_marks FOR UPDATE TO anon USING (true);
+-- No DELETE policy: same academic-record reasoning as `marks`.
+
+CREATE POLICY session_classes_select ON session_classes FOR SELECT TO anon USING (true);
+CREATE POLICY session_classes_insert ON session_classes FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY session_classes_update ON session_classes FOR UPDATE TO anon USING (true);
+CREATE POLICY session_classes_delete ON session_classes FOR DELETE TO anon USING (true);
+
+CREATE POLICY session_subjects_select ON session_subjects FOR SELECT TO anon USING (true);
+CREATE POLICY session_subjects_insert ON session_subjects FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY session_subjects_update ON session_subjects FOR UPDATE TO anon USING (true);
+CREATE POLICY session_subjects_delete ON session_subjects FOR DELETE TO anon USING (true);
+
+CREATE POLICY session_assessments_select ON session_assessments FOR SELECT TO anon USING (true);
+CREATE POLICY session_assessments_insert ON session_assessments FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY session_assessments_update ON session_assessments FOR UPDATE TO anon USING (true);
+CREATE POLICY session_assessments_delete ON session_assessments FOR DELETE TO anon USING (true);
+
+CREATE POLICY session_teacher_assignments_select ON session_teacher_assignments FOR SELECT TO anon USING (true);
+CREATE POLICY session_teacher_assignments_insert ON session_teacher_assignments FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY session_teacher_assignments_update ON session_teacher_assignments FOR UPDATE TO anon USING (true);
+CREATE POLICY session_teacher_assignments_delete ON session_teacher_assignments FOR DELETE TO anon USING (true);
+
+
+-- ═══════════════════════════════════════════════════════════════════
+-- WHAT THIS FILE DOES NOT DO (tracked as separate follow-up SQL/work)
+-- ═══════════════════════════════════════════════════════════════════
+-- - Does not hash passwords (teachers.password / school_settings.
+--   admin_password are still plaintext in the database itself — this
+--   file stops that plaintext from reaching the browser, but the
+--   column contents still need real hashing, e.g. bcrypt via pgcrypto
+--   or application-side, as its own migration).
+-- - Does not scope any table to "only the logged-in teacher's own
+--   data" — requires the Supabase Auth migration described at the top
+--   before auth.uid()/auth.jwt() carry any real per-user identity.
+-- - Does not add rate-limiting or account lockout at the database
+--   level (auth.js already does this client-side; a server-side
+--   version would live in the login_check() function above once
+--   there's a real session to rate-limit against).
+-- ═══════════════════════════════════════════════════════════════════

@@ -22,42 +22,38 @@
 // NOTE: this file previously called a function named canAccessModule(), which
 // doesn't exist in role-permissions.js — fixed below to use the real function, canAccess().
 
-// ─── MOCK DATA ──────────────────────────────────────────────────────
-// Replace with real data from core/data-loader.js
-const YEAR_TERM_DATA = {
-  '2025-2026': {
-    locked: false,
-    activeTerm: 'Term 3',
-    lockedTerms: ['Term 1', 'Term 2'],
-    progress: { 'Term 1': 100, 'Term 2': 100, 'Term 3': 68 },
-    days: { 'Term 3': 24 }
-  },
-  '2026-2027': {
-    locked: true,
-    activeTerm: null,
-    lockedTerms: ['Term 1', 'Term 2', 'Term 3'],
-    progress: {},
-    days: {}
-  },
-  '2027-2028': {
-    locked: true,
-    activeTerm: null,
-    lockedTerms: ['Term 1', 'Term 2', 'Term 3'],
-    progress: {},
-    days: {}
-  }
-};
+// ─── REAL DATA HELPERS ──────────────────────────────────────────────
+// Year/term data derived from state (loaded by data-loader.js)
+
+function _sidebarGetYears() {
+  return (state.academicYears || [])
+    .slice()
+    .sort((a, b) => (b.year_name || '').localeCompare(a.year_name || ''));
+}
+
+function _sidebarGetTermsForYear(yearId) {
+  return (state.terms || [])
+    .filter(t => t.academic_year_id === yearId)
+    .sort((a, b) => a.term_number - b.term_number);
+}
+
+function _sidebarGetHolidaySessionsForYear(yearId) {
+  return (state.holidaySessions || [])
+    .filter(s => s.academic_year_id === yearId)
+    .sort((a, b) => (a.after_term_number||0) - (b.after_term_number||0));
+}
 
 /* ═══════════════════════════════════════════════════════════════════
    STATE
    ═══════════════════════════════════════════════════════════════════ */
 
 const sidebarState = {
-  currentYear: '2025-2026',
-  currentTerm: 'Term 3',
-  openGroup: null,
-  activeModule: 'admin-dashboard',
-  role: 'admin' // Set by auth
+  currentYearId : null,   // academic_year_id (integer)
+  currentTermId : null,   // term id in normal mode, holiday_session_id in holiday mode
+  openGroup     : null,
+  activeModule  : 'admin-dashboard',
+  role          : 'admin',
+  periodMode    : 'normal', // 'normal' | 'holiday' — mirrors state.periodMode
 };
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -173,40 +169,112 @@ function renderBadgeRow() {
   const row = document.getElementById('badge-row');
   if (!row) return;
 
-  const yearData = YEAR_TERM_DATA[sidebarState.currentYear];
+  // ── Resolve current year/term from state ──────────────────────────
+  const inHoliday = typeof isHolidayMode === 'function' && isHolidayMode();
+  sidebarState.periodMode = inHoliday ? 'holiday' : 'normal';
+
+  // Sync yearId with state
+  if (!sidebarState.currentYearId) {
+    const activeYear = typeof getActiveYear === 'function' ? getActiveYear() : null;
+    sidebarState.currentYearId = activeYear?.id || null;
+  }
+  const years = _sidebarGetYears();
+  const currentYear = years.find(y => y.id === sidebarState.currentYearId) || years[0];
+  if (currentYear) sidebarState.currentYearId = currentYear.id;
+
+  // Sync termId
+  const terms    = _sidebarGetTermsForYear(sidebarState.currentYearId);
+  const sessions = _sidebarGetHolidaySessionsForYear(sidebarState.currentYearId);
+
+  if (!sidebarState.currentTermId) {
+    if (inHoliday) {
+      const activeSess = typeof getActiveHolidaySession === 'function' ? getActiveHolidaySession() : null;
+      sidebarState.currentTermId = activeSess?.id || sessions[0]?.id || null;
+    } else {
+      const activeTerm = typeof getActiveTerm === 'function' ? getActiveTerm() : null;
+      sidebarState.currentTermId = activeTerm?.id || terms[0]?.id || null;
+    }
+  }
+
+  const currentTerm    = terms.find(t => t.id === sidebarState.currentTermId);
+  const currentSession = sessions.find(s => s.id === sidebarState.currentTermId);
+
+  // Build year pill label
+  const yearLabel = currentYear?.year_name || '—';
+
+  // Build term/session pill label
+  let termLabel;
+  if (inHoliday) {
+    termLabel = currentSession
+      ? (currentSession.icon||'🏖️') + ' ' + (currentSession.name || 'Holiday')
+      : '— Holiday —';
+  } else {
+    termLabel = currentTerm ? `Term ${currentTerm.term_number}` : '— Term —';
+  }
+
+  // Build year dropdown options
+  const yearOptions = years.map(y => `
+    <div class="badge-dropdown-item ${y.id === sidebarState.currentYearId ? 'active' : ''}"
+         data-year-id="${y.id}" onclick="sidebarSelectYear(${y.id})">
+      ${esc(y.year_name)}
+      ${y.id === (typeof getActiveYear === 'function' ? getActiveYear()?.id : null) ? ' ●' : ''}
+    </div>`).join('');
+
+  // Build term/session dropdown options
+  let termOptions;
+  if (inHoliday) {
+    termOptions = sessions.length
+      ? sessions.map(s => `
+        <div class="badge-dropdown-item ${s.id === sidebarState.currentTermId ? 'active' : ''}"
+             data-session-id="${s.id}" onclick="sidebarSelectSession(${s.id})">
+          ${esc(s.icon||'🏖️')} ${esc(s.name||'Holiday')}
+          ${s.status === 'active' ? ' ●' : ''}
+        </div>`).join('')
+      : '<div class="badge-dropdown-item" style="color:var(--text-muted);">No holiday sessions</div>';
+  } else {
+    termOptions = terms.length
+      ? terms.map(t => {
+          const progress = t.status === 'completed' ? 100
+            : t.status === 'active' ? 65 : 0;
+          return `
+        <div class="badge-dropdown-item ${t.id === sidebarState.currentTermId ? 'active' : ''} ${t.status === 'completed' ? 'locked' : ''}"
+             data-term-id="${t.id}" onclick="sidebarSelectTerm(${t.id})">
+          Term ${t.term_number}
+          <span class="term-status-dot ${t.status}">${t.status === 'completed' ? '🔒' : t.status === 'active' ? '●' : '○'}</span>
+        </div>`}).join('')
+      : '<div class="badge-dropdown-item" style="color:var(--text-muted);">No terms</div>';
+  }
+
+  // ── Holiday mode indicator ─────────────────────────────────────
+  const holidayBadge = inHoliday
+    ? `<div class="sidebar-holiday-indicator">🏖️ Holiday Mode</div>`
+    : '';
+
+  // NOTE: yearData was previously from YEAR_TERM_DATA mock — now from real state
+  const _yearData_compat = { locked: false };
 
   row.innerHTML = `
+        ${holidayBadge}
         <span class="badge-pill" id="year-pill">
-            <span class="dot ${yearData.locked ? 'locked' : 'green'}">
-                ${yearData.locked ? lockIconSvg() : ''}
+            <span class="dot green">
+                
             </span>
             <strong>${sidebarState.currentYear.replace('-', ' \u2013 ')}</strong>
             ${chevronSvg()}
         </span>
         <div class="badge-dropdown" id="year-dropdown">
-            ${Object.keys(YEAR_TERM_DATA).map(y => `
-                <div class="badge-dropdown-item ${y === sidebarState.currentYear ? 'active' : ''} ${YEAR_TERM_DATA[y].locked ? 'locked' : ''}" data-year="${y}">
-                    <span>${y.replace('-', ' \u2013 ')}</span>
-                    ${YEAR_TERM_DATA[y].locked ? '<i class="fa-solid fa-lock lock-icon"></i>' : ''}
-                    <i class="fa-solid fa-check check"></i>
-                </div>
+            ${yearOptions}
+        </div>
             `).join('')}
         </div>
 
         <span class="badge-pill" id="term-pill">
-            <span class="dot blue"></span>
-            <strong>${sidebarState.currentTerm}</strong>
+            <span class="dot ${inHoliday?'amber':'blue'}"></span>
+            <strong>${termLabel}</strong>
             ${chevronSvg()}
         </span>
         <div class="badge-dropdown" id="term-dropdown">
-            ${['Term 1', 'Term 2', 'Term 3'].map(t => {
-    const locked = yearData.lockedTerms.includes(t);
-    return `
-                    <div class="badge-dropdown-item ${t === sidebarState.currentTerm ? 'active' : ''} ${locked ? 'locked' : ''}" data-term="${t}">
-                        <span>${t}</span>
-                        ${locked ? '<i class="fa-solid fa-lock lock-icon"></i>' : ''}
-                        <i class="fa-solid fa-check check"></i>
-                    </div>
+            ${termOptions}
                 `;
   }).join('')}
         </div>
@@ -252,6 +320,52 @@ function renderBadgeRow() {
  * Render the navigation tree
  * @param {object} filteredSections - Sections filtered by role
  */
+/**
+ * Get filtered nav sections — applies role permissions + holiday mode nav swap.
+ * In holiday mode, academic items are replaced with their holiday equivalents.
+ */
+function _getFilteredSections() {
+  const inHoliday = sidebarState.periodMode === 'holiday' ||
+    (typeof isHolidayMode === 'function' && isHolidayMode());
+
+  // Get base sections from navigation config
+  const all = typeof NAV_SECTIONS !== 'undefined' ? NAV_SECTIONS : {};
+
+  // Apply role filtering
+  const filtered = {};
+  for (const [key, sec] of Object.entries(all)) {
+    if (sec.roles && !sec.roles.includes(sidebarState.role)) continue;
+    const items = (sec.items||[]).filter(item=>
+      typeof canAccess !== 'function' || canAccess(item.id, sidebarState.role)
+    );
+    if (items.length === 0 && key !== 'dashboard') continue;
+
+    if (inHoliday) {
+      // In holiday mode: swap academic items for holiday equivalents
+      const swapMap = {
+        'marks-entry'    : { id:'holidays-marks',      label:'Holiday Marks Entry',   icon:'fa-book-open' },
+        'marks-database' : { id:'holidays-marks',      label:'Holiday Marks Register', icon:'fa-table-cells' },
+        'class-register' : { id:'holidays-marks',      label:'Holiday Class Register', icon:'fa-list-check' },
+        'assessments'    : { id:'holidays-enrollment', label:'Holiday Enrollment',    icon:'fa-user-plus' },
+        'report-cards'   : { id:'holidays-marks',      label:'Holiday Reports',        icon:'fa-file-lines' },
+        'rankings'       : { id:'holidays-marks',      label:'Holiday Rankings',       icon:'fa-trophy' },
+      };
+      const swappedItems = items.map(item => swapMap[item.id]
+        ? { ...item, ...swapMap[item.id] }
+        : item
+      );
+      // Deduplicate swapped items
+      const seen = new Set();
+      filtered[key] = { ...sec, items: swappedItems.filter(i=>{
+        if(seen.has(i.id)) return false; seen.add(i.id); return true;
+      })};
+    } else {
+      filtered[key] = { ...sec, items };
+    }
+  }
+  return filtered;
+}
+
 function renderNav(filteredSections) {
   const nav = document.getElementById('sidebar-nav');
   if (!nav) return;
@@ -464,10 +578,20 @@ function closeBadgeDropdowns() {
  * @param {string} year - The year key (e.g., '2025-2026')
  */
 function selectYear(year) {
-  const data = YEAR_TERM_DATA[year];
-  sidebarState.currentYear = year;
-  sidebarState.currentTerm = data.activeTerm || 'Term 1';
+  // Support both string name and numeric ID
+  const yr = (state.academicYears||[]).find(y=>y.year_name===year||y.id===parseInt(year));
+  if (yr) sidebarState.currentYearId = yr.id;
+  sidebarState.currentTermId = null;
   renderBadgeRow();
+  emitPeriodChange();
+  closeBadgeDropdowns();
+}
+
+function sidebarSelectYear(yearId) {
+  sidebarState.currentYearId = yearId;
+  sidebarState.currentTermId = null;
+  renderBadgeRow();
+  renderNav(_getFilteredSections());
   emitPeriodChange();
   closeBadgeDropdowns();
 }
@@ -477,19 +601,48 @@ function selectYear(year) {
  * @param {string} term - The term name (e.g., 'Term 3')
  */
 function selectTerm(term) {
-  const data = YEAR_TERM_DATA[sidebarState.currentYear];
-  sidebarState.currentTerm = term;
+  const t = (state.terms||[]).find(t=>`Term ${t.term_number}`===term||t.id===parseInt(term));
+  if (t) sidebarState.currentTermId = t.id;
   renderBadgeRow();
   emitPeriodChange();
   closeBadgeDropdowns();
+}
+
+function sidebarSelectTerm(termId) {
+  sidebarState.currentTermId = termId;
+  sidebarState.periodMode    = 'normal';
+  if (typeof deactivateHolidayMode === 'function') deactivateHolidayMode();
+  renderBadgeRow();
+  renderNav(_getFilteredSections());
+  emitPeriodChange();
+  closeBadgeDropdowns();
+}
+
+function sidebarSelectSession(sessionId) {
+  sidebarState.currentTermId = sessionId;
+  sidebarState.periodMode    = 'holiday';
+  const s = (state.holidaySessions||[]).find(s=>s.id===sessionId);
+  if (s && typeof activateHolidayMode === 'function') activateHolidayMode(s);
+  if (typeof loadDataForHolidaySession === 'function') loadDataForHolidaySession(sessionId);
+  renderBadgeRow();
+  renderNav(_getFilteredSections());
+  emitPeriodChange();
+  closeBadgeDropdowns();
+  if (typeof TopbarPeriod !== 'undefined') TopbarPeriod.refresh();
 }
 
 /**
  * Emit the academicPeriodChanged event
  */
 function emitPeriodChange() {
-  const data = YEAR_TERM_DATA[sidebarState.currentYear];
-  const locked = data.locked || data.lockedTerms.includes(sidebarState.currentTerm);
+  const inHoliday = sidebarState.periodMode === 'holiday';
+  const currentYear = (state.academicYears||[]).find(y=>y.id===sidebarState.currentYearId);
+  const currentTerm = (state.terms||[]).find(t=>t.id===sidebarState.currentTermId);
+  const currentSession = (state.holidaySessions||[]).find(s=>s.id===sidebarState.currentTermId);
+  const locked = currentTerm?.status === 'completed' || false;
+  // Legacy compat
+  const data = { locked, lockedTerms: [] };
+  const _locked_compat = locked; // used below
   const progress = data.progress?.[sidebarState.currentTerm] ?? 0;
   const days = data.days?.[sidebarState.currentTerm] ?? null;
 
@@ -675,3 +828,7 @@ window.Sidebar = Sidebar;
 // throughout this app) expects a bare window.renderSidebar — this was
 // never aliased, only the Sidebar namespace itself was exposed.
 window.renderSidebar = Sidebar.render;
+
+window.sidebarSelectYear    = sidebarSelectYear;
+window.sidebarSelectTerm    = sidebarSelectTerm;
+window.sidebarSelectSession = sidebarSelectSession;

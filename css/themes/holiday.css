@@ -225,3 +225,44 @@ body.mode-holiday .page-body::before {
 /* ── Normal mode — reset ────────────────────────────────────────── */
 body.mode-normal .page-body::before { display: none; }
 body.mode-normal .holiday-banner    { display: none !important; }
+
+/* ── Sidebar term pill in holiday mode ──────────────────────────── */
+.badge-pill.holiday-pill {
+  border-color        : rgba(217,119,6,0.4) !important;
+  background          : rgba(217,119,6,0.10) !important;
+}
+.badge-pill.holiday-pill strong { color: #fcd34d; }
+
+/* ── Amber dot for holiday term selector ────────────────────────── */
+.dot.amber {
+  background          : #d97706;
+  box-shadow          : 0 0 0 2px rgba(217,119,6,0.25);
+}
+
+/* ── Sidebar holiday mode indicator ────────────────────────────── */
+.sidebar-holiday-indicator {
+  display             : flex;
+  align-items         : center;
+  justify-content     : center;
+  gap                 : 6px;
+  padding             : 5px 12px;
+  margin              : 0 12px 8px;
+  border-radius       : 8px;
+  background          : rgba(217,119,6,0.12);
+  border              : 1px solid rgba(217,119,6,0.25);
+  color               : #fcd34d;
+  font-size           : 11px;
+  font-weight         : 700;
+  text-transform      : uppercase;
+  letter-spacing      : .5px;
+}
+
+/* ── Holiday dropdown item style ────────────────────────────────── */
+.badge-dropdown-item.active {
+  background          : rgba(255,255,255,0.06);
+  font-weight         : 600;
+}
+body.mode-holiday .badge-dropdown-item.active {
+  background          : rgba(217,119,6,0.12);
+  color               : #fcd34d;
+}

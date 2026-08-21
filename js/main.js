@@ -29,8 +29,16 @@ async function _start() {
         // boot() has its own error handling but this is the final safety net
         console.error('[Main] Fatal boot error:', err);
 
+        // boot() has its own boot-loader hide calls on its normal paths,
+        // but a thrown error here means one of those was never reached —
+        // without this, the boot-loader (z-index 100000) would cover the
+        // error message below forever.
+        const bootLoader = document.getElementById('boot-loader');
+        if (bootLoader) bootLoader.classList.add('is-hidden');
+
         const app = document.getElementById('app');
         if (app) {
+            app.style.display = '';
             app.innerHTML = `
                 <div style="display:flex;align-items:center;justify-content:center;
                             min-height:100vh;padding:24px;text-align:center;

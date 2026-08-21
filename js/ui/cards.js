@@ -67,7 +67,7 @@ const Cards = (() => {
    * Stat object format:
    * {
    *   family: 'sapphire' | 'emerald' | 'purple' | 'gold' | 'ruby' | 'cyan' | 'obsidian' | 'rosegold',
-   *   icon: '<svg>...</svg>' or '📊' or '<i class="fa-solid fa-users"></i>',
+   *   icon: '<svg>...</svg>' or '<i class="fa-solid fa-users"></i>',
    *   value: 428,
    *   label: 'Total Students',
    *   trend: { dir: 'up' | 'down' | 'flat', text: '12%' },

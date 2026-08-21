@@ -26,6 +26,7 @@ async function boot() {
 
     // ── Step 1: Apply saved theme immediately (before any render) ──
     _applyInitialTheme();
+    _setBootProgress(10);
 
     // ── Step 2: Register Service Worker ───────────────────────────
     // Non-blocking — do not await, let it register in background
@@ -40,16 +41,19 @@ async function boot() {
     await openOfflineDB().catch(err => {
         console.warn('[Boot] IndexedDB unavailable:', err.message);
     });
+    _setBootProgress(30);
 
     // ── Step 5: Check for Supabase credentials ────────────────────
     if (!hasSupabaseCredentials()) {
         console.warn('[Boot] No Supabase credentials — showing API settings.');
+        _hideBootLoader(); // _showApiSetupScreen replaces body.innerHTML entirely
         _showApiSetupScreen();
         return;
     }
 
     // ── Step 6: Test DB connection (non-blocking toast on fail) ───
     const connTest = await testSupabaseConnection();
+    _setBootProgress(50);
     if (!connTest.ok) {
         console.warn('[Boot] Supabase connection test failed:', connTest.error);
         // Show a warning but continue — user might be offline and have a session
@@ -70,6 +74,7 @@ async function boot() {
             console.error('[Boot] Shell render failed:', err.message);
         });
     }
+    _setBootProgress(70);
     // Show app div (hidden on load to prevent flash before auth)
     const _appEl = document.getElementById('app');
     if (_appEl) _appEl.style.display = '';
@@ -80,6 +85,7 @@ async function boot() {
     if (sessionRestored) {
         // User is already logged in — navigate to correct module
         console.info('[Boot] Session restored. Navigating to app.');
+        _setBootProgress(85);
 
         // Check if URL has a deep-link hash
         const hashModule = _moduleIdFromUrlHash();
@@ -97,14 +103,39 @@ async function boot() {
         // Update offline badge
         if (typeof updateOfflineBadge === 'function') updateOfflineBadge().catch(() => { });
 
+        // Dashboard is actually rendered now — safe to reveal it.
+        _setBootProgress(100);
+        _hideBootLoader();
+
     } else {
         // No session — show login page
         console.info('[Boot] No session found. Showing login.');
         if (typeof hideSidebar === 'function') hideSidebar();
         if (typeof renderLoginPage === 'function') renderLoginPage();
+        _setBootProgress(100);
+        _hideBootLoader();
     }
 
     console.info('[Boot] Boot sequence complete.');
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   BOOT LOADER CONTROL
+   The #boot-loader element (index.html) is the first thing painted,
+   before any JS runs — these just update its progress and hide it
+   once there's something real underneath to reveal, rather than
+   revealing blank/unstyled content while login or the dashboard is
+   still loading.
+   ───────────────────────────────────────────────────────────────── */
+
+function _setBootProgress(pct) {
+    const fill = document.getElementById('boot-loader-progress');
+    if (fill) fill.style.width = pct + '%';
+}
+
+function _hideBootLoader() {
+    const el = document.getElementById('boot-loader');
+    if (el) el.classList.add('is-hidden');
 }
 
 /* ─────────────────────────────────────────────────────────────────

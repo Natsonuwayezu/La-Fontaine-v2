@@ -236,7 +236,7 @@ function _faRenderTable() {
         const discount = Number(fee.waived_amount||0);
 
         const sourceLabel = fee.source === 'holiday_enrollment'
-            ? `<span class="badge" style="background:rgba(217,119,6,0.15);color:#d97706;">🏖️ Holiday</span>`
+            ? `<span class="badge" style="background:rgba(217,119,6,0.15);color:#d97706;"><i class="fa-solid fa-umbrella-beach"></i> Holiday</span>`
             : `<span class="badge badge-neutral">Enrollment</span>`;
 
         return `

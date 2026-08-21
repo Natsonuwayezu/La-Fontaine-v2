@@ -176,9 +176,9 @@ function _ftsRender() {
 
             let cls2, label, title;
             if (allWaived)      { cls2='fts-waived';  label='W'; title=`Waived`; totalWaived++; }
-            else if (allPaid)   { cls2='fts-paid';    label='✓'; title=`Paid: ${fmtCurrency(paidAmt)}`; totalPaid++; }
+            else if (allPaid)   { cls2='fts-paid';    label='Y'; title=`Paid: ${fmtCurrency(paidAmt)}`; totalPaid++; }
             else if (anyPaid)   { cls2='fts-partial'; label='P'; title=`Partial: ${fmtCurrency(paidAmt)}/${fmtCurrency(totalAmt)}`; totalPartial++; }
-            else                { cls2='fts-unpaid';  label='✗'; title=`Unpaid: ${fmtCurrency(totalAmt)}`; totalUnpaid++; }
+            else                { cls2='fts-unpaid';  label='N'; title=`Unpaid: ${fmtCurrency(totalAmt)}`; totalUnpaid++; }
 
             return `<td class="fts-cell ${cls2}" title="${esc(title)}"
                         onclick="ftsOpenPayment(${student.id})" style="cursor:pointer;">

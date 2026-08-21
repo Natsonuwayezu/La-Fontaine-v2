@@ -930,7 +930,7 @@ function chartWithYear(title, chartHtml, yearId = null) {
   const year = getYearLabel(yearId);
   const yearLabel = year ? ` — ${year}` : '';
   const isActive = yearId ? (state.academicYears || []).find(y => y.id === yearId)?.is_active : true;
-  const statusIcon = isActive ? '●' : '🔒';
+  const statusIcon = isActive ? '●' : '<i class="fa-solid fa-lock" style="font-size:0.75em;"></i>';
 
   return `
         <div style="margin-bottom:12px;">

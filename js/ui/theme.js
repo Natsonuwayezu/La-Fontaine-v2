@@ -26,8 +26,8 @@ const THEMES = {
 };
 
 const ICONS = {
-    [THEMES.LIGHT]: '☀️',
-    [THEMES.DARK]: '🌙'
+    [THEMES.LIGHT]: '<i class="fa-solid fa-sun"></i>',
+    [THEMES.DARK]: '<i class="fa-solid fa-moon"></i>'
 };
 
 const LABELS = {
@@ -156,7 +156,7 @@ function updateThemeUI(theme) {
     const text = document.getElementById('dropdown-theme-text');
 
     if (icon) {
-        icon.textContent = ICONS[theme] || '🌙';
+        icon.innerHTML = ICONS[theme] || '<i class="fa-solid fa-moon"></i>';
     }
 
     if (text) {
@@ -169,7 +169,7 @@ function updateThemeUI(theme) {
         const btnText = btn.querySelector('[data-theme-label]');
 
         if (btnIcon) {
-            btnIcon.textContent = ICONS[theme] || '🌙';
+            btnIcon.innerHTML = ICONS[theme] || '<i class="fa-solid fa-moon"></i>';
         }
 
         if (btnText) {
@@ -233,7 +233,7 @@ function applySchoolLogo(logoData, selector = '.school-logo, #school-logo, #logi
     if (loginLogo && (logoData.startsWith('data:') || logoData.startsWith('http'))) {
         loginLogo.innerHTML = `<img src="${logoData}" alt="School Logo" style="width:100%;height:100%;object-fit:contain;">`;
     } else if (loginLogo) {
-        loginLogo.textContent = logoData || '🏫';
+        loginLogo.innerHTML = logoData ? esc(logoData) : '<i class="fa-solid fa-school"></i>';
     }
 }
 

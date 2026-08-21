@@ -95,7 +95,8 @@ const UserManagement = (() => {
                 <div class="form-group"><label class="form-label">Phone (optional)</label>
                     <input type="tel" name="phone" class="form-input" value="${existing ? esc(existing.phone || '') : ''}"></div>
                 <div class="form-group"><label class="form-label">${existing ? 'New Password (leave blank to keep current)' : 'Password'}</label>
-                    <input type="password" name="password" class="form-input" ${existing ? '' : 'required'}></div>
+                    <input type="password" name="password" class="form-input" ${existing ? '' : 'required'}>
+                    <div class="hint">At least 6 characters, with an uppercase letter, a lowercase letter, and a number or symbol.</div></div>
             </form>
         `;
     }

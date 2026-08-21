@@ -449,6 +449,19 @@ function validateWaiverForm(data) {
    6. TEACHER FORM VALIDATION  (Part 2.6)
    ═══════════════════════════════════════════════════════════════════ */
 
+/**
+ * Strong password rule: at least 6 characters, at least one uppercase
+ * letter, one lowercase letter, and one number OR symbol.
+ */
+function validatePasswordStrength(value, label = 'Password') {
+    const s = String(value || '');
+    if (s.length < 6) return { valid: false, error: `${label} must be at least 6 characters.` };
+    if (!/[A-Z]/.test(s)) return { valid: false, error: `${label} must include at least one uppercase letter.` };
+    if (!/[a-z]/.test(s)) return { valid: false, error: `${label} must include at least one lowercase letter.` };
+    if (!/[0-9]/.test(s) && !/[^A-Za-z0-9]/.test(s)) return { valid: false, error: `${label} must include at least one number or symbol.` };
+    return { valid: true, error: null };
+}
+
 function validateTeacherForm(data, isNew = true) {
     const errors = {};
 
@@ -468,12 +481,17 @@ function validateTeacherForm(data, isNew = true) {
         if (!unLen.valid) errors.username = unLen.error;
     }
 
-    if (isNew) {
+    // New accounts always require a password; on edit, a password is
+    // optional (blank = keep current) but if one IS entered, it must
+    // meet the same strength rule — previously this branch only ran
+    // for isNew, so changing a password during an edit silently
+    // skipped validation entirely, including the length check.
+    if (isNew || data.password) {
         const pwR = validateRequired(data.password, 'Password');
         if (!pwR.valid) errors.password = pwR.error;
         else {
-            const pwLen = validateLength(data.password, { min: 6, label: 'Password' });
-            if (!pwLen.valid) errors.password = pwLen.error;
+            const pwStrength = validatePasswordStrength(data.password);
+            if (!pwStrength.valid) errors.password = pwStrength.error;
         }
     }
 
@@ -663,6 +681,7 @@ window.validateFeeForm          = validateFeeForm;
 window.validatePaymentForm      = validatePaymentForm;
 window.validateWaiverForm       = validateWaiverForm;
 window.validateTeacherForm      = validateTeacherForm;
+window.validatePasswordStrength = validatePasswordStrength;
 window.validateAcademicYearForm = validateAcademicYearForm;
 window.validateTermForm         = validateTermForm;
 window.validateTimetableSlot    = validateTimetableSlot;

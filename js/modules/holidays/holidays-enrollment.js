@@ -41,7 +41,7 @@ function _heShell(container, sessions) {
         <div class="mod-topbar-left">
           <h1 class="mod-title"><i class="fa-solid fa-user-plus"></i> Holiday Enrollment</h1>
           <span class="badge" style="background:rgba(217,119,6,.15);color:#d97706;margin-left:8px;">
-            🏖️ ${esc(cur?.name||'—')}</span>
+            <i class="fa-solid fa-umbrella-beach"></i> ${esc(cur?.name||'—')}</span>
         </div>
         <div class="mod-topbar-right">
           <select class="select select-sm" onchange="hePick(parseInt(this.value))">
@@ -202,7 +202,7 @@ window.heEnrollModal = () => {
           </div>
         </label>
         <div data-he-discount="${fc.id}" style="font-size:11px;color:var(--color-success);padding-left:24px;display:none;">
-          ✓ Discount: <span></span>
+          <i class="fa-solid fa-check"></i> Discount: <span></span>
         </div>
       </div>`).join('')}
     </div>`,
@@ -256,7 +256,7 @@ window.heChooseStudent = (id,name,code) => {
     document.getElementById('he-student-id').value=id;
     document.getElementById('he-student-search').value=name+' ('+code+')';
     document.getElementById('he-student-results').style.display='none';
-    document.getElementById('he-student-chosen').textContent=`✓ ${name} selected`;
+    document.getElementById('he-student-chosen').textContent=`${name} selected`;
 };
 
 window.heSubmitEnroll = async () => {

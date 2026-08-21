@@ -134,7 +134,7 @@ function renderSteps(container) {
         if (isDone) statusClass += ' enroll-step--done';
         if (isActive) statusClass += ' enroll-step--active';
 
-        const circleContent = isDone ? '<span class="enroll-step__check">✓</span>' : `<span class="enroll-step__number">${num}</span>`;
+        const circleContent = isDone ? '<span class="enroll-step__check"><i class="fa-solid fa-check"></i></span>' : `<span class="enroll-step__number">${num}</span>`;
 
         return `
             <div class="${statusClass}" data-step="${num}">
@@ -379,7 +379,7 @@ function renderStep2(panel, container) {
                     <div class="modal modal-sm">
                         <div class="modal-header">
                             <h3>Link Sibling</h3>
-                            <button class="modal-close" data-close-modal="${modalId}">✕</button>
+                            <button class="modal-close" data-close-modal="${modalId}"><i class="fa-solid fa-xmark"></i></button>
                         </div>
                         ${modalContent}
                         <div class="modal-footer">

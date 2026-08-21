@@ -126,7 +126,7 @@ body.mode-holiday .period-btn {
 
 /* ── Holiday mode indicator bar (below topbar) ──────────────────── */
 body.mode-holiday .page-body::before {
-  content             : '🏖️  HOLIDAY SESSION ACTIVE — Marks and fees are kept separate from the academic year';
+  content             : 'HOLIDAY SESSION ACTIVE — Marks and fees are kept separate from the academic year';
   display             : block;
   padding             : 6px 20px;
   background          : rgba(217,119,6,0.12);

@@ -12,7 +12,7 @@
      Dropdown.closeAll()
 
    Menu Item Structure:
-     { label: 'Edit', icon: '✏️', onClick: () => {}, danger?: false, divider?: false }
+     { label: 'Edit', icon: '<i class="fa-solid fa-pen"></i>', onClick: () => {}, danger?: false, divider?: false }
 
    Expected CSS: .dropdown, .dropdown-item, .dropdown-item.danger,
    .dropdown-divider from css/components/dropdown.css.

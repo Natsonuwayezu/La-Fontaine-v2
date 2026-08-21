@@ -36,7 +36,7 @@ function _hmShell(container, sessions) {
         <div class="mod-topbar-left">
           <h1 class="mod-title"><i class="fa-solid fa-book-open"></i> Holiday Marks</h1>
           <span class="badge" style="background:rgba(217,119,6,.15);color:#d97706;margin-left:8px;">
-            🏖️ ${esc(cur?.name||'—')}</span>
+            <i class="fa-solid fa-umbrella-beach"></i> ${esc(cur?.name||'—')}</span>
         </div>
         <div class="mod-topbar-right">
           <select class="select select-sm" onchange="hmPickSession(parseInt(this.value))">

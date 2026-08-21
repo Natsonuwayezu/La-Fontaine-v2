@@ -237,7 +237,7 @@ const FamilyManagement = (() => {
             <input type="number" class="form-input" id="fam-discount-pct" min="0" max="100" value="${family.discountPct}" />
             <span class="currency-input-wrap__suffix">%</span>
           </div>
-          <div class="form-hint">${family.members.length < 2 ? 'This family needs at least 2 linked students for a discount to apply.' : ''}</div>
+          <div class="hint">${family.members.length < 2 ? 'This family needs at least 2 linked students for a discount to apply.' : ''}</div>
         </div>
       `, {
       title: `Discount \u2014 ${family.name}`,

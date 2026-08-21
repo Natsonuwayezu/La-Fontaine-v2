@@ -102,7 +102,7 @@ function showModal(content, options = {}) {
                 ${config.title || config.showClose ? `
                 <div class="modal-header">
                     ${config.title ? `<h3 id="${id}-title">${config.title}</h3>` : ''}
-                    ${config.showClose ? `<button class="modal-close" onclick="window.closeModal('${id}')" aria-label="Close modal">✕</button>` : ''}
+                    ${config.showClose ? `<button class="modal-close" onclick="window.closeModal('${id}')" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>` : ''}
                 </div>
                 ` : ''}
                 <div class="modal-body">
@@ -349,7 +349,7 @@ function confirmDialog(message, title = 'Confirm', options = {}) {
         const content = `
             <div style="display:flex; flex-direction:column; gap:12px;">
                 <div style="display:flex; align-items:flex-start; gap:12px;">
-                    <div style="font-size:24px; flex-shrink:0; margin-top:2px;">⚠️</div>
+                    <div style="font-size:24px; flex-shrink:0; margin-top:2px; color:var(--warning, #d97706);"><i class="fa-solid fa-triangle-exclamation"></i></div>
                     <div style="font-size:15px; line-height:1.6; color:var(--text-body, #2c241e);">
                         ${message}
                     </div>

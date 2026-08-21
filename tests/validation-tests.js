@@ -111,7 +111,7 @@ describe('validateMarkValue', () => {
 describe('validateTeacherForm', () => {
     const validData = {
         first_name: 'Jean', last_name: 'Uwimana', role: 'teacher',
-        username: 'juwimana', password: 'secret123'
+        username: 'juwimana', password: 'Secret123'
     };
 
     test('accepts a fully valid new-teacher submission', () => {
@@ -171,5 +171,57 @@ describe('buildErrorSummary', () => {
         const summary = buildErrorSummary({ first_name: 'First name is required.', role: 'Role is invalid.' });
         expect(typeof summary).toBe('string');
         expect(summary.length).toBeGreaterThan(0);
+    });
+});
+
+describe('validatePasswordStrength', () => {
+    test('rejects passwords under 6 characters', () => {
+        expect(validatePasswordStrength('Ab1').valid).toBe(false);
+    });
+    test('rejects a password with no uppercase letter', () => {
+        expect(validatePasswordStrength('abcde1').valid).toBe(false);
+    });
+    test('rejects a password with no lowercase letter', () => {
+        expect(validatePasswordStrength('ABCDE1').valid).toBe(false);
+    });
+    test('rejects a password with neither a number nor a symbol', () => {
+        expect(validatePasswordStrength('Abcdefgh').valid).toBe(false);
+    });
+    test('accepts a 6-character password with upper/lower/number', () => {
+        expect(validatePasswordStrength('Abcde1').valid).toBe(true);
+    });
+    test('accepts a symbol in place of a number', () => {
+        expect(validatePasswordStrength('Abcde!').valid).toBe(true);
+    });
+});
+
+describe('validateTeacherForm password handling', () => {
+    const baseNewUser = { first_name: 'A', last_name: 'B', role: 'teacher', username: 'abtest' };
+
+    test('a new account requires a password meeting the strength rule', () => {
+        const weak = validateTeacherForm({ ...baseNewUser, password: 'weak' }, true);
+        expect(weak.valid).toBe(false);
+        expect(weak.errors.password).toBeDefined();
+    });
+
+    test('a new account with a strong password passes', () => {
+        const strong = validateTeacherForm({ ...baseNewUser, password: 'Abcde1' }, true);
+        expect(strong.valid).toBe(true);
+    });
+
+    test('regression: editing a user with a blank password (keep current) is valid', () => {
+        const result = validateTeacherForm({ ...baseNewUser, password: '' }, false);
+        expect(result.errors.password).toBeUndefined();
+    });
+
+    test('regression: editing a user and entering a WEAK new password is now caught (previously this branch was skipped entirely on edit)', () => {
+        const result = validateTeacherForm({ ...baseNewUser, password: 'weak' }, false);
+        expect(result.valid).toBe(false);
+        expect(result.errors.password).toBeDefined();
+    });
+
+    test('editing a user with a strong new password passes', () => {
+        const result = validateTeacherForm({ ...baseNewUser, password: 'Abcde1' }, false);
+        expect(result.errors.password).toBeUndefined();
     });
 });

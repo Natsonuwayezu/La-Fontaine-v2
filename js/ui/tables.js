@@ -14,7 +14,7 @@
        rowKey: 'id',
        selectable: true,
        pageSize: 25,
-       emptyState: { icon: '📭', title: 'No records', message: 'Try adjusting your filters' },
+       emptyState: { icon: '<i class="fa-regular fa-folder-open"></i>', title: 'No records', message: 'Try adjusting your filters' },
        onSelectionChange: (selectedIds) => { ... },
        onRowClick: (row) => { ... }
      });
@@ -81,7 +81,7 @@ const DataTable = (() => {
       onSelectionChange: opts.onSelectionChange || null,
       onRowClick: opts.onRowClick || null,
       emptyState: opts.emptyState || {
-        icon: '📭',
+        icon: '<i class="fa-regular fa-folder-open"></i>',
         title: 'No records found',
         message: 'Try adjusting your filters or add new data.'
       }
@@ -291,7 +291,7 @@ const DataTable = (() => {
       // Fallback empty state
       container.innerHTML = `
                 <div class="empty-state" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:48px 20px; text-align:center; color:var(--text-soft, #6b5f56);">
-                    <div style="font-size:48px; margin-bottom:12px; opacity:0.5;">${icon || '📭'}</div>
+                    <div style="font-size:48px; margin-bottom:12px; opacity:0.5;">${icon || '<i class="fa-regular fa-folder-open"></i>'}</div>
                     <h3 style="font-size:18px; font-weight:600; color:var(--text-body, #2c241e); margin-bottom:4px;">${esc(title || 'No records found')}</h3>
                     <p style="color:var(--text-muted, #a8988e); font-size:14px;">${esc(message || 'Try adjusting your filters or add new data.')}</p>
                 </div>

@@ -243,9 +243,9 @@ function isBreakSlot(timeSlot) {
 }
 
 function getBreakIcon(timeSlot) {
-  if (timeSlot === '10:20-10:40') return '☕';
-  if (timeSlot === '12:00-13:00') return '🍽️';
-  if (timeSlot === '15:00-15:20') return '☕';
+  if (timeSlot === '10:20-10:40') return '<i class="fa-solid fa-mug-saucer"></i>';
+  if (timeSlot === '12:00-13:00') return '<i class="fa-solid fa-utensils"></i>';
+  if (timeSlot === '15:00-15:20') return '<i class="fa-solid fa-mug-saucer"></i>';
   return '';
 }
 
@@ -400,7 +400,7 @@ const HOLIDAY_CONFIG = {
   /* ── Visual theming ─────────────────────────────────────────────── */
   bannerColor       : '#d97706',                    // amber
   bannerBg          : '#451a03',
-  icon              : '🏖️',
+  icon              : null,                          // no default; topbar.js falls back to a Font Awesome icon when unset
   themeClass        : 'theme-holiday',              // added to <body> in holiday mode
 
   /* ── Banner text ────────────────────────────────────────────────── */

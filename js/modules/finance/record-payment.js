@@ -153,7 +153,7 @@ async function renderRecordPayment(container, params = {}) {
                 <span class="fifo-fee-name">${esc(a.feeName)}</span>
                 <span class="fifo-fee-alloc">${fmtCurrency(a.allocated)}</span>
                 <span class="fifo-fee-rem ${a.isFullyPaid ? 'text-success' : 'text-warning'}">
-                    ${a.isFullyPaid ? '✓ Fully Paid' : `${fmtCurrency(a.remaining)} remaining`}
+                    ${a.isFullyPaid ? '<i class="fa-solid fa-check"></i> Fully Paid' : `${fmtCurrency(a.remaining)} remaining`}
                 </span>
             </div>`).join('');
 

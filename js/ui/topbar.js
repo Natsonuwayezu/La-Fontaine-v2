@@ -141,7 +141,7 @@ const Topbar = (() => {
                 <div class="period-switcher" id="topbar-period-switcher" style="display:none;">
                     <button class="period-btn" id="topbar-period-btn"
                             onclick="window.TopbarPeriod?.toggle()">
-                        <span id="topbar-period-icon">📚</span>
+                        <span id="topbar-period-icon"><i class="fa-solid fa-book"></i></span>
                         <span id="topbar-period-label">Academic Term</span>
                         <i class="fa-solid fa-chevron-down" style="font-size:10px;"></i>
                     </button>
@@ -382,19 +382,19 @@ const Topbar = (() => {
       const pct = progress || 0;
 
       if (locked && pct === 0) {
-        phase.textContent = '🔒 Locked';
+        phase.innerHTML = '<i class="fa-solid fa-lock"></i> Locked';
         phase.className = 'phase-badge locked';
       } else if (pct >= 100) {
-        phase.textContent = '✅ Complete';
+        phase.innerHTML = '<i class="fa-solid fa-circle-check"></i> Complete';
         phase.className = 'phase-badge complete';
       } else if (pct > 75) {
-        phase.textContent = '📝 Post-Midterm';
+        phase.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Post-Midterm';
         phase.className = 'phase-badge post';
       } else if (pct > 0) {
-        phase.textContent = '📋 Pre-Midterm';
+        phase.innerHTML = '<i class="fa-solid fa-clipboard-list"></i> Pre-Midterm';
         phase.className = 'phase-badge pre';
       } else {
-        phase.textContent = '⏳ Upcoming';
+        phase.innerHTML = '<i class="fa-regular fa-hourglass-half"></i> Upcoming';
         phase.className = 'phase-badge upcoming';
       }
     }
@@ -609,7 +609,7 @@ const TopbarPeriod = {
     switcher.style.display = sessions.length > 0 ? '' : 'none';
 
     if (inHoliday && activeSession) {
-      btnIcon.textContent    = activeSession.icon || '🏖️';
+      btnIcon.innerHTML     = activeSession.icon ? esc(activeSession.icon) : '<i class="fa-solid fa-umbrella-beach"></i>';
       btnLabel.textContent   = activeSession.name;
       if (bannerName) bannerName.textContent = activeSession.name;
       if (banner)     banner.style.display   = '';
@@ -618,7 +618,7 @@ const TopbarPeriod = {
     } else {
       const activeTerm = getActiveTerm();
       const activeYear = getActiveYear();
-      btnIcon.textContent  = '📚';
+      btnIcon.innerHTML  = '<i class="fa-solid fa-book"></i>';
       btnLabel.textContent = activeTerm
         ? `Term ${activeTerm.term_number} — ${activeYear?.year_name || ''}`
         : 'Academic Term';
@@ -637,7 +637,7 @@ const TopbarPeriod = {
     let html = `
     <button class="period-option ${isNormal ? 'active' : ''}"
             onclick="window.TopbarPeriod?.selectNormal()">
-      <span class="period-option-icon">📚</span>
+      <span class="period-option-icon"><i class="fa-solid fa-book"></i></span>
       <div class="period-option-info">
         <span class="period-option-name">Academic Term</span>
         <span class="period-option-meta">${esc(getActiveYear()?.year_name || 'Current Year')}</span>
@@ -652,7 +652,7 @@ const TopbarPeriod = {
       html += `
     <button class="period-option ${isActive ? 'active' : ''} period-option-holiday"
             onclick="window.TopbarPeriod?.selectSession(${s.id})">
-      <span class="period-option-icon">${esc(s.icon || '🏖️')}</span>
+      <span class="period-option-icon">${s.icon ? esc(s.icon) : '<i class="fa-solid fa-umbrella-beach"></i>'}</span>
       <div class="period-option-info">
         <span class="period-option-name">${esc(s.name)}</span>
         <span class="period-option-meta">${esc(statusLabel)} · ${esc(s.start_date || '')}</span>

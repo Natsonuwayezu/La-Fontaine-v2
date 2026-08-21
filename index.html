@@ -80,6 +80,26 @@
 
 <body>
 
+    <div class="boot-loader" id="boot-loader">
+        <div class="boot-loader__frame">
+            <svg class="boot-loader__emblem" viewBox="0 0 200 200">
+                <circle class="emblem-ring-outer" cx="100" cy="100" r="90" />
+                <circle class="emblem-ring-active" cx="100" cy="100" r="90" />
+                <circle class="emblem-ring-secondary" cx="100" cy="100" r="65" />
+                <polygon class="emblem-mark" points="100,68 138,88 100,108 62,88" />
+                <rect class="emblem-mark" x="94" y="88" width="12" height="26" rx="2" />
+                <circle class="emblem-orbit-dot" cx="100" cy="22" r="4" />
+            </svg>
+        </div>
+        <div class="boot-loader__label">
+            <span>Loading</span>
+            <span class="spinner-dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+        </div>
+        <div class="boot-loader__progress">
+            <div class="progress-fill" id="boot-loader-progress" style="width:0%;"></div>
+        </div>
+    </div>
+
     <div id="app" style="display:none;">
         <!-- ===== SIDEBAR ===== -->
         <aside class="sidebar" id="sidebar">

@@ -511,7 +511,7 @@ function renderOverdueTable(container) {
   el.querySelectorAll('[data-remind]').forEach(btn => {
     btn.addEventListener('click', () => {
       const name = btn.dataset.remind;
-      showToast(`📧 Reminder sent to ${name}`, 'info');
+      showToast(`Reminder sent to ${name}`, 'info');
     });
   });
 }
@@ -542,7 +542,11 @@ function renderClassRanking(container) {
   const el = container.querySelector('#class-ranking-list');
   if (!el) return;
 
-  const medals = ['🥇', '🥈', '🥉'];
+  const medals = [
+    '<i class="fa-solid fa-medal" style="color:#d4af37;"></i>',
+    '<i class="fa-solid fa-medal" style="color:#a8a8a8;"></i>',
+    '<i class="fa-solid fa-medal" style="color:#b08d57;"></i>'
+  ];
   const statusMap = [
     { min: 90, label: 'Excellent', class: 'good' },
     { min: 75, label: 'Good', class: 'good' },
@@ -725,7 +729,7 @@ function wireStaticNav(container) {
         `Send payment reminders to all ${dashboardData.overdueStudents.length} overdue families?`
       );
       if (confirmed) {
-        showToast(`📨 Reminders sent to ${dashboardData.overdueStudents.length} families`, 'success');
+        showToast(`Reminders sent to ${dashboardData.overdueStudents.length} families`, 'success');
       }
     });
   });

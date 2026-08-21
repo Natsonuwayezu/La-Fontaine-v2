@@ -206,7 +206,7 @@ function renderBadgeRow() {
   let termLabel;
   if (inHoliday) {
     termLabel = currentSession
-      ? (currentSession.icon||'🏖️') + ' ' + (currentSession.name || 'Holiday')
+      ? (currentSession.icon ? esc(currentSession.icon) : '<i class="fa-solid fa-umbrella-beach"></i>') + ' ' + esc(currentSession.name || 'Holiday')
       : '— Holiday —';
   } else {
     termLabel = currentTerm ? `Term ${currentTerm.term_number}` : '— Term —';
@@ -227,7 +227,7 @@ function renderBadgeRow() {
       ? sessions.map(s => `
         <div class="badge-dropdown-item ${s.id === sidebarState.currentTermId ? 'active' : ''}"
              data-session-id="${s.id}" onclick="sidebarSelectSession(${s.id})">
-          ${esc(s.icon||'🏖️')} ${esc(s.name||'Holiday')}
+          ${s.icon ? esc(s.icon) : '<i class="fa-solid fa-umbrella-beach"></i>'} ${esc(s.name||'Holiday')}
           ${s.status === 'active' ? ' ●' : ''}
         </div>`).join('')
       : '<div class="badge-dropdown-item" style="color:var(--text-muted);">No holiday sessions</div>';
@@ -240,14 +240,14 @@ function renderBadgeRow() {
         <div class="badge-dropdown-item ${t.id === sidebarState.currentTermId ? 'active' : ''} ${t.status === 'completed' ? 'locked' : ''}"
              data-term-id="${t.id}" onclick="sidebarSelectTerm(${t.id})">
           Term ${t.term_number}
-          <span class="term-status-dot ${t.status}">${t.status === 'completed' ? '🔒' : t.status === 'active' ? '●' : '○'}</span>
+          <span class="term-status-dot ${t.status}">${t.status === 'completed' ? '<i class="fa-solid fa-lock" style="font-size:0.75em;"></i>' : t.status === 'active' ? '●' : '○'}</span>
         </div>`}).join('')
       : '<div class="badge-dropdown-item" style="color:var(--text-muted);">No terms</div>';
   }
 
   // ── Holiday mode indicator ─────────────────────────────────────
   const holidayBadge = inHoliday
-    ? `<div class="sidebar-holiday-indicator">🏖️ Holiday Mode</div>`
+    ? `<div class="sidebar-holiday-indicator"><i class="fa-solid fa-umbrella-beach"></i> Holiday Mode</div>`
     : '';
 
   // NOTE: yearData was previously from YEAR_TERM_DATA mock — now from real state
@@ -265,8 +265,6 @@ function renderBadgeRow() {
         <div class="badge-dropdown" id="year-dropdown">
             ${yearOptions}
         </div>
-            `).join('')}
-        </div>
 
         <span class="badge-pill" id="term-pill">
             <span class="dot ${inHoliday?'amber':'blue'}"></span>
@@ -275,8 +273,6 @@ function renderBadgeRow() {
         </span>
         <div class="badge-dropdown" id="term-dropdown">
             ${termOptions}
-                `;
-  }).join('')}
         </div>
 
         <button class="help-button" id="sidebar-help-btn">

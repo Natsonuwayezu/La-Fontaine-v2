@@ -1,0 +1,1242 @@
+[
+    {
+        "section": "👁️ VIEW: attendance_daily_summary",
+        "row_count": null,
+        "columns": "View Definition",
+        "primary_key": null,
+        "foreign_keys": null,
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": " SELECT a.date,\n    c.name AS class_name,\n    count(a.id) AS total_students,\n    count(\n        CASE\n            WHEN (a.status = 'Present'::text) THEN 1\n            ELSE NULL::integer\n        END) AS present,\n    count(\n        CASE\n            WHEN (a.status = 'Absent'::text) THEN 1\n            ELSE NULL::integer\n        END) AS absent,\n    count(\n        CASE\n            WHEN (a.status = 'Late'::text) THEN 1\n            ELSE NULL::integer\n        END) AS late,\n    count(\n        CASE\n            WHEN (a.status = 'Excused'::text) THEN 1\n            ELSE NULL::integer\n        END) AS excused,\n    round((((count(\n        CASE\n            WHEN (a.status = 'Present'::text) THEN 1\n            ELSE NULL::integer\n        END))::numeric / (count(a.id))::numeric) * (100)::numeric), 1) AS attendance_rate\n   FROM (attendance a\n     JOIN classes c ON ((c.id = a.class_id)))\n  WHERE (a.academic_year_id = ( SELECT academic_years.id\n           FROM academic_years\n          WHERE (academic_years.is_active = true)))\n  GROUP BY a.date, c.name\n  ORDER BY a.date DESC, c.name;"
+    },
+    {
+        "section": "👁️ VIEW: backup_summary",
+        "row_count": null,
+        "columns": "View Definition",
+        "primary_key": null,
+        "foreign_keys": null,
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": " SELECT to_char(backup_date, 'YYYY-MM-DD'::text) AS backup_day,\n    type,\n    count(*) AS count,\n    sum(size_bytes) AS total_size_bytes,\n    round(((sum(size_bytes) / (1024)::numeric) / (1024)::numeric), 2) AS total_size_mb,\n    count(\n        CASE\n            WHEN ((status)::text = 'completed'::text) THEN 1\n            ELSE NULL::integer\n        END) AS completed,\n    count(\n        CASE\n            WHEN ((status)::text = 'failed'::text) THEN 1\n            ELSE NULL::integer\n        END) AS failed\n   FROM backups\n  GROUP BY (to_char(backup_date, 'YYYY-MM-DD'::text)), type\n  ORDER BY (to_char(backup_date, 'YYYY-MM-DD'::text)) DESC;"
+    },
+    {
+        "section": "👁️ VIEW: payment_allocation_summary",
+        "row_count": null,
+        "columns": "View Definition",
+        "primary_key": null,
+        "foreign_keys": null,
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": " SELECT pa.payment_id,\n    p.receipt_number,\n    p.student_id,\n    (((s.first_name)::text || ' '::text) || (s.last_name)::text) AS student_name,\n    count(pa.id) AS fee_count,\n    sum(pa.amount) AS total_allocated,\n    min(pa.created_at) AS first_allocation,\n    max(pa.created_at) AS last_allocation\n   FROM ((payment_allocations pa\n     JOIN payments p ON ((p.id = pa.payment_id)))\n     JOIN students s ON ((s.id = p.student_id)))\n  GROUP BY pa.payment_id, p.receipt_number, p.student_id, s.first_name, s.last_name\n  ORDER BY pa.payment_id DESC;"
+    },
+    {
+        "section": "👁️ VIEW: school_settings_public",
+        "row_count": null,
+        "columns": "View Definition",
+        "primary_key": null,
+        "foreign_keys": null,
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": " SELECT id,\n    key,\n    value,\n    updated_at\n   FROM school_settings\n  WHERE ((key)::text <> ALL ((ARRAY['admin_password'::character varying, 'system_password'::character varying, 'secret_key'::character varying])::text[]));"
+    },
+    {
+        "section": "👁️ VIEW: session_fee_summary",
+        "row_count": null,
+        "columns": "View Definition",
+        "primary_key": null,
+        "foreign_keys": null,
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": " SELECT sf.id,\n    sf.student_id,\n    (((s.first_name)::text || ' '::text) || (s.last_name)::text) AS student_name,\n    s.student_code,\n    sf.session_class_id,\n    sc.name AS class_name,\n    sf.fee_category_id,\n    fc.name AS fee_category_name,\n    sf.holiday_session_id,\n    hs.name AS session_name,\n    sf.academic_year_id,\n    ay.name AS academic_year,\n    sf.amount,\n    sf.paid_amount,\n    (sf.amount - sf.paid_amount) AS balance,\n    sf.is_paid,\n    sf.is_waived,\n    sf.is_approved,\n    sf.due_date,\n    sf.notes,\n    sf.created_at,\n    sf.updated_at,\n    sf.approved_at,\n    sf.waived_at,\n    sf.waiver_reason\n   FROM (((((session_fees sf\n     LEFT JOIN students s ON ((s.id = sf.student_id)))\n     LEFT JOIN session_classes sc ON ((sc.id = sf.session_class_id)))\n     LEFT JOIN fee_categories fc ON ((fc.id = sf.fee_category_id)))\n     LEFT JOIN holiday_sessions hs ON ((hs.id = sf.holiday_session_id)))\n     LEFT JOIN academic_years ay ON ((ay.id = sf.academic_year_id)))\n  ORDER BY sf.created_at DESC;"
+    },
+    {
+        "section": "👁️ VIEW: session_fee_totals_by_class",
+        "row_count": null,
+        "columns": "View Definition",
+        "primary_key": null,
+        "foreign_keys": null,
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": " SELECT sf.session_class_id,\n    sc.name AS class_name,\n    sf.holiday_session_id,\n    hs.name AS session_name,\n    count(sf.id) AS total_fees,\n    sum(sf.amount) AS total_amount,\n    sum(sf.paid_amount) AS total_paid,\n    sum((sf.amount - sf.paid_amount)) AS total_balance,\n    count(\n        CASE\n            WHEN (sf.is_paid = true) THEN 1\n            ELSE NULL::integer\n        END) AS paid_count,\n    count(\n        CASE\n            WHEN (sf.is_waived = true) THEN 1\n            ELSE NULL::integer\n        END) AS waived_count,\n    count(\n        CASE\n            WHEN ((sf.is_approved = false) AND (sf.is_waived = false)) THEN 1\n            ELSE NULL::integer\n        END) AS pending_approval_count\n   FROM ((session_fees sf\n     LEFT JOIN session_classes sc ON ((sc.id = sf.session_class_id)))\n     LEFT JOIN holiday_sessions hs ON ((hs.id = sf.holiday_session_id)))\n  GROUP BY sf.session_class_id, sc.name, sf.holiday_session_id, hs.name\n  ORDER BY sf.holiday_session_id, sc.name;"
+    },
+    {
+        "section": "👁️ VIEW: session_fees_pending_approval",
+        "row_count": null,
+        "columns": "View Definition",
+        "primary_key": null,
+        "foreign_keys": null,
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": " SELECT sf.id,\n    sf.student_id,\n    (((s.first_name)::text || ' '::text) || (s.last_name)::text) AS student_name,\n    s.student_code,\n    sf.session_class_id,\n    sc.name AS class_name,\n    sf.fee_category_id,\n    fc.name AS fee_category_name,\n    sf.holiday_session_id,\n    hs.name AS session_name,\n    sf.amount,\n    sf.due_date,\n    sf.notes,\n    sf.created_at\n   FROM ((((session_fees sf\n     LEFT JOIN students s ON ((s.id = sf.student_id)))\n     LEFT JOIN session_classes sc ON ((sc.id = sf.session_class_id)))\n     LEFT JOIN fee_categories fc ON ((fc.id = sf.fee_category_id)))\n     LEFT JOIN holiday_sessions hs ON ((hs.id = sf.holiday_session_id)))\n  WHERE ((sf.is_approved = false) AND (sf.is_waived = false) AND (sf.is_paid = false))\n  ORDER BY sf.created_at;"
+    },
+    {
+        "section": "👁️ VIEW: student_balances",
+        "row_count": null,
+        "columns": "View Definition",
+        "primary_key": null,
+        "foreign_keys": null,
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": " SELECT s.id AS student_id,\n    s.first_name,\n    s.last_name,\n    s.student_code,\n    COALESCE(sum(sf.amount), (0)::numeric) AS total_fees,\n    COALESCE(sum(p.amount), (0)::numeric) AS total_paid,\n    (COALESCE(sum(sf.amount), (0)::numeric) - COALESCE(sum(p.amount), (0)::numeric)) AS balance\n   FROM (((students_old s\n     LEFT JOIN student_fees sf ON (((s.id = sf.student_id) AND (sf.is_waived = false))))\n     LEFT JOIN payment_allocations pa ON ((sf.id = pa.student_fee_id)))\n     LEFT JOIN payments p ON ((pa.payment_id = p.id)))\n  GROUP BY s.id, s.first_name, s.last_name, s.student_code;"
+    },
+    {
+        "section": "👁️ VIEW: teachers_public",
+        "row_count": null,
+        "columns": "View Definition",
+        "primary_key": null,
+        "foreign_keys": null,
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": " SELECT id,\n    first_name,\n    last_name,\n    username,\n    email,\n    phone,\n    role,\n    department,\n    is_active,\n    created_at,\n    updated_at\n   FROM teachers;"
+    },
+    {
+        "section": "👁️ VIEW: vw_current_year_students",
+        "row_count": null,
+        "columns": "View Definition",
+        "primary_key": null,
+        "foreign_keys": null,
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": " SELECT id,\n    student_code,\n    first_name,\n    last_name,\n    class_id,\n    gender,\n    date_of_birth,\n    guardian_name,\n    guardian_phone,\n    guardian_email,\n    address,\n    enrollment_date,\n    status,\n    family_id,\n    discount_amount,\n    is_deleted,\n    created_at,\n    updated_at,\n    nationality,\n    notes,\n    archived_at,\n    transfer_destination,\n    transfer_notes,\n    academic_year_id,\n    promoted_at,\n    repeated_at,\n    graduated_at\n   FROM students_old s\n  WHERE ((academic_year_id = ( SELECT academic_years.id\n           FROM academic_years\n          WHERE (academic_years.is_active = true))) AND ((status)::text = 'Active'::text) AND (is_deleted = false));"
+    },
+    {
+        "section": "👁️ VIEW: vw_marks_by_year",
+        "row_count": null,
+        "columns": "View Definition",
+        "primary_key": null,
+        "foreign_keys": null,
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": " SELECT m.id,\n    m.assessment_id,\n    m.student_id,\n    m.score,\n    m.entered_by,\n    m.entered_at,\n    m.updated_at,\n    m.academic_year_id,\n    m.term_id,\n    m.is_archived,\n    m.archived_at,\n    m.archived_to,\n    a.assessment_name,\n    a.max_marks,\n    a.assessment_type,\n    ay.name AS academic_year_name,\n    t.name AS term_name\n   FROM (((marks m\n     LEFT JOIN assessments a ON ((m.assessment_id = a.id)))\n     LEFT JOIN academic_years ay ON ((m.academic_year_id = ay.id)))\n     LEFT JOIN terms t ON ((m.term_id = t.id)))\n  WHERE (m.is_archived = false);"
+    },
+    {
+        "section": "📊 TABLE: academic_years",
+        "row_count": 1,
+        "columns": "id (bigint NOT NULL, name (character varying, is_active (boolean, start_date (date, end_date (date, created_at (timestamp with time zone, updated_at (timestamp with time zone, is_locked (boolean, locked_at (timestamp with time zone, locked_by (integer",
+        "primary_key": "id",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18568_1_not_null: id IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: activity_logs",
+        "row_count": 0,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('activity_logs_id_seq'::regclass), user_id (bigint, user_role (character varying, action (character varying, entity_type (character varying, entity_id (bigint, details (jsonb, ip_address (character varying, created_at (timestamp with time zone",
+        "primary_key": "id",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18575_1_not_null: id IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: announcements",
+        "row_count": 0,
+        "columns": "id (integer NOT NULL, type (text, recipients (text, title (text, message (text, status (text, created_by (integer, created_at (timestamp without time zone, is_read (boolean, read_at (timestamp without time zone, specific_teacher_id (integer, term_id (integer, archived_at (timestamp without time zone, archived_by (integer, academic_year_id (integer NOT NULL",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; term_id → terms.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18582_15_not_null: academic_year_id IS NOT NULL; 2200_18582_1_not_null: id IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: assessments",
+        "row_count": 514,
+        "columns": "id (bigint NOT NULL, class_id (bigint NOT NULL, subject_id (bigint NOT NULL, term_id (bigint NOT NULL, assessment_type (character varying NOT NULL, assessment_name (character varying NOT NULL, max_marks (numeric NOT NULL, due_date (date, recorded_at (date, is_locked (boolean, created_by (bigint, created_at (timestamp with time zone, updated_at (timestamp with time zone, academic_year_id (integer NOT NULL, entered_by (integer, date (date",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; class_id → classes.id; created_by → teachers.id; entered_by → teachers.id; subject_id → subjects.id; term_id → terms.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18589_14_not_null: academic_year_id IS NOT NULL; 2200_18589_1_not_null: id IS NOT NULL; 2200_18589_2_not_null: class_id IS NOT NULL; 2200_18589_3_not_null: subject_id IS NOT NULL; 2200_18589_4_not_null: term_id IS NOT NULL; 2200_18589_5_not_null: assessment_type IS NOT NULL; 2200_18589_6_not_null: assessment_name IS NOT NULL; 2200_18589_7_not_null: max_marks IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: attendance",
+        "row_count": 0,
+        "columns": "id (bigint NOT NULL, class_id (bigint NOT NULL, student_id (bigint NOT NULL, date (date NOT NULL, status (text NOT NULL, reason (text, notes (text, recorded_by (bigint, created_at (timestamp with time zone, updated_at (timestamp with time zone, academic_year_id (integer NOT NULL, term_id (integer NOT NULL, is_excused (boolean DEFAULT false",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; class_id → classes.id; recorded_by → teachers.id; student_id → students.id; term_id → terms.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18596_11_not_null: academic_year_id IS NOT NULL; 2200_18596_12_not_null: term_id IS NOT NULL; 2200_18596_1_not_null: id IS NOT NULL; 2200_18596_2_not_null: class_id IS NOT NULL; 2200_18596_3_not_null: student_id IS NOT NULL; 2200_18596_4_not_null: date IS NOT NULL; 2200_18596_5_not_null: status IS NOT NULL; chk_attendance_status: (status = ANY (ARRAY['Present'::text, 'Absent'::text, 'Late'::text, 'Excused'::text, 'Holiday'::text]))",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: audit_log_entries",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: backups",
+        "row_count": 0,
+        "columns": "id (bigint NOT NULL, filename (character varying NOT NULL, size_bytes (bigint, backup_date (timestamp with time zone NOT NULL, type (character varying NOT NULL, status (character varying NOT NULL, created_at (timestamp with time zone NOT NULL, created_by (bigint, description (text, location (text, checksum (text",
+        "primary_key": "id",
+        "foreign_keys": "created_by → teachers.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18603_1_not_null: id IS NOT NULL; 2200_18603_2_not_null: filename IS NOT NULL; 2200_18603_4_not_null: backup_date IS NOT NULL; 2200_18603_5_not_null: type IS NOT NULL; 2200_18603_6_not_null: status IS NOT NULL; 2200_18603_7_not_null: created_at IS NOT NULL; chk_backups_status: ((status)::text = ANY ((ARRAY['pending'::character varying, 'completed'::character varying, 'failed'::character varying, 'restored'::character varying])::text[])); chk_backups_type: ((type)::text = ANY ((ARRAY['full'::character varying, 'partial'::character varying, 'auto'::character varying, 'manual'::character varying])::text[]))",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: buckets",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: buckets_analytics",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: buckets_vectors",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: class_enrollments",
+        "row_count": 0,
+        "columns": "id (integer NOT NULL DEFAULT nextval('class_enrollments_id_seq'::regclass), student_id (integer NOT NULL, class_id (integer NOT NULL, academic_year_id (integer NOT NULL, term_id (integer, enrollment_date (date NOT NULL DEFAULT CURRENT_DATE, is_active (boolean DEFAULT true, promoted_from_id (integer, promoted_to_id (integer, status (character varying DEFAULT 'Active'::character varying max:20, notes (text, created_at (timestamp without time zone DEFAULT now(), updated_at (timestamp without time zone DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; class_id → classes.id; student_id → students.id; term_id → terms.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_35733_1_not_null: id IS NOT NULL; 2200_35733_2_not_null: student_id IS NOT NULL; 2200_35733_3_not_null: class_id IS NOT NULL; 2200_35733_4_not_null: academic_year_id IS NOT NULL; 2200_35733_6_not_null: enrollment_date IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: classes",
+        "row_count": 9,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('classes_id_seq'::regclass), name (character varying NOT NULL, code (character varying, level (character varying NOT NULL, sort_order (integer, capacity (integer, is_active (boolean, created_at (timestamp with time zone, updated_at (timestamp with time zone, class_teacher_id (bigint, academic_year_id (integer NOT NULL",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; class_teacher_id → teachers.id",
+        "unique_constraints": "academic_year_id, name",
+        "check_constraints": "2200_18610_11_not_null: academic_year_id IS NOT NULL; 2200_18610_1_not_null: id IS NOT NULL; 2200_18610_2_not_null: name IS NOT NULL; 2200_18610_4_not_null: level IS NOT NULL; chk_classes_level: ((level)::text = ANY ((ARRAY['Nursery'::character varying, 'Primary'::character varying])::text[]))",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: custom_oauth_providers",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: discount_rules",
+        "row_count": 2,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('discount_rules_id_seq'::regclass), name (character varying, discount_type (character varying, discount_value (numeric, target_type (character varying, valid_until (date, is_active (boolean, created_at (timestamp without time zone, academic_year_id (integer, description (text, conditions (jsonb, priority (integer DEFAULT 0, max_discount (numeric, applies_to (character varying max:50, created_by (bigint, updated_at (timestamp without time zone DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; created_by → teachers.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18617_1_not_null: id IS NOT NULL; chk_discount_rules_applies: ((applies_to)::text = ANY ((ARRAY['all'::character varying, 'nursery'::character varying, 'primary'::character varying, 'specific_classes'::character varying])::text[])); chk_discount_rules_target: ((target_type)::text = ANY ((ARRAY['student'::character varying, 'family'::character varying, 'fee_category'::character varying, 'class'::character varying])::text[])); chk_discount_rules_type: ((discount_type)::text = ANY ((ARRAY['percentage'::character varying, 'fixed'::character varying, 'free'::character varying])::text[]))",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: discounts",
+        "row_count": 3,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('discounts_id_seq'::regclass), name (character varying NOT NULL max:100, description (text, student_id (bigint, family_id (bigint, fee_category_id (bigint, discount_type (character varying NOT NULL max:20, discount_value (numeric NOT NULL, amount (numeric, is_recurring (boolean DEFAULT false, recurrence_type (character varying max:20, start_date (date, end_date (date, academic_year_id (integer, reason (text, approved_by (bigint, approved_at (timestamp without time zone, is_active (boolean DEFAULT true, created_at (timestamp without time zone DEFAULT now(), updated_at (timestamp without time zone DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; approved_by → teachers.id; family_id → families.id; fee_category_id → fee_categories.id; student_id → students.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_33757_1_not_null: id IS NOT NULL; 2200_33757_2_not_null: name IS NOT NULL; 2200_33757_7_not_null: discount_type IS NOT NULL; 2200_33757_8_not_null: discount_value IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: families",
+        "row_count": 21,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('families_id_seq'::regclass), family_code (character varying NOT NULL max:50, total_children (integer DEFAULT 0, active_children (integer DEFAULT 0, notes (text, created_at (timestamp without time zone DEFAULT now(), updated_at (timestamp without time zone DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "None",
+        "unique_constraints": "family_code",
+        "check_constraints": "2200_33712_1_not_null: id IS NOT NULL; 2200_33712_2_not_null: family_code IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: fee_amounts",
+        "row_count": 225,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('fee_amounts_id_seq'::regclass), fee_category_id (bigint, class_id (bigint, amount (numeric, academic_year_id (bigint, created_at (timestamp with time zone, term_id (bigint, updated_at (timestamp with time zone DEFAULT now(), created_by (bigint",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; class_id → classes.id; created_by → teachers.id; fee_category_id → fee_categories.id; term_id → terms.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18631_1_not_null: id IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: fee_approval_requests",
+        "row_count": 37,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('fee_approval_requests_id_seq'::regclass), student_id (bigint NOT NULL, fee_category_id (bigint NOT NULL, amount (numeric NOT NULL, reason (character varying max:200, status (character varying NOT NULL DEFAULT 'pending'::character varying max:50, created_at (timestamp without time zone DEFAULT now(), reviewed_by (bigint, reviewed_at (timestamp without time zone, notes (text, academic_year_id (integer, term_id (integer, created_by (integer",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; created_by → teachers.id; fee_category_id → fee_categories.id; reviewed_by → teachers.id; student_id → students.id; term_id → terms.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_35166_1_not_null: id IS NOT NULL; 2200_35166_2_not_null: student_id IS NOT NULL; 2200_35166_3_not_null: fee_category_id IS NOT NULL; 2200_35166_4_not_null: amount IS NOT NULL; 2200_35166_6_not_null: status IS NOT NULL; chk_fee_approval_requests_amount: (amount > (0)::numeric); chk_fee_approval_requests_status: ((status)::text = ANY ((ARRAY['pending'::character varying, 'approved'::character varying, 'rejected'::character varying])::text[]))",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: fee_auto_apply_notifications",
+        "row_count": 0,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('fee_auto_apply_notifications_id_seq'::regclass), student_id (bigint NOT NULL, fee_category_id (bigint NOT NULL, amount (numeric NOT NULL, reason (character varying max:200, status (character varying NOT NULL DEFAULT 'pending'::character varying max:50, created_at (timestamp without time zone DEFAULT now(), reviewed_by (bigint, reviewed_at (timestamp without time zone, academic_year_id (integer, term_id (integer, created_by (integer",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; created_by → teachers.id; fee_category_id → fee_categories.id; reviewed_by → teachers.id; student_id → students.id; term_id → terms.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_35140_1_not_null: id IS NOT NULL; 2200_35140_2_not_null: student_id IS NOT NULL; 2200_35140_3_not_null: fee_category_id IS NOT NULL; 2200_35140_4_not_null: amount IS NOT NULL; 2200_35140_6_not_null: status IS NOT NULL; chk_fee_auto_apply_notifications_amount: (amount > (0)::numeric); chk_fee_auto_apply_notifications_status: ((status)::text = ANY ((ARRAY['pending'::character varying, 'approved'::character varying, 'rejected'::character varying])::text[]))",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: fee_categories",
+        "row_count": 11,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('fee_categories_id_seq'::regclass), name (character varying NOT NULL, description (text, reset_frequency (character varying NOT NULL, is_mandatory (boolean DEFAULT false, is_active (boolean DEFAULT true, sort_order (integer, created_at (timestamp with time zone, updated_at (timestamp with time zone, apply_to (character varying, class_id (integer, fee_type (character varying NOT NULL, is_monthly (boolean, version (integer, previous_amount (numeric, deleted_at (timestamp without time zone, deleted_by (integer, academic_year_id (integer NOT NULL, created_by (bigint",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; class_id → classes.id; created_by → teachers.id; deleted_by → teachers.id",
+        "unique_constraints": "academic_year_id, name",
+        "check_constraints": "2200_18638_13_not_null: fee_type IS NOT NULL; 2200_18638_19_not_null: academic_year_id IS NOT NULL; 2200_18638_1_not_null: id IS NOT NULL; 2200_18638_2_not_null: name IS NOT NULL; 2200_18638_4_not_null: reset_frequency IS NOT NULL; chk_fee_categories_apply_to: ((apply_to)::text = ANY ((ARRAY['all'::character varying, 'class'::character varying, 'specific'::character varying])::text[])); chk_fee_categories_fee_type: ((fee_type)::text = ANY ((ARRAY['Activity'::character varying, 'Tuition'::character varying, 'Academic'::character varying, 'Insurance'::character varying, 'Uniform'::character varying, 'Transport'::character varying, 'Administrative'::character varying, 'Supplies'::character varying, 'Event'::character varying, 'Meals'::character varying])::text[])); chk_fee_categories_reset_frequency: ((reset_frequency)::text = ANY ((ARRAY['termly'::character varying, 'monthly'::character varying, 'annual'::character varying, 'one_time'::character varying])::text[]))",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: fee_templates",
+        "row_count": 0,
+        "columns": "id (bigint NOT NULL, name (character varying NOT NULL, description (text, fees (jsonb NOT NULL, fees_count (integer DEFAULT 0, created_at (timestamp without time zone, created_by (bigint, academic_year_id (integer",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; created_by → teachers.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18645_1_not_null: id IS NOT NULL; 2200_18645_2_not_null: name IS NOT NULL; 2200_18645_4_not_null: fees IS NOT NULL; chk_fee_templates_fees_count: (fees_count >= 0)",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: fee_waivers",
+        "row_count": 0,
+        "columns": "id (integer NOT NULL DEFAULT nextval('fee_waivers_id_seq'::regclass), student_id (integer NOT NULL, student_fee_id (integer NOT NULL, amount_waived (numeric NOT NULL, reason (text, waiver_type (character varying NOT NULL DEFAULT 'full'::character varying max:20, approved_by (integer, approved_at (timestamp with time zone DEFAULT now(), academic_year_id (integer, term_id (integer, created_at (timestamp with time zone DEFAULT now(), created_by (integer, is_active (boolean DEFAULT true, notes (text",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; approved_by → teachers.id; created_by → teachers.id; student_fee_id → student_fees.id; student_id → students.id; term_id → terms.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18176_1_not_null: id IS NOT NULL; 2200_18176_2_not_null: student_id IS NOT NULL; 2200_18176_3_not_null: student_fee_id IS NOT NULL; 2200_18176_4_not_null: amount_waived IS NOT NULL; 2200_18176_6_not_null: waiver_type IS NOT NULL; chk_fee_waivers_amount: (amount_waived > (0)::numeric); chk_fee_waivers_type: ((waiver_type)::text = ANY ((ARRAY['full'::character varying, 'partial'::character varying])::text[]))",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: flow_state",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: grading_scale",
+        "row_count": 7,
+        "columns": "id (bigint NOT NULL, grade (character varying NOT NULL, min_percentage (integer NOT NULL, max_percentage (integer NOT NULL, description (character varying, color (character varying, sort_order (integer DEFAULT 0, created_at (timestamp with time zone, academic_year_id (integer, updated_at (timestamp with time zone DEFAULT now(), is_active (boolean DEFAULT true",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id",
+        "unique_constraints": "academic_year_id, grade",
+        "check_constraints": "2200_18652_1_not_null: id IS NOT NULL; 2200_18652_2_not_null: grade IS NOT NULL; 2200_18652_3_not_null: min_percentage IS NOT NULL; 2200_18652_4_not_null: max_percentage IS NOT NULL; chk_grading_scale_grade_not_empty: ((grade IS NOT NULL) AND ((grade)::text <> ''::text)); chk_grading_scale_max_range: ((max_percentage >= 0) AND (max_percentage <= 100)); chk_grading_scale_min_max: (min_percentage < max_percentage); chk_grading_scale_min_range: ((min_percentage >= 0) AND (min_percentage <= 100))",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: guardians",
+        "row_count": 262,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('guardians_id_seq'::regclass), family_id (bigint, guardian_type (character varying NOT NULL max:20, first_name (character varying NOT NULL max:100, last_name (character varying NOT NULL max:100, national_id (character varying max:20, phone (character varying max:20, email (character varying max:100, occupation (character varying max:100, employer (character varying max:200, province (character varying max:100, district (character varying max:100, sector (character varying max:100, cell (character varying max:100, village (character varying max:100, is_primary (boolean DEFAULT false, is_active (boolean DEFAULT true, notes (text, created_at (timestamp without time zone DEFAULT now(), updated_at (timestamp without time zone DEFAULT now(), student_code (character varying max:20",
+        "primary_key": "id",
+        "foreign_keys": "None",
+        "unique_constraints": "national_id",
+        "check_constraints": "2200_33681_1_not_null: id IS NOT NULL; 2200_33681_3_not_null: guardian_type IS NOT NULL; 2200_33681_4_not_null: first_name IS NOT NULL; 2200_33681_5_not_null: last_name IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: holiday_sessions",
+        "row_count": 6,
+        "columns": "id (integer NOT NULL DEFAULT nextval('holiday_sessions_id_seq'::regclass), academic_year_id (integer NOT NULL, term_id (integer, name (character varying NOT NULL max:100, session_type (character varying NOT NULL max:50, start_date (date NOT NULL, end_date (date NOT NULL, is_active (boolean DEFAULT false, is_holiday_school (boolean DEFAULT false, description (text, created_at (timestamp without time zone DEFAULT now(), updated_at (timestamp without time zone DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; term_id → terms.id",
+        "unique_constraints": "academic_year_id, session_type, term_id",
+        "check_constraints": "2200_33587_1_not_null: id IS NOT NULL; 2200_33587_2_not_null: academic_year_id IS NOT NULL; 2200_33587_4_not_null: name IS NOT NULL; 2200_33587_5_not_null: session_type IS NOT NULL; 2200_33587_6_not_null: start_date IS NOT NULL; 2200_33587_7_not_null: end_date IS NOT NULL; chk_holiday_sessions_dates: (end_date >= start_date); chk_holiday_sessions_type: ((session_type)::text = ANY ((ARRAY['Term1_Holiday'::character varying, 'Term2_Holiday'::character varying, 'Term3_Holiday'::character varying, 'Public_Holiday'::character varying])::text[]))",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: holidays",
+        "row_count": 15,
+        "columns": "id (integer NOT NULL DEFAULT nextval('holidays_id_seq'::regclass), name (character varying NOT NULL, start_date (date NOT NULL, end_date (date NOT NULL, type (character varying DEFAULT 'Public Holiday'::character varying, description (text, academic_year_id (integer NOT NULL, created_at (timestamp without time zone, updated_at (timestamp without time zone DEFAULT now(), is_active (boolean DEFAULT true, term_id (integer",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; term_id → terms.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18659_1_not_null: id IS NOT NULL; 2200_18659_2_not_null: name IS NOT NULL; 2200_18659_3_not_null: start_date IS NOT NULL; 2200_18659_4_not_null: end_date IS NOT NULL; 2200_18659_7_not_null: academic_year_id IS NOT NULL; chk_holidays_dates: (end_date >= start_date); chk_holidays_type: ((type)::text = ANY ((ARRAY['Public Holiday'::character varying, 'Vacation'::character varying, 'Event'::character varying])::text[]))",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: identities",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: instances",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: marks",
+        "row_count": 0,
+        "columns": "id (bigint NOT NULL, assessment_id (bigint NOT NULL, student_id (bigint NOT NULL, score (numeric NOT NULL, entered_by (bigint, entered_at (timestamp with time zone DEFAULT now(), updated_at (timestamp with time zone, academic_year_id (integer NOT NULL, term_id (integer NOT NULL, is_archived (boolean DEFAULT false, archived_at (timestamp without time zone, archived_to (integer, enrollment_id (bigint",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; archived_to → academic_years.id; assessment_id → assessments.id; enrollment_id → student_class_history.id; entered_by → teachers.id; student_id → students.id; term_id → terms.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18666_1_not_null: id IS NOT NULL; 2200_18666_2_not_null: assessment_id IS NOT NULL; 2200_18666_3_not_null: student_id IS NOT NULL; 2200_18666_4_not_null: score IS NOT NULL; 2200_18666_8_not_null: academic_year_id IS NOT NULL; 2200_18666_9_not_null: term_id IS NOT NULL; chk_marks_score_positive: (score >= (0)::numeric)",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: marks_archive",
+        "row_count": 0,
+        "columns": "id (integer NOT NULL DEFAULT nextval('marks_archive_id_seq'::regclass), original_mark_id (integer NOT NULL, student_id (bigint NOT NULL, assessment_id (bigint NOT NULL, score (numeric NOT NULL, academic_year_id (bigint NOT NULL, term_id (bigint, archived_at (timestamp without time zone NOT NULL DEFAULT now(), archived_by (bigint",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; archived_by → teachers.id; assessment_id → assessments.id; student_id → students.id; term_id → terms.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_19399_1_not_null: id IS NOT NULL; 2200_19399_2_not_null: original_mark_id IS NOT NULL; 2200_19399_3_not_null: student_id IS NOT NULL; 2200_19399_4_not_null: assessment_id IS NOT NULL; 2200_19399_5_not_null: score IS NOT NULL; 2200_19399_6_not_null: academic_year_id IS NOT NULL; 2200_19399_8_not_null: archived_at IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: messages",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: mfa_amr_claims",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: mfa_challenges",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: mfa_factors",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: migrations",
+        "row_count": 2,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: notifications",
+        "row_count": 0,
+        "columns": "id (integer NOT NULL DEFAULT nextval('notifications_id_seq'::regclass), recipient_id (bigint NOT NULL, sender_id (bigint, type (character varying NOT NULL max:30, title (character varying max:200, message (text NOT NULL, action_url (character varying max:500, is_read (boolean DEFAULT false, read_at (timestamp with time zone, created_at (timestamp with time zone NOT NULL DEFAULT now(), recipient_role (character varying max:20, is_archived (boolean DEFAULT false, academic_year_id (integer, term_id (integer, sender_role (character varying max:20, archived_at (timestamp without time zone, category (character varying DEFAULT 'system'::character varying max:50, created_by (bigint",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; created_by → teachers.id; recipient_id → teachers.id; sender_id → teachers.id; term_id → terms.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18202_10_not_null: created_at IS NOT NULL; 2200_18202_1_not_null: id IS NOT NULL; 2200_18202_2_not_null: recipient_id IS NOT NULL; 2200_18202_4_not_null: type IS NOT NULL; 2200_18202_6_not_null: message IS NOT NULL; chk_notifications_category: ((category)::text = ANY ((ARRAY['system'::character varying, 'fee'::character varying, 'academic'::character varying, 'attendance'::character varying, 'payment'::character varying, 'announcement'::character varying, 'reminder'::character varying])::text[])); chk_notifications_type: ((type)::text = ANY ((ARRAY['info'::character varying, 'warning'::character varying, 'success'::character varying, 'error'::character varying, 'system'::character varying, 'fee'::character varying, 'academic'::character varying, 'attendance'::character varying])::text[]))",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: oauth_authorizations",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: oauth_client_states",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: oauth_clients",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: oauth_consents",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: objects",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: one_time_tokens",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: payment_allocations",
+        "row_count": 0,
+        "columns": "id (bigint NOT NULL, payment_id (bigint NOT NULL, student_fee_id (bigint NOT NULL, amount (numeric NOT NULL, created_at (timestamp with time zone NOT NULL DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "payment_id → payments.id; student_fee_id → student_fees.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18673_1_not_null: id IS NOT NULL; 2200_18673_2_not_null: payment_id IS NOT NULL; 2200_18673_3_not_null: student_fee_id IS NOT NULL; 2200_18673_4_not_null: amount IS NOT NULL; 2200_18673_5_not_null: created_at IS NOT NULL; chk_payment_allocations_amount_positive: (amount > (0)::numeric)",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: payment_reversals",
+        "row_count": 0,
+        "columns": "id (bigint NOT NULL, original_payment_id (bigint NOT NULL, receipt_number (character varying, amount (numeric NOT NULL, student_id (bigint NOT NULL, reversal_date (timestamp without time zone NOT NULL, reversed_by (bigint NOT NULL, reason (text NOT NULL, created_at (timestamp without time zone NOT NULL DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "original_payment_id → payments.id; reversed_by → teachers.id; student_id → students.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18680_1_not_null: id IS NOT NULL; 2200_18680_2_not_null: original_payment_id IS NOT NULL; 2200_18680_4_not_null: amount IS NOT NULL; 2200_18680_5_not_null: student_id IS NOT NULL; 2200_18680_6_not_null: reversal_date IS NOT NULL; 2200_18680_7_not_null: reversed_by IS NOT NULL; 2200_18680_8_not_null: reason IS NOT NULL; 2200_18680_9_not_null: created_at IS NOT NULL; chk_payment_reversals_amount_positive: (amount > (0)::numeric)",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: payments",
+        "row_count": 0,
+        "columns": "id (bigint NOT NULL, receipt_number (character varying, student_id (bigint NOT NULL, amount (numeric NOT NULL, payment_date (date NOT NULL, payment_method (character varying NOT NULL, reference_number (character varying, notes (text, recorded_by (bigint, created_at (timestamp with time zone NOT NULL DEFAULT now(), reference (text, is_credit_payment (boolean, is_credit_addition (boolean, academic_year_id (integer NOT NULL, term_id (integer, is_reversed (boolean DEFAULT false, reversed_at (timestamp without time zone, reversed_by (bigint, reversal_reason (text",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; recorded_by → teachers.id; reversed_by → teachers.id; student_id → students.id; term_id → terms.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18687_10_not_null: created_at IS NOT NULL; 2200_18687_14_not_null: academic_year_id IS NOT NULL; 2200_18687_1_not_null: id IS NOT NULL; 2200_18687_3_not_null: student_id IS NOT NULL; 2200_18687_4_not_null: amount IS NOT NULL; 2200_18687_5_not_null: payment_date IS NOT NULL; 2200_18687_6_not_null: payment_method IS NOT NULL; chk_payments_amount_positive: (amount > (0)::numeric); chk_payments_method: ((payment_method)::text = ANY ((ARRAY['Cash'::character varying, 'Mobile-Money'::character varying, 'Bank Transfer'::character varying, 'Cheque'::character varying, 'Credit Note'::character varying, 'Credit Balance'::character varying])::text[]))",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: promotion_batches",
+        "row_count": 0,
+        "columns": "id (integer NOT NULL DEFAULT nextval('promotion_batches_id_seq'::regclass), batch_name (character varying NOT NULL DEFAULT 'Promotion Batch'::character varying max:200, from_year_id (bigint NOT NULL, to_year_id (bigint NOT NULL, promoted_count (integer DEFAULT 0, graduated_count (integer DEFAULT 0, repeated_count (integer DEFAULT 0, executed_by (bigint NOT NULL, executed_at (timestamp with time zone DEFAULT now(), can_rollback (boolean DEFAULT true",
+        "primary_key": "id",
+        "foreign_keys": "executed_by → teachers.id; from_year_id → academic_years.id; to_year_id → academic_years.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18238_1_not_null: id IS NOT NULL; 2200_18238_2_not_null: batch_name IS NOT NULL; 2200_18238_3_not_null: from_year_id IS NOT NULL; 2200_18238_4_not_null: to_year_id IS NOT NULL; 2200_18238_8_not_null: executed_by IS NOT NULL; chk_promotion_batches_graduated_positive: (graduated_count >= 0); chk_promotion_batches_promoted_positive: (promoted_count >= 0); chk_promotion_batches_repeated_positive: (repeated_count >= 0); chk_promotion_batches_years_different: (from_year_id <> to_year_id)",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: promotion_thresholds",
+        "row_count": 5,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('promotion_thresholds_id_seq'::regclass), class_id (bigint NOT NULL, academic_year_id (integer NOT NULL, promotion_threshold (numeric NOT NULL, subject_threshold (numeric, max_failed_subjects (integer DEFAULT 2, second_sitting_allowed (boolean DEFAULT true, second_sitting_subject_threshold (numeric DEFAULT 40, graduation_certificate (boolean DEFAULT false, certificate_minimum (numeric DEFAULT 30, created_by (bigint, updated_by (bigint, created_at (timestamp without time zone DEFAULT now(), updated_at (timestamp without time zone DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; class_id → classes.id; created_by → teachers.id; updated_by → teachers.id",
+        "unique_constraints": "academic_year_id, class_id",
+        "check_constraints": "2200_35505_1_not_null: id IS NOT NULL; 2200_35505_2_not_null: class_id IS NOT NULL; 2200_35505_3_not_null: academic_year_id IS NOT NULL; 2200_35505_5_not_null: promotion_threshold IS NOT NULL; chk_promotion_thresholds_certificate: ((certificate_minimum IS NULL) OR ((certificate_minimum >= (0)::numeric) AND (certificate_minimum <= (100)::numeric))); chk_promotion_thresholds_max_failed: (max_failed_subjects >= 0); chk_promotion_thresholds_second_sitting: ((second_sitting_subject_threshold IS NULL) OR ((second_sitting_subject_threshold >= (0)::numeric) AND (second_sitting_subject_threshold <= (100)::numeric))); chk_promotion_thresholds_subject: ((subject_threshold IS NULL) OR ((subject_threshold >= (0)::numeric) AND (subject_threshold <= (100)::numeric))); chk_promotion_thresholds_values: ((promotion_threshold >= (0)::numeric) AND (promotion_threshold <= (100)::numeric))",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: promotions",
+        "row_count": 0,
+        "columns": "id (bigint NOT NULL, batch_name (text NOT NULL, promotion_date (date NOT NULL, promoted_count (integer, graduated_count (integer, performed_by (bigint NOT NULL, details (text, rolled_back (boolean, rolled_back_by (bigint, rolled_back_at (timestamp without time zone, created_at (timestamp without time zone NOT NULL DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "performed_by → teachers.id; rolled_back_by → teachers.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18694_11_not_null: created_at IS NOT NULL; 2200_18694_1_not_null: id IS NOT NULL; 2200_18694_2_not_null: batch_name IS NOT NULL; 2200_18694_3_not_null: promotion_date IS NOT NULL; 2200_18694_6_not_null: performed_by IS NOT NULL; chk_promotions_graduated_positive: (graduated_count >= 0); chk_promotions_promoted_positive: (promoted_count >= 0)",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: receipt_snapshots",
+        "row_count": 0,
+        "columns": "id (integer NOT NULL DEFAULT nextval('receipt_snapshots_id_seq'::regclass), receipt_number (text NOT NULL, student_id (bigint, student_name (text NOT NULL, student_first_name (text NOT NULL DEFAULT ''::text, student_last_name (text NOT NULL DEFAULT ''::text, student_code (text NOT NULL, class_name (text NOT NULL DEFAULT ''::text, guardian_name (text, guardian_phone (text, term_id (bigint, term_name (text NOT NULL DEFAULT ''::text, academic_year_id (bigint, year_name (text NOT NULL DEFAULT ''::text, amount (numeric NOT NULL, amount_in_words (text NOT NULL, payment_method (text NOT NULL, payment_date (date NOT NULL, reference_number (text, notes (text, recorded_by (text, fees (jsonb NOT NULL DEFAULT '[]'::jsonb, line_items (jsonb NOT NULL DEFAULT '[]'::jsonb, total_fees (numeric DEFAULT 0, total_paid (numeric DEFAULT 0, outstanding_balance (numeric DEFAULT 0, school_name (text NOT NULL DEFAULT 'ECOLE LA FONTAINE'::text, school_address (text DEFAULT 'Rubavu, Rwanda'::text, school_phone (text, school_email (text, school_logo (text, head_teacher_name (text, generated_at (timestamp with time zone DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; student_id → students.id; term_id → terms.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_25472_12_not_null: term_name IS NOT NULL; 2200_25472_14_not_null: year_name IS NOT NULL; 2200_25472_15_not_null: amount IS NOT NULL; 2200_25472_16_not_null: amount_in_words IS NOT NULL; 2200_25472_17_not_null: payment_method IS NOT NULL; 2200_25472_18_not_null: payment_date IS NOT NULL; 2200_25472_1_not_null: id IS NOT NULL; 2200_25472_22_not_null: fees IS NOT NULL; 2200_25472_23_not_null: line_items IS NOT NULL; 2200_25472_27_not_null: school_name IS NOT NULL; 2200_25472_2_not_null: receipt_number IS NOT NULL; 2200_25472_4_not_null: student_name IS NOT NULL; 2200_25472_5_not_null: student_first_name IS NOT NULL; 2200_25472_6_not_null: student_last_name IS NOT NULL; 2200_25472_7_not_null: student_code IS NOT NULL; 2200_25472_8_not_null: class_name IS NOT NULL; chk_receipt_snapshots_amount_positive: (amount > (0)::numeric); chk_receipt_snapshots_total_fees: (total_fees >= (0)::numeric); chk_receipt_snapshots_total_paid: (total_paid >= (0)::numeric)",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: refresh_tokens",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: reminders",
+        "row_count": 0,
+        "columns": "id (bigint NOT NULL, title (character varying NOT NULL, description (text, due_date (date NOT NULL, priority (character varying, completed (boolean DEFAULT false, related_type (character varying, related_id (bigint, user_id (bigint NOT NULL, created_at (timestamp without time zone NOT NULL DEFAULT now(), updated_at (timestamp without time zone DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "user_id → teachers.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18708_10_not_null: created_at IS NOT NULL; 2200_18708_1_not_null: id IS NOT NULL; 2200_18708_2_not_null: title IS NOT NULL; 2200_18708_4_not_null: due_date IS NOT NULL; 2200_18708_9_not_null: user_id IS NOT NULL; chk_reminders_priority: ((priority)::text = ANY ((ARRAY['Low'::character varying, 'Medium'::character varying, 'High'::character varying, 'Urgent'::character varying])::text[])); chk_reminders_related_type: ((related_type)::text = ANY ((ARRAY['student'::character varying, 'class'::character varying, 'assessment'::character varying, 'payment'::character varying, 'fee'::character varying, 'teacher'::character varying, 'attendance'::character varying, 'exam'::character varying])::text[]))",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: report_card_snapshots",
+        "row_count": 0,
+        "columns": "id (integer NOT NULL DEFAULT nextval('report_card_snapshots_id_seq'::regclass), student_id (bigint NOT NULL, student_name (text NOT NULL, student_first_name (text NOT NULL DEFAULT ''::text, student_last_name (text NOT NULL DEFAULT ''::text, student_code (text NOT NULL, student_dob (date, student_gender (text, guardian_name (text, guardian_phone (text, class_id (bigint, class_name (text NOT NULL DEFAULT ''::text, term_id (bigint NOT NULL, term_name (text NOT NULL DEFAULT ''::text, term_number (smallint, academic_year_id (bigint NOT NULL, year_name (text NOT NULL DEFAULT ''::text, phase (text NOT NULL, is_nursery (boolean DEFAULT false, subjects (jsonb NOT NULL DEFAULT '[]'::jsonb, totals (jsonb NOT NULL DEFAULT '{}'::jsonb, annual_data (jsonb, rank (text, rank_number (smallint, class_size (smallint DEFAULT 0, overall_grade (text, overall_percentage (numeric, is_passing (boolean, attendance (jsonb, teacher_comment (text, promotion_decision (text, promotion_label (text, head_teacher_name (text, school_name (text NOT NULL DEFAULT 'ECOLE LA FONTAINE'::text, school_address (text DEFAULT 'Rubavu, Rwanda'::text, school_phone (text, school_email (text, school_logo (text, school_motto (text, school_footer_1 (text, school_footer_2 (text, generated_at (timestamp with time zone DEFAULT now(), created_by (bigint, is_locked (boolean DEFAULT true",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; class_id → classes.id; created_by → teachers.id; student_id → students.id; term_id → terms.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_25421_12_not_null: class_name IS NOT NULL; 2200_25421_13_not_null: term_id IS NOT NULL; 2200_25421_14_not_null: term_name IS NOT NULL; 2200_25421_16_not_null: academic_year_id IS NOT NULL; 2200_25421_17_not_null: year_name IS NOT NULL; 2200_25421_18_not_null: phase IS NOT NULL; 2200_25421_1_not_null: id IS NOT NULL; 2200_25421_20_not_null: subjects IS NOT NULL; 2200_25421_21_not_null: totals IS NOT NULL; 2200_25421_2_not_null: student_id IS NOT NULL; 2200_25421_34_not_null: school_name IS NOT NULL; 2200_25421_3_not_null: student_name IS NOT NULL; 2200_25421_4_not_null: student_first_name IS NOT NULL; 2200_25421_5_not_null: student_last_name IS NOT NULL; 2200_25421_6_not_null: student_code IS NOT NULL; report_card_snapshots_phase_check: (phase = ANY (ARRAY['pre_midterm'::text, 'post_midterm'::text, 'annual'::text]))",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: report_templates",
+        "row_count": 0,
+        "columns": "id (bigint NOT NULL, name (character varying NOT NULL, type (character varying NOT NULL, content (text NOT NULL, file_size (integer, created_by (bigint NOT NULL, created_at (timestamp without time zone NOT NULL DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "created_by → teachers.id",
+        "unique_constraints": "name, type",
+        "check_constraints": "2200_18715_1_not_null: id IS NOT NULL; 2200_18715_2_not_null: name IS NOT NULL; 2200_18715_3_not_null: type IS NOT NULL; 2200_18715_4_not_null: content IS NOT NULL; 2200_18715_6_not_null: created_by IS NOT NULL; 2200_18715_7_not_null: created_at IS NOT NULL; chk_report_templates_file_size: (file_size >= 0); chk_report_templates_type: ((type)::text = ANY ((ARRAY['report_card'::character varying, 'transcript'::character varying, 'fee_statement'::character varying, 'attendance'::character varying, 'summary'::character varying, 'custom'::character varying])::text[]))",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: s3_multipart_uploads",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: s3_multipart_uploads_parts",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: saml_providers",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: saml_relay_states",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: schema_migrations",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: school_settings",
+        "row_count": 0,
+        "columns": "id (bigint NOT NULL, key (character varying NOT NULL, value (text NOT NULL, updated_at (timestamp with time zone DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "None",
+        "unique_constraints": "key",
+        "check_constraints": "2200_18722_1_not_null: id IS NOT NULL; 2200_18722_2_not_null: key IS NOT NULL; 2200_18722_3_not_null: value IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: second_sitting_config",
+        "row_count": 0,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('second_sitting_config_id_seq'::regclass), class_id (bigint NOT NULL, academic_year_id (integer NOT NULL, promotion_threshold (numeric NOT NULL, min_pass_per_subject (numeric DEFAULT 40, max_subjects_to_retake (integer DEFAULT 2, retake_percentage_reduction (numeric DEFAULT 0, second_sitting_start (date, second_sitting_end (date, results_release_date (date, auto_register (boolean DEFAULT true, auto_promote_on_pass (boolean DEFAULT true, created_by (bigint, updated_by (bigint, created_at (timestamp without time zone DEFAULT now(), updated_at (timestamp without time zone DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; class_id → classes.id; created_by → teachers.id; updated_by → teachers.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_35547_1_not_null: id IS NOT NULL; 2200_35547_2_not_null: class_id IS NOT NULL; 2200_35547_3_not_null: academic_year_id IS NOT NULL; 2200_35547_4_not_null: promotion_threshold IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: second_sitting_marks",
+        "row_count": 0,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('second_sitting_marks_id_seq'::regclass), second_sitting_student_id (bigint NOT NULL, student_id (bigint NOT NULL, subject_id (bigint NOT NULL, academic_year_id (integer NOT NULL, term_id (integer, subject_name (character varying max:100, original_score (numeric, original_grade (character varying max:2, second_score (numeric, second_max_marks (numeric DEFAULT 100, second_percentage (numeric, second_grade (character varying max:2, final_score (numeric, final_grade (character varying max:2, passed (boolean DEFAULT false, entered_by (bigint, recorded_at (date, notes (text, created_at (timestamp without time zone DEFAULT now(), updated_at (timestamp without time zone DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; entered_by → teachers.id; second_sitting_student_id → second_sitting_students.id; student_id → students.id; subject_id → subjects.id; term_id → terms.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_35457_1_not_null: id IS NOT NULL; 2200_35457_2_not_null: second_sitting_student_id IS NOT NULL; 2200_35457_3_not_null: student_id IS NOT NULL; 2200_35457_4_not_null: subject_id IS NOT NULL; 2200_35457_5_not_null: academic_year_id IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: second_sitting_students",
+        "row_count": 0,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('second_sitting_students_id_seq'::regclass), student_id (bigint NOT NULL, academic_year_id (integer NOT NULL, term_id (integer, class_id (bigint NOT NULL, original_average (numeric, original_grade (character varying max:2, promotion_threshold (numeric, failed_subjects (jsonb, total_failed_subjects (integer DEFAULT 0, status (character varying DEFAULT 'registered'::character varying max:20, second_sitting_date (date, second_sitting_completed (boolean DEFAULT false, final_average (numeric, final_grade (character varying max:2, is_promoted (boolean DEFAULT false, is_repeated (boolean DEFAULT false, notes (text, created_by (bigint, reviewed_by (bigint, reviewed_at (timestamp without time zone, created_at (timestamp without time zone DEFAULT now(), updated_at (timestamp without time zone DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; class_id → classes.id; created_by → teachers.id; reviewed_by → teachers.id; student_id → students.id; term_id → terms.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_35406_1_not_null: id IS NOT NULL; 2200_35406_2_not_null: student_id IS NOT NULL; 2200_35406_3_not_null: academic_year_id IS NOT NULL; 2200_35406_5_not_null: class_id IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: secrets",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: session_assessments",
+        "row_count": 12,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('session_assessments_id_seq'::regclass), session_class_id (bigint NOT NULL, session_subject_id (bigint NOT NULL, assessment_name (character varying NOT NULL max:200, assessment_type (character varying NOT NULL DEFAULT 'Quiz'::character varying max:50, max_marks (integer NOT NULL DEFAULT 100, created_by (bigint, created_at (timestamp without time zone DEFAULT now(), date (date, due_date (date, is_locked (boolean DEFAULT false, academic_year_id (bigint NOT NULL, holiday_session_id (bigint NOT NULL",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; created_by → teachers.id; holiday_session_id → holiday_sessions.id; session_class_id → session_classes.id; session_subject_id → session_subjects.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_35841_12_not_null: academic_year_id IS NOT NULL; 2200_35841_13_not_null: holiday_session_id IS NOT NULL; 2200_35841_1_not_null: id IS NOT NULL; 2200_35841_2_not_null: session_class_id IS NOT NULL; 2200_35841_3_not_null: session_subject_id IS NOT NULL; 2200_35841_4_not_null: assessment_name IS NOT NULL; 2200_35841_5_not_null: assessment_type IS NOT NULL; 2200_35841_6_not_null: max_marks IS NOT NULL; chk_session_assessments_max_marks: (max_marks > 0); session_assessments_assessment_type_check: ((assessment_type)::text = ANY (ARRAY[('Quiz'::character varying)::text, ('Assignment'::character varying)::text, ('Mid-Holiday'::character varying)::text, ('Exam'::character varying)::text, ('Final Exam'::character varying)::text, ('Test'::character varying)::text]))",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: session_classes",
+        "row_count": 6,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('session_classes_id_seq'::regclass), name (character varying NOT NULL max:100, is_free (boolean DEFAULT false, academic_year_id (bigint NOT NULL, is_active (boolean DEFAULT true, created_at (timestamp without time zone DEFAULT now(), holiday_session_id (bigint NOT NULL",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; holiday_session_id → holiday_sessions.id",
+        "unique_constraints": "academic_year_id, name",
+        "check_constraints": "2200_35789_1_not_null: id IS NOT NULL; 2200_35789_2_not_null: name IS NOT NULL; 2200_35789_4_not_null: academic_year_id IS NOT NULL; 2200_35789_7_not_null: holiday_session_id IS NOT NULL; chk_session_classes_name_not_empty: (length(TRIM(BOTH FROM name)) > 0)",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: session_enrollments",
+        "row_count": 40,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('session_enrollments_id_seq'::regclass), student_id (bigint NOT NULL, session_class_id (bigint NOT NULL, enrolled_at (timestamp without time zone DEFAULT now(), is_active (boolean DEFAULT true, academic_year_id (bigint NOT NULL, holiday_session_id (bigint NOT NULL",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; holiday_session_id → holiday_sessions.id; session_class_id → session_classes.id; student_id → students.id",
+        "unique_constraints": "session_class_id, student_id",
+        "check_constraints": "2200_35870_1_not_null: id IS NOT NULL; 2200_35870_2_not_null: student_id IS NOT NULL; 2200_35870_3_not_null: session_class_id IS NOT NULL; 2200_35870_6_not_null: academic_year_id IS NOT NULL; 2200_35870_7_not_null: holiday_session_id IS NOT NULL; chk_session_enrollments_date: (enrolled_at <= (now() + '1 day'::interval))",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: session_fees",
+        "row_count": 0,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('session_fees_id_seq'::regclass), student_id (bigint NOT NULL, session_class_id (bigint NOT NULL, fee_category_id (bigint NOT NULL, holiday_session_id (bigint NOT NULL, academic_year_id (bigint NOT NULL, amount (numeric NOT NULL, paid_amount (numeric DEFAULT 0, is_paid (boolean DEFAULT false, is_waived (boolean DEFAULT false, is_approved (boolean DEFAULT false, is_template_based (boolean DEFAULT true, manually_deleted (boolean DEFAULT false, is_credit (boolean DEFAULT false, credit_amount (numeric DEFAULT 0, due_date (date, created_at (timestamp with time zone DEFAULT now(), updated_at (timestamp with time zone DEFAULT now(), approved_at (timestamp with time zone, approved_by (bigint, waived_at (timestamp with time zone, waived_by (bigint, waiver_reason (text, waived_amount (numeric DEFAULT 0, notes (text",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; approved_by → teachers.id; fee_category_id → fee_categories.id; holiday_session_id → holiday_sessions.id; session_class_id → session_classes.id; student_id → students.id; waived_by → teachers.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_37261_1_not_null: id IS NOT NULL; 2200_37261_2_not_null: student_id IS NOT NULL; 2200_37261_3_not_null: session_class_id IS NOT NULL; 2200_37261_4_not_null: fee_category_id IS NOT NULL; 2200_37261_5_not_null: holiday_session_id IS NOT NULL; 2200_37261_6_not_null: academic_year_id IS NOT NULL; 2200_37261_7_not_null: amount IS NOT NULL; chk_session_fees_amount_positive: (amount > (0)::numeric); chk_session_fees_credit_positive: (credit_amount >= (0)::numeric); chk_session_fees_paid_not_exceed_amount: (paid_amount <= amount); chk_session_fees_waived_amount: (waived_amount >= (0)::numeric); session_fees_amount_check: (amount > (0)::numeric); session_fees_paid_amount_check: (paid_amount >= (0)::numeric)",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: session_marks",
+        "row_count": 57,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('session_marks_id_seq'::regclass), session_assessment_id (bigint NOT NULL, student_id (bigint NOT NULL, score (numeric NOT NULL, entered_by (bigint, entered_at (timestamp without time zone DEFAULT now(), created_at (timestamp without time zone DEFAULT now(), academic_year_id (bigint NOT NULL, holiday_session_id (bigint NOT NULL",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; entered_by → teachers.id; holiday_session_id → holiday_sessions.id; session_assessment_id → session_assessments.id; student_id → students.id",
+        "unique_constraints": "session_assessment_id, student_id",
+        "check_constraints": "2200_35890_1_not_null: id IS NOT NULL; 2200_35890_2_not_null: session_assessment_id IS NOT NULL; 2200_35890_3_not_null: student_id IS NOT NULL; 2200_35890_4_not_null: score IS NOT NULL; 2200_35890_8_not_null: academic_year_id IS NOT NULL; 2200_35890_9_not_null: holiday_session_id IS NOT NULL; chk_session_marks_score_positive: (score >= (0)::numeric)",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: session_subjects",
+        "row_count": 24,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('session_subjects_id_seq'::regclass), name (character varying NOT NULL max:100, session_class_id (bigint NOT NULL, is_active (boolean DEFAULT true, created_at (timestamp without time zone DEFAULT now(), academic_year_id (bigint NOT NULL, holiday_session_id (bigint NOT NULL",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; holiday_session_id → holiday_sessions.id; session_class_id → session_classes.id",
+        "unique_constraints": "holiday_session_id, name, session_class_id",
+        "check_constraints": "2200_35826_1_not_null: id IS NOT NULL; 2200_35826_2_not_null: name IS NOT NULL; 2200_35826_3_not_null: session_class_id IS NOT NULL; 2200_35826_6_not_null: academic_year_id IS NOT NULL; 2200_35826_7_not_null: holiday_session_id IS NOT NULL; chk_session_subjects_name_not_empty: (length(TRIM(BOTH FROM name)) > 0)",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: session_teacher_assignments",
+        "row_count": 24,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('session_teacher_assignments_id_seq'::regclass), teacher_id (bigint, session_class_id (bigint, session_subject_id (bigint, academic_year_id (bigint NOT NULL, created_at (timestamp without time zone DEFAULT now(), holiday_session_id (bigint NOT NULL",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; holiday_session_id → holiday_sessions.id; session_class_id → session_classes.id; session_subject_id → session_subjects.id; teacher_id → teachers.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_35915_1_not_null: id IS NOT NULL; 2200_35915_5_not_null: academic_year_id IS NOT NULL; 2200_35915_7_not_null: holiday_session_id IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: sessions",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: sso_domains",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: sso_providers",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: student_academic_history",
+        "row_count": 0,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('student_academic_history_id_seq'::regclass), student_id (bigint, school_name (character varying NOT NULL max:200, school_code (character varying max:50, academic_year_id (integer, class_name (character varying max:100, overall_average (numeric, overall_grade (character varying max:5, rank (integer, total_students (integer, sdms_code (character varying max:50, subject_results (jsonb, transfer_reason (text, transfer_date (date, is_verified (boolean DEFAULT false, verified_by (bigint, verified_at (timestamp without time zone, notes (text, created_at (timestamp without time zone DEFAULT now(), updated_at (timestamp without time zone DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; student_id → students.id; verified_by → teachers.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_33799_1_not_null: id IS NOT NULL; 2200_33799_3_not_null: school_name IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: student_archive",
+        "row_count": 0,
+        "columns": "id (bigint NOT NULL, original_student_id (bigint, student_code (character varying, first_name (character varying, last_name (character varying, class_name (character varying, archived_date (date, archived_reason (character varying, original_data (jsonb, created_at (timestamp with time zone",
+        "primary_key": "id",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18729_1_not_null: id IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: student_class_history",
+        "row_count": 0,
+        "columns": "id (integer NOT NULL DEFAULT nextval('student_class_history_id_seq'::regclass), student_id (integer NOT NULL, class_id (integer NOT NULL, academic_year_id (integer NOT NULL, term_id (integer, start_date (date, end_date (date, status (character varying DEFAULT 'active'::character varying max:20, created_at (timestamp without time zone DEFAULT now(), updated_at (timestamp without time zone DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; class_id → classes.id; student_id → students_old.id; term_id → terms.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_19295_1_not_null: id IS NOT NULL; 2200_19295_2_not_null: student_id IS NOT NULL; 2200_19295_3_not_null: class_id IS NOT NULL; 2200_19295_4_not_null: academic_year_id IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: student_credit_balance",
+        "row_count": 0,
+        "columns": "id (integer NOT NULL DEFAULT nextval('student_credit_balance_id_seq'::regclass), student_id (integer, credit_amount (numeric DEFAULT 0, updated_at (timestamp with time zone DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "None",
+        "unique_constraints": "student_id",
+        "check_constraints": "2200_18142_1_not_null: id IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: student_fee_history",
+        "row_count": 0,
+        "columns": "id (integer NOT NULL, student_id (integer, fee_category_id (integer, action (character varying, old_amount (numeric, new_amount (numeric, reason (text, created_at (timestamp without time zone, performed_by (integer",
+        "primary_key": "id",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18736_1_not_null: id IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: student_fees",
+        "row_count": 0,
+        "columns": "id (bigint NOT NULL, student_id (bigint, fee_category_id (bigint, amount (numeric, paid_amount (numeric, is_waived (boolean, waiver_reason (text, waiver_approved_by (bigint, academic_year_id (bigint, term_id (bigint, due_date (date, created_at (timestamp with time zone, updated_at (timestamp with time zone, is_credit (boolean, credit_amount (numeric, is_archived (boolean, is_paid (boolean, notes (text, is_template_based (boolean, manually_deleted (boolean, archived_at (timestamp with time zone",
+        "primary_key": "id",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18743_1_not_null: id IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: student_guardians",
+        "row_count": 262,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('student_guardians_id_seq'::regclass), student_id (bigint, guardian_id (bigint, relationship (character varying max:50, is_emergency_contact (boolean DEFAULT false, created_at (timestamp without time zone DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "guardian_id → guardians.id; student_id → students.id",
+        "unique_constraints": "guardian_id, student_id",
+        "check_constraints": "2200_33730_1_not_null: id IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: student_promotion_records",
+        "row_count": 0,
+        "columns": "id (integer NOT NULL DEFAULT nextval('student_promotion_records_id_seq'::regclass), promotion_id (integer NOT NULL, student_id (integer NOT NULL, from_class_id (integer, to_class_id (integer, action (character varying NOT NULL max:20, annual_percentage (numeric, from_academic_year_id (integer, to_academic_year_id (integer, created_at (timestamp without time zone DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "from_academic_year_id → academic_years.id; from_class_id → classes.id; promotion_id → student_promotions.id; student_id → students_old.id; to_academic_year_id → academic_years.id; to_class_id → classes.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_19359_1_not_null: id IS NOT NULL; 2200_19359_2_not_null: promotion_id IS NOT NULL; 2200_19359_3_not_null: student_id IS NOT NULL; 2200_19359_6_not_null: action IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: student_promotions",
+        "row_count": 0,
+        "columns": "id (integer NOT NULL DEFAULT nextval('student_promotions_id_seq'::regclass), batch_name (character varying NOT NULL max:200, from_academic_year_id (integer NOT NULL, to_academic_year_id (integer NOT NULL, executed_by (integer, executed_at (timestamp without time zone DEFAULT now(), total_students (integer DEFAULT 0, promoted_count (integer DEFAULT 0, repeated_count (integer DEFAULT 0, graduated_count (integer DEFAULT 0, can_rollback (boolean DEFAULT true, notes (text",
+        "primary_key": "id",
+        "foreign_keys": "executed_by → teachers.id; from_academic_year_id → academic_years.id; to_academic_year_id → academic_years.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_19327_1_not_null: id IS NOT NULL; 2200_19327_2_not_null: batch_name IS NOT NULL; 2200_19327_3_not_null: from_academic_year_id IS NOT NULL; 2200_19327_4_not_null: to_academic_year_id IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: students",
+        "row_count": 141,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('students_new_id_seq'::regclass), student_code (character varying NOT NULL max:50, sdms_code (character varying max:50, first_name (character varying NOT NULL max:100, last_name (character varying NOT NULL max:100, date_of_birth (date, gender (character varying max:10, birthplace (text, nationality (character varying max:100, medical_insurance (character varying max:100, province (character varying max:100, district (character varying max:100, sector (character varying max:100, cell (character varying max:100, village (character varying max:100, address (text, class_id (bigint, enrollment_date (date, academic_year_id (integer, status (character varying DEFAULT 'Active'::character varying max:20, previous_school (character varying max:200, previous_school_marks (numeric, transfer_destination (text, transfer_notes (text, promoted_at (timestamp without time zone, repeated_at (timestamp without time zone, graduated_at (timestamp without time zone, exited_at (date, exit_reason (character varying max:100, is_deleted (boolean DEFAULT false, archived_at (date, notes (text, photo (text, created_at (timestamp without time zone DEFAULT now(), updated_at (timestamp without time zone DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; class_id → classes.id",
+        "unique_constraints": "student_code",
+        "check_constraints": "2200_33653_1_not_null: id IS NOT NULL; 2200_33653_2_not_null: student_code IS NOT NULL; 2200_33653_4_not_null: first_name IS NOT NULL; 2200_33653_5_not_null: last_name IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: students_old",
+        "row_count": 0,
+        "columns": "id (bigint NOT NULL, student_code (character varying, first_name (character varying, last_name (character varying, class_id (bigint, gender (character varying, date_of_birth (date, guardian_name (character varying, guardian_phone (character varying, guardian_email (character varying, address (text, enrollment_date (date, status (character varying, family_id (bigint, discount_amount (numeric, is_deleted (boolean, created_at (timestamp with time zone, updated_at (timestamp with time zone, nationality (text, notes (text, archived_at (date, transfer_destination (text, transfer_notes (text, academic_year_id (integer, promoted_at (timestamp without time zone, repeated_at (timestamp without time zone, graduated_at (timestamp without time zone, photo (text, previous_school (character varying, sibling_count (integer DEFAULT 0, has_discount (boolean DEFAULT false, discount_type (character varying, exit_date (date, exit_reason (character varying",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18750_1_not_null: id IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: subjects",
+        "row_count": 17,
+        "columns": "id (bigint NOT NULL DEFAULT nextval('subjects_id_seq'::regclass), name (character varying, code (character varying, level (character varying, mg_max (integer, ex_max (integer, appears_only_post_midterm (boolean, sort_order (integer, is_active (boolean, created_at (timestamp with time zone, updated_at (timestamp with time zone, academic_year_id (integer",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18757_1_not_null: id IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: subscription",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: system_logs",
+        "row_count": 0,
+        "columns": "id (integer NOT NULL DEFAULT nextval('system_logs_id_seq'::regclass), user_id (integer, action (character varying NOT NULL max:200, entity_type (character varying max:50, entity_id (integer, details (jsonb, ip_address (character varying max:45, created_at (timestamp with time zone DEFAULT now()",
+        "primary_key": "id",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18223_1_not_null: id IS NOT NULL; 2200_18223_3_not_null: action IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: teacher_assignments",
+        "row_count": 0,
+        "columns": "id (bigint NOT NULL, teacher_id (bigint, class_id (bigint, subject_id (bigint, academic_year_id (bigint, created_at (timestamp with time zone",
+        "primary_key": "id",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18764_1_not_null: id IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: teachers",
+        "row_count": 2,
+        "columns": "id (bigint NOT NULL, name (character varying, email (character varying, username (character varying, password (character varying, phone (character varying, department (character varying, role (character varying, hire_date (date, is_active (boolean, last_login (timestamp with time zone, created_at (timestamp with time zone, updated_at (timestamp with time zone, first_name (character varying, last_name (character varying, qualification (character varying, profile_photo (text",
+        "primary_key": "id",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18769_1_not_null: id IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: terms",
+        "row_count": 3,
+        "columns": "id (integer NOT NULL, academic_year_id (integer, name (character varying, start_date (date, end_date (date, midterm_date (date, is_locked (boolean, created_at (timestamp without time zone, updated_at (timestamp without time zone, term_number (integer, is_active (boolean DEFAULT false",
+        "primary_key": "id",
+        "foreign_keys": "None",
+        "unique_constraints": "academic_year_id, term_number",
+        "check_constraints": "2200_18776_1_not_null: id IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: timetable_slots",
+        "row_count": 473,
+        "columns": "id (integer NOT NULL, day (text NOT NULL, time_slot (text NOT NULL, class_id (bigint NOT NULL, subject_id (bigint NOT NULL, teacher_id (bigint, created_at (timestamp without time zone, academic_year_id (integer NOT NULL, duration_minutes (integer DEFAULT 40, is_active (boolean DEFAULT true",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; class_id → classes.id; subject_id → subjects.id; teacher_id → teachers.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_18783_10_not_null: academic_year_id IS NOT NULL; 2200_18783_1_not_null: id IS NOT NULL; 2200_18783_2_not_null: day IS NOT NULL; 2200_18783_3_not_null: time_slot IS NOT NULL; 2200_18783_4_not_null: class_id IS NOT NULL; 2200_18783_5_not_null: subject_id IS NOT NULL; chk_timetable_day: (day = ANY (ARRAY['Monday'::text, 'Tuesday'::text, 'Wednesday'::text, 'Thursday'::text, 'Friday'::text])); chk_timetable_duration: (duration_minutes > 0); chk_timetable_time_slot: (time_slot ~ '^[0-9]{2}:[0-9]{2}-[0-9]{2}:[0-9]{2}$'::text)",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: transcript_snapshots",
+        "row_count": 0,
+        "columns": "id (integer NOT NULL DEFAULT nextval('transcript_snapshots_id_seq'::regclass), student_id (integer, student_name (text NOT NULL, student_first_name (text NOT NULL DEFAULT ''::text, student_last_name (text NOT NULL DEFAULT ''::text, student_code (text NOT NULL, academic_year_id (integer, year_name (text NOT NULL DEFAULT ''::text, class_name (text NOT NULL DEFAULT ''::text, class_level (text DEFAULT 'primary'::text, terms (jsonb NOT NULL DEFAULT '[]'::jsonb, cumulative_totals (jsonb NOT NULL DEFAULT '{}'::jsonb, overall_grade (text, overall_percentage (numeric, school_name (text NOT NULL DEFAULT 'ECOLE LA FONTAINE'::text, school_address (text DEFAULT 'Rubavu, Rwanda'::text, school_logo (text, head_teacher_name (text, generated_at (timestamp with time zone DEFAULT now(), created_by (integer",
+        "primary_key": "id",
+        "foreign_keys": "academic_year_id → academic_years.id; created_by → teachers.id; student_id → students_old.id",
+        "unique_constraints": "None",
+        "check_constraints": "2200_25511_11_not_null: terms IS NOT NULL; 2200_25511_12_not_null: cumulative_totals IS NOT NULL; 2200_25511_15_not_null: school_name IS NOT NULL; 2200_25511_1_not_null: id IS NOT NULL; 2200_25511_3_not_null: student_name IS NOT NULL; 2200_25511_4_not_null: student_first_name IS NOT NULL; 2200_25511_5_not_null: student_last_name IS NOT NULL; 2200_25511_6_not_null: student_code IS NOT NULL; 2200_25511_8_not_null: year_name IS NOT NULL; 2200_25511_9_not_null: class_name IS NOT NULL",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: users",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: vector_indexes",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: verifications",
+        "row_count": 0,
+        "columns": "id (integer NOT NULL DEFAULT nextval('verifications_id_seq'::regclass), token (uuid NOT NULL DEFAULT gen_random_uuid(), document_type (text NOT NULL, document_id (integer NOT NULL, student_id (integer, generated_at (timestamp with time zone DEFAULT now(), scan_count (integer DEFAULT 0, last_scanned_at (timestamp with time zone, is_valid (boolean DEFAULT true, created_by (integer",
+        "primary_key": "id",
+        "foreign_keys": "created_by → teachers.id; student_id → students_old.id",
+        "unique_constraints": "token",
+        "check_constraints": "2200_25393_1_not_null: id IS NOT NULL; 2200_25393_2_not_null: token IS NOT NULL; 2200_25393_3_not_null: document_type IS NOT NULL; 2200_25393_4_not_null: document_id IS NOT NULL; verifications_document_type_check: (document_type = ANY (ARRAY['report_card'::text, 'receipt'::text, 'transcript'::text]))",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: webauthn_challenges",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "📊 TABLE: webauthn_credentials",
+        "row_count": 0,
+        "columns": "No columns",
+        "primary_key": "None",
+        "foreign_keys": "None",
+        "unique_constraints": "None",
+        "check_constraints": "None",
+        "indexes": "None"
+    },
+    {
+        "section": "🔧 FUNCTION: apply_session_fee_to_class",
+        "row_count": null,
+        "columns": "Return: TABLE(student_id bigint, fee_id bigint, status text)",
+        "primary_key": "p_session_class_id bigint, p_fee_category_id bigint, p_holiday_session_id bigint, p_amount numeric, p_due_date date DEFAULT NULL::date, p_notes text DEFAULT NULL::text, p_academic_year_id bigint DEFAULT NULL::bigint",
+        "foreign_keys": "Source: \r\nDECLARE\r\n    v_academic_year_id BIGINT;\r\n    v_student RECORD;\r\n    v_fee_id BIGINT;\r\n    v_count INTEGER := 0;\r\nBEGIN\r\n    -- Get academic year if not provided\r\n    IF p_academic_year_id IS NULL TH",
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": null
+    },
+    {
+        "section": "🔧 FUNCTION: approve_session_fee",
+        "row_count": null,
+        "columns": "Return: boolean",
+        "primary_key": "p_fee_id bigint, p_approved_by bigint",
+        "foreign_keys": "Source: \r\nBEGIN\r\n    UPDATE session_fees\r\n    SET is_approved = TRUE,\r\n        approved_at = NOW(),\r\n        approved_by = p_approved_by,\r\n        updated_at = NOW()\r\n    WHERE id = p_fee_id\r\n      AND is_app",
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": null
+    },
+    {
+        "section": "🔧 FUNCTION: auto_apply_family_discounts",
+        "row_count": null,
+        "columns": "Return: TABLE(family_id bigint, student_id bigint, student_name text, discount_percentage numeric, message text)",
+        "primary_key": "",
+        "foreign_keys": "Source: \r\nDECLARE\r\n    v_family RECORD;\r\n    v_child_count INTEGER;\r\n    v_student RECORD;\r\n    v_discount_percentage NUMERIC;\r\n    v_school_fee_category_id BIGINT;\r\n    v_academic_year_id INTEGER;\r\n    v_dis",
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": null
+    },
+    {
+        "section": "🔧 FUNCTION: auto_create_families_from_guardians",
+        "row_count": null,
+        "columns": "Return: TABLE(family_code character varying, match_type text, students_linked integer, guardian_ids text, message text)",
+        "primary_key": "",
+        "foreign_keys": "Source: \r\nDECLARE\r\n    v_family_id BIGINT;\r\n    v_family_code VARCHAR(50);\r\n    v_group RECORD;\r\n    v_student_count INTEGER;\r\n    v_guardian_count INTEGER;\r\n    v_seq INTEGER;\r\n    v_guardian_ids TEXT;\r\nBEGI",
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": null
+    },
+    {
+        "section": "🔧 FUNCTION: auto_detect_families",
+        "row_count": null,
+        "columns": "Return: TABLE(match_key text, match_type text, student_count integer, student_ids text, student_names text, guardian_ids text)",
+        "primary_key": "",
+        "foreign_keys": "Source: \r\nBEGIN\r\n    RETURN QUERY\r\n    -- Group 1: matched by shared guardian phone number\r\n    SELECT\r\n        g.phone::TEXT AS match_key,\r\n        'phone'::TEXT AS match_type,\r\n        COUNT(DISTINCT sg.stu",
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": null
+    },
+    {
+        "section": "🔧 FUNCTION: auto_match_student_to_family",
+        "row_count": null,
+        "columns": "Return: trigger",
+        "primary_key": "",
+        "foreign_keys": "Source: \r\nDECLARE\r\n    v_guardian_id BIGINT;\r\n    v_family_id BIGINT;\r\nBEGIN\r\n    -- Check if any guardian with matching phone exists\r\n    SELECT g.id, g.family_id INTO v_guardian_id, v_family_id\r\n    FROM gu",
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": null
+    },
+    {
+        "section": "🔧 FUNCTION: auto_register_second_sitting_students",
+        "row_count": null,
+        "columns": "Return: TABLE(student_id bigint, student_name text, average numeric, failed_subjects text, message text)",
+        "primary_key": "p_class_id bigint, p_academic_year_id integer, p_term_id integer DEFAULT NULL::integer",
+        "foreign_keys": "Source: \r\nDECLARE\r\n    v_student RECORD;\r\n    v_promotion_threshold NUMERIC;\r\n    v_subject_threshold NUMERIC;\r\n    v_failed_subjects JSONB;\r\n    v_failed_count INTEGER;\r\n    v_config RECORD;\r\nBEGIN\r\n    -- G",
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": null
+    },
+    {
+        "section": "🔧 FUNCTION: check_all_tables",
+        "row_count": null,
+        "columns": "Return: TABLE(table_name text, row_count bigint)",
+        "primary_key": "",
+        "foreign_keys": "Source: \nDECLARE\n  rec RECORD;\nBEGIN\n  FOR rec IN \n    SELECT tablename \n    FROM pg_tables \n    WHERE schemaname = 'public' \n    ORDER BY tablename\n  LOOP\n    RETURN QUERY EXECUTE \n      format('SELECT %L as",
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": null
+    },
+    {
+        "section": "🔧 FUNCTION: get_sample_row",
+        "row_count": null,
+        "columns": "Return: jsonb",
+        "primary_key": "table_name text",
+        "foreign_keys": "Source: \r\nDECLARE\r\n    result JSONB;\r\n    query TEXT;\r\nBEGIN\r\n    query := format('SELECT row_to_json(t) FROM (SELECT * FROM %I LIMIT 1) t', table_name);\r\n    EXECUTE query INTO result;\r\n    RETURN result;\r\nE",
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": null
+    },
+    {
+        "section": "🔧 FUNCTION: login_check",
+        "row_count": null,
+        "columns": "Return: TABLE(id integer, username text, first_name text, last_name text, role text, phone text, email text, is_active boolean)",
+        "primary_key": "p_username text, p_password text, p_role text",
+        "foreign_keys": "Source: \r\nBEGIN\r\n    IF p_role = 'admin' THEN\r\n        -- Admin login: check school_settings for admin_password\r\n        RETURN QUERY\r\n        SELECT \r\n            t.id::INTEGER,\r\n            t.username::TEXT",
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": null
+    },
+    {
+        "section": "🔧 FUNCTION: record_session_fee_payment",
+        "row_count": null,
+        "columns": "Return: TABLE(fee_id bigint, payment_id bigint, remaining_balance numeric, status text)",
+        "primary_key": "p_fee_id bigint, p_amount numeric, p_payment_method text DEFAULT 'Cash'::text, p_receipt_number text DEFAULT NULL::text, p_recorded_by bigint DEFAULT NULL::bigint",
+        "foreign_keys": "Source: \r\nDECLARE\r\n    v_fee RECORD;\r\n    v_payment_id BIGINT;\r\n    v_new_paid NUMERIC;\r\nBEGIN\r\n    -- Get the fee\r\n    SELECT * INTO v_fee FROM session_fees WHERE id = p_fee_id;\r\n    \r\n    IF NOT FOUND THEN\r",
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": null
+    },
+    {
+        "section": "🔧 FUNCTION: set_active_term",
+        "row_count": null,
+        "columns": "Return: trigger",
+        "primary_key": "",
+        "foreign_keys": "Source: \r\nBEGIN\r\n    IF NEW.is_active = TRUE THEN\r\n        -- Deactivate all other terms in the same academic year\r\n        UPDATE terms \r\n        SET is_active = FALSE \r\n        WHERE academic_year_id = NEW.",
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": null
+    },
+    {
+        "section": "🔧 FUNCTION: update_school_settings_updated_at",
+        "row_count": null,
+        "columns": "Return: trigger",
+        "primary_key": "",
+        "foreign_keys": "Source: \r\nBEGIN\r\n    NEW.updated_at = NOW();\r\n    RETURN NEW;\r\nEND;\r\n",
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": null
+    },
+    {
+        "section": "🔧 FUNCTION: validate_session_mark_score",
+        "row_count": null,
+        "columns": "Return: trigger",
+        "primary_key": "",
+        "foreign_keys": "Source: \r\nDECLARE\r\n    v_max_marks INTEGER;\r\nBEGIN\r\n    SELECT max_marks INTO v_max_marks\r\n    FROM session_assessments\r\n    WHERE id = NEW.session_assessment_id;\r\n    \r\n    IF NEW.score > v_max_marks THEN\r\n ",
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": null
+    },
+    {
+        "section": "🔧 FUNCTION: waive_session_fee",
+        "row_count": null,
+        "columns": "Return: boolean",
+        "primary_key": "p_fee_id bigint, p_waived_by bigint, p_reason text DEFAULT NULL::text",
+        "foreign_keys": "Source: \r\nBEGIN\r\n    UPDATE session_fees\r\n    SET is_waived = TRUE,\r\n        waived_at = NOW(),\r\n        waived_by = p_waived_by,\r\n        waiver_reason = p_reason,\r\n        updated_at = NOW()\r\n    WHERE id =",
+        "unique_constraints": null,
+        "check_constraints": null,
+        "indexes": null
+    }
+]

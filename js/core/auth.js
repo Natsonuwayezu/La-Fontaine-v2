@@ -247,18 +247,21 @@ function checkLoginLockout() {
  * Attempt to log in with a role, username, and password.
  * Returns { success: boolean, error: string|null, user: Object|null }.
  *
- * Authentication flow:
- *   1. Check lockout status
- *   2. Query teachers table for matching username
- *   3. Verify password (plain-text comparison — Part 3.1)
- *   4. Check is_active flag
- *   5. Save session, load data, navigate to dashboard
+ * Authentication flow (Phase 2 of the auth hardening roadmap — see
+ * TODO.md):
+ *   1. Check lockout status (still client-side/localStorage — Phase 4
+ *      moves this server-side too, since this alone is bypassable)
+ *   2. Call login_check(username, password, role) — a Postgres
+ *      function (docs/sql/001_enable_rls_baseline.sql) that does the
+ *      actual lookup + password comparison entirely server-side and
+ *      returns a safe row with no password column, ever
+ *   3. Check is_active flag
+ *   4. Save session, load data, navigate to dashboard
  *
- * NOTE: The existing system stores passwords as plain text in the DB
- * (admin_password in school_settings for admin, and password field
- * on teachers rows for other users). This matches the existing code.
- * Migration to hashed passwords can be done later without changing
- * this function's interface.
+ * NOTE: passwords are still stored as plain text in the database
+ * itself (school_settings.admin_password, teachers.password) — this
+ * function no longer fetches that value to the browser at all, but
+ * the column contents still need real hashing (Phase 3, not done yet).
  *
  * @param {string} role     - 'admin' | 'teacher' | 'accountant'
  * @param {string} username
@@ -280,56 +283,29 @@ async function doLogin(role, username, password) {
     }
 
     try {
-        // 2. Special case: admin login uses school_settings.admin_password
-        if (role === 'admin') {
-            const adminPw = state.schoolSettings?.admin_password
-                || (await getSchoolSetting('admin_password', SCHOOL_DEFAULTS.admin_password));
+        // 2. Real login check — runs entirely server-side via the
+        // login_check() Postgres function (docs/sql/001_enable_rls_baseline.sql).
+        // The password value is never fetched to this browser at all,
+        // win or lose — a real change from the previous flow, which
+        // fetched the full teachers row (password column included) and
+        // compared it here in the client. The admin dual-password-source
+        // check (school_settings.admin_password OR teachers.password)
+        // and the "state not loaded yet, query fresh" fallback both
+        // moved server-side into the function itself.
+        const rows = await callRPC('login_check', {
+            p_username: username,
+            p_password: password,
+            p_role: role,
+        });
 
-            const adminUser = (state.teachers || []).find(t =>
-                t.role === 'admin' &&
-                (t.username === username || username === 'admin')
-            );
-
-            if (!adminUser) {
-                _recordFailedAttempt();
-                return { success: false, error: 'Invalid username or password.', user: null };
-            }
-
-            if (password !== adminPw && password !== adminUser.password) {
-                _recordFailedAttempt();
-                return { success: false, error: 'Invalid username or password.', user: null };
-            }
-
-            return await _completeLogin(adminUser);
-        }
-
-        // 3. Teacher / Accountant login via teachers table
-        const matches = (state.teachers || []).filter(t =>
-            t.username === username &&
-            t.role === role
-        );
-
-        if (matches.length === 0) {
-            // Try fresh DB query in case state isn't loaded yet
-            const rows = await getAll('teachers', `username=eq.${encodeURIComponent(username)}&role=eq.${role}&limit=1`)
-                .catch(() => []);
-
-            if (rows.length === 0) {
-                _recordFailedAttempt();
-                return { success: false, error: 'Invalid username or password.', user: null };
-            }
-            matches.push(rows[0]);
-        }
-
-        const user = matches[0];
-
-        // 4. Password check
-        if (user.password !== password) {
+        if (!rows || rows.length === 0) {
             _recordFailedAttempt();
             return { success: false, error: 'Invalid username or password.', user: null };
         }
 
-        // 5. Active check
+        const user = rows[0];
+
+        // 3. Active check
         if (user.is_active === false) {
             return { success: false, error: 'Your account has been deactivated. Contact admin.', user: null };
         }
@@ -648,19 +624,37 @@ function disableBiometricLogin() {
  * @returns {Promise<{ success: boolean, error: string|null }>}
  */
 async function changePassword(userId, oldPassword, newPassword) {
-    if (!newPassword || newPassword.length < 6) {
-        return { success: false, error: 'New password must be at least 6 characters.' };
+    const strength = validatePasswordStrength(newPassword, 'New password');
+    if (!strength.valid) {
+        return { success: false, error: strength.error };
     }
 
     try {
-        const user = await getById('teachers', userId);
+        // teachers_public (docs/sql/001_enable_rls_baseline.sql) never
+        // includes the password column — this fetch is safe and RLS
+        // allows it, unlike fetching from `teachers` directly.
+        const user = await getById('teachers_public', userId);
         if (!user) {
             return { success: false, error: 'User not found.' };
         }
 
-        // Non-admin must verify old password
-        if (!iAmAdmin() && user.password !== oldPassword) {
-            return { success: false, error: 'Current password is incorrect.' };
+        // Non-admin must verify old password — done via the same
+        // real, server-side login_check() doLogin() uses, so the
+        // current password value is never fetched to this browser
+        // either. (Previously this compared user.password directly,
+        // which the RLS baseline's column-level REVOKE now makes
+        // permanently undefined — that old comparison would always
+        // fail for a non-admin, locking out self-service password
+        // changes entirely until this fix.)
+        if (!iAmAdmin()) {
+            const verifyRows = await callRPC('login_check', {
+                p_username: user.username,
+                p_password: oldPassword,
+                p_role: user.role,
+            });
+            if (!verifyRows || verifyRows.length === 0) {
+                return { success: false, error: 'Current password is incorrect.' };
+            }
         }
 
         await update('teachers', userId, {

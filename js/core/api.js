@@ -246,6 +246,16 @@ async function getCount(table, filterStr = '') {
  * Insert a single row. Returns the created record or null.
  * Automatically routes to holiday tables in holiday mode.
  */
+/**
+ * Call a Postgres function (RPC) via PostgREST.
+ * @param {string} fnName - the function name (e.g. 'login_check')
+ * @param {Object} params - named parameters matching the function's signature
+ * @returns {Promise<Array>} - PostgREST always returns RPC results as an array
+ */
+async function callRPC(fnName, params = {}) {
+    return await apiFetch(`rpc/${fnName}`, 'POST', params);
+}
+
 async function insert(table, data) {
     const target = resolveTable(table, 'write');
     const rows = await apiFetch(target, 'POST', data);
@@ -742,6 +752,7 @@ window.getById = getById;
 window.getWhere = getWhere;
 window.getCount = getCount;
 window.insert = insert;
+window.callRPC = callRPC;
 window.insertMany = insertMany;
 window.update = update;
 window.updateWhere = updateWhere;

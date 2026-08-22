@@ -1,5 +1,94 @@
 # ECOLE LA FONTAINE v2 — MASTER TODO LIST
-Last updated: 2026-07-26
+Last updated: 2026-08-20
+
+---
+
+## AUTH HARDENING ROADMAP (going phase by phase, per Natso's decision)
+
+Google Sign-In only — Apple/iCloud dropped (the $99/year Apple Developer
+Program cost wasn't worth it given Natso mainly wants device-unlock via
+fingerprint/Face ID/PIN, which doesn't need Apple at all — that's WebAuthn,
+a browser API, not tied to either Google or Apple).
+
+- [x] **Phase 1 — Run `docs/sql/001_enable_rls_baseline.sql`** — DONE, confirmed by Natso (2026-08-20)
+- [x] **Phase 2 — Wire `auth.js` to actually call `login_check()`** — DONE (2026-08-20)
+      doLogin() now calls the real login_check() RPC; password never
+      fetched to the browser during login. Also found and fixed a
+      regression Phase 1's SQL had silently caused: changePassword()
+      called getById('teachers', userId) expecting a .password field
+      to compare against — but Phase 1's REVOKE SELECT (password) ...
+      FROM anon made that field permanently undefined, so every
+      non-admin's self-service password change was broken (old-password
+      check always failed) from the moment the SQL was run. Fixed to
+      verify via login_check() instead, and to use the new
+      validatePasswordStrength() instead of a bare 6-char check.
+- [ ] **Phase 3 — Hash passwords** (bcrypt via pgcrypto, inside `login_check()`)
+      One-time migration for existing plaintext rows; check with Natso
+      before running if anyone might be mid-session (old plaintext won't
+      work after).
+- [ ] **Phase 4 — Real server-side login lockout**
+      New `login_attempts` table, enforced inside `login_check()` itself —
+      current lockout lives only in localStorage (auth.js), trivially
+      bypassed by clearing storage/incognito/hitting the API directly.
+- [ ] **Phase 5 — Google Sign-In**
+      Natso: create free Google Cloud project + OAuth consent screen +
+      Client ID/Secret, add to Supabase Auth provider settings.
+      Then: build the button + account-linking logic (match by email to
+      an existing teachers row, or route to Phase 7's approval flow).
+- [ ] **Phase 6 — Device unlock via WebAuthn (fingerprint/Face ID/PIN)**
+      New `webauthn_credentials` table + challenge/verify functions.
+      Rides on the device's own biometric/PIN prompt, no separate
+      biometric system to build. Real, standalone piece of work — do
+      after Phases 2-4 are solid and tested.
+      🔴 URGENT NOTE found while doing Phase 2: the EXISTING "biometric
+      login" (auth.js: isBiometricAvailable/enableBiometricLogin/
+      tryBiometricLogin/disableBiometricLogin) is not real WebAuthn.
+      enableBiometricLogin() just sets a localStorage flag — no
+      credential is ever actually registered (no navigator.credentials.
+      create() call exists anywhere). tryBiometricLogin() calls
+      navigator.credentials.get() with a hardcoded all-zero challenge
+      and, if it ever succeeds, doesn't verify WHICH credential/user
+      matched — it just restores whatever session was last saved in
+      localStorage. On a personal device this mostly just fails
+      harmlessly. On a SHARED school device, if any resident credential
+      exists for this origin from prior use, this could authenticate as
+      the WRONG person with no real per-user check. Needs a decision
+      from Natso: disable the "Enable Fingerprint" toggle now as a
+      precaution, or leave it until Phase 6 replaces it for real.
+- [ ] **Phase 7 — Self-registration + admin approval**
+      New `pending_registrations` table + form (name, email, phone, ID
+      number, previous school, requested role, password) + admin
+      approval page that creates the real teachers row on approval.
+      Can run in parallel with Phase 5/6.
+
+---
+
+## EMOJI CLEANUP (project rule: no emojis in the app UI — use Font
+Awesome/SVG; canvas/SVG-text rendering contexts are the only exception)
+
+46 of ~130 instances fixed so far (topbar.js, constants.js, theme.js,
+tables.js, modals.js, charts.js, dropdowns.js, cards.js, sidebar.js,
+accountant-dashboard.js, fee-term-status.js, enroll-student.js,
+fee-approvals.js, record-payment.js, holidays-enrollment.js,
+holidays-marks.js, holiday.css). Remaining:
+
+- [ ] `offline.html` (18 instances)
+- [ ] `qr-verify.html` (17 instances)
+- [ ] `404.html` (14 instances)
+- [ ] `js/modules/help/help-data.js` (8 instances)
+- [ ] `js/modules/help/help-templates.js` (8 instances)
+- [ ] `js/modules/help/help-center.js` (7 instances)
+- [ ] `html/partials/help-center.html` (3 instances)
+
+Deliberately left as-is (real exception, not an oversight):
+`js/integrations/qrcode.js` + `js/config/constants.js`'s QR badge emoji
+— render via Canvas `fillText()` and raw SVG `<text>`, contexts where
+Font Awesome's webfont isn't reliably drawable.
+
+Also worth a repo-wide re-sweep once the above is done — the emoji
+detection pattern used so far may not cover every Unicode block (e.g.
+variation selectors, some regional/flag ranges), so the true remaining
+count could be slightly different from what's listed here.
 
 ---
 

@@ -1,6 +1,19 @@
 -- ═══════════════════════════════════════════════════════════════════
 -- 001_enable_rls_baseline.sql
 -- ═══════════════════════════════════════════════════════════════════
+-- ⚠️  AMENDMENT (2026-08-20): the version of this script Natso actually
+-- ran against the live database differs from what's below in one
+-- important way this file got wrong — `school_settings` is a
+-- key-value table (id, key, value, updated_at), not named columns
+-- like school_name/contact_phone/etc. The corrected school_settings_
+-- public view filters `WHERE key NOT IN ('admin_password', ...)`
+-- instead. login_check()'s admin branch was adjusted to match (a
+-- CROSS JOIN against the admin_password row's value, plus an
+-- is_active check on the teacher branch that's a genuine improvement
+-- over what's below). See docs/sql/002 and 003 for what was found
+-- and fixed after running the corrected version — this file is kept
+-- for history, but 002/003 assume the corrected schema, not this one.
+-- ═══════════════════════════════════════════════════════════════════
 -- Ecole La Fontaine v2 — Row Level Security baseline
 --
 -- READ THIS BEFORE RUNNING (and before assuming this "fixes" security):

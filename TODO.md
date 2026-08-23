@@ -22,10 +22,29 @@ a browser API, not tied to either Google or Apple).
       check always failed) from the moment the SQL was run. Fixed to
       verify via login_check() instead, and to use the new
       validatePasswordStrength() instead of a bare 6-char check.
-- [ ] **Phase 3 — Hash passwords** (bcrypt via pgcrypto, inside `login_check()`)
-      One-time migration for existing plaintext rows; check with Natso
-      before running if anyone might be mid-session (old plaintext won't
-      work after).
+- [ ] **Phase 2.5 — Run `docs/sql/002_tighten_delete_protection.sql`** *(Natso's action)*
+      Found by auditing the LIVE pg_policies output Natso ran after a
+      corrected version of 001: leftover broad anon_all_<table> (cmd=ALL)
+      policies were undermining the intended no-delete protection on 7
+      tables (assessments, attendance, marks, payment_allocations,
+      payments, student_credit_balance, student_fees) and the no-insert
+      restriction on school_settings — RLS policies are additive, so any
+      matching permissive policy grants access regardless of narrower
+      ones existing alongside it. Also locks down 4 frozen-document
+      tables (verifications, receipt_snapshots, report_card_snapshots,
+      transcript_snapshots) that should never be hard-deletable but
+      weren't protected at all — confirmed by checking every real call
+      site, they're only ever insert()-ed (or, for verifications,
+      updated for scan_count) by core/verification-engine.js.
+- [ ] **Phase 3 — Run `docs/sql/003_hash_passwords.sql`** *(Natso's action)*
+      Real bcrypt hashing via a database trigger — zero app-code
+      changes needed, verified against every real password-writing
+      call site first (insert/update('teachers', ...) is the only path,
+      no matter who calls it). Includes a one-time migration for
+      existing plaintext rows. IMPORTANT: after running, actually log
+      in as each role (admin/teacher/accountant) before considering
+      this done — the file's own verification query only confirms rows
+      look hashed, not that login still works.
 - [ ] **Phase 4 — Real server-side login lockout**
       New `login_attempts` table, enforced inside `login_check()` itself —
       current lockout lives only in localStorage (auth.js), trivially
@@ -55,6 +74,41 @@ a browser API, not tied to either Google or Apple).
       the WRONG person with no real per-user check. Needs a decision
       from Natso: disable the "Enable Fingerprint" toggle now as a
       precaution, or leave it until Phase 6 replaces it for real.
+- [ ] **Phase 7 — Self-registration + admin approval**
+      New `pending_registrations` table + form (name, email, phone, ID
+      number, previous school, requested role, password) + admin
+      approval page that creates the real teachers row on approval.
+      Can run in parallel with Phase 5/6. Per Natso (2026-08-20): the
+      registration form should also be aware of `guardians`/
+      `student_guardians` (see the DATABASE TABLES LINKAGE section below)
+      — design this together once that analysis happens, not before.
+
+---
+
+## DATABASE TABLES LINKAGE & CLEANUP (do AFTER the auth phases above)
+
+Natso is preparing a JSON export of every real table in the live
+database for a full analysis pass together. Do not act on any of this
+until that happens — noted here only so it doesn't get lost.
+
+Per Natso (2026-08-20): the following tables found in the live
+pg_policies audit are NOT stale/legacy — they were intentionally added
+for features not yet wired into the app code, and each is designed to
+hold its own real data:
+`backups`, `push_subscriptions`, `guardians`, `student_guardians`,
+`discount_rules`, `student_class_history`, `promotions`,
+`promotion_batches`, `student_promotions`, `student_promotion_records`,
+`fee_templates`, `student_fee_history`, `marks_archive`,
+`student_archive`. (`students_old` was confirmed genuinely stale and
+has already been removed by Natso directly.)
+
+Once the JSON is shared: analyze real column shapes for each, figure
+out which app features should read/write each one (guardians/
+student_guardians almost certainly ties into Phase 7's registration
+form — students should be linkable to one or more real guardian
+records instead of just the two free-text guardian_name/guardian_phone/
+guardian_email fields currently on the students row), and wire up or
+formally deprioritize each table on a case-by-case basis.
 - [ ] **Phase 7 — Self-registration + admin approval**
       New `pending_registrations` table + form (name, email, phone, ID
       number, previous school, requested role, password) + admin

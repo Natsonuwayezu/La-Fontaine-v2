@@ -12,6 +12,8 @@ without duplicating data or erroring on already-applied changes).
 | # | File | What it does |
 |---|---|---|
 | 001 | `001_enable_rls_baseline.sql` | Enables RLS on every real table, stops plaintext passwords from reaching the client via a secure login function + views, blocks hard-deletion of financial/academic history records. See the file's own header comment for what it deliberately does NOT do yet (password hashing, per-user row scoping — both need a real auth migration first). |
+| 002 | `002_tighten_delete_protection.sql` | Fixes a gap found by auditing the live `pg_policies` output after 001 ran: leftover broad `anon_all_<table>` policies were undermining the intended no-delete protection on 7 tables, and 4 frozen-document/audit-trail tables (verifications, receipt/report_card/transcript snapshots) had no delete protection at all. Run after 001. |
+| 003 | `003_hash_passwords.sql` | Phase 3 of the auth roadmap — real bcrypt password hashing via a database trigger, requiring no app-code changes. Includes a one-time migration for existing plaintext rows and an updated `login_check()` that compares against the hash. Run after 001 and 002, then verify by actually logging in as each role. |
 
 ## Before running any file here
 

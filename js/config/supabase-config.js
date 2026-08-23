@@ -152,30 +152,44 @@ function hasSupabaseCredentials() {
   return isSupabaseConfigured();
 }
 
-/**
- * Test the Supabase connection with a lightweight request.
- * Returns { ok: boolean, error: string|null }
- */
+// ==================================================================================
+// ✅ FIXED: Test connection against a TABLE endpoint
+// ==================================================================================
+
 async function testSupabaseConnection() {
   try {
     const url = getSupabaseUrl();
     const key = getSupabaseKey();
     if (!url || !key) return { ok: false, error: 'No credentials configured' };
-    const res = await fetch(`${url}/rest/v1/`, {
+
+    // ✅ Test a table that exists and is accessible
+    const res = await fetch(`${url}/rest/v1/academic_years?select=id&limit=1`, {
       method: 'GET',
-      headers: { 'apikey': key, 'Authorization': `Bearer ${key}` },
+      headers: {
+        'apikey': key,
+        'Authorization': `Bearer ${key}`
+      },
     });
-    // 200 = connected, 400 = connected but bad path, both mean server reachable
-    if (res.ok || res.status === 400) return { ok: true, error: null };
+
+    if (res.ok) {
+      return { ok: true, error: null };
+    }
+
+    if (res.status === 401 || res.status === 403) {
+      return { ok: false, error: 'Invalid API key or insufficient permissions' };
+    }
+
     return { ok: false, error: `HTTP ${res.status}` };
   } catch (err) {
     return { ok: false, error: err.message };
   }
 }
 
-/**
- * Alias for setSupabaseCredentials() — called by boot.js API setup screen.
- */
+// Alias for boot.js
+function hasSupabaseCredentials() {
+  return isSupabaseConfigured();
+}
+
 function saveSupabaseCredentials(url, key) {
   return setSupabaseCredentials(url, key);
 }

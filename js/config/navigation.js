@@ -91,6 +91,8 @@ const NAV_SECTIONS = {
     items: [
       { id: 'holidays-enrollment', label: 'Holiday Enrollment', icon: 'fa-user-plus', desc: 'Enroll students into holiday session classes and assign fees' },
       { id: 'holidays-marks', label: 'Holiday Marks Entry', icon: 'fa-pen-to-square', desc: 'Enter marks per assessment for enrolled holiday students' },
+      { id: 'holidays-reports', label: 'Holiday Reports', icon: 'fa-file-lines', desc: 'Holiday session report cards' },
+      { id: 'holidays-rankings', label: 'Holiday Rankings', icon: 'fa-trophy', desc: 'Student rankings within each holiday class' },
       { id: 'holidays-fees', label: 'Holiday Fees', icon: 'fa-money-bill', desc: 'Fees specific to the holiday period' }
     ]
   },

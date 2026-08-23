@@ -266,5 +266,70 @@ async function testAndSaveSetup() {
    EXPOSE
    ───────────────────────────────────────────────────────────────── */
 
+
+/* ─────────────────────────────────────────────────────────────────
+   AUTO HOLIDAY MODE SWITCH
+   Runs on boot + every 10 minutes. Checks if today falls within an
+   active holiday_session → activates holiday mode automatically.
+   ───────────────────────────────────────────────────────────────── */
+function _setupAutoHolidaySwitch() {
+    _checkAndSwitchMode();
+    setInterval(_checkAndSwitchMode, 10 * 60 * 1000);
+}
+
+async function _checkAndSwitchMode() {
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const sessions = state.holidaySessions || [];
+        const shouldBeActive = sessions.find(s =>
+            s.status === 'active' &&
+            s.auto_activate !== false &&
+            s.start_date <= today &&
+            (!s.end_date || s.end_date >= today)
+        );
+        const currentlyHoliday = typeof isHolidayMode === 'function' && isHolidayMode();
+        if (shouldBeActive && !currentlyHoliday) {
+            if (typeof activateHolidayMode === 'function') activateHolidayMode(shouldBeActive);
+            if (typeof loadDataForHolidaySession === 'function')
+                await loadDataForHolidaySession(shouldBeActive.id);
+            if (typeof Sidebar !== 'undefined' && Sidebar.refresh) Sidebar.refresh();
+            _logAutoSwitch('normal', 'holiday', shouldBeActive.name);
+            console.info('[Boot] Auto-activated holiday mode:', shouldBeActive.name);
+        } else if (!shouldBeActive && currentlyHoliday) {
+            if (typeof deactivateHolidayMode === 'function') deactivateHolidayMode();
+            if (typeof loadAllData === 'function') await loadAllData({ silent: true });
+            if (typeof Sidebar !== 'undefined' && Sidebar.refresh) Sidebar.refresh();
+            _logAutoSwitch('holiday', 'normal', 'Session ended');
+            console.info('[Boot] Auto-deactivated holiday mode — session ended.');
+        }
+    } catch(err) {
+        console.warn('[Boot] Auto-switch check failed:', err.message);
+    }
+}
+
+function _logAutoSwitch(fromMode, toMode, reason) {
+    const now = new Date().toISOString();
+    if (typeof insert !== 'function') return;
+    insert('system_logs', {
+        action_type : 'auto_mode_switch',
+        description : `SYSTEM: ${fromMode} → ${toMode}: ${reason}`,
+        actor_id    : null,
+        actor_name  : 'SYSTEM',
+        created_at  : now,
+        metadata    : JSON.stringify({ fromMode, toMode, reason }),
+    }).catch(() => {});
+    const admins = (state.users || []).filter(u => u.role === 'admin');
+    admins.forEach(admin => {
+        insert('notifications', {
+            user_id    : admin.id,
+            title      : `Mode switched: ${fromMode} → ${toMode}`,
+            body       : reason,
+            type       : 'mode_switch',
+            is_read    : false,
+            created_at : now,
+        }).catch(() => {});
+    });
+}
+
 window.boot = boot;
 window.testAndSaveSetup = testAndSaveSetup;

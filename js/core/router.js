@@ -62,6 +62,8 @@ const MODULE_FILE_MAP = {
     // Holidays (academic)
     'holidays-enrollment': 'js/modules/holidays/holidays-enrollment.js',
     'holidays-marks': 'js/modules/holidays/holidays-marks.js',
+    'holidays-reports': 'js/modules/holidays/holidays-reports.js',
+    'holidays-rankings': 'js/modules/holidays/holidays-rankings.js',
 
     // Finance
     'finance-dashboard': 'js/modules/finance/finance-dashboard.js',

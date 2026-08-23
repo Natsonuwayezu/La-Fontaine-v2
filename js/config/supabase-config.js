@@ -149,7 +149,7 @@ function getSupabaseCredentials() {
  * Alias for isSupabaseConfigured() — called by boot.js step 5.
  */
 function hasSupabaseCredentials() {
-    return isSupabaseConfigured();
+  return isSupabaseConfigured();
 }
 
 /**
@@ -157,27 +157,27 @@ function hasSupabaseCredentials() {
  * Returns { ok: boolean, error: string|null }
  */
 async function testSupabaseConnection() {
-    try {
-        const url = getSupabaseUrl();
-        const key = getSupabaseKey();
-        if (!url || !key) return { ok: false, error: 'No credentials configured' };
-        const res = await fetch(`${url}/rest/v1/`, {
-            method : 'GET',
-            headers: { 'apikey': key, 'Authorization': `Bearer ${key}` },
-        });
-        // 200 = connected, 400 = connected but bad path, both mean server reachable
-        if (res.ok || res.status === 400) return { ok: true, error: null };
-        return { ok: false, error: `HTTP ${res.status}` };
-    } catch (err) {
-        return { ok: false, error: err.message };
-    }
+  try {
+    const url = getSupabaseUrl();
+    const key = getSupabaseKey();
+    if (!url || !key) return { ok: false, error: 'No credentials configured' };
+    const res = await fetch(`${url}/rest/v1/`, {
+      method: 'GET',
+      headers: { 'apikey': key, 'Authorization': `Bearer ${key}` },
+    });
+    // 200 = connected, 400 = connected but bad path, both mean server reachable
+    if (res.ok || res.status === 400) return { ok: true, error: null };
+    return { ok: false, error: `HTTP ${res.status}` };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
 }
 
 /**
  * Alias for setSupabaseCredentials() — called by boot.js API setup screen.
  */
 function saveSupabaseCredentials(url, key) {
-    return setSupabaseCredentials(url, key);
+  return setSupabaseCredentials(url, key);
 }
 
 window.SUPABASE_URL = getSupabaseUrl();
@@ -193,6 +193,6 @@ window.getSupabaseKey = getSupabaseKey;
 window.getSupabaseCredentials = getSupabaseCredentials;
 window.setSupabaseCredentials = setSupabaseCredentials;
 window.resetSupabaseCredentials = resetSupabaseCredentials;
-window.hasSupabaseCredentials  = hasSupabaseCredentials;
-window.testSupabaseConnection  = testSupabaseConnection;
+window.hasSupabaseCredentials = hasSupabaseCredentials;
+window.testSupabaseConnection = testSupabaseConnection;
 window.saveSupabaseCredentials = saveSupabaseCredentials;

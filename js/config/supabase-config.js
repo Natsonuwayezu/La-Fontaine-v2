@@ -21,47 +21,26 @@
 /* ═══════════════════════════════════════════════════════════════════
    DEFAULT CREDENTIALS
    ═══════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   js/config/supabase-config.js — Supabase client setup
+   ═══════════════════════════════════════════════════════════════════ */
 
 const DEFAULT_SUPABASE_URL = 'https://ovmymtdrugdljnttiltd.supabase.co';
 const DEFAULT_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXltdGRydWdkbGpudHRpbHRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1ODkwMDAsImV4cCI6MjA5ODE2NTAwMH0.8stEjiVUde2wNodGFW1dkNPhm501EqhlqbTFM2yXyLI';
 
-/* ═══════════════════════════════════════════════════════════════════
-   RESOLVE FROM localStorage (overrides)
-   ═══════════════════════════════════════════════════════════════════ */
-
-/**
- * Get the Supabase URL from localStorage or fallback to default
- * @returns {string} The Supabase URL
- */
 function getSupabaseUrl() {
   return localStorage.getItem('sb_url') || DEFAULT_SUPABASE_URL;
 }
 
-/**
- * Get the Supabase API key from localStorage or fallback to default
- * @returns {string} The Supabase API key
- */
 function getSupabaseKey() {
   return localStorage.getItem('sb_key') || DEFAULT_SUPABASE_KEY;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   SUPABASE CLIENT INITIALIZATION
-   ═══════════════════════════════════════════════════════════════════ */
-
 let supabaseClient = null;
 
-/**
- * Initialize the Supabase client
- * @returns {object|null} The Supabase client instance or null if failed
- */
 function initSupabase() {
   if (typeof window.supabase === 'undefined') {
-    console.error(
-      'Supabase JS library not found. Make sure the CDN script tag ' +
-      '(@supabase/supabase-js) is included in index.html before ' +
-      'js/config/supabase-config.js.'
-    );
+    console.error('Supabase JS library not found.');
     return null;
   }
 
@@ -79,56 +58,28 @@ function initSupabase() {
   return supabaseClient;
 }
 
-// Initialize the client immediately
 initSupabase();
 
-/* ═══════════════════════════════════════════════════════════════════
-   HELPERS
-   ═══════════════════════════════════════════════════════════════════ */
-
-/**
- * Check if Supabase is properly configured
- * @returns {boolean} True if client exists and URL is not a placeholder
- */
 function isSupabaseConfigured() {
   return supabaseClient !== null && !getSupabaseUrl().includes('YOUR-PROJECT-REF');
 }
 
-/**
- * Get the current Supabase client instance
- * @returns {object|null} The Supabase client or null if not initialized
- */
 function getSupabaseClient() {
   return supabaseClient;
 }
 
-/**
- * Update Supabase credentials in localStorage and reinitialize the client
- * @param {string} url - New Supabase URL
- * @param {string} key - New API key
- * @returns {object|null} The reinitialized client or null if failed
- */
 function setSupabaseCredentials(url, key) {
   if (url) localStorage.setItem('sb_url', url);
   if (key) localStorage.setItem('sb_key', key);
-  // Reinitialize the client with new credentials
   return initSupabase();
 }
 
-/**
- * Reset Supabase credentials to defaults and reinitialize
- * @returns {object|null} The reinitialized client or null if failed
- */
 function resetSupabaseCredentials() {
   localStorage.removeItem('sb_url');
   localStorage.removeItem('sb_key');
   return initSupabase();
 }
 
-/**
- * Get current credentials (for display or API calls)
- * @returns {object} { url, key, isUsingDefaults }
- */
 function getSupabaseCredentials() {
   const url = getSupabaseUrl();
   const key = getSupabaseKey();
@@ -141,28 +92,19 @@ function getSupabaseCredentials() {
   };
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   EXPOSE TO WINDOW (for debugging and legacy onclick handlers)
-   ═══════════════════════════════════════════════════════════════════ */
-
-/**
- * Alias for isSupabaseConfigured() — called by boot.js step 5.
- */
-function hasSupabaseCredentials() {
-  return isSupabaseConfigured();
-}
-
 // ==================================================================================
-// ✅ FIXED: Test connection against a TABLE endpoint
+// ✅ FIXED: ALWAYS returns an object with ok/error properties
 // ==================================================================================
 
 async function testSupabaseConnection() {
   try {
     const url = getSupabaseUrl();
     const key = getSupabaseKey();
-    if (!url || !key) return { ok: false, error: 'No credentials configured' };
 
-    // ✅ Test a table that exists and is accessible
+    if (!url || !key) {
+      return { ok: false, error: 'No Supabase credentials configured' };
+    }
+
     const res = await fetch(`${url}/rest/v1/academic_years?select=id&limit=1`, {
       method: 'GET',
       headers: {
@@ -179,9 +121,11 @@ async function testSupabaseConnection() {
       return { ok: false, error: 'Invalid API key or insufficient permissions' };
     }
 
-    return { ok: false, error: `HTTP ${res.status}` };
+    return { ok: false, error: `HTTP ${res.status}: ${res.statusText || 'Unknown error'}` };
+
   } catch (err) {
-    return { ok: false, error: err.message };
+    // ✅ Catch ANY error and return an object
+    return { ok: false, error: err.message || 'Network error' };
   }
 }
 
@@ -194,6 +138,7 @@ function saveSupabaseCredentials(url, key) {
   return setSupabaseCredentials(url, key);
 }
 
+// Expose to window
 window.SUPABASE_URL = getSupabaseUrl();
 window.SUPABASE_KEY = getSupabaseKey();
 window.SUPABASE_DEFAULT_URL = DEFAULT_SUPABASE_URL;

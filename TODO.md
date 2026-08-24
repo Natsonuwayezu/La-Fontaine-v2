@@ -45,10 +45,16 @@ a browser API, not tied to either Google or Apple).
       in as each role (admin/teacher/accountant) before considering
       this done — the file's own verification query only confirms rows
       look hashed, not that login still works.
-- [ ] **Phase 4 — Real server-side login lockout**
-      New `login_attempts` table, enforced inside `login_check()` itself —
-      current lockout lives only in localStorage (auth.js), trivially
-      bypassed by clearing storage/incognito/hitting the API directly.
+- [ ] **Phase 4 (SQL file 005) — Run `docs/sql/005_server_side_lockout.sql`** *(Natso's action)*
+      Real login lockout enforced inside login_check() itself (5
+      attempts/15 minutes, matching auth.js's existing client-side
+      numbers exactly) — closes the gap where the current lockout only
+      lives in localStorage and is bypassed by clearing storage,
+      incognito, or calling the RPC directly. New login_attempts table
+      with zero anon policies — only login_check() (SECURITY DEFINER)
+      touches it. Verify by deliberately failing a test login 5 times,
+      then confirming the 6th attempt fails even with the correct
+      password.
 - [ ] **Phase 5 — Google Sign-In**
       Natso: create free Google Cloud project + OAuth consent screen +
       Client ID/Secret, add to Supabase Auth provider settings.
@@ -87,28 +93,77 @@ a browser API, not tied to either Google or Apple).
 
 ## DATABASE TABLES LINKAGE & CLEANUP (do AFTER the auth phases above)
 
-Natso is preparing a JSON export of every real table in the live
-database for a full analysis pass together. Do not act on any of this
-until that happens — noted here only so it doesn't get lost.
+Reviewed `docs/sql/tables.json` (2026-08-23) — real findings below, not
+acted on yet per Natso's instruction to finish the auth phases first.
 
-Per Natso (2026-08-20): the following tables found in the live
-pg_policies audit are NOT stale/legacy — they were intentionally added
-for features not yet wired into the app code, and each is designed to
-hold its own real data:
-`backups`, `push_subscriptions`, `guardians`, `student_guardians`,
-`discount_rules`, `student_class_history`, `promotions`,
-`promotion_batches`, `student_promotions`, `student_promotion_records`,
-`fee_templates`, `student_fee_history`, `marks_archive`,
-`student_archive`. (`students_old` was confirmed genuinely stale and
-has already been removed by Natso directly.)
+🔴 **Needs Natso to confirm urgently, may already be broken in production:**
+`school_settings` has 0 rows in the export. `login_check()` (001/003/004)
+requires a row with `key = 'admin_password'` to exist for admin login to
+ever succeed. If that row genuinely doesn't exist, admin login has been
+failing since Phase 2 shipped. Natso needs to try logging in as admin
+and confirm; if it fails, insert the row (see chat for exact SQL).
 
-Once the JSON is shared: analyze real column shapes for each, figure
-out which app features should read/write each one (guardians/
-student_guardians almost certainly ties into Phase 7's registration
-form — students should be linkable to one or more real guardian
-records instead of just the two free-text guardian_name/guardian_phone/
-guardian_email fields currently on the students row), and wire up or
-formally deprioritize each table on a case-by-case basis.
+🔴 **Real bug, not yet fixed:** `family-management.js` (written this
+session) references `families.parent_name` and
+`families.sibling_discount_pct` — neither column exists on the real
+table (real columns: `family_code`, `total_children`, `active_children`,
+`notes`). Traced the wrong assumption back to a PRE-EXISTING file,
+`family-fee-summary.js`, which has the exact same wrong field
+references and is presumably also broken — this predates this
+session's work, not introduced by it. The real discount mechanism
+turned out to be a proper rules engine (`discount_rules` table:
+discount_type/discount_value/target_type/applies_to/conditions jsonb/
+priority/max_discount, plus a `auto_apply_family_discounts()` DB
+function) that must have been added after those files were written.
+Needs a real redesign of the family-discount UI around the rules
+engine, not a simple field-rename — deferred to the dedicated
+database-linkage pass.
+
+**Big opportunity found:** `guardians` (262 rows) and
+`student_guardians` (262 rows) are real, already-populated tables with
+a much richer model than the app currently uses — national ID, phone,
+email, occupation, employer, full address (province/district/sector/
+cell/village), primary/emergency-contact flags. The entire current app
+(student-profile.js, enroll-student.js, family-management.js) only
+ever reads/writes the flat `guardian_name`/`guardian_phone`/
+`guardian_email` text fields directly on the `students` row, never
+touching this relational data at all. This is exactly what Phase 7's
+registration form should be built against instead of free-text fields.
+
+**Confirmed empty shell tables (reserved names, zero columns defined
+yet):** `webauthn_credentials`, `webauthn_challenges`,
+`custom_oauth_providers`, `oauth_clients`, `oauth_authorizations`,
+`oauth_client_states`, `oauth_consents`. Worth keeping these exact
+table names when Phase 6 (WebAuthn) gets designed for real, since
+they're already reserved.
+
+**Bigger backend than the app currently uses, not investigated in
+depth yet:** a whole holiday-session fee-approval subsystem
+(`fee_approval_requests`, `fee_auto_apply_notifications`, `session_fees`,
+functions like `apply_session_fee_to_class`/`approve_session_fee`/
+`waive_session_fee`/`record_session_fee_payment`), a family
+auto-detection system (`auto_create_families_from_guardians`/
+`auto_detect_families`/`auto_match_student_to_family`), a second-sitting
+exam system (`second_sitting_config`/`second_sitting_marks`/
+`second_sitting_students`), and promotion history tables
+(`promotion_batches`, `promotion_thresholds`, `student_promotions`,
+`student_promotion_records`) — none of which the current JS app reads
+from or writes to. Needs its own dedicated investigation pass to figure
+out what's finished-but-unwired vs. abandoned vs. still in progress.
+
+**Also found:** `teachers` has several real columns not in any current
+view/query — `name` (separate from first_name/last_name), `department`,
+`hire_date`, `qualification`, `profile_photo`, `last_login`. Worth
+deciding whether `teachers_public` (001) should expose these.
+
+Per Natso (2026-08-20): the following are confirmed intentional
+future-feature tables, not stale — don't drop or deprioritize without
+discussion: `backups`, `push_subscriptions`, `discount_rules`,
+`student_class_history`, `promotions`, `promotion_batches`,
+`student_promotions`, `student_promotion_records`, `fee_templates`,
+`student_fee_history`, `marks_archive`, `student_archive`.
+(`students_old` was confirmed genuinely stale and already removed by
+Natso directly.)
 - [ ] **Phase 7 — Self-registration + admin approval**
       New `pending_registrations` table + form (name, email, phone, ID
       number, previous school, requested role, password) + admin

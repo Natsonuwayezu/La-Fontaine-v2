@@ -121,8 +121,8 @@ function _heRenderTable() {
     const tableRows=paged.map(e=>{
         const s=getStudent(e.student_id);
         const cls=(state.sessionClasses||[]).find(c=>c.id===e.session_class_id);
-        const fees=(state.studentFees||[]).filter(f=>f.student_id===e.student_id&&f.source==='holiday_enrollment');
-        const pending=fees.filter(f=>f.requires_approval&&f.is_approved===false).length;
+        const fees=(state.holidayFees||[]).filter(f=>f.student_id===e.student_id&&f.holiday_session_id===_heSessionId);
+        const pending=(state.holidayFees||[]).filter(f=>f.student_id===e.student_id&&f.holiday_session_id===_heSessionId&&f.requires_approval&&f.is_approved===false).length;
         return `<tr>
           <td><div class="student-cell">
             <span class="student-name">${s?`${esc(s.last_name)}, ${esc(s.first_name)}`:`#${e.student_id}`}</span>
@@ -290,18 +290,22 @@ window.heSubmitEnroll = async () => {
             const isPaid=false; // enrollment only assigns, doesn't record payment
 
             const needsApproval=true; // ALL holiday enrollment fees need approval
-            const feeRow=await insert('student_fees',{
-                student_id:studentId,
-                fee_category_id:fc.id, fee_name:fc.name,
-                amount:fullAmt, waived_amount:discount, paid_amount:0,
-                is_paid:false, is_waived:false,
-                requires_approval:true, is_approved:false,
-                source:'holiday_enrollment',
-                holiday_session_id:_heSessionId,
-                term_id:state.currentTerm?.id||null,
-                academic_year_id:state.currentAcadYear?.id||null,
-                due_date:null,
-                created_at:now, updated_at:now,
+            // Holiday enrollment fees go to holiday_fees (separate from student_fees)
+            const feeRow=await insert('holiday_fees',{
+                student_id         : studentId,
+                holiday_session_id : _heSessionId,
+                session_class_id   : classId,
+                academic_year_id   : (state.holidaySessions||[]).find(s=>s.id===_heSessionId)?.academic_year_id || null,
+                fee_name           : fc.name,
+                amount             : fullAmt,
+                waived_amount      : discount,
+                paid_amount        : 0,
+                is_paid            : false,
+                requires_approval  : true,
+                is_approved        : false,
+                source             : 'holiday_enrollment',
+                created_at         : now,
+                updated_at         : now,
             });
             if(feeRow){feesCreated++;feesApprovalNeeded++;}
         }
@@ -309,7 +313,7 @@ window.heSubmitEnroll = async () => {
         // 3. Reload state
         await loadDataForHolidaySession(_heSessionId);
         closeModal();
-        showToast(`Student enrolled.${feesCreated?` ${feesCreated} fee(s) assigned — ${feesApprovalNeeded} pending approval.`:'`'}`, 'success');
+        showToast(`Student enrolled.${feesCreated?' '+feesCreated+' fee(s) assigned — '+feesApprovalNeeded+' pending approval.':''}`, 'success');
         _heShell(document.getElementById('moduleContent')||document.querySelector('.module-wrap')?.parentElement, state.holidaySessions||[]);
     }catch(e){handleApiError(e,'holiday enrollment');}
 };
@@ -332,8 +336,8 @@ window.heUnenroll = async (enrollmentId, studentId) => {
 /* ── VIEW FEES ── */
 window.heViewFees = studentId => {
     const student=getStudent(studentId);
-    const fees=(state.studentFees||[]).filter(f=>
-        f.student_id===studentId&&f.source==='holiday_enrollment'&&f.holiday_session_id===_heSessionId);
+    const fees=(state.holidayFees||[]).filter(f=>
+        f.student_id===studentId&&f.holiday_session_id===_heSessionId);
     if(!fees.length){showToast('No holiday fees for this student.','info');return;}
     const rows=fees.map(f=>{
         const amt=Number(f.amount||0), waived=Number(f.waived_amount||0);

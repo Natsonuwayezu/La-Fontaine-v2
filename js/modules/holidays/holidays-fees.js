@@ -1,275 +1,651 @@
 /* ═══════════════════════════════════════════════════════════════════
    js/modules/holidays/holidays-fees.js
    ═══════════════════════════════════════════════════════════════════
-   Fees specific to the holiday period (Section 3.5) — isolated in the
-   real holiday_fees table, never student_fees. Uses the real backend
-   functions already implemented in js/core/fees.js:
-   window.createHolidayFees(feeData, studentIds, academicYearId) and
-   window.markHolidayFeesAsApplied(holidayFeeIds, newTermId).
+   Purpose : Holiday session fee management.
 
-   Note on the current core/fees.js implementation: createHolidayFees()
-   currently sets apply_at_next_term=true unconditionally for every
-   holiday fee. The original spec (Section 3.5) called for some holiday
-   fees — like a remedial-course fee — to post and be payable
-   immediately during the holiday itself, while only fees meant for the
-   next term get deferred. This module exposes both framings in the UI
-   (an "Applies" toggle) but the deferred flag is currently a no-op on
-   the backend until core/fees.js is revisited — flagged clearly here
-   rather than silently working around it.
+   HOW IT WORKS:
+   - Each holiday session can have configured fees (e.g. 20,000 RWF
+     for remedial course). Some sessions are FREE (no fee configured).
+   - When a student is enrolled in a holiday class, the session fee
+     is AUTO-ASSIGNED to that student in the holiday_fees table.
+   - holiday_fees is SEPARATE from student_fees — never mixed.
+   - Fee has: holiday_session_id, session_class_id, student_id,
+     amount, waived_amount (discount), paid_amount, is_paid,
+     requires_approval, is_approved, source='holiday_enrollment'
+   - Discount: entered < full → difference = waived_amount
+   - All go to fee_approval queue (fee-approvals.js handles it)
+   - Already paid = auto-approved immediately
+
+   TABS:
+   1. Fee Overview — fee status per session/class (who paid, who owes)
+   2. Configure Session Fees — set fee amount per holiday session
+      (zero = free, students enrolled at no charge)
+   3. Record Payment — record payment against a student's holiday fee
    ═══════════════════════════════════════════════════════════════════ */
+'use strict';
 
-const HolidaysFees = (() => {
+let _hfTab       = 'overview'; // 'overview' | 'configure' | 'payment'
+let _hfSessionId = null;
+let _hfClassId   = null;
+let _hfFilter    = { search: '', status: 'all' };
+let _hfPage      = 1;
+const _hfSize    = 50;
 
-    function esc(str) {
-        if (window.esc) return window.esc(str);
-        const div = document.createElement('div');
-        div.textContent = str ?? '';
-        return div.innerHTML;
+async function renderHolidaysFees(container, params = {}) {
+    if (!container) return;
+    await ensureStateLoaded();
+    const sessions = state.holidaySessions || [];
+    _hfSessionId = params.sessionId || getActiveHolidaySessionId() || sessions[0]?.id || null;
+    if (_hfSessionId && !(state.sessionClasses||[]).some(c=>c.holiday_session_id===_hfSessionId))
+        await loadDataForHolidaySession(_hfSessionId);
+    if (!sessions.length) {
+        container.innerHTML = `<div class="module-wrap"><div class="section-card">
+            <div class="empty-state" style="padding:60px;">
+            <div class="es-title">No Holiday Sessions</div>
+            <div class="es-sub">Create a holiday session first.</div>
+            </div></div></div>`; return;
+    }
+    _hfShell(container, sessions);
+}
+
+function _hfShell(container, sessions) {
+    const cur     = sessions.find(s=>s.id===_hfSessionId)||sessions[0];
+    const classes = (state.sessionClasses||[]).filter(c=>c.holiday_session_id===_hfSessionId);
+
+    // Count stats
+    const allFees = (state.holidayFees||[]).filter(f=>f.holiday_session_id===_hfSessionId);
+    const totalFees = allFees.length;
+    const paidFees  = allFees.filter(f=>f.is_paid).length;
+    const pendingApproval = allFees.filter(f=>f.requires_approval&&f.is_approved===false&&!Number(f.paid_amount||0)).length;
+    const totalOwed = allFees.reduce((s,f)=>s+Number(f.amount||0)-Number(f.waived_amount||0),0);
+    const totalPaid = allFees.reduce((s,f)=>s+Number(f.paid_amount||0),0);
+
+    container.innerHTML = `
+    <div class="module-wrap">
+      <div class="mod-topbar">
+        <div class="mod-topbar-left">
+          <h1 class="mod-title"><i class="fa-solid fa-coins"></i> Holiday Fees</h1>
+          <span class="badge" style="background:rgba(217,119,6,.15);color:#d97706;margin-left:8px;">
+            <i class="fa-solid fa-umbrella-beach"></i> ${esc(cur?.name||'—')}</span>
+        </div>
+        <div class="mod-topbar-right">
+          <select class="select select-sm" onchange="hfPickSession(parseInt(this.value))">
+            ${sessions.map(s=>`<option value="${s.id}"${s.id===_hfSessionId?' selected':''}>
+              ${esc(s.name)}${s.status==='active'?' ●':''}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="stats-grid stats-grid-4" style="margin-bottom:14px;">
+        <div class="stat-card">
+          <div class="stat-value">${totalFees}</div>
+          <div class="stat-label">Fee Assignments</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value c-success">${paidFees}</div>
+          <div class="stat-label">Paid</div>
+          <div class="stat-sub">${fmtCurrency(totalPaid)}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value c-warning">${pendingApproval}</div>
+          <div class="stat-label">Pending Approval</div>
+          ${pendingApproval?`<div class="stat-sub"><a href="#" onclick="navigateTo('fee-approvals')">Review</a></div>`:''}
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${fmtCurrency(totalOwed-totalPaid)}</div>
+          <div class="stat-label">Outstanding</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs" style="margin-bottom:0;">
+        <button class="tab-btn${_hfTab==='overview'?' active':''}" onclick="hfTab('overview')">
+          <i class="fa-solid fa-list"></i> Fee Overview</button>
+        <button class="tab-btn${_hfTab==='configure'?' active':''}" onclick="hfTab('configure')">
+          <i class="fa-solid fa-gear"></i> Configure Session Fees</button>
+        <button class="tab-btn${_hfTab==='payment'?' active':''}" onclick="hfTab('payment')">
+          <i class="fa-solid fa-money-bill-transfer"></i> Record Payment</button>
+      </div>
+
+      <div class="section-card" style="border-top-left-radius:0;margin-top:0;">
+        <div id="hf-body"></div>
+      </div>
+    </div>`;
+
+    _hfDraw();
+}
+
+window.hfTab = t => { _hfTab=t; _hfDraw(); };
+window.hfPickSession = async id => {
+    _hfSessionId=id; _hfClassId=null; _hfFilter={search:'',status:'all'}; _hfPage=1;
+    await loadDataForHolidaySession(id);
+    _hfShell(document.getElementById('moduleContent')||
+        document.querySelector('.module-wrap')?.parentElement, state.holidaySessions||[]);
+};
+
+function _hfDraw() {
+    const el = document.getElementById('hf-body');
+    if (!el) return;
+    if (_hfTab==='overview')   _hfOverview(el);
+    else if (_hfTab==='configure') _hfConfigure(el);
+    else                        _hfPayment(el);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   TAB 1: FEE OVERVIEW
+   ══════════════════════════════════════════════════════════════════ */
+function _hfOverview(el) {
+    const classes = (state.sessionClasses||[]).filter(c=>c.holiday_session_id===_hfSessionId);
+
+    // Build fee rows
+    let fees = (state.holidayFees||[]).filter(f=>f.holiday_session_id===_hfSessionId);
+
+    // Filter by class
+    if (_hfClassId) {
+        const enrollIds = new Set((state.holidayEnrollments||[])
+            .filter(e=>e.session_class_id===_hfClassId).map(e=>e.student_id));
+        fees = fees.filter(f=>enrollIds.has(f.student_id));
     }
 
-    function rwf(n) { return window.fmtCurrency ? window.fmtCurrency(n) : (window.Forms?.formatRWF(n) ?? n); }
+    // Filter by status
+    if (_hfFilter.status==='paid')    fees=fees.filter(f=>f.is_paid);
+    if (_hfFilter.status==='unpaid')  fees=fees.filter(f=>!f.is_paid);
+    if (_hfFilter.status==='pending') fees=fees.filter(f=>f.requires_approval&&f.is_approved===false);
+    if (_hfFilter.status==='free')    fees=fees.filter(f=>Number(f.amount||0)===0);
 
-    let selectedStudentIds = new Set();
+    // Search
+    if (_hfFilter.search) {
+        const q=_hfFilter.search.toLowerCase();
+        fees=fees.filter(f=>{
+            const s=getStudent(f.student_id);
+            return s&&`${s.first_name} ${s.last_name} ${s.code||''}`.toLowerCase().includes(q);
+        });
+    }
 
-    function render(container) {
-        if (!container) return;
-        const holidayActive = window.isHolidayMode ? window.isHolidayMode() : false;
+    const total=fees.length, start=(_hfPage-1)*_hfSize, paged=fees.slice(start,start+_hfSize);
 
-        container.innerHTML = `
-      <div class="dashboard-page">
-        <div class="dash-card" style="margin-bottom:16px; ${holidayActive ? 'border-color:rgba(245,158,11,0.35);' : ''}">
-          <div class="dash-card-body" style="display:flex; align-items:center; gap:10px;">
-            <i class="fa-solid ${holidayActive ? 'fa-umbrella-beach' : 'fa-circle-check'}" style="color:${holidayActive ? 'var(--warning)' : 'var(--success)'}; font-size:1.1rem;"></i>
-            <span style="font-size:0.85rem; color:var(--card-text,#e2e8f0);">
-              ${holidayActive
-                ? 'Holiday mode is active \u2014 fees created here are written to the isolated holiday_fees table, never to the regular term fees.'
-                : 'Holiday mode is not currently active. You can still create/manage holiday fees here for planning purposes.'}
-            </span>
+    el.innerHTML = `
+    <div class="filters-bar">
+      <div class="filter-group">
+        <label>Class</label>
+        <select class="select" onchange="hfFilterClass(this.value)">
+          <option value="">All Classes</option>
+          ${classes.map(c=>`<option value="${c.id}"${c.id===_hfClassId?' selected':''}>${esc(c.name)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Status</label>
+        <select class="select" onchange="hfFilterStatus(this.value)">
+          <option value="all">All</option>
+          <option value="paid">Paid</option>
+          <option value="unpaid">Unpaid</option>
+          <option value="pending">Pending Approval</option>
+          <option value="free">Free (no fee)</option>
+        </select>
+      </div>
+      <div class="search-group">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" class="input" placeholder="Search student…"
+               oninput="hfSearch(this.value)">
+      </div>
+    </div>
+
+    ${!paged.length
+      ? `<div class="empty-state" style="padding:40px;">
+           <div class="es-title">No fees found</div>
+           <div class="es-sub">Enroll students and configure session fees to see data here.</div>
+         </div>`
+      : `<div class="table-wrap"><table class="data-table">
+          <thead><tr>
+            <th>Student</th><th>Class</th><th>Fee</th>
+            <th class="text-right">Amount</th><th class="text-right">Discount</th>
+            <th class="text-right">Net</th><th class="text-right">Paid</th>
+            <th>Status</th><th>Actions</th>
+          </tr></thead>
+          <tbody>
+          ${paged.map(f=>{
+              const s   = getStudent(f.student_id);
+              const cls = _hfClassForStudent(f.student_id);
+              const amt = Number(f.amount||0);
+              const wvd = Number(f.waived_amount||0);
+              const net = amt-wvd;
+              const paid= Number(f.paid_amount||0);
+              const bal = Math.max(0, net-paid);
+
+              let statusBadge;
+              if (amt===0) statusBadge='<span class="badge" style="background:rgba(99,102,241,.15);color:#818cf8;">Free</span>';
+              else if (f.is_paid) statusBadge='<span class="badge badge-success">Paid</span>';
+              else if (f.requires_approval&&f.is_approved===false&&paid===0) statusBadge='<span class="badge badge-warning">Pending Approval</span>';
+              else if (paid>0) statusBadge='<span class="badge" style="background:rgba(245,158,11,.15);color:#f59e0b;">Partial</span>';
+              else statusBadge='<span class="badge badge-danger">Unpaid</span>';
+
+              const canPay = !f.is_paid && (f.is_approved===true||!f.requires_approval) && net>0;
+
+              return `<tr>
+                <td><div class="student-cell">
+                  <span class="student-name">${s?`${esc(s.last_name)}, ${esc(s.first_name)}`:`#${f.student_id}`}</span>
+                  <span class="student-code">${s?esc(s.code||''):'—'}</span></div></td>
+                <td style="font-size:12px;">${esc(cls?.name||'—')}</td>
+                <td style="font-size:12px;">${esc(f.fee_name||'Holiday Fee')}</td>
+                <td class="text-right">${fmtCurrency(amt)}</td>
+                <td class="text-right" style="color:var(--color-success);">${wvd?`-${fmtCurrency(wvd)}`:'—'}</td>
+                <td class="text-right" style="font-weight:600;">${fmtCurrency(net)}</td>
+                <td class="text-right" style="color:var(--color-success);">${paid?fmtCurrency(paid):'—'}</td>
+                <td>${statusBadge}</td>
+                <td>
+                  ${canPay?`<button class="btn btn-sm btn-primary" onclick="hfRecordPayment(${f.id})">
+                    <i class="fa-solid fa-money-bill"></i> Pay</button>`:''}
+                </td>
+              </tr>`;
+          }).join('')}
+          </tbody>
+        </table></div>
+        <div class="table-footer">
+          <span>${total} record${total!==1?'s':''}</span>
+          <div style="display:flex;gap:6px;">
+            ${_hfPage>1?`<button class="btn btn-sm btn-ghost" onclick="hfPage(${_hfPage-1})">Prev</button>`:''}
+            ${start+_hfSize<total?`<button class="btn btn-sm btn-ghost" onclick="hfPage(${_hfPage+1})">Next</button>`:''}
           </div>
+        </div>`}`;
+}
+
+function _hfClassForStudent(studentId) {
+    const enroll = (state.holidayEnrollments||[]).find(e=>
+        e.student_id===studentId && e.holiday_session_id===_hfSessionId);
+    return enroll ? (state.sessionClasses||[]).find(c=>c.id===enroll.session_class_id) : null;
+}
+
+window.hfFilterClass  = v => { _hfClassId=v?parseInt(v):null; _hfPage=1; _hfDraw(); };
+window.hfFilterStatus = v => { _hfFilter.status=v; _hfPage=1; _hfDraw(); };
+window.hfSearch       = v => { _hfFilter.search=v; _hfPage=1; _hfDraw(); };
+window.hfPage         = p => { _hfPage=p; _hfDraw(); };
+
+/* ══════════════════════════════════════════════════════════════════
+   TAB 2: CONFIGURE SESSION FEES
+   Set fee amounts per holiday session (per class or global).
+   Zero = free session. Fee auto-assigned on enrollment.
+   ══════════════════════════════════════════════════════════════════ */
+function _hfConfigure(el) {
+    const classes = (state.sessionClasses||[]).filter(c=>c.holiday_session_id===_hfSessionId);
+    const session = (state.holidaySessions||[]).find(s=>s.id===_hfSessionId);
+
+    // Get configured fees for this session (stored as session metadata or fee_amounts with holiday_session_id)
+    // We use a simple approach: store in constants or as a local state key
+    const configuredFees = _hfGetSessionFeeConfig();
+
+    el.innerHTML = `
+    <div style="margin-bottom:16px;">
+      <div class="alert alert-info">
+        <i class="fa-solid fa-circle-info"></i>
+        Configure the fees for this holiday session. When a student is enrolled in a class,
+        the fee for that class is <strong>automatically assigned</strong> to them.
+        Set amount to <strong>0 or leave empty</strong> for a free session class.
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+      <!-- Global session fee -->
+      <div class="section-card">
+        <div class="section-header"><h3>Session-Wide Fee</h3></div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">
+          Applied to all students regardless of class (e.g. holiday programme fee).
+          Leave at 0 if there is no session-wide fee.
+        </p>
+        <div class="form-group">
+          <label class="field-label">Fee Name</label>
+          <input type="text" id="hfc-global-name" class="input"
+                 value="${esc(configuredFees.global?.name||'Holiday Programme Fee')}"
+                 placeholder="e.g. Holiday Programme Fee">
+        </div>
+        <div class="form-group">
+          <label class="field-label">Amount (RWF) — 0 = Free</label>
+          <input type="number" id="hfc-global-amount" class="input"
+                 value="${configuredFees.global?.amount||0}" min="0" step="1000">
+        </div>
+        <button class="btn btn-primary" onclick="hfSaveGlobalFee()">
+          <i class="fa-solid fa-floppy-disk"></i> Save Session Fee</button>
+      </div>
+
+      <!-- Per-class fees -->
+      <div class="section-card">
+        <div class="section-header"><h3>Per-Class Fees (optional)</h3></div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">
+          Override session-wide fee per class (e.g. advanced class costs more).
+        </p>
+        ${classes.length ? classes.map(c=>{
+            const classFee = configuredFees.perClass?.[c.id] || {};
+            return `
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <span style="font-size:13px;font-weight:600;min-width:120px;">${esc(c.name)}</span>
+              <input type="number" class="input" style="width:110px;"
+                     id="hfc-class-${c.id}" value="${classFee.amount||0}" min="0" step="1000"
+                     placeholder="0 = use global">
+              <button class="btn btn-sm btn-secondary" onclick="hfSaveClassFee(${c.id})">Save</button>
+            </div>`;}).join('')
+          : '<div style="color:var(--text-muted);font-size:13px;">No classes in this session yet.</div>'}
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-header"><h3>Auto-Assign Fees to All Enrolled Students</h3></div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">
+        Click below to auto-assign configured fees to all currently enrolled students
+        who don't have a fee yet. Students already assigned a fee are skipped.
+      </p>
+      <button class="btn btn-primary" onclick="hfAutoAssignAll()">
+        <i class="fa-solid fa-bolt"></i> Auto-Assign Fees to All Enrolled Students</button>
+    </div>`;
+}
+
+function _hfGetSessionFeeConfig() {
+    // Read from session metadata (stored in holiday_sessions.metadata or local state)
+    const session = (state.holidaySessions||[]).find(s=>s.id===_hfSessionId);
+    try {
+        const meta = session?.fee_config ? JSON.parse(session.fee_config) : {};
+        return meta;
+    } catch(e) { return {}; }
+}
+
+window.hfSaveGlobalFee = async () => {
+    const name   = cleanInput(document.getElementById('hfc-global-name')?.value) || 'Holiday Fee';
+    const amount = parseInt(document.getElementById('hfc-global-amount')?.value||'0', 10) || 0;
+    const config = _hfGetSessionFeeConfig();
+    config.global = { name, amount };
+    try {
+        await update('holiday_sessions', _hfSessionId, {
+            fee_config: JSON.stringify(config), updated_at: new Date().toISOString()
+        });
+        // Update local state
+        const sess = (state.holidaySessions||[]).find(s=>s.id===_hfSessionId);
+        if (sess) sess.fee_config = JSON.stringify(config);
+        showToast(`Session fee set: ${fmtCurrency(amount)} (${amount===0?'Free':name})`, 'success');
+    } catch(e) { handleApiError(e, 'save session fee'); }
+};
+
+window.hfSaveClassFee = async classId => {
+    const amount = parseInt(document.getElementById(`hfc-class-${classId}`)?.value||'0', 10) || 0;
+    const config = _hfGetSessionFeeConfig();
+    if (!config.perClass) config.perClass = {};
+    config.perClass[classId] = { amount };
+    try {
+        await update('holiday_sessions', _hfSessionId, {
+            fee_config: JSON.stringify(config), updated_at: new Date().toISOString()
+        });
+        const sess = (state.holidaySessions||[]).find(s=>s.id===_hfSessionId);
+        if (sess) sess.fee_config = JSON.stringify(config);
+        const cls = (state.sessionClasses||[]).find(c=>c.id===classId);
+        showToast(`${cls?.name||'Class'} fee: ${fmtCurrency(amount)}`, 'success');
+    } catch(e) { handleApiError(e, 'save class fee'); }
+};
+
+window.hfAutoAssignAll = async () => {
+    const enrollments = (state.holidayEnrollments||[]).filter(e=>e.holiday_session_id===_hfSessionId);
+    if (!enrollments.length) { showToast('No enrolled students.', 'warning'); return; }
+
+    const confirmed = await confirmDialog(
+        `Auto-assign fees to ${enrollments.length} enrolled student(s)?`,
+        'Auto-Assign Holiday Fees',
+        { confirmText: 'Assign', confirmClass: 'btn-primary' }
+    );
+    if (!confirmed) return;
+
+    const config = _hfGetSessionFeeConfig();
+    const now    = new Date().toISOString();
+    let created  = 0, skipped = 0;
+
+    for (const enroll of enrollments) {
+        // Check if fee already exists
+        const exists = (state.holidayFees||[]).find(f=>
+            f.student_id===enroll.student_id && f.holiday_session_id===_hfSessionId);
+        if (exists) { skipped++; continue; }
+
+        // Resolve fee amount: per-class override → global → 0 (free)
+        const classOverride = config.perClass?.[enroll.session_class_id];
+        const feeAmount = classOverride?.amount ?? config.global?.amount ?? 0;
+        const feeName   = config.global?.name || 'Holiday Fee';
+
+        if (feeAmount === 0) { skipped++; continue; } // free session — skip
+
+        try {
+            await insert('holiday_fees', {
+                student_id         : enroll.student_id,
+                holiday_session_id : _hfSessionId,
+                session_class_id   : enroll.session_class_id,
+                academic_year_id   : (state.holidaySessions||[]).find(s=>s.id===_hfSessionId)?.academic_year_id || null,
+                fee_name           : feeName,
+                amount             : feeAmount,
+                waived_amount      : 0,
+                paid_amount        : 0,
+                is_paid            : false,
+                requires_approval  : true,
+                is_approved        : false,
+                source             : 'holiday_enrollment',
+                created_at         : now,
+                updated_at         : now,
+            });
+            created++;
+        } catch(e) { /* continue */ }
+    }
+
+    showToast(`${created} fee(s) assigned. ${skipped} skipped (already assigned or free).`, 'success');
+    await loadDataForHolidaySession(_hfSessionId);
+    _hfDraw();
+};
+
+/* ══════════════════════════════════════════════════════════════════
+   TAB 3: RECORD PAYMENT
+   Record payment against a student's holiday fee.
+   Supports partial payment.
+   ══════════════════════════════════════════════════════════════════ */
+function _hfPayment(el) {
+    const classes = (state.sessionClasses||[]).filter(c=>c.holiday_session_id===_hfSessionId);
+
+    // Unpaid / partial fees for this session
+    const unpaidFees = (state.holidayFees||[]).filter(f=>
+        f.holiday_session_id===_hfSessionId &&
+        !f.is_paid &&
+        (f.is_approved===true || f.is_approved===null || !f.requires_approval) &&
+        (Number(f.amount||0)-Number(f.waived_amount||0)) > 0
+    );
+
+    el.innerHTML = `
+    <div class="two-col-grid" style="gap:16px;">
+      <div>
+        <div class="form-group">
+          <label class="field-label">Student *</label>
+          <input type="text" id="hfp-search" class="input" placeholder="Search by name or code…"
+                 oninput="hfpSearch(this.value)">
+          <div id="hfp-results" style="max-height:160px;overflow-y:auto;border:1px solid var(--border);
+               border-radius:6px;margin-top:4px;display:none;"></div>
+          <input type="hidden" id="hfp-student-id">
+          <div id="hfp-student-chosen" style="margin-top:6px;font-size:13px;color:var(--color-success);"></div>
         </div>
 
-        <div class="two-col">
-          <div class="dash-card">
-            <div class="dash-card-header"><span class="dash-card-title">Create Holiday Fee</span></div>
-            <div class="dash-card-body">
-              <div class="form-group">
-                <label>Fee Name <span class="required">*</span></label>
-                <input type="text" class="form-input" id="hf-name" placeholder="e.g. Holiday Remedial Course" />
-              </div>
-              <div class="form-row" style="margin-top:12px;">
-                <div class="form-group">
-                  <label>Amount (RWF) <span class="required">*</span></label>
-                  <div class="currency-input-wrap"><input type="text" class="form-input" id="hf-amount" data-currency placeholder="0" /><span class="currency-input-wrap__suffix">RWF</span></div>
-                </div>
-                <div class="form-group">
-                  <label>Applies</label>
-                  <select class="form-select" id="hf-applies">
-                    <option value="immediate">Immediately (holiday-period fee)</option>
-                    <option value="next-term">At start of next term</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-group" style="margin-top:12px;">
-                <label>Description</label>
-                <textarea class="form-textarea" id="hf-description" placeholder="Optional notes about this fee..."></textarea>
-              </div>
-              <div class="form-group" style="margin-top:12px;">
-                <label>Target Students <span class="required">*</span></label>
-                <div id="hf-student-picker" style="max-height:200px; overflow-y:auto; border:1px solid var(--card-border, rgba(255,255,255,0.07)); border-radius:8px; padding:8px;"></div>
-                <div class="form-hint" id="hf-selected-count">0 students selected</div>
-              </div>
-              <div class="form-actions" style="margin-top:14px;">
-                <button class="btn btn-primary" id="hf-create-btn"><i class="fa-solid fa-plus"></i> Create Holiday Fee</button>
-              </div>
-            </div>
-          </div>
+        <div id="hfp-fee-list" style="margin-top:8px;">
+          <div style="color:var(--text-muted);font-size:13px;">Select a student to see their fees.</div>
+        </div>
+      </div>
 
-          <div class="dash-card">
-            <div class="dash-card-header"><span class="dash-card-title">Existing Holiday Fees</span><span class="dash-card-action" id="hf-pending-count"></span></div>
-            <div class="dash-card-body">
-              <div class="form-actions" style="margin-bottom:12px; justify-content:flex-start;">
-                <button class="btn btn-outline btn-sm" id="hf-apply-next-term-btn"><i class="fa-solid fa-forward"></i> Apply Pending Fees to New Term</button>
-              </div>
-              <div id="hf-list-wrap"></div>
-            </div>
+      <div class="section-card" style="background:rgba(255,255,255,.02);">
+        <div class="section-header"><h3><i class="fa-solid fa-receipt"></i> Payment Form</h3></div>
+        <div id="hfp-form">
+          <div class="empty-state" style="padding:24px;">
+            <div class="es-title" style="font-size:13px;">Select student + fee above</div>
           </div>
         </div>
       </div>
-    `;
+    </div>`;
+}
 
-        renderStudentPicker(container);
-        renderFeeList(container);
+let _hfpSelectedFeeId = null;
 
-        container.querySelector('#hf-create-btn').addEventListener('click', () => createFee(container));
-        container.querySelector('#hf-apply-next-term-btn').addEventListener('click', () => applyPendingToNewTerm(container));
+window.hfpSearch = q => {
+    const res = document.getElementById('hfp-results');
+    if (!res||!q||q.length<2) { if(res)res.style.display='none'; return; }
+    const lower = q.toLowerCase();
+    // Only show students with unpaid holiday fees for this session
+    const studentIds = new Set((state.holidayFees||[])
+        .filter(f=>f.holiday_session_id===_hfSessionId&&!f.is_paid)
+        .map(f=>f.student_id));
+    const matches = (state.students||[]).filter(s=>
+        studentIds.has(s.id) &&
+        `${s.first_name} ${s.last_name} ${s.code||''}`.toLowerCase().includes(lower)
+    ).slice(0,8);
+    if (!matches.length) {
+        res.innerHTML='<div style="padding:8px 12px;font-size:13px;color:var(--text-muted);">No students with unpaid fees</div>';
+        res.style.display='block'; return;
     }
+    res.innerHTML = matches.map(s=>`
+    <div style="padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);"
+         onclick="hfpChoose(${s.id},'${esc(s.first_name+' '+s.last_name)}','${esc(s.code||'')}')">
+      <strong>${esc(s.first_name)} ${esc(s.last_name)}</strong>
+      <span style="color:var(--text-muted);margin-left:8px;">${esc(s.code||'')}</span>
+    </div>`).join('');
+    res.style.display='block';
+};
 
-    function studentPool() {
-        if (window.state?.holidayEnrollments?.length && window.state?.students?.length) {
-            const enrolledIds = new Set(window.state.holidayEnrollments.map(e => e.student_id));
-            return window.state.students.filter(s => enrolledIds.has(s.id) && !s.is_deleted)
-                .map(s => ({ id: s.id, name: s.full_name || `${s.first_name || ''} ${s.last_name || ''}`.trim() }));
-        }
-        if (window.state?.students?.length) {
-            return window.state.students.filter(s => !s.is_deleted)
-                .map(s => ({ id: s.id, name: s.full_name || `${s.first_name || ''} ${s.last_name || ''}`.trim() }));
-        }
-        console.warn('HolidaysFees: no real student directory available yet — student picker will be empty.');
-        return [];
+window.hfpChoose = (id, name, code) => {
+    document.getElementById('hfp-student-id').value=id;
+    document.getElementById('hfp-search').value=`${name} (${code})`;
+    document.getElementById('hfp-results').style.display='none';
+    document.getElementById('hfp-student-chosen').textContent=`Selected: ${name}`;
+    _hfpShowFees(id);
+};
+
+function _hfpShowFees(studentId) {
+    const fees = (state.holidayFees||[]).filter(f=>
+        f.student_id===studentId && f.holiday_session_id===_hfSessionId && !f.is_paid);
+    const el = document.getElementById('hfp-fee-list');
+    if (!el) return;
+    if (!fees.length) {
+        el.innerHTML=`<div style="color:var(--color-success);font-size:13px;padding:8px;">
+            <i class="fa-solid fa-circle-check"></i> All fees paid for this student.</div>`;
+        return;
     }
+    el.innerHTML = `<div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--text-muted);">
+        Outstanding fees:</div>` +
+    fees.map(f=>{
+        const net = Number(f.amount||0)-Number(f.waived_amount||0);
+        const bal = Math.max(0, net-Number(f.paid_amount||0));
+        return `<div style="padding:8px 10px;border-radius:6px;background:rgba(255,255,255,.03);
+                     margin-bottom:6px;cursor:pointer;border:1px solid ${_hfpSelectedFeeId===f.id?'var(--color-primary)':'var(--border)'};"
+                onclick="hfpSelectFee(${f.id})">
+          <div style="font-weight:600;font-size:13px;">${esc(f.fee_name||'Holiday Fee')}</div>
+          <div style="font-size:11px;color:var(--text-muted);">
+            Balance: ${fmtCurrency(bal)}
+            ${f.waived_amount?` (incl. ${fmtCurrency(f.waived_amount)} discount)`:''}</div>
+        </div>`;}).join('');
+}
 
-    function renderStudentPicker(container) {
-        const pool = studentPool();
-        const el = container.querySelector('#hf-student-picker');
-        if (!pool.length) {
-            window.EmptyStates?.renderInto(el, { title: 'No students available', message: 'Student data hasn\u2019t loaded yet.' });
-            return;
-        }
-        el.innerHTML = pool.map(s => `
-      <label class="checkbox" style="display:flex; padding:5px 0;">
-        <input type="checkbox" data-student="${s.id}" />
-        <span class="checkbox__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
-        ${esc(s.name)} <span style="color:var(--card-text-muted,#475569); font-size:0.7rem; margin-left:6px;">${esc(s.id)}</span>
-      </label>
-    `).join('');
+window.hfpSelectFee = feeId => {
+    _hfpSelectedFeeId = feeId;
+    const studentId = parseInt(document.getElementById('hfp-student-id')?.value||'0');
+    _hfpShowFees(studentId);
+    _hfpShowForm(feeId);
+};
 
-        el.querySelectorAll('[data-student]').forEach(cb => {
-            cb.addEventListener('change', () => {
-                if (cb.checked) selectedStudentIds.add(cb.dataset.student);
-                else selectedStudentIds.delete(cb.dataset.student);
-                container.querySelector('#hf-selected-count').textContent = `${selectedStudentIds.size} student${selectedStudentIds.size === 1 ? '' : 's'} selected`;
-            });
+function _hfpShowForm(feeId) {
+    const fee = (state.holidayFees||[]).find(f=>f.id===feeId);
+    if (!fee) return;
+    const net = Number(fee.amount||0)-Number(fee.waived_amount||0);
+    const bal = Math.max(0, net-Number(fee.paid_amount||0));
+    const formEl = document.getElementById('hfp-form');
+    if (!formEl) return;
+
+    formEl.innerHTML = `
+    <div class="form-group">
+      <label class="field-label">Fee</label>
+      <div style="font-size:14px;font-weight:700;">${esc(fee.fee_name||'Holiday Fee')}</div>
+      <div style="font-size:12px;color:var(--text-muted);">Balance: ${fmtCurrency(bal)}</div>
+    </div>
+    <div class="form-group">
+      <label class="field-label">Amount to Pay (RWF) *</label>
+      <input type="number" id="hfp-amount" class="input" min="1" max="${bal}"
+             value="${bal}" step="500" placeholder="${bal}">
+      <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">
+        Max: ${fmtCurrency(bal)}</div>
+    </div>
+    <div class="form-group">
+      <label class="field-label">Payment Method *</label>
+      <select id="hfp-method" class="select">
+        <option value="cash">Cash</option>
+        <option value="bank_transfer">Bank Transfer</option>
+        <option value="mobile_money">Mobile Money</option>
+        <option value="cheque">Cheque</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="field-label">Reference (optional)</label>
+      <input type="text" id="hfp-ref" class="input" placeholder="Receipt / transaction ref">
+    </div>
+    <button class="btn btn-primary" style="width:100%;" onclick="hfpSubmit(${feeId},${bal})">
+      <i class="fa-solid fa-check"></i> Record Payment</button>`;
+}
+
+window.hfpSubmit = async (feeId, balance) => {
+    const amountInput = parseFloat(document.getElementById('hfp-amount')?.value||'0');
+    const method      = document.getElementById('hfp-method')?.value||'cash';
+    const ref         = cleanInput(document.getElementById('hfp-ref')?.value)||null;
+
+    if (!amountInput||amountInput<=0) { showToast('Enter a valid amount.','warning'); return; }
+    if (amountInput>balance) { showToast(`Amount cannot exceed balance of ${fmtCurrency(balance)}.`,'warning'); return; }
+
+    const fee = (state.holidayFees||[]).find(f=>f.id===feeId);
+    if (!fee) return;
+
+    const newPaid   = Number(fee.paid_amount||0) + amountInput;
+    const net       = Number(fee.amount||0)-Number(fee.waived_amount||0);
+    const isPaid    = newPaid >= net;
+    const now       = new Date().toISOString();
+
+    try {
+        await update('holiday_fees', feeId, {
+            paid_amount  : newPaid,
+            is_paid      : isPaid,
+            is_approved  : true, // paying removes from approval queue
+            updated_at   : now,
         });
-    }
 
-    async function createFee(container) {
-        const name = container.querySelector('#hf-name').value.trim();
-        const amountInput = container.querySelector('#hf-amount');
-        const amount = parseInt(amountInput.dataset.rawValue || '0', 10);
-        const description = container.querySelector('#hf-description').value.trim();
-        const applies = container.querySelector('#hf-applies').value;
-
-        if (!name) { window.Toast?.warning('Name required', 'Enter a name for this holiday fee.'); return; }
-        if (!amount || amount <= 0) { window.Toast?.warning('Amount required', 'Enter a valid amount.'); return; }
-        if (!selectedStudentIds.size) { window.Toast?.warning('No students selected', 'Select at least one student.'); return; }
-
-        const btn = container.querySelector('#hf-create-btn');
-        window.Loaders?.button?.start(btn);
-
-        try {
-            const yearId = window.getActiveYearId ? window.getActiveYearId() : null;
-            if (!window.createHolidayFees) throw new Error('Holiday fee creation is not available yet (core/fees.js not loaded).');
-
-            const result = await window.createHolidayFees(
-                { name, amount, description, fee_type: applies === 'next-term' ? 'holiday_deferred' : 'holiday' },
-                [...selectedStudentIds],
-                yearId
-            );
-
-            window.Toast?.success('Holiday fee created', `Applied to ${result.created} student${result.created === 1 ? '' : 's'}.`);
-            container.querySelector('#hf-name').value = '';
-            amountInput.value = ''; amountInput.dataset.rawValue = '0';
-            container.querySelector('#hf-description').value = '';
-            selectedStudentIds.clear();
-            renderStudentPicker(container);
-            container.querySelector('#hf-selected-count').textContent = '0 students selected';
-            renderFeeList(container);
-        } catch (err) {
-            window.Toast?.error('Could not create holiday fee', err?.message || 'Please try again.');
-        } finally {
-            window.Loaders?.button?.stop(btn);
-        }
-    }
-
-    function renderFeeList(container) {
-        const fees = window.state?.holidayFees || [];
-        const pendingCount = fees.filter(f => f.apply_at_next_term && !f.is_applied_next_term).length;
-        container.querySelector('#hf-pending-count').textContent = pendingCount ? `${pendingCount} pending` : '';
-
-        const wrap = container.querySelector('#hf-list-wrap');
-        if (!fees.length) {
-            window.EmptyStates?.renderPreset(wrap, 'noData', { title: 'No holiday fees yet', message: 'Create one using the form on the left.' });
-            return;
+        // Log to system_logs
+        if (typeof insert === 'function') {
+            insert('system_logs', {
+                action_type : 'holiday_fee_payment',
+                description : `Holiday fee payment: ${fmtCurrency(amountInput)} for student #${fee.student_id} — ${fee.fee_name||'Holiday Fee'}`,
+                actor_id    : state.currentUser?.id || null,
+                actor_name  : state.currentUser?.name || 'Unknown',
+                created_at  : now,
+                metadata    : JSON.stringify({ feeId, amount: amountInput, method, reference: ref }),
+            }).catch(()=>{});
         }
 
-        window.DataTable?.create(wrap, {
-            rowKey: 'id',
-            pageSize: 10,
-            columns: [
-                { key: 'name', label: 'Fee', sortable: true },
-                { key: 'student_id', label: 'Student', render: (f) => esc(studentName(f.student_id)) },
-                { key: 'amount', label: 'Amount', align: 'right', render: (f) => rwf(f.amount) },
-                { key: 'is_paid', label: 'Status', align: 'center', render: (f) => `<span class="fee-status-chip ${f.is_paid ? 'paid' : 'unpaid'}">${f.is_paid ? 'paid' : 'unpaid'}</span>` },
-                { key: 'apply_at_next_term', label: 'Timing', align: 'center', render: (f) => f.apply_at_next_term ? (f.is_applied_next_term ? '<span class="overdue-badge mild">Applied</span>' : '<span class="overdue-badge warning">Pending</span>') : '<span class="overdue-badge">Immediate</span>' },
-                { key: 'actions', label: '', align: 'right', render: (f) => f.is_paid ? '' : `<button class="btn btn-sm btn-primary" data-pay="${f.id}">Record Payment</button>` }
-            ],
-            data: fees,
-            emptyState: { title: 'No holiday fees' }
-        });
+        // Update local state
+        const localFee = (state.holidayFees||[]).find(f=>f.id===feeId);
+        if (localFee) { localFee.paid_amount=newPaid; localFee.is_paid=isPaid; localFee.is_approved=true; }
 
-        wrap.querySelectorAll('[data-pay]').forEach(btn => {
-            btn.addEventListener('click', () => recordHolidayPayment(container, btn.dataset.pay));
-        });
-    }
+        showToast(`Payment of ${fmtCurrency(amountInput)} recorded.${isPaid?' Fee fully paid!':''}`, 'success');
 
-    function studentName(studentId) {
-        const s = window.state?.students?.find(x => x.id === studentId);
-        return s ? (s.full_name || `${s.first_name || ''} ${s.last_name || ''}`.trim()) : studentId;
-    }
+        // Reset form
+        _hfpSelectedFeeId = null;
+        document.getElementById('hfp-search').value='';
+        document.getElementById('hfp-student-id').value='';
+        document.getElementById('hfp-student-chosen').textContent='';
+        document.getElementById('hfp-fee-list').innerHTML=
+            '<div style="color:var(--text-muted);font-size:13px;">Select a student.</div>';
+        document.getElementById('hfp-form').innerHTML=
+            '<div class="empty-state" style="padding:24px;"><div class="es-title" style="font-size:13px;">Payment recorded successfully</div></div>';
 
-    async function recordHolidayPayment(container, feeId) {
-        const fee = (window.state?.holidayFees || []).find(f => f.id === feeId);
-        if (!fee) return;
+        // Refresh KPIs
+        _hfShell(document.getElementById('moduleContent')||
+            document.querySelector('.module-wrap')?.parentElement, state.holidaySessions||[]);
+    } catch(e) { handleApiError(e, 'record holiday payment'); }
+};
 
-        const confirmed = await window.Modals?.confirm({
-            title: 'Record full payment?',
-            message: `Mark "${fee.name}" (${rwf(fee.amount)} RWF) as paid in full for ${studentName(fee.student_id)}?`,
-            confirmLabel: 'Record Payment',
-            tone: 'info'
-        });
-        if (!confirmed) return;
+/* ── PUBLIC ── */
+window.hfRecordPayment = feeId => {
+    _hfTab = 'payment';
+    _hfDraw();
+    setTimeout(() => hfpSelectFee(feeId), 100);
+};
 
-        try {
-            await window.update?.('holiday_fees', feeId, { paid_amount: fee.amount, is_paid: true, updated_at: new Date().toISOString() });
-            fee.paid_amount = fee.amount;
-            fee.is_paid = true;
-            window.Toast?.success('Payment recorded');
-            renderFeeList(container);
-        } catch (err) {
-            window.Toast?.error('Could not record payment', err?.message);
-        }
-    }
-
-    async function applyPendingToNewTerm(container) {
-        const pending = (window.state?.holidayFees || []).filter(f => f.apply_at_next_term && !f.is_applied_next_term);
-        if (!pending.length) { window.Toast?.info('Nothing to apply', 'No pending holiday fees are waiting for next term.'); return; }
-
-        const confirmed = await window.Modals?.confirm({
-            title: `Apply ${pending.length} fee${pending.length === 1 ? '' : 's'} to the new term?`,
-            message: 'These holiday fees will be marked as applied and become part of the upcoming term\u2019s fee tracking.',
-            confirmLabel: 'Apply Now',
-            tone: 'warning'
-        });
-        if (!confirmed) return;
-
-        try {
-            const newTermId = window.getActiveTermId ? window.getActiveTermId() : null;
-            await window.markHolidayFeesAsApplied?.(pending.map(f => f.id), newTermId);
-            pending.forEach(f => { f.is_applied_next_term = true; });
-            window.Toast?.success('Fees applied', `${pending.length} holiday fee${pending.length === 1 ? '' : 's'} applied to the new term.`);
-            renderFeeList(container);
-        } catch (err) {
-            window.Toast?.error('Could not apply fees', err?.message);
-        }
-    }
-
-    return { render };
-})();
-
-// ─── EXPOSE ─────────────────────────────────────────────────────────
-// window.HolidaysFees was never assigned anywhere in this file, and the router
-// looks up window.renderHolidaysFees specifically (see core/router.js's
-// moduleIdToRenderFn) — this page was completely unreachable via navigation
-// despite being fully built.
-window.HolidaysFees = HolidaysFees;
-window.renderHolidaysFees = HolidaysFees.render;
+window.renderHolidaysFees = renderHolidaysFees;

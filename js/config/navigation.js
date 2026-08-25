@@ -74,6 +74,7 @@ const NAV_SECTIONS = {
     desc: 'Assessments, marks entry, registers, report cards, transcripts.',
     items: [
       { id: 'assessments', label: 'Assessments', icon: 'fa-clipboard-list', desc: 'Create and lock assessments by class/subject/term' },
+      { id: 'second-sitting', label: 'Second Sitting', icon: 'fa-clock-rotate-left', desc: 'Enter second sitting marks for students below promotion threshold' },
       { id: 'marks-entry', label: 'Marks Entry', icon: 'fa-pencil', desc: 'Live-validated entry with batch save' },
       { id: 'marks-database', label: 'Marks Database', icon: 'fa-database', desc: 'Browse and edit marks across assessments' },
       { id: 'class-register', label: 'Class Register', icon: 'fa-table-list', desc: 'Pre/Post/Annual layouts, Nursery and Primary' },

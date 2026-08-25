@@ -47,6 +47,7 @@ const MODULE_FILE_MAP = {
     'marks-analysis': 'js/modules/academics/marks-analysis.js',
     'marks-import-export': 'js/modules/academics/marks-import-export.js',
     'assessments': 'js/modules/academics/assessments.js',
+    'second-sitting': 'js/modules/academics/second-sitting.js',
     'assessment-locking': 'js/modules/academics/assessment-locking.js',
     'class-register': 'js/modules/academics/class-register.js',
     'register-export': 'js/modules/academics/register-export.js',

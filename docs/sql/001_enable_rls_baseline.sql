@@ -100,55 +100,23 @@ WHERE key NOT IN ('admin_password', 'system_password', 'secret_key');
 
 GRANT SELECT ON school_settings_public TO anon;
 
--- login_check() intentionally left alone -- see previous message.
--- Your live version already does the correct key-value lookup; re-running
--- the original file's named-column version would regress it.
-
-
--- NOTE: this still compares plaintext-to-plaintext internally, since
--- passwords aren't hashed yet (tracked separately). The improvement
--- here specifically is that the password value is now NEVER sent to
--- the browser at any point in the login flow, win or lose — it stays
--- entirely inside this function on the database side.
-CREATE OR REPLACE FUNCTION login_check(
-    p_username TEXT,
-    p_password TEXT,
-    p_role TEXT
-)
-RETURNS TABLE (
-    id INT, username TEXT, first_name TEXT, last_name TEXT,
-    role TEXT, phone TEXT, email TEXT, is_active BOOLEAN
-)
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-BEGIN
-    IF p_role = 'admin' THEN
-        RETURN QUERY
-        SELECT t.id, t.username, t.first_name, t.last_name, t.role,
-               t.phone, t.email, t.is_active
-        FROM teachers t, school_settings s
-        WHERE t.role = 'admin'
-          AND (t.username = p_username OR p_username = 'admin')
-          AND (p_password = s.admin_password OR p_password = t.password)
-        LIMIT 1;
-    ELSE
-        RETURN QUERY
-        SELECT t.id, t.username, t.first_name, t.last_name, t.role,
-               t.phone, t.email, t.is_active
-        FROM teachers t
-        WHERE t.username = p_username
-          AND t.role = p_role
-          AND t.password = p_password
-        LIMIT 1;
-    END IF;
-END;
-$$;
-
-GRANT EXECUTE ON FUNCTION login_check(TEXT, TEXT, TEXT) TO anon;
-
--- ─── Application follow-up required (not a DB change) ───────────────
+-- ⚠️  login_check()'s definition is intentionally NOT included in this
+-- file. An earlier version of this file had one here, but it was a
+-- stale, wrong-schema definition (referenced school_settings.
+-- admin_password as a COLUMN, which doesn't exist -- school_settings
+-- is key-value: id/key/value/updated_at) that would have silently
+-- overwritten the correct, current version if this file were ever
+-- re-run top-to-bottom. A comment saying "don't re-run this part"
+-- doesn't stop CREATE OR REPLACE FUNCTION from actually running --
+-- only removing the SQL itself does that.
+--
+-- The authoritative, current login_check() definition lives in
+-- 005_server_side_lockout.sql (or 003_hash_passwords.sql if 005
+-- hasn't been run yet) -- run this file (001), then 002, then 003,
+-- then 004 (whichever applies), then 005, in that order, and the
+-- LAST one you run is authoritative for login_check() specifically.
+-- If you ever need to rebuild login_check() from scratch, copy it
+-- from 005, not from here.
 -- core/auth.js's doLogin() needs to call this function instead of
 -- fetching teachers/school_settings directly:
 --   POST /rest/v1/rpc/login_check

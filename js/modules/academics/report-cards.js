@@ -12,14 +12,22 @@ let _rcClassId = null, _rcStudentId = null, _rcYearId = null;
 async function renderReportCards(container, params = {}) {
     if (!container) return;
     await ensureStateLoaded();
-    _rcClassId   = params.classId   || state.classes?.[0]?.id  || null;
+    _rcYearId    = params.yearId || getActiveYear()?.id || null;
+
+    // Class teacher restriction: teacher sees only their own class
+    const myClass = typeof getMyClass === 'function' ? getMyClass() : null;
+    const isAdmin = state.currentUser?.role === 'admin';
+    const accessibleIds = typeof getAccessibleClassIds === 'function'
+        ? getAccessibleClassIds() : (state.classes||[]).map(c=>c.id);
+
+    _rcClassId = params.classId || myClass?.id || accessibleIds[0] || null;
     _rcStudentId = params.studentId || null;
-    _rcYearId    = params.yearId    || getActiveYear()?.id      || null;
     _rcShell(container);
 }
 
 function _rcShell(container) {
-    const classes  = (state.classes||[]).filter(c=>c.is_active!==false).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+    const accessIds = typeof getAccessibleClassIds === 'function' ? getAccessibleClassIds() : (state.classes||[]).map(c=>c.id);
+    const classes  = (state.classes||[]).filter(c=>c.is_active!==false&&accessIds.includes(c.id)).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
     const students = _rcStudentsForClass(_rcClassId);
     if (!_rcStudentId && students.length) _rcStudentId = students[0].id;
     const years    = (state.academicYears||[]).sort((a,b)=>(b.year_name||'').localeCompare(a.year_name||''));

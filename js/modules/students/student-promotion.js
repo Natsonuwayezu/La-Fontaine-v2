@@ -196,25 +196,65 @@ const StudentPromotion = (() => {
 
   function renderTable(body) {
     const wrap = body.querySelector('#promo-table-wrap');
+    const promoMark = parseFloat(state.schoolSettings?.promotion_mark || '50');
     wrap.innerHTML = `
+      <div style="overflow-x:auto;">
       <table class="data-table">
-        <thead><tr><th>Student</th><th style="text-align:center;">Average</th><th style="text-align:center;">Decision</th></tr></thead>
-        <tbody>${roster.map(s => `
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th class="text-center">Code</th>
+            <th class="text-center">Annual %</th>
+            <th class="text-center">2nd Sitting %</th>
+            <th class="text-center" style="min-width:160px;">First Decision</th>
+            <th class="text-center" style="min-width:180px;">Final Decision</th>
+          </tr>
+        </thead>
+        <tbody>${roster.map(s => {
+          const annColor  = !s.hasMarks ? 'color:var(--text-muted);'
+            : s.average  >= promoMark   ? 'color:var(--success);font-weight:700;'
+            :                             'color:var(--danger);font-weight:700;';
+          const ssColor   = s.ssAverage === null ? 'color:var(--text-muted);'
+            : s.ssAverage >= promoMark  ? 'color:var(--success);font-weight:700;'
+            :                             'color:var(--danger);font-weight:700;';
+          return `
           <tr>
             <td>${escapeHTML(s.name)}</td>
-            <td style="text-align:center; color:${s.average < 50 ? 'var(--danger)' : 'var(--success)'};">${s.hasMarks ? `${s.average}%` : '<span style="color:var(--text-soft);">No marks</span>'}</td>
-            <td style="text-align:center;">
-              <select class="form-select" data-decision="${s.id}" style="min-width:130px;">
-                ${DECISION_OPTIONS.map(o => `<option value="${o.value}" ${s.decision === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
+            <td class="text-center" style="font-size:11px;color:var(--text-muted);">${escapeHTML(s.code||'')}</td>
+            <td class="text-center" style="${annColor}">
+              ${s.hasMarks ? s.average.toFixed(1) + '%' : '<span style="color:var(--text-muted);">No marks</span>'}</td>
+            <td class="text-center" style="${ssColor}">
+              ${s.ssAverage !== null ? s.ssAverage.toFixed(1) + '%' : '<span style="color:var(--text-muted);">—</span>'}</td>
+            <td class="text-center">
+              <select class="select" data-decision="${s.id}" style="min-width:150px;font-size:12px;">
+                ${DECISION_OPTIONS.map(o => `<option value="${o.value}" ${s.decision === o.value ? 'selected' : ''}>${escapeHTML(o.label)}</option>`).join('')}
+              </select>
+            </td>
+            <td class="text-center">
+              <select class="select" data-final-decision="${s.id}" style="min-width:170px;font-size:12px;"
+                ${s.decision !== 'second_sitting' ? 'disabled' : ''}>
+                <option value="">— Pending 2nd sitting —</option>
+                ${FINAL_DECISION_OPTIONS.map(o => `<option value="${o.value}" ${s.finalDecision === o.value ? 'selected' : ''}>${escapeHTML(o.label)}</option>`).join('')}
               </select>
             </td>
           </tr>
-        `).join('')}</tbody>
+        `}).join('')}</tbody>
       </table>
+      </div>
     `;
     wrap.querySelectorAll('[data-decision]').forEach(sel => {
       sel.addEventListener('change', () => {
-        roster.find(s => s.id === parseInt(sel.dataset.decision, 10)).decision = sel.value;
+        const s = roster.find(s => s.id === parseInt(sel.dataset.decision, 10));
+        s.decision = sel.value;
+        // Enable/disable final decision based on first decision
+        const finalSel = wrap.querySelector(`[data-final-decision="${s.id}"]`);
+        if (finalSel) finalSel.disabled = s.decision !== 'second_sitting';
+      });
+    });
+    wrap.querySelectorAll('[data-final-decision]').forEach(sel => {
+      sel.addEventListener('change', () => {
+        const s = roster.find(s => s.id === parseInt(sel.dataset['final-decision'] || sel.getAttribute('data-final-decision'), 10));
+        if (s) s.finalDecision = sel.value || null;
       });
     });
   }

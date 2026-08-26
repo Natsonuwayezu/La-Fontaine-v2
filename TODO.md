@@ -416,3 +416,27 @@ count could be slightly different from what's listed here.
 - [x] window.renderXxx bridges for all 92 MODULE_FILE_MAP IDs
 - [x] backend.txt / frontend.txt removed
 - [x] index.html CSS + script order fixed (multiple times)
+
+---
+
+## 🔴 NEXT SESSION (confirmed from review)
+
+### Registration form update
+- [ ] **Student enrollment form (enroll-student.js)** — update to match current DB schema
+      - Remove fields that don't exist in students table
+      - Add fields that are missing but in the DB
+      - Review fee assignment section (already has discount/approval logic)
+      - Verify all field names match DB column names exactly
+
+### Fee categories page
+- [ ] **fee-categories.js** — review and update
+      - Ensure is_core flag is usable for second sitting subject selection
+      - Add default_amount field for holiday fee auto-assignment
+      - Ensure fee_config column on holiday_sessions is accessible
+      - Link to fee-approvals workflow
+
+### Other confirmed pending
+- [ ] Run supabase-migration-second-sitting.sql in Supabase SQL Editor
+- [ ] Run supabase-migration-holiday-sessions.sql
+- [ ] Run supabase-migration-qr-snapshots.sql
+- [ ] Wire createReportCardSnapshot() into report-cards.js print button (QR code on printed report)

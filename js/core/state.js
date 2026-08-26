@@ -804,3 +804,44 @@ function getRosterForClassAndYear(classId, yearId) {
 window.getTermById = getTermById;
 window.getSessionSubjectsForClass = getSessionSubjectsForClass;
 window.getRosterForClassAndYear = getRosterForClassAndYear;
+/* ─────────────────────────────────────────────────────────────────
+   CLASS TEACHER HELPERS
+   ─────────────────────────────────────────────────────────────────
+   Teachers can only access their own class (class_teacher_id).
+   Admins can access everything.
+   ───────────────────────────────────────────────────────────────── */
+
+/** Returns the class this teacher is class teacher of, or null */
+function getMyClass() {
+    if (!state.currentUser) return null;
+    if (state.currentUser.role === 'admin') return null; // admin sees all
+    const teacherId = state.currentUser.teacher_id || state.currentUser.id;
+    return (state.classes || []).find(c => c.class_teacher_id === teacherId) || null;
+}
+
+/** Returns true if current user can access data for this classId */
+function canAccessClass(classId) {
+    if (!state.currentUser) return false;
+    const role = state.currentUser.role;
+    // Admin and accountant see all
+    if (role === 'admin' || role === 'accountant') return true;
+    // Teacher: only their own class
+    const myClass = getMyClass();
+    return myClass ? myClass.id === classId : false;
+}
+
+/** Returns the list of class IDs this user can access */
+function getAccessibleClassIds() {
+    if (!state.currentUser) return [];
+    const role = state.currentUser.role;
+    if (role === 'admin' || role === 'accountant') {
+        return (state.classes || []).map(c => c.id);
+    }
+    const myClass = getMyClass();
+    return myClass ? [myClass.id] : [];
+}
+
+
+window.getMyClass = getMyClass;
+window.canAccessClass = canAccessClass;
+window.getAccessibleClassIds = getAccessibleClassIds;

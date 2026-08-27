@@ -610,6 +610,120 @@ function disableBiometricLogin() {
 }
 
 /* ─────────────────────────────────────────────────────────────────
+   GOOGLE SIGN-IN (Phase 5 of the auth hardening roadmap — TODO.md)
+   ───────────────────────────────────────────────────────────────── */
+
+/**
+ * Kick off the Google OAuth redirect. Requires the Google provider to
+ * be enabled in the Supabase dashboard (Authentication → Providers)
+ * with a real Client ID/Secret from Google Cloud Console — this call
+ * will fail with a clear Supabase error until that's configured.
+ */
+async function signInWithGoogle() {
+    const client = getSupabaseClient();
+    if (!client) {
+        if (typeof showToast === 'function') {
+            showToast('Cannot reach the authentication service. Check your connection.', 'error');
+        }
+        return;
+    }
+
+    const { error } = await client.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            // Return to the same page (index.html at the site root);
+            // handleGoogleRedirect() below picks up from there.
+            redirectTo: window.location.origin + window.location.pathname,
+        },
+    });
+
+    if (error) {
+        console.error('[Auth] Google sign-in failed to start:', error.message);
+        if (typeof showToast === 'function') {
+            showToast(`Could not start Google sign-in: ${error.message}`, 'error');
+        }
+    }
+    // On success, the browser navigates away to Google immediately —
+    // nothing else to do here, control resumes in handleGoogleRedirect()
+    // after the round trip back.
+}
+
+/**
+ * Called once, early in boot.js, before the normal session check.
+ * Detects whether this page load is the return leg of a Google OAuth
+ * redirect (a `?code=...` param Supabase's signInWithOAuth appends),
+ * and if so, exchanges it for a session, looks up whether the
+ * signed-in Google email matches a real teacher, and completes the
+ * app's own login flow the same way a password login does.
+ *
+ * Returns true if it handled a redirect (whether that led to a
+ * successful login or not) so boot.js knows not to also run the
+ * normal "no session, show login page" path on top of it.
+ */
+async function handleGoogleRedirect() {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has('code')) return false;
+
+    const client = getSupabaseClient();
+    if (!client) return false;
+
+    let session = null;
+    try {
+        const { data, error } = await client.auth.exchangeCodeForSession(window.location.href);
+        if (error) throw error;
+        session = data?.session || null;
+    } catch (err) {
+        console.error('[Auth] Google redirect exchange failed:', err.message);
+    }
+
+    // Clean the ?code=... out of the URL either way — leaving it
+    // there risks trying to re-exchange an already-used code on the
+    // next refresh, which always fails.
+    window.history.replaceState({}, document.title, window.location.pathname);
+
+    const email = session?.user?.email || null;
+
+    // The app doesn't use Supabase Auth sessions for anything else —
+    // it manages its own custom session (see _saveSession above).
+    // Sign out of the Supabase Auth session once we've read the email
+    // from it, so it doesn't linger as a second, unused session.
+    await client.auth.signOut().catch(() => { });
+
+    if (!email) {
+        if (typeof showToast === 'function') {
+            showToast('Google sign-in did not complete. Please try again.', 'error');
+        }
+        return true;
+    }
+
+    try {
+        const rows = await callRPC('oauth_login_check', { p_email: email });
+
+        if (!rows || rows.length === 0) {
+            if (typeof showToast === 'function') {
+                showToast(`No account found for ${email}. Contact your administrator to be added.`, 'error', 8000);
+            }
+            return true;
+        }
+
+        const user = rows[0];
+        if (user.is_active === false) {
+            if (typeof showToast === 'function') {
+                showToast('Your account has been deactivated. Contact admin.', 'error');
+            }
+            return true;
+        }
+
+        await _completeLogin(user);
+        return true;
+
+    } catch (err) {
+        handleApiError(err, 'Google login');
+        return true;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────
    PASSWORD CHANGE
    ───────────────────────────────────────────────────────────────── */
 
@@ -807,6 +921,19 @@ function renderLoginPage() {
                                     Sign in with Biometric
                                 </button>
                             </div>
+
+                            <!-- Google Sign-In -->
+                            <div class="login-divider"><span>or</span></div>
+                            <button class="login-btn login-btn--google" id="google-signin-btn"
+                                    onclick="signInWithGoogle()" ${lockout.locked ? 'disabled' : ''}>
+                                <svg width="18" height="18" viewBox="0 0 48 48">
+                                    <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.5 5.4 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.4-.4-3.5z"/>
+                                    <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.5 5.4 29.6 3 24 3c-7.7 0-14.4 4.4-17.7 10.7z"/>
+                                    <path fill="#4CAF50" d="M24 45c5.5 0 10.4-1.9 14.3-5.1l-6.6-5.6C29.6 36 26.9 37 24 37c-5.2 0-9.6-3.3-11.2-7.9l-6.6 5.1C9.5 40.5 16.2 45 24 45z"/>
+                                    <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.6 5.6C41.7 36.6 45 30.9 45 24c0-1.4-.1-2.4-.4-3.5z"/>
+                                </svg>
+                                Sign in with Google
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -961,6 +1088,8 @@ window.checkLoginLockout = checkLoginLockout;
 window.isBiometricAvailable = isBiometricAvailable;
 window.isBiometricEnabled = isBiometricEnabled;
 window.tryBiometricLogin = tryBiometricLogin;
+window.signInWithGoogle = signInWithGoogle;
+window.handleGoogleRedirect = handleGoogleRedirect;
 window.enableBiometricLogin = enableBiometricLogin;
 window.disableBiometricLogin = disableBiometricLogin;
 window.changePassword = changePassword;

@@ -143,7 +143,15 @@ window.SUPABASE_URL = getSupabaseUrl();
 window.SUPABASE_KEY = getSupabaseKey();
 window.SUPABASE_DEFAULT_URL = DEFAULT_SUPABASE_URL;
 window.SUPABASE_DEFAULT_KEY = DEFAULT_SUPABASE_KEY;
-window.supabaseClient = supabaseClient;
+// NOTE: window.supabaseClient (a snapshot) used to be exposed here,
+// but it was only ever set once at module load — if initSupabase()
+// ran again later (setSupabaseCredentials()/resetSupabaseCredentials()
+// reassign the module-scoped `supabaseClient` variable, not this
+// property), anything reading window.supabaseClient directly would
+// silently keep using a stale client. Nothing in the app currently
+// reads it directly (checked before removing it), but exposing a live
+// getter instead removes the trap for whoever reaches for it next.
+Object.defineProperty(window, 'supabaseClient', { get: getSupabaseClient, configurable: true });
 window.getSupabaseClient = getSupabaseClient;
 window.initSupabase = initSupabase;
 window.isSupabaseConfigured = isSupabaseConfigured;

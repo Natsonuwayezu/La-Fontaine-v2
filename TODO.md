@@ -55,11 +55,39 @@ a browser API, not tied to either Google or Apple).
       touches it. Verify by deliberately failing a test login 5 times,
       then confirming the 6th attempt fails even with the correct
       password.
-- [ ] **Phase 5 — Google Sign-In**
-      Natso: create free Google Cloud project + OAuth consent screen +
-      Client ID/Secret, add to Supabase Auth provider settings.
-      Then: build the button + account-linking logic (match by email to
-      an existing teachers row, or route to Phase 7's approval flow).
+- [ ] **Phase 5 — Google Sign-In** — code + SQL written (2026-08-24), needs Natso's external setup before it can work
+      Built: "Sign in with Google" button on the login page,
+      signInWithGoogle()/handleGoogleRedirect() in auth.js, wired into
+      boot.js right before the normal session check, and
+      docs/sql/006_google_oauth_login.sql's oauth_login_check()
+      function (same security posture as login_check() — never
+      exposes the password column, matches by Google-verified email
+      only). Also fixed a real bug found while touching this file:
+      window.supabaseClient was a one-time snapshot from module load
+      that never updated if credentials changed later
+      (setSupabaseCredentials()/resetSupabaseCredentials() reassign
+      the module-scoped variable, not this property) — replaced with
+      a live getter. Nothing currently read the stale one directly,
+      but it was exactly the kind of trap Phase 5's own new code could
+      have walked into.
+      *(Natso's action, required before this can work at all):*
+      1. Google Cloud Console: free project + OAuth consent screen +
+         Client ID/Secret (no cost, unlike Apple's $99/year)
+      2. Supabase Dashboard → Authentication → Providers → Google:
+         paste the Client ID/Secret, enable the provider
+      3. In the same Google OAuth client, add Supabase's callback URL
+         as an authorized redirect URI (exact URL in 006's header)
+      Then: run 006, and actually test the full round trip — sign in
+      with a Google account whose email matches an existing teacher,
+      confirm it logs you in as that person; then try one that doesn't
+      match, confirm you get "No account found" cleanly. I can't test
+      this end-to-end myself (no way to complete a real Google OAuth
+      redirect from here), so this genuinely needs Natso's hands-on
+      verification before calling it done.
+      Not handled yet, deliberately deferred: what happens when a
+      Google email doesn't match anyone currently just shows an error
+      message — routing that into Phase 7's registration/approval flow
+      instead is real follow-up work once Phase 7 exists.
 - [ ] **Phase 6 — Device unlock via WebAuthn (fingerprint/Face ID/PIN)**
       New `webauthn_credentials` table + challenge/verify functions.
       Rides on the device's own biometric/PIN prompt, no separate

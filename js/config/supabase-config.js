@@ -26,8 +26,7 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 const DEFAULT_SUPABASE_URL = 'https://ovmymtdrugdljnttiltd.supabase.co';
-const DEFAULT_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXltdGRydWdkbGpudHRpbHRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1ODkwMDAsImV4cCI6MjA5ODE2NTAwMH0.8stEjiVUde2wNodGFW1dkNPhm501EqhlqbTFM2yXyLI';
-
+const DEFAULT_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXltdGRydWdkbGpudHRpbHRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1ODkwMDAsImV4cCI6MjA5ODE2NTAwMH0.8stEjiVUde2wNodGFW1dkNPhm501EqhlqbTFM2yXyLI'
 function getSupabaseUrl() {
   return localStorage.getItem('sb_url') || DEFAULT_SUPABASE_URL;
 }

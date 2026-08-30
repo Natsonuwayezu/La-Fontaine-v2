@@ -30,9 +30,15 @@ async function boot() {
 
     // ── Step 2: Register Service Worker ───────────────────────────
     // Non-blocking — do not await, let it register in background
-    registerServiceWorker().catch(err => {
-        console.warn('[Boot] SW registration failed:', err.message);
-    });
+    if (typeof registerServiceWorker === 'function') {
+        registerServiceWorker().catch(err => {
+            console.warn('[Boot] SW registration failed:', err.message);
+        });
+    } else {
+        console.warn('[Boot] registerServiceWorker not available — skipping SW registration.');
+        // If you need it, you can define a dummy function:
+        // window.registerServiceWorker = () => Promise.resolve();
+    }
 
     // ── Step 3: Init offline listeners ────────────────────────────
     initOfflineListeners();
@@ -312,7 +318,7 @@ async function _checkAndSwitchMode() {
             _logAutoSwitch('holiday', 'normal', 'Session ended');
             console.info('[Boot] Auto-deactivated holiday mode — session ended.');
         }
-    } catch(err) {
+    } catch (err) {
         console.warn('[Boot] Auto-switch check failed:', err.message);
     }
 }
@@ -321,23 +327,23 @@ function _logAutoSwitch(fromMode, toMode, reason) {
     const now = new Date().toISOString();
     if (typeof insert !== 'function') return;
     insert('system_logs', {
-        action_type : 'auto_mode_switch',
-        description : `SYSTEM: ${fromMode} → ${toMode}: ${reason}`,
-        actor_id    : null,
-        actor_name  : 'SYSTEM',
-        created_at  : now,
-        metadata    : JSON.stringify({ fromMode, toMode, reason }),
-    }).catch(() => {});
+        action_type: 'auto_mode_switch',
+        description: `SYSTEM: ${fromMode} → ${toMode}: ${reason}`,
+        actor_id: null,
+        actor_name: 'SYSTEM',
+        created_at: now,
+        metadata: JSON.stringify({ fromMode, toMode, reason }),
+    }).catch(() => { });
     const admins = (state.users || []).filter(u => u.role === 'admin');
     admins.forEach(admin => {
         insert('notifications', {
-            user_id    : admin.id,
-            title      : `Mode switched: ${fromMode} → ${toMode}`,
-            body       : reason,
-            type       : 'mode_switch',
-            is_read    : false,
-            created_at : now,
-        }).catch(() => {});
+            user_id: admin.id,
+            title: `Mode switched: ${fromMode} → ${toMode}`,
+            body: reason,
+            type: 'mode_switch',
+            is_read: false,
+            created_at: now,
+        }).catch(() => { });
     });
 }
 

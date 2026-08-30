@@ -80,7 +80,17 @@ async function boot() {
     if (_appEl) _appEl.style.display = '';
 
     // ── Step 8: Check for existing session ────────────────────────
-    const sessionRestored = await checkSession();
+    // A returning Google OAuth redirect (Phase 5) takes priority —
+    // it carries its own one-time ?code= param that must be consumed
+    // before anything else touches the URL or the session state.
+    const handledGoogleRedirect = await handleGoogleRedirect().catch(err => {
+        console.error('[Boot] Google redirect handling failed:', err.message);
+        return false;
+    });
+
+    const sessionRestored = handledGoogleRedirect
+        ? !!state.currentUser
+        : await checkSession();
 
     if (sessionRestored) {
         // User is already logged in — navigate to correct module

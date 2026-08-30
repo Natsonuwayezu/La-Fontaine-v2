@@ -20,10 +20,21 @@
 const StudentPromotion = (() => {
 
   const DECISION_OPTIONS = [
-    { value: 'promote', label: 'Promote', color: 'var(--success)' },
-    { value: 'repeat', label: 'Repeat', color: 'var(--warning)' },
-    { value: 'transfer', label: 'Transfer', color: 'var(--accent-light, #60a5fa)' },
-    { value: 'graduate', label: 'Graduate', color: 'var(--academics-accent, #8b5cf6)' }
+    { value: 'promote',      label: 'Promoted',                  color: 'var(--success)' },
+    { value: 'second_sitting', label: '2nd Sitting',             color: 'var(--warning)' },
+    { value: 'repeat',       label: 'Repeated',                  color: 'var(--danger)' },
+    { value: 'transfer',     label: 'Promoted elsewhere',         color: 'var(--accent-light, #60a5fa)' },
+    { value: 'graduate',     label: 'Graduate',                   color: 'var(--academics-accent, #8b5cf6)' },
+    { value: 'discontinued', label: 'Discontinued',               color: 'var(--text-muted)' },
+  ];
+
+  // Final decisions after 2nd sitting
+  const FINAL_DECISION_OPTIONS = [
+    { value: 'promoted',          label: 'Promoted' },
+    { value: 'repeated',          label: 'Repeated' },
+    { value: 'promoted_after_2nd',label: 'Promoted after 2nd sitting' },
+    { value: 'repeated_after_2nd',label: 'Repeated after 2nd sitting' },
+    { value: 'discontinued',      label: 'Discontinued' },
   ];
 
   // Maps the real getPromotionDecision() formula's decision codes to
@@ -31,10 +42,10 @@ const StudentPromotion = (() => {
   // (e.g. to "transfer" instead of "repeat"), the formula just seeds a
   // sensible starting point instead of everyone defaulting to "promote".
   const FORMULA_TO_OPTION = {
-    PROMOTED: 'promote',
+    PROMOTED:  'promote',
     GRADUATED: 'graduate',
-    REMEDIAL: 'repeat',
-    REPEATED: 'repeat',
+    REMEDIAL:  'second_sitting',  // below promotion mark → 2nd sitting first
+    REPEATED:  'repeat',
   };
 
   let selectedClassId = null;
@@ -85,12 +96,33 @@ const StudentPromotion = (() => {
         const average = pcts.length ? Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length) : 0;
 
         const formulaResult = getPromotionDecision(average, cls.name);
+
+        // Compute 2nd sitting average % (core subjects only, stored in marks.second_sitting_score)
+        const yearTermIds2 = new Set((state.terms || [])
+          .filter(t => !window.getActiveYearId || t.academic_year_id === window.getActiveYearId())
+          .map(t => t.id));
+        const ssAssmnts = (state.assessments || []).filter(a =>
+          a.class_id === Number(classId) && yearTermIds2.has(a.term_id) && a.phase === 'second_sitting');
+        const ssScores = ssAssmnts.map(a => {
+          const m = (state.marks || []).find(m => m.student_id === s.id && m.assessment_id === a.id);
+          return m?.second_sitting_score ?? null;
+        }).filter(p => p !== null);
+        const ssAverage = ssScores.length
+          ? ssScores.reduce((a, b) => a + b, 0) / ssScores.length : null;
+
+        // Promotion decision from DB (if already saved)
+        const savedDecision = (state.promotionDecisions || []).find(d =>
+          d.student_id === s.id && d.academic_year_id === (window.getActiveYearId?.() || null));
+
         return {
           id: s.id,
           name: `${s.first_name || ''} ${s.last_name || ''}`.trim() || `Student #${s.id}`,
+          code: s.code || '',
           average,
+          ssAverage,
           hasMarks: pcts.length > 0,
-          decision: FORMULA_TO_OPTION[formulaResult.decision] || 'promote',
+          decision: savedDecision?.first_decision || FORMULA_TO_OPTION[formulaResult.decision] || 'promote',
+          finalDecision: savedDecision?.final_decision || null,
         };
       })
       .sort((a, b) => a.name.localeCompare(b.name));
@@ -164,25 +196,65 @@ const StudentPromotion = (() => {
 
   function renderTable(body) {
     const wrap = body.querySelector('#promo-table-wrap');
+    const promoMark = parseFloat(state.schoolSettings?.promotion_mark || '50');
     wrap.innerHTML = `
+      <div style="overflow-x:auto;">
       <table class="data-table">
-        <thead><tr><th>Student</th><th style="text-align:center;">Average</th><th style="text-align:center;">Decision</th></tr></thead>
-        <tbody>${roster.map(s => `
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th class="text-center">Code</th>
+            <th class="text-center">Annual %</th>
+            <th class="text-center">2nd Sitting %</th>
+            <th class="text-center" style="min-width:160px;">First Decision</th>
+            <th class="text-center" style="min-width:180px;">Final Decision</th>
+          </tr>
+        </thead>
+        <tbody>${roster.map(s => {
+          const annColor  = !s.hasMarks ? 'color:var(--text-muted);'
+            : s.average  >= promoMark   ? 'color:var(--success);font-weight:700;'
+            :                             'color:var(--danger);font-weight:700;';
+          const ssColor   = s.ssAverage === null ? 'color:var(--text-muted);'
+            : s.ssAverage >= promoMark  ? 'color:var(--success);font-weight:700;'
+            :                             'color:var(--danger);font-weight:700;';
+          return `
           <tr>
             <td>${escapeHTML(s.name)}</td>
-            <td style="text-align:center; color:${s.average < 50 ? 'var(--danger)' : 'var(--success)'};">${s.hasMarks ? `${s.average}%` : '<span style="color:var(--text-soft);">No marks</span>'}</td>
-            <td style="text-align:center;">
-              <select class="form-select" data-decision="${s.id}" style="min-width:130px;">
-                ${DECISION_OPTIONS.map(o => `<option value="${o.value}" ${s.decision === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
+            <td class="text-center" style="font-size:11px;color:var(--text-muted);">${escapeHTML(s.code||'')}</td>
+            <td class="text-center" style="${annColor}">
+              ${s.hasMarks ? s.average.toFixed(1) + '%' : '<span style="color:var(--text-muted);">No marks</span>'}</td>
+            <td class="text-center" style="${ssColor}">
+              ${s.ssAverage !== null ? s.ssAverage.toFixed(1) + '%' : '<span style="color:var(--text-muted);">—</span>'}</td>
+            <td class="text-center">
+              <select class="select" data-decision="${s.id}" style="min-width:150px;font-size:12px;">
+                ${DECISION_OPTIONS.map(o => `<option value="${o.value}" ${s.decision === o.value ? 'selected' : ''}>${escapeHTML(o.label)}</option>`).join('')}
+              </select>
+            </td>
+            <td class="text-center">
+              <select class="select" data-final-decision="${s.id}" style="min-width:170px;font-size:12px;"
+                ${s.decision !== 'second_sitting' ? 'disabled' : ''}>
+                <option value="">— Pending 2nd sitting —</option>
+                ${FINAL_DECISION_OPTIONS.map(o => `<option value="${o.value}" ${s.finalDecision === o.value ? 'selected' : ''}>${escapeHTML(o.label)}</option>`).join('')}
               </select>
             </td>
           </tr>
-        `).join('')}</tbody>
+        `}).join('')}</tbody>
       </table>
+      </div>
     `;
     wrap.querySelectorAll('[data-decision]').forEach(sel => {
       sel.addEventListener('change', () => {
-        roster.find(s => s.id === parseInt(sel.dataset.decision, 10)).decision = sel.value;
+        const s = roster.find(s => s.id === parseInt(sel.dataset.decision, 10));
+        s.decision = sel.value;
+        // Enable/disable final decision based on first decision
+        const finalSel = wrap.querySelector(`[data-final-decision="${s.id}"]`);
+        if (finalSel) finalSel.disabled = s.decision !== 'second_sitting';
+      });
+    });
+    wrap.querySelectorAll('[data-final-decision]').forEach(sel => {
+      sel.addEventListener('change', () => {
+        const s = roster.find(s => s.id === parseInt(sel.dataset['final-decision'] || sel.getAttribute('data-final-decision'), 10));
+        if (s) s.finalDecision = sel.value || null;
       });
     });
   }

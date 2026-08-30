@@ -940,20 +940,57 @@ function renderStep4(panel, container) {
                 const receiptNumber = await generateReceiptNumber();
 
                 const paymentPayload = {
-                    student_id: studentId,
-                    amount: totalPaidToday,
-                    payment_date: new Date().toISOString().slice(0, 10),
-                    payment_method: 'Cash',
-                    receipt_number: receiptNumber,
-                    notes: `Initial enrollment payment for ${d.firstName} ${d.lastName}`,
-                    recorded_by: state.currentUser?.id || null,
-                    created_at: new Date().toISOString()
+                    student_id       : studentId,
+                    amount           : totalPaidToday,
+                    payment_date     : new Date().toISOString().split('T')[0],
+                    payment_method   : d.paymentMethod || 'Cash',
+                    receipt_number   : receiptNumber,
+                    notes            : `Initial enrollment payment — ${d.firstName} ${d.lastName}`,
+                    recorded_by      : state.currentUser?.id || null,
+                    recorded_by_name : state.currentUser?.name || null,
+                    academic_year_id : state.currentAcadYear?.id || null,
+                    term_id          : state.currentTerm?.id || null,
+                    created_at       : new Date().toISOString(),
+                    updated_at       : new Date().toISOString(),
                 };
 
                 await insert('payments', paymentPayload);
             }
 
-            // 5. Update state and navigate
+            // 5. Record class enrollment for historical tracking
+            if (studentId && d.classId && state.currentAcadYear?.id) {
+                await insert('class_enrollments', {
+                    student_id       : studentId,
+                    class_id         : d.classId,
+                    academic_year_id : state.currentAcadYear.id,
+                    term_id          : state.currentTerm?.id || null,
+                    enrollment_date  : new Date().toISOString().split('T')[0],
+                    is_active        : true,
+                    status           : 'active',
+                    enrolled_by      : state.currentUser?.id || null,
+                    notes            : `Enrolled via enrollment form — ${d.firstName} ${d.lastName}`,
+                    created_at       : new Date().toISOString(),
+                    updated_at       : new Date().toISOString(),
+                }).catch(() => {});
+
+                await insert('student_class_history', {
+                    student_id       : studentId,
+                    class_id         : d.classId,
+                    academic_year_id : state.currentAcadYear.id,
+                    term_id          : state.currentTerm?.id || null,
+                    start_date       : new Date().toISOString().split('T')[0],
+                    end_date         : null,
+                    status           : 'active',
+                    reason           : 'new_enrollment',
+                    recorded_by      : state.currentUser?.id || null,
+                    created_at       : new Date().toISOString(),
+                }).catch(() => {});
+            }
+
+            // 6. Add payment academic_year + term if paid today
+            // (already included in paymentPayload above via state.currentAcadYear)
+
+            // 7. Update state and navigate
             await loadInitialData();
             showToast('Student enrolled successfully!', 'success', `${d.firstName} ${d.lastName} (${studentCode})`);
             navigateTo('student-list');

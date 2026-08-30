@@ -678,21 +678,30 @@ async function saveMarks() {
 
         if (toInsert.length) {
             jobs.push(insertMany('marks', toInsert.map(s => ({
-                student_id: s.student_id,
-                assessment_id: currentAssessment.id,
-                score: s.score,
-                is_absent: s.is_absent,
-                entered_by: state.currentUser?.id ?? null,
-                entered_at: now,
+                student_id       : s.student_id,
+                assessment_id    : currentAssessment.id,
+                score            : s.score,
+                is_absent        : s.is_absent,
+                entered_by       : state.currentUser?.id ?? null,
+                entered_by_name  : state.currentUser?.name || null,
+                entered_at       : now,
+                created_at       : now,
+                updated_at       : now,
+                academic_year_id : currentAssessment.academic_year_id || state.currentAcadYear?.id || null,
+                term_id          : currentAssessment.term_id          || state.currentTerm?.id    || null,
             }))));
         }
 
         toUpdate.forEach(s => {
             jobs.push(update('marks', s.markId, {
-                score: s.score,
-                is_absent: s.is_absent,
-                entered_by: state.currentUser?.id ?? null,
-                entered_at: now,
+                score            : s.score,
+                is_absent        : s.is_absent,
+                entered_by       : state.currentUser?.id ?? null,
+                entered_by_name  : state.currentUser?.name || null,
+                entered_at       : now,
+                updated_at       : now,
+                academic_year_id : currentAssessment.academic_year_id || state.currentAcadYear?.id || null,
+                term_id          : currentAssessment.term_id          || state.currentTerm?.id    || null,
             }));
         });
 

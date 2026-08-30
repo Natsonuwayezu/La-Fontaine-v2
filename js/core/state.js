@@ -845,3 +845,40 @@ function getAccessibleClassIds() {
 window.getMyClass = getMyClass;
 window.canAccessClass = canAccessClass;
 window.getAccessibleClassIds = getAccessibleClassIds;
+/**
+ * Get the roster for a class at a specific term — uses class_enrollments
+ * for historical accuracy (handles mid-year transfers, students leaving).
+ * Falls back to students.class_id if class_enrollments is empty.
+ *
+ * @param {number} classId
+ * @param {number} termId   - If null, uses current state
+ * @param {number} yearId   - If null, uses current year
+ * @returns {Array} student objects
+ */
+function getHistoricalRoster(classId, termId = null, yearId = null) {
+    const tId = termId || state.currentTerm?.id || null;
+    const yId = yearId || state.currentAcadYear?.id || null;
+
+    // Try class_enrollments first (historical)
+    const enrollments = (state.classEnrollments || []).filter(e =>
+        e.class_id === classId &&
+        (tId ? e.term_id === tId : true) &&
+        (yId ? e.academic_year_id === yId : true) &&
+        e.is_active !== false
+    );
+
+    if (enrollments.length > 0) {
+        const enrolled = new Set(enrollments.map(e => e.student_id));
+        return (state.students || [])
+            .filter(s => enrolled.has(s.id))
+            .sort((a, b) => (a.last_name || '').localeCompare(b.last_name || ''));
+    }
+
+    // Fallback: use students.class_id (current roster only)
+    return (state.students || [])
+        .filter(s => s.class_id === classId && s.status !== 'Archived' && !s.is_deleted)
+        .sort((a, b) => (a.last_name || '').localeCompare(b.last_name || ''));
+}
+
+
+window.getHistoricalRoster = getHistoricalRoster;

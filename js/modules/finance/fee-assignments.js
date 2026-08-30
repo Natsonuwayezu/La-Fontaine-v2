@@ -427,6 +427,11 @@ window.submitAssignFee = async function () {
             }
             await insert('student_fees', {
                 student_id: studentId, fee_amount_id: feeAmountId,
+                fee_category_id  : feeAmt?.fee_category_id || null,
+                amount           : feeAmt?.amount || 0,
+                academic_year_id : yearId || state.currentAcadYear?.id || null,
+                term_id          : state.currentTerm?.id || null,
+                due_date         : due || feeAmt?.due_date || null,
                 academic_year_id: yearId, amount, paid_amount: 0,
                 waived_amount: 0, is_paid: false, is_waived: false,
                 due_date: due || feeAmt.due_date || null,

@@ -423,7 +423,7 @@ const StudentProfile = (() => {
           student_id: s.id,
           academic_year_id: yearId,
           term_id: termId,
-          total_amount: total,
+          amount       : total,
           payment_date: now.slice(0, 10),
           payment_method: method,
           receipt_number: receiptNumber,
@@ -441,7 +441,8 @@ const StudentProfile = (() => {
           const bal = computeFeeBalance(fee);
           return update('student_fees', fee.id, {
             paid_amount: newPaid,
-            is_paid: newPaid >= bal.effective,
+            is_paid    : newPaid >= bal.effective,
+            updated_at : new Date().toISOString(),
           }).then(() => {
             fee.paid_amount = newPaid;
             fee.is_paid = newPaid >= bal.effective;

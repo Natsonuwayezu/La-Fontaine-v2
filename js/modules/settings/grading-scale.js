@@ -63,6 +63,7 @@ async function createGradeBand(data) {
     if (!check.valid) return { success: false, error: check.error };
 
     const row = await insert('grading_scale', {
+                academic_year_id : state.currentAcadYear?.id || null,
         grade: data.grade.trim(),
         min: Number(data.min),
         max: Number(data.max),
@@ -102,7 +103,8 @@ async function deleteGradeBand(id) {
 async function resetGradingScaleToDefault() {
     const existing = await listGradingScale();
     await Promise.all(existing.filter(b => b.id).map(b => remove('grading_scale', b.id)));
-    await Promise.all(DEFAULT_GRADES.map(g => insert('grading_scale', { ...g })));
+    await Promise.all(DEFAULT_GRADES.map(g => insert('grading_scale', {
+                academic_year_id : state.currentAcadYear?.id || null, ...g })));
     await refreshTable('grading_scale');
     await logAction('GRADING_SCALE_RESET', 'grading_scale', null);
     return { success: true };

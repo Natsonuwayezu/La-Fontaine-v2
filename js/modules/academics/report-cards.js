@@ -7,7 +7,7 @@
    ═══════════════════════════════════════════════════════════════════ */
 'use strict';
 
-let _rcClassId = null, _rcStudentId = null, _rcYearId = null;
+let _rcClassId = null, _rcStudentId = null, _rcYearId = null, _rcTermId = null;
 
 async function renderReportCards(container, params = {}) {
     if (!container) return;
@@ -66,10 +66,13 @@ function _rcShell(container) {
     </div>`;
 }
 
-function _rcStudentsForClass(classId) {
+function _rcStudentsForClass(classId, termId, yearId) {
     if (!classId) return [];
+    if (typeof getHistoricalRoster === 'function') {
+        return getHistoricalRoster(classId, termId || _rcTermId, yearId || _rcYearId);
+    }
     return (state.students||[]).filter(s=>s.class_id===classId&&s.status==='Active'&&!s.is_deleted)
-        .sort((a,b)=>(a.last_name||''). localeCompare(b.last_name||'')); 
+        .sort((a,b)=>(a.last_name||'').localeCompare(b.last_name||''));
 }
 
 window.rcPickYear    = id  => { _rcYearId=id; _rcRefresh(); };

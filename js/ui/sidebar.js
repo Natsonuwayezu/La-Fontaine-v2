@@ -250,7 +250,6 @@ function renderBadgeRow() {
     ? `<div class="sidebar-holiday-indicator"><i class="fa-solid fa-umbrella-beach"></i> Holiday Mode</div>`
     : '';
 
-  // NOTE: yearData was previously from YEAR_TERM_DATA mock — now from real state
   const _yearData_compat = { locked: false };
 
   row.innerHTML = `

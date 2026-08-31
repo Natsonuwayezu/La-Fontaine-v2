@@ -325,6 +325,36 @@ const StudentPromotion = (() => {
       window.Toast?.success('Promotion complete', `${roster.length} students in ${escapeHTML(cls.name)} processed: ${summaryText}.`);
     }
 
+    // Save first + final decisions to student_promotion_decisions table
+    const _now = new Date().toISOString();
+    for (const s of roster) {
+      try {
+        const payload = {
+          student_id          : s.id,
+          academic_year_id    : state.currentAcadYear?.id || null,
+          class_id            : Number(selectedClassId),
+          annual_average_pct  : s.hasMarks ? s.average : null,
+          second_sitting_avg_pct: s.ssAverage || null,
+          first_decision      : s.decision,
+          final_decision      : s.finalDecision || null,
+          first_decision_by   : state.currentUser?.id || null,
+          first_decision_at   : _now,
+          updated_at          : _now,
+        };
+        const ex = (state.promotionDecisions||[]).find(d =>
+          d.student_id === s.id && d.academic_year_id === payload.academic_year_id);
+        if (ex) {
+          await update('student_promotion_decisions', ex.id, payload).catch(()=>{});
+        } else {
+          payload.created_at = _now;
+          await insert('student_promotion_decisions', payload).catch(()=>{});
+        }
+        if (typeof logAction === 'function')
+          logAction('promotion_decision', 'student_promotion_decisions', s.id,
+            { first: s.decision, final: s.finalDecision, avg: s.average });
+      } catch(e) {}
+    }
+
     container.querySelector('#promo-class-select').value = '';
     container.querySelector('#promo-body').innerHTML = '';
     container.querySelector('#promo-count').textContent = '';

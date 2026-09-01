@@ -1,54 +1,156 @@
-# Permissions
+# École La Fontaine v9.0 — Permissions Matrix
 
-## Roles
+Role definitions: `admin`, `teacher`, `accountant`.
+Class teacher access: teachers only see their own class (classes.class_teacher_id).
 
-Three roles, defined in `config/constants.js`:
+---
 
-```js
-const USER_ROLES = ['admin', 'accountant', 'teacher'];
-const TEACHER_ROLES = USER_ROLES; // alias — see note below
-```
+## Module Access by Role
 
-All three live in the same `teachers` table (see `database-schema.md`) — there's no separate "users" or "accountants" table. `state.currentUser.role` holds the current session's role.
+| Module | Admin | Teacher | Accountant |
+|---|:---:|:---:|:---:|
+| **Dashboards** | | | |
+| admin-dashboard | ✅ | | |
+| teacher-dashboard | ✅ | ✅ | |
+| accountant-dashboard | ✅ | | ✅ |
+| **Attendance** | | | |
+| attendance-entry | ✅ | ✅ (own class) | |
+| attendance-reports | ✅ | ✅ (own class) | |
+| attendance-summary | ✅ | ✅ (own class) | |
+| attendance-analytics | ✅ | | |
+| **Students** | | | |
+| student-list | ✅ | ✅ (read) | ✅ (read) |
+| enroll-student | ✅ | | |
+| student-details | ✅ | | |
+| student-profile | ✅ | ✅ (own class) | ✅ |
+| family-management | ✅ | | ✅ |
+| sibling-linking | ✅ | | |
+| student-archive | ✅ | | |
+| student-promotion | ✅ | ✅ (own class) | |
+| **Academics** | | | |
+| marks-entry | ✅ | ✅ (own class) | |
+| marks-database | ✅ | ✅ (own class) | |
+| marks-analysis | ✅ | ✅ (own class) | |
+| marks-import-export | ✅ | ✅ (own class) | |
+| assessments | ✅ | ✅ (own class) | |
+| assessment-locking | ✅ | | |
+| second-sitting | ✅ | ✅ (own class) | |
+| class-register | ✅ | ✅ (own class) | |
+| annual-register | ✅ | ✅ (own class) | |
+| register-export | ✅ | ✅ (own class) | |
+| report-cards | ✅ | ✅ (own class) | |
+| rankings | ✅ | ✅ (own class) | |
+| statistics | ✅ | ✅ (own class) | |
+| academic-reports | ✅ | ✅ (own class) | |
+| **Holidays** | | | |
+| holidays-enrollment | ✅ | | |
+| holidays-marks | ✅ | ✅ (own class) | |
+| holidays-reports | ✅ | ✅ (own class) | |
+| holidays-rankings | ✅ | ✅ (own class) | |
+| holidays-fees | ✅ | | ✅ |
+| **Finance** | | | |
+| finance-dashboard | ✅ | | ✅ |
+| fee-structure | ✅ | | ✅ |
+| fee-assignments | ✅ | | ✅ |
+| fee-term-status | ✅ | | ✅ |
+| record-payment | ✅ | | ✅ |
+| payment-history | ✅ | | ✅ |
+| receipts | ✅ | | ✅ |
+| overdue-payments | ✅ | | ✅ |
+| fee-waivers | ✅ | | ✅ |
+| fee-approvals | ✅ | | ✅ |
+| credit-balances | ✅ | | ✅ |
+| balances | ✅ | | ✅ |
+| student-fees | ✅ | | ✅ |
+| student-statements | ✅ | | ✅ |
+| family-fee-summary | ✅ | | ✅ |
+| payment-reversals | ✅ | | |
+| manual-adjustments | ✅ | | |
+| discounts | ✅ | | ✅ |
+| carry-forward | ✅ | | ✅ |
+| finance-audit | ✅ | | ✅ |
+| financial-reports | ✅ | | ✅ |
+| **Staff & Timetable** | | | |
+| teachers | ✅ | ✅ (read) | |
+| subjects | ✅ | ✅ (read) | |
+| teacher-assignments | ✅ | | |
+| teacher-performance | ✅ | | |
+| class-timetable | ✅ | ✅ | |
+| teacher-timetable | ✅ | ✅ (own) | |
+| staff-timetable | ✅ | ✅ (read) | |
+| timetable-generator | ✅ | | |
+| timetable-conflicts | ✅ | | |
+| timetable-import | ✅ | | |
+| user-management | ✅ | | |
+| **Communication** | | | |
+| announcements | ✅ | ✅ (read) | ✅ (read) |
+| announcement-center | ✅ | ✅ | ✅ |
+| notifications | ✅ | ✅ | ✅ |
+| notification-center | ✅ | ✅ | ✅ |
+| reminders | ✅ | ✅ (read) | ✅ (read) |
+| **Analytics** | | | |
+| analytics | ✅ | | |
+| analytics-settings | ✅ | | |
+| system-health | ✅ | | |
+| **Settings** | | | |
+| settings | ✅ | | |
+| school-settings | ✅ | | |
+| academic-years | ✅ | | |
+| academic-calendar | ✅ | | |
+| grading-scale | ✅ | | |
+| grading-settings | ✅ | | |
+| holidays | ✅ | | |
+| backup-restore | ✅ | | |
+| system-logs | ✅ | | |
+| api-settings | ✅ | | |
+| users | ✅ | | |
+| **Bulk Operations** | | | |
+| bulk-import | ✅ | | |
+| bulk-export | ✅ | | ✅ |
+| bulk-student-actions | ✅ | | |
+| bulk-finance-actions | ✅ | | ✅ |
+| **Help** | | | |
+| help-center | ✅ | ✅ | ✅ |
+| faq | ✅ | ✅ | ✅ |
+| support | ✅ | ✅ | ✅ |
 
-> **Note:** `TEACHER_ROLES` didn't exist until it was added as an alias to `USER_ROLES` — `core/validators.js`'s `validateTeacherForm()` referenced it and would have thrown `ReferenceError` on every call before that fix. See `changelog.md`.
+---
 
-## Two permission systems
+## Database RLS Policies
 
-This codebase currently has **two** separate, overlapping permission modules. Both are real and both are in use — they haven't been reconciled into one yet.
+| Policy type | Tables |
+|---|---|
+| Admin full access | All 43 tables |
+| Teacher read own class | marks, assessments, class_enrollments, attendance |
+| Teacher write own class | marks (own assessments), attendance (own class) |
+| Accountant read | students, student_fees, payments, payment_allocations, fee_categories, fee_amounts, families |
+| Accountant write | payments, payment_allocations, student_fees, fee_waivers |
+| No hard delete | marks, payments, system_logs, verifications, snapshots |
 
-### `config/role-permissions.js` — generic module/entity access
+---
 
-Built around **which modules a role can see**, and generic CRUD-style checks:
+## Holiday Mode — Additional Restrictions
 
-- `canAccess(role, moduleId, isHoliday)` — can this role open this nav module at all
-- `can(role, entity, action)` / `canEdit` / `canDelete` / `canCreate` / `canRead` — generic entity-level CRUD check
-- `canAccessDashboard(role, moduleId)`, `getAccessibleModules(role)`, `getDashboardModules(role)`
-- `isAdmin()` / `isTeacher()` / `isAccountant()` / `currentRole()` / `currentUserId()` (all read from `state.currentUser`)
-- `isClassTeacher(teacherId, classId)` — true if this teacher is the assigned class-teacher for this class
+In holiday mode, teachers access holiday equivalents of their normal modules,
+but still restricted to their assigned class:
 
-Module access is driven by three sets: `ADMIN_BLOCKED_MODULES` (empty — admins can reach everything), `ACCOUNTANT_BLOCKED_MODULES`, `TEACHER_BLOCKED_MODULES` — plus `CLASS_TEACHER_EXTRA_ACCESS` for the small set of things a class-teacher can do that ordinary teachers can't.
+| Normal module | Holiday equivalent | Teacher access |
+|---|---|---|
+| marks-entry | holidays-marks | Own class only |
+| class-register | holidays-marks (register tab) | Own class only |
+| report-cards | holidays-reports | Own class only |
+| rankings | holidays-rankings | Own class only |
+| assessments | holidays-enrollment | Admin only |
+| fee-structure | holidays-fees | Accountant only |
 
-`js/ui/sidebar.js` calls `canAccess(state.role, item.id)` to filter which nav items render for the current role. (It used to call a function named `canAccessModule`, which never existed anywhere — fixed to call the real `canAccess`. See `changelog.md`.)
+Finance modules (holidays-fees, fee-approvals) — admin and accountant only in both modes.
 
-### `core/permissions.js` — specific action checks
+---
 
-Built around **one function per specific action**, all reading the current user via `myRole()`/`myId()`/`iAmAdmin()`/`iAmTeacher()`/`iAmAccountant()`:
+## Class Teacher Assignment
 
-- Students: `canCreateStudents`, `canEditStudent`, `canArchiveStudent`, `canPromoteStudents`
-- Academics: `canEnterMarks(assessment)`, `canLockAssessments`, `canDeleteAssessment(assessment)`, `canViewMarksDB`, `canViewReportCards`, `canViewAnnualRegister`
-- Finance: `canRecordPayment`, `canViewPayments`, `canManageFees`, `canGrantWaivers`, `canReversePayment`, `canViewFinanceReports`
-- Staff/settings: `canManageStaff`, `canManageSubjects`, `canResetPassword(targetUserId)`, `canManageSettings`, `canManageGrading`, `canBackup`, `canViewLogs`
-- Communication: `canCreateAnnouncements`
-- Class-teacher scoping: `iAmClassTeacher(classId)`, `myAssignedClassIds()`, `myAssignedSubjectIds()`, `canSeeClass(classId)`
-- DOM helpers for conditionally showing/hiding/disabling UI based on any of the above: `showIf`, `hideIf`, `visibleIf`, `disabledIf`, `readonlyIf`, plus page-level appliers `enforceRoleVisibility()`, `enforceFormPermissions()`, `applyHolidayVisibility()`
-
-This is the file to reach for when a specific button or form field needs a specific permission check — `role-permissions.js` is coarser (whole-module access), `permissions.js` is finer (this one action, right now, for this user).
-
-## Holiday mode
-
-`isHolidayMode()` (`core/state.js`) toggles a parallel mode where a different set of tables is used (`holiday_marks`, `holiday_fees`, `holiday_enrollments`, `holiday_subjects` — see `database-schema.md`) and `applyHolidayVisibility()` in `permissions.js` adjusts what's shown accordingly. `canAccess()` in `role-permissions.js` also takes an `isHoliday` parameter for the same reason.
-
-## Login lockout
-
-`core/auth.js` locks out repeated failed login attempts using `APP_CONFIG.maxLoginAttempts` (5) and `APP_CONFIG.lockoutDuration` (15 minutes), tracked in `localStorage` under the key `lf_login_attempts`. Check via the public `checkLoginLockout()` function. (This was silently broken — it checked a field named `maxFailedLogins`, which didn't exist, so lockout never triggered. Fixed; see `changelog.md`. Covered by `tests/auth-tests.js`.)
+A teacher is identified as class teacher by:
+- `classes.class_teacher_id` = teacher's `id` in the `teachers` table.
+- This FK controls all class-level access restrictions.
+- A teacher with no class assigned sees their modules but with no class data.
+- Admin overrides all restrictions — sees all classes always.

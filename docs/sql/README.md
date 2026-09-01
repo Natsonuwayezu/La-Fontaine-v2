@@ -1,27 +1,45 @@
-# docs/sql/
+# docs/sql/ — Database Migrations
 
-Numbered SQL migrations to run manually in the Supabase SQL editor, in
-order. These are not auto-applied by the app — run each file once,
-top to bottom, checking for errors before moving to the next.
+SQL migrations for École La Fontaine v9.0.
+Run in Supabase SQL Editor in order, top to bottom.
+Each file is idempotent where practical — safe to re-run.
+Check for errors after each file before moving to the next.
 
-Every file here should be idempotent where practical (safe to re-run
-without duplicating data or erroring on already-applied changes).
+---
 
-## Files
+## Run Order
 
-| # | File | What it does |
-|---|---|---|
-| 001 | `001_enable_rls_baseline.sql` | Enables RLS on every real table, stops plaintext passwords from reaching the client via a secure login function + views, blocks hard-deletion of financial/academic history records. See the file's own header comment for what it deliberately does NOT do yet (password hashing, per-user row scoping — both need a real auth migration first). |
-| 002 | `002_tighten_delete_protection.sql` | Fixes a gap found by auditing the live `pg_policies` output after 001 ran: leftover broad `anon_all_<table>` policies were undermining the intended no-delete protection on 7 tables, and 4 frozen-document/audit-trail tables (verifications, receipt/report_card/transcript snapshots) had no delete protection at all. Run after 001. |
-| 003 | `003_hash_passwords.sql` | Phase 3 of the auth roadmap — real bcrypt password hashing via a database trigger, requiring no app-code changes. Includes a one-time migration for existing plaintext rows and an updated `login_check()` that compares against the hash. Run after 001 and 002, then verify by actually logging in as each role. |
-| 005 | `005_server_side_lockout.sql` | Phase 4 — real login lockout enforced inside `login_check()` itself (5 attempts / 15 minutes, matching the existing client-side numbers in `auth.js`), closing the gap where the current lockout lives only in `localStorage` and is trivially bypassed by clearing storage or calling the RPC directly. New `login_attempts` table with no `anon` policies at all — only `login_check()` itself (SECURITY DEFINER) touches it. Run after 001, 002, and 003. |
-| 006 | `006_google_oauth_login.sql` | Phase 5 — `oauth_login_check(email)`, used by the new Google Sign-In flow to match a Google-verified email to a real teacher without exposing the password column. Requires manual setup outside the database first (Google Cloud OAuth credentials + Supabase provider settings) — see the file's header for the exact 3 steps. |
-| 007 | `007_holiday_sessions.sql` | Holiday session system — creates `holiday_sessions`, `session_classes`, `session_subjects`, `session_teacher_assignments`, `session_assessments`, `fee_approval_log`. Adds `holiday_session_id` FK to `holiday_marks`, `holiday_fees`, `holiday_enrollments`, `holiday_subjects`. Adds `is_approved`, `requires_approval`, `waived_amount`, `source` to `student_fees`. Run after 006. |
-| 008 | `008_qr_snapshots.sql` | QR verification system — creates `verifications`, `report_card_snapshots`, `receipt_snapshots`, `transcript_snapshots`. Each snapshot stores a frozen PDF-ready payload and a one-time verification token used by the QR scanner at `qr-verify.html`. Run after 007. |
-| 009 | `009_second_sitting.sql` | Second sitting marks system — allows `phase='second_sitting'` in assessments. Adds `second_sitting_score`, `second_sitting_entered_by/at` to `marks`. Creates `student_promotion_decisions` (first_decision + final_decision per student per year). Adds `is_core` to `subjects` to flag which subjects count for second sitting. Run after 008. |
+| # | File | What it does | Status |
+|---|---|---|---|
+| 001 | `001_enable_rls_baseline.sql` | Enables Row Level Security on all 43 tables. Creates `login_check(email, password)` RPC for secure server-side authentication. Adds hard-delete protection on marks, payments, system_logs, verifications, snapshots. | Run |
+| 002 | `002_tighten_delete_protection.sql` | Removes overly-broad `anon_all_<table>` policies that bypassed delete protection on several tables. Adds protection to verifications and snapshot tables. Fixes live policy conflicts found in `pg_policies` audit. | Run |
+| 003 | `003_hash_passwords.sql` | Adds bcrypt password hashing via DB trigger on `school_settings`. One-time migration converts any existing plaintext password rows to hashes. Updates `login_check()` to compare input against bcrypt hash using `pgcrypto`. | Run |
+| 004 | `004_fix_unexplained_policies.sql` | Removes conflicting and duplicate RLS policies discovered during live audit of `pg_policies`. Replaces with clean, non-overlapping policies. | Run |
+| 005 | `005_server_side_lockout.sql` | Adds login lockout inside `login_check()`: 5 failed attempts per 15 minutes triggers a lockout period. Creates `login_attempts` table (no anon access, no user-readable). Auto-clears expired lockout records. | Run |
+| 006 | `006_google_oauth_login.sql` | Creates `oauth_login_check(email TEXT)` RPC for Google Sign-In. Matches Google-verified email to a teacher record in the `teachers` table without exposing or checking passwords. Returns the same session structure as `login_check()`. | Run |
+| 007 | `007_holiday_sessions.sql` | Creates the full holiday session system: `holiday_sessions`, `session_classes`, `session_subjects`, `session_teacher_assignments`, `session_assessments`, `fee_approval_log`. Adds `holiday_session_id` FK to `holiday_marks`, `holiday_fees`, `holiday_enrollments`, `holiday_subjects`. Adds `is_approved`, `requires_approval`, `waived_amount`, `source` columns to `student_fees`. Enables RLS on all new tables. | Run |
+| 008 | `008_qr_snapshots.sql` | Creates QR verification system: `verifications`, `report_card_snapshots`, `receipt_snapshots`, `transcript_snapshots`. Each snapshot stores a frozen JSON payload and a one-time verification token. Token is embedded in QR code on printed documents. `qr-verify.html` fetches and renders by token. | Run |
+| 009 | `009_second_sitting.sql` | Second sitting support: allows `phase = 'second_sitting'` in `assessments.phase` check constraint. Adds `second_sitting_score`, `second_sitting_entered_by`, `second_sitting_entered_at` to `marks`. Creates `student_promotion_decisions` table (first_decision + final_decision per student per academic year). Adds `is_core BOOLEAN DEFAULT TRUE` to `subjects` to flag which subjects count for second sitting. | Run |
 
-## Before running any file here
+---
 
-1. Run on a staging/copy of the database first if you have one — RLS changes can break the app if a policy is missing for something the client actually calls.
-2. After running, test each role's core workflows (login, enroll a student, record a payment, enter marks) before considering it done — RLS failures show up as empty results or 403s, not errors that are always obvious in the UI.
-3. Read the file's own header comment — each one explains what it achieves and, just as importantly, what it doesn't.
+## tables.json
+
+Full schema export from Supabase. Contains every table's columns, data types,
+primary keys, foreign keys, unique constraints, check constraints, and indexes.
+Used during development to audit JS insert/update payloads against real column names.
+Do not modify manually — regenerate from Supabase if schema changes.
+
+---
+
+## Notes
+
+- Always run in order. Later migrations depend on objects created by earlier ones.
+- If a migration partially fails: fix the error, then re-run only the failed file.
+  Most statements use `IF NOT EXISTS` and `IF EXISTS` guards.
+- After running 007-009: reload the app and verify holiday mode, QR scanning,
+  and second sitting entry work correctly.
+- The `login_attempts` table (created by 005) has no user-visible UI —
+  it is managed entirely by the `login_check()` function.
+- Never manually edit `login_check()` or `oauth_login_check()` without understanding
+  the auth flow in `js/core/auth.js`.

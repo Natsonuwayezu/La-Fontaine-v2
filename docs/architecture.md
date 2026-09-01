@@ -1,82 +1,331 @@
-# Architecture
+# École La Fontaine v9.0 — System Architecture
 
-## The one rule that matters most: plain scripts, shared global scope
+---
 
-Every JS file in this app is loaded by `index.html` as a classic `<script src="...">` tag — **not** `<script type="module">`. This is a deliberate, load-bearing choice, not an oversight:
+## Overview
 
-- Module scripts require the page to be served over `http(s)://`; opening `index.html` directly (`file://`) fails with a CORS error. Plain scripts don't have that restriction.
-- It keeps every file's globals reachable from every other file without an import graph to maintain.
+École La Fontaine is a single-page Progressive Web App (PWA) built with vanilla JavaScript
+and Supabase as the backend. There is no build step, no bundler, and no JavaScript framework.
+All 161 JS files are loaded via plain `<script>` tags in `index.html`. The app runs
+offline-capable on desktop, tablet, and mobile.
 
-The tradeoff: **all classic scripts on the page share one global scope.** Two consequences that have caused real bugs in this codebase (see `troubleshooting.md`):
+---
 
-1. **`import`/`export` syntax is a hard parse error** in a non-module script — the whole file silently executes zero lines. Every file was audited and converted off this pattern (see `changelog.md`), but if you're porting in new code, strip `import`/`export` and expose things via `window.X = X` instead.
-2. **A top-level `const`/`let`/`function` name declared in two files that both load on the page throws `SyntaxError: Identifier already declared`** the moment the second file parses — and that error kills the *entire* second file, not just the colliding name. This has happened at least 7 times across this codebase (`ANNUAL_MAX`, `esc`, `scoreToPercent`, `getStudentRank`, `state`, `serializeForm`/`clearForm`, `openPrintWindow`/`printElement`). **Before adding a new top-level name to any always-loaded file, grep the rest of `js/` for it first.**
-
-Because of #2, a function that's only used internally in one file should still get a reasonably specific name — `esc`, `state`, and `render` are exactly the kind of short, generic names that collide.
-
-## Load order (`index.html`)
-
-Scripts load in this order, synchronously, at the end of `<body>`:
+## Layer Architecture
 
 ```
-config/  (constants, navigation, role-permissions, supabase-config)
-  ↓
-core/    (state → utils → sanitizers → validators → api → formulas →
-          academic-formulas → finance-formulas → fees → permissions →
-          auth → router → cache → logger → error-handler →
-          notifications-engine → offline → sync-engine → pwa →
-          print-engine)
-  ↓
-ui/      (shell → sidebar → topbar → modals → toast → theme → tables →
-          forms → cards → charts → skeletons → dropdowns → tabs →
-          pagination → empty-states → tooltips → context-menu →
-          responsive-ui → loaders)
-  ↓
-mobile/  (gestures → mobile-navigation → mobile-tables → mobile-modals →
-          touch-optimizations)
-  ↓
-main.js  (boot)
+┌─────────────────────────────────────────────────────────────────────┐
+│                        Browser / PWA                                 │
+│  index.html  ─── sw.js (cache-first, offline fallback)               │
+│  qr-verify.html (standalone, no shell)                               │
+└─────────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                      Config Layer                                    │
+│  constants.js   navigation.js   role-permissions.js   supabase-config.js │
+└─────────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                       Core Layer                                     │
+│  api.js   auth.js   boot.js   state.js   router.js   data-loader.js │
+│  logger.js   notifications-engine.js   validators.js                │
+│  verification-engine.js   print-engine.js   export-engine.js        │
+└─────────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                        UI Layer                                      │
+│  sidebar.js   topbar.js   shell.js   modals.js   toast.js           │
+│  loaders.js   charts.js   tables.js   forms.js   dropdowns.js       │
+└─────────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                     Module Layer (86 routes)                         │
+│  academics/   attendance/   students/   finance/   holidays/         │
+│  staff/   settings/   dashboard/   communication/   analytics/       │
+│  bulk/   help/                                                       │
+└─────────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                      Supabase Backend                                │
+│  PostgreSQL 15 + PostgREST + Auth + Storage                         │
+│  43 tables + 9 SQL migrations + RLS on every table                  │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-Order matters for the reasons above — a file can use a bare identifier (`esc(...)`, `state.role`) or a `window.X` reference to anything declared in a file that loaded earlier, without needing to import it.
+---
 
-## Page modules aren't preloaded — the router injects them
+## Script Load Order
 
-Files under `js/modules/` are **not** listed in `index.html`. `core/router.js` loads them on demand:
+Scripts are loaded in a strict dependency order in `index.html`:
 
-1. `navigateTo(moduleId)` looks up `moduleId` in `MODULE_FILE_MAP` (in `router.js`).
-2. Each entry is either a single file path, or an **array** of paths for pages that split into a data-layer file + a render-page file (see below). Files load in array order via `document.createElement('script')`, appended to `<head>` — same shared global scope as everything else.
-3. Once loaded, the router calls `window[moduleIdToRenderFn(moduleId)](container, params)` — `moduleIdToRenderFn` is a mechanical conversion, e.g. `'grading-scale'` → `renderGradingScale`. **The last file in an array mapping must be the one that exposes that exact function name.** `container` is `document.getElementById('moduleContent')` — the real "Dynamic content rendered here" element in `index.html`, **not** `#app` (the whole shell, sidebar/topbar included) and not `#app-main` (referenced in a few file header comments, but that id doesn't actually exist anywhere). Every top-level page module's render function must accept `container` as its first argument — this convention is uniform across every author in this codebase (settings/, staff/, academics/, dashboard/, attendance/, students/, communication/).
-4. Loaded files are tracked by file path (not by moduleId) in `_loadedFiles`, so a companion file shared across multiple pages (e.g. `staff/teachers.js`, used by three different staff pages) is only ever injected once.
+1. **Config** — `constants.js`, `navigation.js`, `role-permissions.js`, `supabase-config.js`
+2. **Core** — `api.js`, `state.js`, `cache.js`, `validators.js`, `formulas.js`,
+   `academic-formulas.js`, `finance-formulas.js`, `fees.js`, `logger.js`,
+   `notifications-engine.js`, `error-handler.js`, `export-engine.js`,
+   `print-engine.js`, `verification-engine.js`, `backup-engine.js`,
+   `offline-sync.js`, `sync-engine.js`, `data-loader.js`, `router.js`, `auth.js`
+3. **UI** — `shell.js`, `sidebar.js`, `topbar.js`, `modals.js`, `toast.js`,
+   `loaders.js`, `charts.js`, `cards.js`, `forms.js`, `tables.js`,
+   `dropdowns.js`, `pagination.js`, `empty-states.js`, `context-menu.js`,
+   `responsive-ui.js`, `theme.js`
+4. **Integrations** — `qrcode.js`, `print.js`, `xlsx.js`
+5. **Mobile** — `gestures.js`, `mobile-modals.js`, `mobile-navigation.js`,
+   `mobile-tables.js`, `touch-optimizations.js`
+6. **Help** — `help-data.js`, `help-templates.js`, `help-search.js`, `help-center.js`
+7. **Modules** — all 86 module files (lazy-loaded by router on first navigation)
+8. **Boot** — `boot.js`
+9. **Main** — `main.js`
 
-> This container-passing step was broken for a long stretch of this project's history — `navigateTo` called `renderFn(params)` with no container at all, so no page could ever render anything visible, with no console error to show for it. See `troubleshooting.md` for the full story if you're chasing something that smells similar.
+---
 
-### The data-layer / render-page split
+## Routing
 
-Several `settings/` and `staff/` modules split into two files:
+`router.js` contains `MODULE_FILE_MAP` — an object mapping 86 module IDs to file paths.
 
-| Nav id | Data layer (no render fn) | Render page |
+When `navigateTo(moduleId, params)` is called:
+1. Check if module file already loaded (via script tag presence).
+2. If not: dynamically inject `<script src="...">`. Wait for load.
+3. Call `window.renderXxx(container, params)` where `container = getElementById('moduleContent')`.
+4. Update sidebar active state.
+5. Update browser URL hash.
+
+Every module file must expose `window.renderModuleName(container, params)` on the global
+scope — no ES modules, no `import`/`export`.
+
+---
+
+## State Management
+
+`state.js` holds a single global `state` object with 45 top-level keys.
+All modules read from and write to this object directly.
+
+### State shape (key groups)
+
+**User context:**
+`currentUser`, `currentModule`
+
+**Academic context:**
+`currentAcadYear`, `currentTerm`, `currentPhase`, `selectedYearId`, `selectedTermId`
+
+**Master data:**
+`academicYears[]`, `terms[]`, `holidays[]`, `classes[]`, `subjects[]`, `teachers[]`,
+`families[]`, `students[]`, `gradingScale[]`, `schoolSettings{}`
+
+**Transactional data:**
+`assessments[]`, `marks[]`, `feeCategories[]`, `feeAmounts[]`, `studentFees[]`,
+`creditBalances[]`, `payments[]`, `paymentAllocations[]`
+
+**Communication:**
+`announcements[]`, `notifications[]`, `activityLogs[]`, `timetableSlots[]`
+
+**Holiday mode:**
+`holidaySessions[]`, `activeHolidaySession`, `sessionClasses[]`, `sessionSubjects[]`,
+`sessionAssessments[]`, `sessionTeachers[]`, `holidayEnrollments[]`, `holidayMarks[]`,
+`holidayFees[]`, `pendingFeeApprovals[]`, `periodMode`
+
+**Roster tracking:**
+`classEnrollments[]`, `studentClassHistory[]`
+
+**Promotion:**
+`promotionDecisions[]`
+
+### State updates
+
+- `updateState(key, value)` — updates one key, notifies subscribers.
+- `updateStateBatch(obj)` — updates multiple keys atomically.
+- `invalidateCache(key)` — clears derived caches for related keys.
+- `subscribe(key, fn)` — registers a callback for state changes on a key.
+
+---
+
+## Holiday Mode — Two-State Machine
+
+The app operates in exactly two modes:
+
+```
+  NORMAL ◄────────────────────────────────► HOLIDAY
+  (academic term)                          (holiday session)
+
+  data: classes, marks, student_fees       data: session_classes, holiday_marks,
+        assessments, payments                    holiday_fees, session_assessments
+```
+
+### Mode transitions
+
+**Manual (admin):** Settings toggle → writes `school_settings.holiday_mode_active`.
+All users see new mode within 30 seconds (sync-engine polling).
+
+**Automatic (boot.js):** Every 10 minutes, `_checkAndSwitchMode()` runs:
+- Finds `holiday_sessions` where `status='active'` and today within `start_date / end_date`.
+- If found and not in holiday mode → `activateHolidayMode(session)`.
+- If in holiday mode and session ended → `deactivateHolidayMode()`.
+- Both transitions: log to `system_logs` + notify all admins.
+
+### Mode effects
+
+| Area | Normal mode | Holiday mode |
 |---|---|---|
-| `academic-calendar` | `settings/academic-years.js` | `settings/academic-calendar.js` |
-| `grading-scale` | `settings/grading-scale.js` | `settings/grading-settings.js` |
-| `user-management` | `settings/users.js` | `staff/user-management.js` |
-| `teacher-assignments` | `staff/teachers.js`, `staff/subjects.js` | `staff/teacher-assignments.js` |
-| `teacher-performance` | `staff/teachers.js` | `staff/teacher-performance.js` |
-| `timetable` | `staff/teachers.js`, `staff/subjects.js`, `staff/timetable-conflicts.js`, `staff/class-timetable.js`, `staff/teacher-timetable.js`, `staff/staff-timetable.js`, `staff/timetable-import.js` | `staff/timetable.js` |
+| Sidebar nav | Standard academic items | Holiday equivalents swapped |
+| Term selector | term_number 1/2/3 | Term 1/2/3 Holiday sessions |
+| Marks saved to | `marks` table | `holiday_marks` table |
+| Fees saved to | `student_fees` table | `holiday_fees` table |
+| Body class | `mode-normal` | `mode-holiday` |
+| CSS theme | Default | Amber (holiday.css) |
 
-If you add a new split-file page, add the array to `MODULE_FILE_MAP` yourself — the router has no automatic discovery. `tests/router-tests.js` has a regression test for exactly this (the `grading-scale` entry originally pointed at the data file instead of the render page, which would have made that whole page unreachable).
+### resolveTable()
 
-## State and data flow
+`resolveTable(normalTable, holidayTable)` — returns the correct table for the current mode.
+Called before every data write to ensure marks and fees never cross between modes.
 
-- **`core/state.js`** holds one mutable `state` object (current user, active year/term, cached lists of classes/subjects/teachers/students, etc.) — not a store with subscriptions, just a shared object everything reads and mutates directly.
-- **`core/api.js`** wraps every Supabase table read/write (`getAll`, `getById`, `getWhere`, `insert`, `update`, `remove`, `insertMany`) plus a `REFRESH_MAP` used by `refreshTable(name)` to reload `state.X` after a write.
-- **`core/formulas.js`** / **`core/academic-formulas.js`** / **`core/finance-formulas.js`** hold pure calculation logic (grading, ranking, attendance rate, fee balances) — no DOM, no DB calls, which is exactly why they're the most heavily unit-tested part of the app (see `tests/`).
-- **`core/validators.js`** / **`core/sanitizers.js`** hold shared form validation and input-cleaning functions, reused across every module's forms.
+---
 
-## Two permission systems (not yet reconciled)
+## Class Teacher Access Control
 
-`config/role-permissions.js` (`canAccess`, `canEdit`, `canCreate`, ...) and `core/permissions.js` (`myRole`, `canNavigateTo`, `isBlocked`, ...) overlap in purpose. Both are currently in use in different places. See `permissions.md`.
+Every class-level module enforces teacher restrictions:
 
-## Testing approach
+1. `getMyClass()` — finds the class where `classes.class_teacher_id` equals the current
+   teacher's `id`. Returns `null` for admin (admin sees all).
+2. `canAccessClass(classId)` — returns `true` if admin, accountant, or teacher's own class.
+3. `getAccessibleClassIds()` — returns array of allowed class IDs for the current user.
 
-Since there's no build step and no CommonJS/ES-module structure, `tests/helpers/load-scripts.js` loads real source files into Jest's jsdom global scope with a single combined `eval()` call — deliberately combined (not one `eval()` per file), because separate `eval()` calls don't reliably share top-level `const`/`let` bindings with each other's function closures in this environment, even though `window.X` assignments always work. See the comment at the top of that file for the full explanation. Tests cover the pure-logic layer (`formulas.js`, `validators.js`, `finance-formulas.js`, timetable conflict detection) plus real jsdom DOM behavior for toast/modals and real IndexedDB behavior (via `fake-indexeddb`) for the offline queue.
+Modules that enforce this:
+- `marks-entry.js`, `class-register.js`, `report-cards.js`, `rankings.js`,
+  `second-sitting.js`, `student-promotion.js`, `holidays-marks.js`,
+  `holidays-reports.js`, `holidays-rankings.js`.
+
+---
+
+## Historical Roster
+
+Student lists must be accurate for any point in time, not just today.
+
+Problem: A student can join in Term 1 (total = 22), leave in Term 2 (total = 21),
+and a different student joins in Term 3 (total = 22). The same class has different
+rosters in each term.
+
+Solution: `getHistoricalRoster(classId, termId, yearId)`:
+1. Query `classEnrollments` filtered by `class_id + term_id + academic_year_id + is_active = true`.
+2. Map enrollment records to student objects.
+3. Fall back to `students.class_id` only if no enrollment records exist for that period.
+
+Used by: `report-cards.js`, `class-register.js`, `rankings.js`, `marks-entry.js`,
+`attendance-entry.js`, `student-promotion.js`.
+
+---
+
+## Data Integrity
+
+Every DB insert and update includes full context so no record is silently incomplete:
+
+| Field | What it identifies |
+|---|---|
+| `academic_year_id` | Which year this record belongs to |
+| `term_id` | Which term (for marks, fees, payments, attendance) |
+| `created_at` | When the record was created |
+| `updated_at` | When the record was last modified |
+| `entered_by` / `recorded_by` | Which user performed the action (ID) |
+| `entered_by_name` / `recorded_by_name` | Human-readable actor name |
+| `enrollment_id` | Links mark to the exact class enrollment snapshot |
+
+### class_enrollments
+
+Written on:
+- New student enrollment (`enroll-student.js`)
+- Class change in student profile (`student-details.js`)
+- Holiday enrollment (`holidays-enrollment.js`)
+
+Columns: `student_id`, `class_id`, `academic_year_id`, `term_id`, `enrollment_date`,
+`is_active`, `status`, `enrolled_by`, `notes`, `created_at`, `updated_at`.
+
+### student_class_history
+
+Written on:
+- New enrollment (reason: `new_enrollment`)
+- Class change (reason: `class_change`)
+- Transfer out (reason: `transferred`)
+
+Columns: `student_id`, `class_id`, `from_class_id`, `academic_year_id`, `term_id`,
+`start_date`, `end_date`, `status`, `reason`, `recorded_by`, `created_at`.
+
+---
+
+## Audit Trail
+
+Every action is logged via `logAction(action, entityType, entityId, details, level)` in
+`logger.js`. This writes to `system_logs` with real column names:
+- `user_id` — actor from `state.currentUser`
+- `action` — string action type (e.g. `marks_entry`, `payment_recorded`, `mode_switch`)
+- `entity_type` — table name (e.g. `marks`, `payments`, `students`)
+- `entity_id` — primary key of the affected record
+- `details` — JSONB with full context (amounts, names, before/after values)
+
+Never use raw `insert('system_logs', {...})` — always `logAction()`.
+
+---
+
+## Notifications
+
+Notifications are role-targeted (not broadcast to all users):
+
+- Admin gets: mode switches, fee approval queue changes, new enrollments, term completions.
+- Teacher gets: assessment locked/unlocked for their class, marks deadline warnings.
+- Accountant gets: new fees needing approval, payment recorded.
+
+Written via `sendNotification()` or `notifyAdmins()` in `notifications-engine.js`.
+Columns: `recipient_id`, `sender_id`, `type`, `title`, `message`, `action_url`,
+`is_read`, `category`, `recipient_role`, `academic_year_id`, `term_id`.
+
+---
+
+## QR Code Verification
+
+Printed report cards and receipts carry a QR code that links to a frozen snapshot.
+
+Flow:
+1. Print button calls `createReportCardSnapshot(studentId, yearId)` in `verification-engine.js`.
+2. Snapshot: serializes all report data to JSON, stores in `report_card_snapshots`.
+3. Generates unique one-time token. Embeds token URL in QR code via `qrcode.js`.
+4. User scans QR code → opens `qr-verify.html?token=...`.
+5. `qr-verify.html` fetches snapshot by token. Auto-downloads frozen PDF.
+6. Token marked as used (cannot be reused for tampering).
+
+---
+
+## Offline Strategy
+
+Service worker (`sw.js`) uses cache-first for static assets:
+- All CSS, JS, fonts, icons are precached at install.
+- App shell is always available offline.
+- API calls go network-first with no offline fallback (data requires connection).
+- Failed writes are queued to IndexedDB by `offline-sync.js`.
+- Queue is replayed when `online` event fires.
+
+---
+
+## Security
+
+- **RLS** — Supabase Row Level Security enabled on all 43 tables. No table is accessible
+  without authentication.
+- **Login** — `login_check()` RPC on the DB side. Password compared against bcrypt hash.
+  Lockout after 5 failed attempts per 15 minutes (tracked in `login_attempts` table).
+- **Google OAuth** — `oauth_login_check(email)` RPC verifies Google-authenticated email
+  matches a teacher record without exposing password.
+- **No anon write** — All write policies require `auth.role() = 'authenticated'`.
+- **Delete protection** — Marks, payments, system_logs, snapshots cannot be hard-deleted.
+  Soft-delete pattern used (status flags or archival).
+- **Session** — Stored in localStorage with TTL. `_touchSession()` refreshes every 5 min.
+  `_readSession()` guards against NaN elapsed time.
+
+---
+
+## PWA
+
+- `site.webmanifest` — name, icons, `display: standalone`, `theme_color`.
+- Service worker registered in `main.js`.
+- Installable on iOS (Add to Home Screen), Android (PWA install prompt), Chrome.
+- Offline page: `offline.html` served by service worker when network unavailable.

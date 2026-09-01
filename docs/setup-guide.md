@@ -1,53 +1,140 @@
-# Setup Guide
+# École La Fontaine v9.0 — Setup Guide
 
-## Prerequisites
+---
 
-- A modern browser
-- [Node.js](https://nodejs.org/) (for running the test suite only — the app itself needs no build step)
-- A [Supabase](https://supabase.com) project (free tier is enough for development)
-- A local static file server (see "Running the app" below — plain `file://` won't work fully, see note)
+## First-Run Setup
 
-## Clone and install
+### Step 1: Supabase project
 
-```bash
-git clone https://github.com/Natsonuwayezu/La-Fontaine-v2.git
-cd La-Fontaine-v2
-npm install
+1. Create a Supabase project at https://supabase.com.
+2. Note your Project URL and anon key (Settings → API).
+3. In the Supabase SQL Editor, run migrations in order:
+   - `docs/sql/001_enable_rls_baseline.sql`
+   - `docs/sql/002_tighten_delete_protection.sql`
+   - `docs/sql/003_hash_passwords.sql`
+   - `docs/sql/004_fix_unexplained_policies.sql`
+   - `docs/sql/005_server_side_lockout.sql`
+   - `docs/sql/006_google_oauth_login.sql`
+   - `docs/sql/007_holiday_sessions.sql`
+   - `docs/sql/008_qr_snapshots.sql`
+   - `docs/sql/009_second_sitting.sql`
+
+### Step 2: Admin password
+
+In Supabase SQL Editor:
+```sql
+INSERT INTO school_settings (key, value)
+VALUES ('admin_password', crypt('your_password_here', gen_salt('bf')));
 ```
+Replace `your_password_here` with your chosen admin password.
+The `crypt()` function is provided by the `pgcrypto` extension (enabled by migration 003).
 
-`npm install` only pulls in Jest and test-related packages (`jest`, `jest-environment-jsdom`, `fake-indexeddb`) — nothing the app itself depends on at runtime. See `package.json`.
+### Step 3: Open the app
 
-## Configure Supabase
+1. Open `index.html` in your browser (via a local server or deployed URL).
+2. The Supabase setup screen appears on first load.
+3. Enter your Supabase Project URL and anon key.
+4. Click "Test Connection" — should show green checkmark.
+5. Click "Save & Continue".
 
-1. Create a Supabase project.
-2. In the SQL editor, create the tables listed in `database-schema.md` (there's no migration file in this repo yet to run directly — that's a gap worth closing).
-3. Open `js/config/supabase-config.js` and set your project URL and anon key — either by editing `DEFAULT_SUPABASE_URL`/`DEFAULT_SUPABASE_KEY` directly, or at runtime via `setSupabaseCredentials(url, key)` (also reachable through the in-app **Settings → Database Connection** panel, `settings/api-settings.js`, once you can log in).
+### Step 4: Log in
 
-## Running the app
+Email: `admin@ecolelafontaine.rw` (or your configured admin email)
+Password: the password you set in Step 2.
 
-This is a static site with no build step, but it's **not** safe to open `index.html` directly via `file://`:
+### Step 5: School settings
 
-- Fetches to Supabase and the service-worker registration both behave inconsistently or fail outright under `file://`.
-- Use any local static server, for example:
-  ```bash
-  npx serve .
-  # or
-  python3 -m http.server 8080
-  ```
-  then visit `http://localhost:<port>/index.html`.
+Settings → School Settings:
+- School name
+- Address and phone
+- Head teacher name and title
+- Promotion mark (default: 50%)
+- Currency (RWF)
+- School logo
 
-## Running the tests
+### Step 6: Academic year
 
+Settings → Academic Years → Create Year:
+- Year name (e.g. `2025-2026`)
+- Set as active year
+
+Settings → Academic Calendar → Add Terms:
+- Term 1: start date, end date
+- Term 2: start date, end date
+- Term 3: start date, end date
+
+### Step 7: Classes and subjects
+
+Settings → Classes:
+- Create each class (P1A, P1B, P2A, ... P6D)
+- Set sort_order (determines promotion path: P1 → P2 → ... → P6)
+- Assign class teacher to each class
+
+Settings → Subjects:
+- Create each subject
+- Set `is_core = true` for: English, Kinyarwanda, Mathematics, Sciences, SRS, French
+- Set `is_core = false` for: Creative Arts, Physical Education
+- Set sort_order for report card display order
+
+### Step 8: Grading scale
+
+Settings → Grading Scale:
+- Confirm or adjust grade thresholds
+- Default: A(80+), B(75-79), C(70-74), D(65-69), E(60-64), S(50-59), F(0-49)
+
+### Step 9: Fee categories
+
+Finance → Fee Structure:
+- Create fee categories (Tuition, Registration, Activity fee, etc.)
+- Set `default_amount` for each
+- Mark `is_core` for categories used in second sitting context
+
+### Step 10: Teachers and users
+
+Staff → Teachers:
+- Add each teacher with name, email, subjects
+Settings → Users:
+- Create login accounts for teachers
+- Set role: `teacher` or `accountant`
+
+### Step 11: Enroll students
+
+Students → Enroll Student:
+- Use the 4-step wizard
+- Step 1: Student details
+- Step 2: Guardian information
+- Step 3: Class assignment
+- Step 4: Fee assignment and initial payment
+
+### Step 12: Google Sign-In (optional)
+
+1. Create a Google Cloud project at https://console.cloud.google.com
+2. Enable Google+ API and create OAuth 2.0 credentials
+3. Add your app's URL to authorized origins
+4. In Supabase: Authentication → Providers → Google → Enable, add Client ID and Secret
+5. The Google Sign-In button on the login page becomes active automatically
+
+---
+
+## Deployment
+
+### Local development
 ```bash
-npm test              # run once
-npm run test:watch    # watch mode
-npm run test:coverage # with coverage
+npx serve .
 ```
+Open http://localhost:3000
 
-The suite doesn't need Supabase, a browser, or the app running — it loads the real source files into a Jest+jsdom environment directly. See `architecture.md`'s "Testing approach" section for how that works, and `tests/helpers/load-scripts.js` for the loader itself.
+### Production
+Deploy the entire repository to any static hosting:
+- Netlify: drag and drop the folder
+- Vercel: `vercel deploy`
+- GitHub Pages: push to `gh-pages` branch
+- Custom server: `nginx` or `caddy` serving the folder
 
-## Known setup gaps
+No build step needed. All files are production-ready as-is.
 
-- **`core/boot.js`, `core/router.js`, `core/auth.js`, `core/window-exposure.js`, `main.js`** are the app's entry point and were empty for a long stretch of this project's history — they're now written, but if you're working from an older checkout, the app won't boot at all until you're on a commit after `core files`/`other modules` in the git history.
-- **`html/partials/*.html` and `html/templates/*.html` are now written** (sidebar, topbar, login, footer, modal-container, toast-container, loaders, empty-states, term-progress-bar), **but nothing in `index.html` or the JS actually fetches/injects them yet** — `grep -rn "partials/" js/ index.html` turns up nothing. Until that wiring exists, these files are effectively inert; the visible page still comes from whatever's inlined directly in `index.html`. `html/templates/` (receipts, report cards, transcripts, etc.) is still empty.
-- No `.env` file or environment-variable convention exists yet — Supabase credentials live in `js/config/supabase-config.js` directly (or `localStorage`, once changed via the Settings UI). Don't commit real production credentials to that file.
+### PWA install
+Once deployed to HTTPS, users can install the app:
+- Chrome/Android: "Add to Home Screen" prompt
+- Safari/iOS: Share → Add to Home Screen
+- Chrome Desktop: install icon in address bar

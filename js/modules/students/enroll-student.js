@@ -1,1014 +1,912 @@
 /* ═══════════════════════════════════════════════════════════════════
-   js/modules/students/enroll-student.js
+   js/modules/students/enroll-student.js  v9.0
    ═══════════════════════════════════════════════════════════════════
-   Four-step enrollment wizard with fee assignment and payment
-   recording. Renders into the main content container.
-
-   Dependencies (all plain-script globals loaded earlier in index.html, no import needed):
-   - utils.js: esc, fmtCurrency, debounce
-   - api.js: insert, update  ('get' was imported previously but never used — removed)
-   - toast.js: showToast
-   - router.js: navigateTo (NOTE: core/router.js is currently an empty file —
-     navigateTo() will be undefined until it's written; not part of this fix)
-   - modals.js: confirmDialog
-   - loaders.js: window.Loaders.button.start/stop (see fix below —
-     this file previously called a non-existent buttonLoader() function)
-   - state.js: state
+   4-step enrollment wizard:
+     Step 1 — Father / Mother / Guardian information (→ guardians table)
+     Step 2 — Student personal details (all students table columns)
+     Step 3 — Rwanda location (province→district→sector→cell→village)
+     Step 4 — Fee assignment + initial payment
+   On save:
+     - insert('students', {...})           — all columns
+     - insert('guardians', father)         — father row
+     - insert('guardians', mother)         — mother row (if filled)
+     - insert('student_guardians', link)   — father + mother links
+     - insert('families', {...})           — or link existing
+     - insert('class_enrollments', {...})  — historical roster
+     - insert('student_class_history', {}) — audit trail
+     - insert('student_fees', {...})       — per fee category
+     - insert('payments', {...})           — if initial payment
    ═══════════════════════════════════════════════════════════════════ */
+'use strict';
 
-// CLASS_LEVELS is defined in js/config/constants.js
-/* ─── Module State ────────────────────────────────────────────────── */
+// ── Module state ────────────────────────────────────────────────────
+let _esStep        = 1;
+let _esAddress     = { province:'', district:'', sector:'', cell:'', village:''}; 
+let _esLocData     = null; // Rwanda location hierarchy cache
+let _esLinkedFamily= null;
 
-const enrollState = {
-    step: 1,
-    data: {
-        firstName: '',
-        lastName: '',
-        dob: '',
-        gender: '',
-        classId: '',
-        guardianName: '',
-        guardianPhone: '',
-        guardianEmail: '',
-        guardianAddress: '',
-        linkedFamily: null,
-        feeSelections: {}
+async function renderEnrollStudent(container, params = {}) {
+    if (!container) return;
+    await ensureStateLoaded();
+    _esStep = 1;
+    _esAddress = { province:'', district:'', sector:'', cell:'', village:''}; 
+    _esLinkedFamily = null;
+    _esShell(container);
+}
+
+function _esShell(container) {
+    const year  = getActiveYear();
+    const terms = (state.terms||[]).filter(t=>t.academic_year_id===year?.id).sort((a,b)=>a.term_number-b.term_number);
+    const classes = (state.classes||[]).filter(c=>c.is_active!==false).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+
+    container.innerHTML = `
+    <div class="module-wrap">
+      <div class="mod-topbar">
+        <div class="mod-topbar-left">
+          <h1 class="mod-title"><i class="fa-solid fa-user-plus"></i> Enroll Student</h1>
+        </div>
+        <div class="mod-topbar-right">
+          <button class="btn btn-ghost" onclick="navigateTo('student-list')">
+            <i class="fa-solid fa-arrow-left"></i> Back to Students</button>
+        </div>
+      </div>
+
+      <!-- Step indicator -->
+      <div class="enroll-steps" id="es-steps">
+        ${[
+          {n:1, label:'Guardian Info', icon:'fa-person'},
+          {n:2, label:'Student Details', icon:'fa-child'},
+          {n:3, label:'Location', icon:'fa-location-dot'},
+          {n:4, label:'Fees & Payment', icon:'fa-coins'},
+        ].map(s=>`
+        <div class="enroll-step ${_esStep===s.n?'active':_esStep>s.n?'done':''}" id="es-step-tab-${s.n}">
+          <div class="step-circle">${_esStep>s.n?'<i class="fa-solid fa-check"></i>':s.n}</div>
+          <div class="step-label">${s.label}</div>
+        </div>`).join('<div class="step-connector"></div>')}
+      </div>
+
+      <!-- Step panels -->
+      <div class="section-card" id="es-panel">
+        <!-- Rendered by _esRenderStep() -->
+      </div>
+    </div>`;
+
+    _esRenderStep(year, classes, terms);
+}
+
+function _esRenderStep(year, classes, terms) {
+    const panel = document.getElementById('es-panel');
+    if (!panel) return;
+
+    if (_esStep === 1) _esStep1(panel);
+    else if (_esStep === 2) _esStep2(panel, classes);
+    else if (_esStep === 3) _esStep3(panel);
+    else if (_esStep === 4) _esStep4(panel, year, terms);
+
+    // Update step tabs
+    [1,2,3,4].forEach(n=>{
+        const tab = document.getElementById(`es-step-tab-${n}`);
+        if (tab) {
+            tab.className = `enroll-step ${_esStep===n?'active':_esStep>n?'done':''}`;
+            tab.querySelector('.step-circle').innerHTML =
+                _esStep>n?'<i class="fa-solid fa-check"></i>':String(n);
+        }
+    });
+}
+
+/* ══ STEP 1 — GUARDIAN INFORMATION ════════════════════════════════ */
+function _esStep1(panel) {
+    panel.innerHTML = `
+    <h3 style="margin-bottom:16px;"><i class="fa-solid fa-person"></i> Guardian Information</h3>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">
+      Enter father and/or mother details. At least one guardian is required.
+      Phone numbers will be used for communication.
+    </p>
+
+    <!-- FATHER -->
+    <div class="section-divider" style="margin-bottom:12px;">
+      <i class="fa-solid fa-person"></i> Father / Paternal Guardian
+    </div>
+    <div class="form-grid" style="margin-bottom:14px;">
+      <div class="field">
+        <label class="field-label">First Name</label>
+        <input type="text" id="es-father-first" class="input" placeholder="First name">
+      </div>
+      <div class="field">
+        <label class="field-label">Last Name</label>
+        <input type="text" id="es-father-last" class="input" placeholder="Last name">
+      </div>
+      <div class="field">
+        <label class="field-label">Phone <span style="color:var(--text-muted);font-size:11px;">(07xxxxxxxx)</span></label>
+        <input type="tel" id="es-father-phone" class="input" placeholder="0780000000">
+      </div>
+      <div class="field">
+        <label class="field-label">National ID <span style="color:var(--text-muted);font-size:11px;">(16 digits)</span></label>
+        <input type="text" id="es-father-nid" class="input" placeholder="1 19XX X XXXXXXX X XX" maxlength="20">
+      </div>
+      <div class="field">
+        <label class="field-label">Email</label>
+        <input type="email" id="es-father-email" class="input" placeholder="email@example.com">
+      </div>
+      <div class="field">
+        <label class="field-label">Occupation</label>
+        <input type="text" id="es-father-occupation" class="input" placeholder="e.g. Teacher, Farmer, Business">
+      </div>
+      <div class="field">
+        <label class="field-label">Employer / Business</label>
+        <input type="text" id="es-father-employer" class="input" placeholder="e.g. School name, Ministry">
+      </div>
+    </div>
+
+    <!-- MOTHER -->
+    <div class="section-divider" style="margin-bottom:12px;">
+      <i class="fa-solid fa-person-dress"></i> Mother / Maternal Guardian
+    </div>
+    <div class="form-grid" style="margin-bottom:20px;">
+      <div class="field">
+        <label class="field-label">First Name</label>
+        <input type="text" id="es-mother-first" class="input" placeholder="First name">
+      </div>
+      <div class="field">
+        <label class="field-label">Last Name</label>
+        <input type="text" id="es-mother-last" class="input" placeholder="Last name">
+      </div>
+      <div class="field">
+        <label class="field-label">Phone</label>
+        <input type="tel" id="es-mother-phone" class="input" placeholder="0780000000">
+      </div>
+      <div class="field">
+        <label class="field-label">National ID</label>
+        <input type="text" id="es-mother-nid" class="input" placeholder="1 19XX X XXXXXXX X XX" maxlength="20">
+      </div>
+      <div class="field">
+        <label class="field-label">Email</label>
+        <input type="email" id="es-mother-email" class="input" placeholder="email@example.com">
+      </div>
+      <div class="field">
+        <label class="field-label">Occupation</label>
+        <input type="text" id="es-mother-occupation" class="input" placeholder="Occupation">
+      </div>
+      <div class="field">
+        <label class="field-label">Employer / Business</label>
+        <input type="text" id="es-mother-employer" class="input" placeholder="Employer">
+      </div>
+    </div>
+
+    <!-- Sibling link -->
+    <div class="section-divider" style="margin-bottom:12px;">
+      <i class="fa-solid fa-people-group"></i> Sibling Link (optional)
+    </div>
+    <div class="form-group" style="margin-bottom:20px;">
+      <label class="field-label">Search existing sibling to link family</label>
+      <input type="text" id="es-sibling-search" class="input"
+             placeholder="Type student name or code…"
+             oninput="esSiblingSearch(this.value)">
+      <div id="es-sibling-results" style="max-height:140px;overflow-y:auto;border:1px solid var(--border);
+           border-radius:6px;margin-top:4px;display:none;"></div>
+      <div id="es-sibling-chosen" style="margin-top:6px;font-size:13px;color:var(--color-success);"></div>
+    </div>
+
+    <div class="form-footer">
+      <button class="btn btn-primary" onclick="esNext()">
+        Next <i class="fa-solid fa-arrow-right"></i></button>
+    </div>`;
+}
+
+/* ══ STEP 2 — STUDENT DETAILS ══════════════════════════════════════ */
+function _esStep2(panel, classes) {
+    const insuranceOptions = ['MUTUELLE DE SANTE','RSSB','MMI','RADIANT','SORAS','BRITAM','COGEBANQUE','Other'];
+    panel.innerHTML = `
+    <h3 style="margin-bottom:16px;"><i class="fa-solid fa-child"></i> Student Details</h3>
+    <div class="form-grid">
+      <div class="field">
+        <label class="field-label">First Name *</label>
+        <input type="text" id="es-first-name" class="input" placeholder="First name" required>
+      </div>
+      <div class="field">
+        <label class="field-label">Last Name *</label>
+        <input type="text" id="es-last-name" class="input" placeholder="Last name" required>
+      </div>
+      <div class="field">
+        <label class="field-label">Class *</label>
+        <select id="es-class" class="select" required>
+          <option value="">— Select class —</option>
+          ${classes.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">Gender</label>
+        <select id="es-gender" class="select">
+          <option value="">— Select —</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">Date of Birth</label>
+        <input type="date" id="es-dob" class="input">
+      </div>
+      <div class="field">
+        <label class="field-label">Birthplace (District)</label>
+        <input type="text" id="es-birthplace" class="input" placeholder="e.g. Rubavu">
+      </div>
+      <div class="field">
+        <label class="field-label">Nationality</label>
+        <input type="text" id="es-nationality" class="input" placeholder="e.g. Rwandan" value="Rwandan">
+      </div>
+      <div class="field">
+        <label class="field-label">Medical Insurance</label>
+        <select id="es-insurance" class="select" onchange="esInsuranceChange()">
+          <option value="">— Select —</option>
+          ${insuranceOptions.map(o=>`<option value="${o==='Other'?'__other__':o}">${o}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field" id="es-insurance-other-wrap" style="display:none;">
+        <label class="field-label">Other Insurance Name</label>
+        <input type="text" id="es-insurance-other" class="input" placeholder="Specify insurance">
+      </div>
+      <div class="field">
+        <label class="field-label">SDMS Code <span style="color:var(--text-muted);font-size:11px;">(if any)</span></label>
+        <input type="text" id="es-sdms-code" class="input" placeholder="Ministry SDMS code">
+      </div>
+      <div class="field">
+        <label class="field-label">Previous School</label>
+        <input type="text" id="es-prev-school" class="input" placeholder="School name (transfers only)">
+      </div>
+      <div class="field">
+        <label class="field-label">Previous School Marks (%)</label>
+        <input type="number" id="es-prev-marks" class="input" min="0" max="100" step="0.1"
+               placeholder="Average % from previous school">
+      </div>
+      <div class="field" style="grid-column:1/-1;">
+        <label class="field-label">Notes</label>
+        <textarea id="es-notes" class="input" rows="2"
+                  placeholder="Any additional notes about this student…"></textarea>
+      </div>
+    </div>
+    <div class="form-footer">
+      <button class="btn btn-ghost" onclick="esPrev()">
+        <i class="fa-solid fa-arrow-left"></i> Back</button>
+      <button class="btn btn-primary" onclick="esNext()">
+        Next <i class="fa-solid fa-arrow-right"></i></button>
+    </div>`;
+}
+
+window.esInsuranceChange = () => {
+    const sel = document.getElementById('es-insurance');
+    const wrap = document.getElementById('es-insurance-other-wrap');
+    if (wrap) wrap.style.display = sel?.value === '__other__' ? 'block' : 'none';
+};
+
+/* ══ STEP 3 — RWANDA LOCATION ══════════════════════════════════════ */
+function _esStep3(panel) {
+    panel.innerHTML = `
+    <h3 style="margin-bottom:16px;"><i class="fa-solid fa-location-dot"></i> Home Location</h3>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:14px;">
+      Select the student's home address from Rwanda's administrative divisions.
+      All levels will be saved on the student's record.
+    </p>
+    <div class="form-grid" style="margin-bottom:20px;">
+      <div class="field">
+        <label class="field-label">Province</label>
+        <select id="es-province" class="select" onchange="esProvinceChange()">
+          <option value="">— Select province —</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">District</label>
+        <select id="es-district" class="select" disabled onchange="esDistrictChange()">
+          <option value="">— Select province first —</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">Sector</label>
+        <select id="es-sector" class="select" disabled onchange="esSectorChange()">
+          <option value="">— Select district first —</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">Cell</label>
+        <select id="es-cell" class="select" disabled onchange="esCellChange()">
+          <option value="">— Select sector first —</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">Village</label>
+        <select id="es-village" class="select" disabled onchange="esVillageChange()">
+          <option value="">— Select cell first —</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-footer">
+      <button class="btn btn-ghost" onclick="esPrev()">
+        <i class="fa-solid fa-arrow-left"></i> Back</button>
+      <button class="btn btn-primary" onclick="esNext()">
+        Next <i class="fa-solid fa-arrow-right"></i></button>
+    </div>`;
+
+    _esLoadProvinces();
+}
+
+async function _esGetLocData() {
+    if (_esLocData) return _esLocData;
+    const rows = await getAll('rwanda_locations', 'order=province.asc,district.asc,sector.asc,cell.asc,village.asc').catch(()=>[]);
+    const h = {};
+    (rows||[]).forEach(r=>{
+        if (!r.province||!r.district||!r.sector||!r.cell||!r.village) return;
+        h[r.province] = h[r.province]||{};
+        h[r.province][r.district] = h[r.province][r.district]||{};
+        h[r.province][r.district][r.sector] = h[r.province][r.district][r.sector]||{};
+        h[r.province][r.district][r.sector][r.cell] = h[r.province][r.district][r.sector][r.cell]||[];
+        if (!h[r.province][r.district][r.sector][r.cell].includes(r.village))
+            h[r.province][r.district][r.sector][r.cell].push(r.village);
+    });
+    _esLocData = h;
+    return h;
+}
+
+async function _esLoadProvinces() {
+    const data = await _esGetLocData();
+    const sel = document.getElementById('es-province');
+    if (!sel) return;
+    const provinces = Object.keys(data).sort();
+    sel.innerHTML = '<option value="">— Select province —</option>' +
+        provinces.map(p=>`<option value="${esc(p)}" ${_esAddress.province===p?'selected':''}>
+            ${esc(p)}</option>`).join('');
+    if (_esAddress.province) esProvinceChange();
+}
+
+window.esProvinceChange = async () => {
+    _esAddress.province = document.getElementById('es-province')?.value||'';
+    _esAddress.district = _esAddress.sector = _esAddress.cell = _esAddress.village = '';
+    _esClearSel('es-district','— Select province first —');
+    _esClearSel('es-sector','— Select district first —');
+    _esClearSel('es-cell','— Select sector first —');
+    _esClearSel('es-village','— Select cell first —');
+    if (!_esAddress.province) return;
+    const data = await _esGetLocData();
+    const districts = Object.keys(data[_esAddress.province]||{}).sort();
+    const sel = document.getElementById('es-district');
+    if (!sel) return;
+    sel.disabled = false;
+    sel.innerHTML = '<option value="">— Select district —</option>' +
+        districts.map(d=>`<option value="${esc(d)}">${esc(d)}</option>`).join('');
+};
+
+window.esDistrictChange = async () => {
+    _esAddress.district = document.getElementById('es-district')?.value||'';
+    _esAddress.sector = _esAddress.cell = _esAddress.village = '';
+    _esClearSel('es-sector','— Select district first —');
+    _esClearSel('es-cell','— Select sector first —');
+    _esClearSel('es-village','— Select cell first —');
+    if (!_esAddress.district) return;
+    const data = await _esGetLocData();
+    const sectors = Object.keys(data[_esAddress.province]?.[_esAddress.district]||{}).sort();
+    const sel = document.getElementById('es-sector');
+    if (!sel) return;
+    sel.disabled = false;
+    sel.innerHTML = '<option value="">— Select sector —</option>' +
+        sectors.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
+};
+
+window.esSectorChange = async () => {
+    _esAddress.sector = document.getElementById('es-sector')?.value||'';
+    _esAddress.cell = _esAddress.village = '';
+    _esClearSel('es-cell','— Select sector first —');
+    _esClearSel('es-village','— Select cell first —');
+    if (!_esAddress.sector) return;
+    const data = await _esGetLocData();
+    const cells = Object.keys(data[_esAddress.province]?.[_esAddress.district]?.[_esAddress.sector]||{}).sort();
+    const sel = document.getElementById('es-cell');
+    if (!sel) return;
+    sel.disabled = false;
+    sel.innerHTML = '<option value="">— Select cell —</option>' +
+        cells.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+};
+
+window.esCellChange = async () => {
+    _esAddress.cell = document.getElementById('es-cell')?.value||'';
+    _esAddress.village = '';
+    _esClearSel('es-village','— Select cell first —');
+    if (!_esAddress.cell) return;
+    const data = await _esGetLocData();
+    const villages = (data[_esAddress.province]?.[_esAddress.district]?.[_esAddress.sector]?.[_esAddress.cell]||[]).sort();
+    const sel = document.getElementById('es-village');
+    if (!sel) return;
+    sel.disabled = false;
+    sel.innerHTML = '<option value="">— Select village —</option>' +
+        villages.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+};
+
+window.esVillageChange = () => {
+    _esAddress.village = document.getElementById('es-village')?.value||'';
+};
+
+function _esClearSel(id, placeholder) {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    sel.disabled = true;
+    sel.innerHTML = `<option value="">${esc(placeholder)}</option>`;
+}
+
+/* ══ STEP 4 — FEES & PAYMENT ═══════════════════════════════════════ */
+function _esStep4(panel, year, terms) {
+    const feeCats = (state.feeCategories||[]).filter(c=>c.is_active!==false);
+    panel.innerHTML = `
+    <h3 style="margin-bottom:16px;"><i class="fa-solid fa-coins"></i> Fee Assignment & Initial Payment</h3>
+
+    <div class="section-divider" style="margin-bottom:12px;">
+      <i class="fa-solid fa-tags"></i> Fee Categories
+    </div>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:12px;">
+      Select fees to assign. Enter amount paid today (leave 0 if not paid yet).
+      Entered amount less than full price creates an automatic discount (waiver).
+    </p>
+    <div id="es-fee-list" style="margin-bottom:18px;">
+      ${feeCats.length ? feeCats.map(fc=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;
+           border-bottom:1px solid var(--border);">
+        <input type="checkbox" id="es-fee-${fc.id}" style="width:16px;height:16px;cursor:pointer;"
+               onchange="esFeeToggle(${fc.id})">
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;">${esc(fc.name)}</div>
+          <div style="font-size:11px;color:var(--text-muted);">
+            Full amount: ${fmtCurrency(fc.default_amount||0)}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:12px;color:var(--text-muted);">RWF</span>
+          <input type="number" id="es-fee-amt-${fc.id}" class="input" style="width:120px;"
+                 value="${fc.default_amount||0}" min="0" step="500" disabled
+                 oninput="esFeeAmtChange(${fc.id},${fc.default_amount||0})">
+        </div>
+      </div>
+      <div id="es-fee-discount-${fc.id}" style="font-size:11px;color:var(--color-success);
+           padding-left:26px;display:none;">
+        <i class="fa-solid fa-tag"></i> Discount: <span></span> will be waived
+      </div>`)  .join('') :
+      '<div class="empty-state" style="padding:24px;"><div class="es-title">No fee categories configured</div><div class="es-sub">Add fee categories in Finance → Fee Structure first.</div></div>'}
+    </div>
+
+    <div class="section-divider" style="margin-bottom:12px;">
+      <i class="fa-solid fa-money-bill-wave"></i> Initial Payment (optional)
+    </div>
+    <div class="form-grid" style="margin-bottom:16px;">
+      <div class="field">
+        <label class="field-label">Payment Method</label>
+        <select id="es-pay-method" class="select">
+          <option value="Cash">Cash</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="Mobile Money">Mobile Money (MTN/Airtel)</option>
+          <option value="Cheque">Cheque</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">Reference / Receipt Note</label>
+        <input type="text" id="es-pay-ref" class="input" placeholder="Transaction reference (optional)">
+      </div>
+    </div>
+
+    <div class="alert alert-info" style="margin-bottom:16px;">
+      <i class="fa-solid fa-circle-info"></i>
+      All assigned fees will be sent to the <strong>Fee Approvals</strong> queue.
+      Fees paid in full today will be auto-approved.
+    </div>
+
+    <div class="form-footer" style="justify-content:space-between;">
+      <button class="btn btn-ghost" onclick="esPrev()">
+        <i class="fa-solid fa-arrow-left"></i> Back</button>
+      <button class="btn btn-primary" onclick="esSubmit()" id="es-submit-btn">
+        <i class="fa-solid fa-user-plus"></i> Enroll Student</button>
+    </div>`;
+}
+
+window.esFeeToggle = (fcId) => {
+    const cb  = document.getElementById(`es-fee-${fcId}`);
+    const inp = document.getElementById(`es-fee-amt-${fcId}`);
+    if (!inp) return;
+    inp.disabled = !cb?.checked;
+    if (!cb?.checked) {
+        document.getElementById(`es-fee-discount-${fcId}`)?.style && (document.getElementById(`es-fee-discount-${fcId}`).style.display='none');
     }
 };
 
-/* ─── Helpers ─────────────────────────────────────────────────────── */
+window.esFeeAmtChange = (fcId, fullAmt) => {
+    const amt = parseFloat(document.getElementById(`es-fee-amt-${fcId}`)?.value||'0');
+    const discEl = document.getElementById(`es-fee-discount-${fcId}`);
+    if (!discEl) return;
+    const discount = fullAmt > 0 && amt < fullAmt ? fullAmt - amt : 0;
+    discEl.style.display = discount > 0 ? 'block' : 'none';
+    const span = discEl.querySelector('span');
+    if (span) span.textContent = fmtCurrency(discount);
+};
 
-function getLevelForClass(classId) {
-    const allNursery = CLASS_LEVELS.nursery;
-    const allPrimary = CLASS_LEVELS.primary;
-    if (allNursery.includes(classId)) return 'nursery';
-    if (allPrimary.includes(classId)) return 'primary';
-    return 'primary';
-}
+/* ══ NAVIGATION ════════════════════════════════════════════════════ */
+window.esNext = () => {
+    if (!_esValidateStep()) return;
+    _esStep++;
+    const year  = getActiveYear();
+    const terms = (state.terms||[]).filter(t=>t.academic_year_id===year?.id);
+    const classes = (state.classes||[]).filter(c=>c.is_active!==false);
+    _esRenderStep(year, classes, terms);
+    document.getElementById('es-panel')?.scrollIntoView({behavior:'smooth'});
+};
 
-// generateStudentCode() is defined in js/core/api.js
+window.esPrev = () => {
+    _esStep--;
+    const year  = getActiveYear();
+    const terms = (state.terms||[]).filter(t=>t.academic_year_id===year?.id);
+    const classes = (state.classes||[]).filter(c=>c.is_active!==false);
+    _esRenderStep(year, classes, terms);
+};
 
-function getDefaultFeesForLevel(level) {
-    // Query the fee_categories table for the given level
-    // For now, return a fallback structure
-    const fees = (state.feeCategories || [])
-        .filter(c => c.level === level && c.is_active !== false)
-        .map(c => ({
-            id: c.id,
-            name: c.name,
-            amount: c.default_amount || 0
-        }));
-
-    if (fees.length === 0) {
-        // Fallback defaults
-        if (level === 'nursery') {
-            return [
-                { id: 'fallback-tuition', name: 'Tuition', amount: 60000 },
-                { id: 'fallback-uniform', name: 'Uniform', amount: 25000 },
-                { id: 'fallback-materials', name: 'Books & Materials', amount: 15000 }
-            ];
+function _esValidateStep() {
+    if (_esStep === 1) {
+        const fFirst = cleanInput(document.getElementById('es-father-first')?.value);
+        const mFirst = cleanInput(document.getElementById('es-mother-first')?.value);
+        if (!fFirst && !mFirst) {
+            showToast('Enter at least father or mother first name.', 'warning');
+            return false;
         }
-        return [
-            { id: 'fallback-tuition', name: 'Tuition', amount: 80000 },
-            { id: 'fallback-uniform', name: 'Uniform', amount: 25000 },
-            { id: 'fallback-materials', name: 'Books & Materials', amount: 18000 },
-            { id: 'fallback-transport', name: 'Transport', amount: 30000 }
-        ];
+        const fPhone = document.getElementById('es-father-phone')?.value?.trim();
+        const mPhone = document.getElementById('es-mother-phone')?.value?.trim();
+        if (fPhone && !/^(07|\+250)\d{8,9}$/.test(fPhone.replace(/\s/g,''))) {
+            showToast('Father phone format: 07XXXXXXXX or +250XXXXXXXXX', 'warning'); return false;
+        }
+        if (mPhone && !/^(07|\+250)\d{8,9}$/.test(mPhone.replace(/\s/g,''))) {
+            showToast('Mother phone format: 07XXXXXXXX or +250XXXXXXXXX', 'warning'); return false;
+        }
+        return true;
     }
-    return fees;
-}
-
-/* ─── Step Labels ──────────────────────────────────────────────────── */
-
-const STEP_LABELS = [
-    'Basic Information',
-    'Family & Guardian',
-    'Fee Assignment',
-    'Review & Confirm'
-];
-
-/* ─── Main Render ──────────────────────────────────────────────────── */
-
-function renderEnrollStudent(container) {
-    if (!container) return;
-    enrollState.step = 1;
-    enrollState.data = {
-        firstName: '',
-        lastName: '',
-        dob: '',
-        gender: '',
-        classId: '',
-        guardianName: '',
-        guardianPhone: '',
-        guardianEmail: '',
-        guardianAddress: '',
-        linkedFamily: null,
-        feeSelections: {}
-    };
-
-    container.innerHTML = `
-        <div class="enroll-wizard">
-            <div class="enroll-wizard__header">
-                <h2>Enroll New Student</h2>
-                <p class="text-muted">Complete all steps to enroll a new student</p>
-            </div>
-            <div class="enroll-steps" id="enroll-steps"></div>
-            <div class="enroll-form-panel" id="enroll-panel"></div>
-        </div>
-    `;
-
-    renderSteps(container);
-    renderStepContent(container);
-}
-
-function renderSteps(container) {
-    const el = container.querySelector('#enroll-steps');
-    if (!el) return;
-
-    el.innerHTML = STEP_LABELS.map((label, i) => {
-        const num = i + 1;
-        const isActive = num === enrollState.step;
-        const isDone = num < enrollState.step;
-
-        let statusClass = 'enroll-step';
-        if (isDone) statusClass += ' enroll-step--done';
-        if (isActive) statusClass += ' enroll-step--active';
-
-        const circleContent = isDone ? '<span class="enroll-step__check"><i class="fa-solid fa-check"></i></span>' : `<span class="enroll-step__number">${num}</span>`;
-
-        return `
-            <div class="${statusClass}" data-step="${num}">
-                <div class="enroll-step__circle">${circleContent}</div>
-                <div class="enroll-step__label">${label}</div>
-                ${num < STEP_LABELS.length ? `<div class="enroll-step__connector ${isDone ? 'enroll-step__connector--done' : ''}"></div>` : ''}
-            </div>
-        `;
-    }).join('');
-}
-
-function renderStepContent(container) {
-    const panel = container.querySelector('#enroll-panel');
-    if (!panel) return;
-
-    switch (enrollState.step) {
-        case 1: renderStep1(panel, container); break;
-        case 2: renderStep2(panel, container); break;
-        case 3: renderStep3(panel, container); break;
-        case 4: renderStep4(panel, container); break;
-        default: break;
-    }
-}
-
-function goToStep(container, step) {
-    if (step < 1 || step > 4) return;
-    enrollState.step = step;
-    renderSteps(container);
-    renderStepContent(container);
-
-    // Scroll to top of panel
-    const panel = container.querySelector('#enroll-panel');
-    if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-/* ─── Step 1: Basic Information ───────────────────────────────────── */
-
-function renderStep1(panel, container) {
-    const d = enrollState.data;
-
-    panel.innerHTML = `
-        <div class="enroll-form-section">
-            <h3 class="enroll-form-section__title">Basic Information</h3>
-            <p class="enroll-form-section__subtitle">Enter the student's personal details</p>
-        </div>
-
-        <div class="enroll-form-grid">
-            <div class="form-group">
-                <label for="enroll-first-name">First Name <span class="required">*</span></label>
-                <input type="text" id="enroll-first-name" class="form-input" value="${esc(d.firstName)}" placeholder="e.g. Eric" />
-                <div class="form-hint"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="enroll-last-name">Last Name <span class="required">*</span></label>
-                <input type="text" id="enroll-last-name" class="form-input" value="${esc(d.lastName)}" placeholder="e.g. Habimana" />
-                <div class="form-hint"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="enroll-dob">Date of Birth <span class="required">*</span></label>
-                <input type="date" id="enroll-dob" class="form-input" value="${d.dob}" />
-                <div class="form-hint"></div>
-            </div>
-
-            <div class="form-group">
-                <label>Gender <span class="required">*</span></label>
-                <div class="radio-group">
-                    <label class="radio-label">
-                        <input type="radio" name="enroll-gender" value="Male" ${d.gender === 'Male' ? 'checked' : ''} />
-                        <span class="radio-label__text">Male</span>
-                    </label>
-                    <label class="radio-label">
-                        <input type="radio" name="enroll-gender" value="Female" ${d.gender === 'Female' ? 'checked' : ''} />
-                        <span class="radio-label__text">Female</span>
-                    </label>
-                </div>
-                <div class="form-hint"></div>
-            </div>
-
-            <div class="form-group form-group--full">
-                <label for="enroll-class">Class <span class="required">*</span></label>
-                <select id="enroll-class" class="form-select">
-                    <option value="">Select a class...</option>
-                    <optgroup label="Nursery">
-                        ${CLASS_LEVELS.nursery.map(c => `<option value="${c}" ${d.classId === c ? 'selected' : ''}>${c}</option>`).join('')}
-                    </optgroup>
-                    <optgroup label="Primary">
-                        ${CLASS_LEVELS.primary.map(c => `<option value="${c}" ${d.classId === c ? 'selected' : ''}>${c}</option>`).join('')}
-                    </optgroup>
-                </select>
-                <div class="form-hint"></div>
-            </div>
-        </div>
-
-        <div class="enroll-actions">
-            <button class="btn btn-primary" id="enroll-step1-next">
-                Continue <i class="fa-solid fa-arrow-right"></i>
-            </button>
-        </div>
-    `;
-
-    const nextBtn = panel.querySelector('#enroll-step1-next');
-    nextBtn.addEventListener('click', () => {
-        const firstName = panel.querySelector('#enroll-first-name').value.trim();
-        const lastName = panel.querySelector('#enroll-last-name').value.trim();
-        const dob = panel.querySelector('#enroll-dob').value;
-        const gender = panel.querySelector('input[name="enroll-gender"]:checked')?.value || '';
-        const classId = panel.querySelector('#enroll-class').value;
-
-        // Validate
-        if (!firstName) {
-            showToast('First name is required', 'warning');
-            return;
+    if (_esStep === 2) {
+        if (!cleanInput(document.getElementById('es-first-name')?.value)) {
+            showToast('Student first name is required.', 'warning'); return false;
         }
-        if (!lastName) {
-            showToast('Last name is required', 'warning');
-            return;
+        if (!cleanInput(document.getElementById('es-last-name')?.value)) {
+            showToast('Student last name is required.', 'warning'); return false;
         }
-        if (!dob) {
-            showToast('Date of birth is required', 'warning');
-            return;
+        if (!document.getElementById('es-class')?.value) {
+            showToast('Class selection is required.', 'warning'); return false;
         }
-        if (!gender) {
-            showToast('Please select a gender', 'warning');
-            return;
-        }
-        if (!classId) {
-            showToast('Please select a class', 'warning');
-            return;
-        }
-
-        d.firstName = firstName;
-        d.lastName = lastName;
-        d.dob = dob;
-        d.gender = gender;
-        d.classId = classId;
-
-        goToStep(container, 2);
-    });
-
-    // Enter key support
-    panel.querySelector('#enroll-first-name').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') nextBtn.click();
-    });
-    panel.querySelector('#enroll-last-name').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') nextBtn.click();
-    });
-    panel.querySelector('#enroll-dob').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') nextBtn.click();
-    });
-}
-
-/* ─── Step 2: Family & Guardian ───────────────────────────────────── */
-
-function renderStep2(panel, container) {
-    const d = enrollState.data;
-    const hasFamily = !!d.linkedFamily;
-
-    panel.innerHTML = `
-        <div class="enroll-form-section">
-            <h3 class="enroll-form-section__title">Family &amp; Guardian</h3>
-            <p class="enroll-form-section__subtitle">Link to an existing family or create a new one</p>
-        </div>
-
-        ${hasFamily ? `
-            <div class="enroll-family-badge">
-                <div class="enroll-family-badge__icon">
-                    <i class="fa-solid fa-house-chimney-user"></i>
-                </div>
-                <div class="enroll-family-badge__info">
-                    <div class="enroll-family-badge__name">Linked to ${esc(d.linkedFamily.name)}</div>
-                    <div class="enroll-family-badge__sub">Sibling of an existing student — family discounts may apply</div>
-                </div>
-                <button class="btn btn-sm btn-outline-danger" id="enroll-unlink-family">
-                    <i class="fa-solid fa-unlink"></i> Unlink
-                </button>
-            </div>
-        ` : `
-            <button class="btn btn-outline" id="enroll-link-sibling" style="margin-bottom:20px;">
-                <i class="fa-solid fa-link"></i> This student has a sibling already enrolled
-            </button>
-        `}
-
-        <div class="enroll-form-grid">
-            <div class="form-group form-group--full">
-                <label for="enroll-guardian-name">Guardian Full Name <span class="required">*</span></label>
-                <input type="text" id="enroll-guardian-name" class="form-input" value="${esc(d.guardianName)}" placeholder="e.g. HABIMANA Grace" />
-                <div class="form-hint"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="enroll-guardian-phone">Guardian Phone <span class="required">*</span></label>
-                <input type="tel" id="enroll-guardian-phone" class="form-input" value="${esc(d.guardianPhone)}" placeholder="+250 788 534 320" />
-                <div class="form-hint"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="enroll-guardian-email">Guardian Email</label>
-                <input type="email" id="enroll-guardian-email" class="form-input" value="${esc(d.guardianEmail)}" placeholder="guardian@email.com" />
-                <div class="form-hint"></div>
-            </div>
-
-            <div class="form-group form-group--full">
-                <label for="enroll-guardian-address">Address</label>
-                <input type="text" id="enroll-guardian-address" class="form-input" value="${esc(d.guardianAddress)}" placeholder="e.g. Kigali, Rwanda" />
-                <div class="form-hint"></div>
-            </div>
-        </div>
-
-        <div class="enroll-actions">
-            <button class="btn btn-outline" id="enroll-step2-back">
-                <i class="fa-solid fa-arrow-left"></i> Back
-            </button>
-            <button class="btn btn-primary" id="enroll-step2-next">
-                Continue <i class="fa-solid fa-arrow-right"></i>
-            </button>
-        </div>
-    `;
-
-    // Link sibling button
-    const linkBtn = panel.querySelector('#enroll-link-sibling');
-    if (linkBtn) {
-        linkBtn.addEventListener('click', () => {
-            // Open sibling search modal
-            const modalContent = `
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label>Search for a student</label>
-                        <input type="text" id="sibling-search" class="form-input" placeholder="Search by name or code..." />
-                        <div class="form-hint">Search for an existing student to link as a sibling</div>
-                    </div>
-                    <div id="sibling-results" style="margin-top:16px; max-height:300px; overflow-y:auto;">
-                        <div class="text-muted" style="text-align:center; padding:20px;">Type to search for students</div>
-                    </div>
-                </div>
-            `;
-
-            const modalId = 'sibling-link-modal';
-            const modalHtml = `
-                <div class="modal-overlay" id="${modalId}">
-                    <div class="modal modal-sm">
-                        <div class="modal-header">
-                            <h3>Link Sibling</h3>
-                            <button class="modal-close" data-close-modal="${modalId}"><i class="fa-solid fa-xmark"></i></button>
-                        </div>
-                        ${modalContent}
-                        <div class="modal-footer">
-                            <button class="btn btn-outline" data-close-modal="${modalId}">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            // Show modal
-            const modalsContainer = document.getElementById('modals-container');
-            if (modalsContainer) {
-                modalsContainer.innerHTML = modalHtml;
-
-                const searchInput = document.getElementById('sibling-search');
-                const resultsContainer = document.getElementById('sibling-results');
-
-                const performSearch = debounce((query) => {
-                    if (!query || query.length < 2) {
-                        resultsContainer.innerHTML = `<div class="text-muted" style="text-align:center; padding:20px;">Type at least 2 characters to search</div>`;
-                        return;
-                    }
-
-                    const students = (state.students || [])
-                        .filter(s => s.status === 'Active' && !s.is_deleted)
-                        .filter(s => {
-                            const fullName = `${s.first_name} ${s.last_name}`.toLowerCase();
-                            const code = (s.student_code || '').toLowerCase();
-                            const q = query.toLowerCase();
-                            return fullName.includes(q) || code.includes(q);
-                        })
-                        .slice(0, 10);
-
-                    if (students.length === 0) {
-                        resultsContainer.innerHTML = `<div class="text-muted" style="text-align:center; padding:20px;">No students found</div>`;
-                        return;
-                    }
-
-                    resultsContainer.innerHTML = students.map(s => `
-                        <div class="sibling-result-item" data-student-id="${s.id}" data-family-id="${s.family_id || ''}" data-name="${esc(s.first_name)} ${esc(s.last_name)}">
-                            <div class="sibling-result-item__info">
-                                <div class="sibling-result-item__name">${esc(s.first_name)} ${esc(s.last_name)}</div>
-                                <div class="sibling-result-item__sub">${esc(s.student_code || '')} · ${esc((state.classes || []).find(c => c.id === s.class_id)?.name || '')}</div>
-                            </div>
-                            ${s.family_id ? '<span class="badge badge-info">Has Family</span>' : '<span class="badge badge-neutral">No Family</span>'}
-                        </div>
-                    `).join('');
-
-                    // Click handler for results
-                    resultsContainer.querySelectorAll('.sibling-result-item').forEach(el => {
-                        el.addEventListener('click', () => {
-                            const familyId = el.dataset.familyId;
-                            const name = el.dataset.name;
-
-                            if (familyId) {
-                                // Link to existing family
-                                enrollState.data.linkedFamily = { id: familyId, name: `${name}'s Family` };
-                            } else {
-                                // Create new family with this student's guardian
-                                const studentId = parseInt(el.dataset.studentId);
-                                const student = state.students.find(s => s.id === studentId);
-                                if (student) {
-                                    enrollState.data.linkedFamily = {
-                                        id: `NEW-${studentId}`,
-                                        name: `${student.guardian_name || 'Family'} (from ${student.first_name} ${student.last_name})`
-                                    };
-                                    // Pre-fill guardian info
-                                    if (!enrollState.data.guardianName) {
-                                        enrollState.data.guardianName = student.guardian_name || '';
-                                    }
-                                    if (!enrollState.data.guardianPhone) {
-                                        enrollState.data.guardianPhone = student.guardian_phone || '';
-                                    }
-                                    if (!enrollState.data.guardianEmail) {
-                                        enrollState.data.guardianEmail = student.guardian_email || '';
-                                    }
-                                    if (!enrollState.data.guardianAddress) {
-                                        enrollState.data.guardianAddress = student.address || '';
-                                    }
-                                }
-                            }
-
-                            // Close modal and re-render step
-                            const modal = document.getElementById(modalId);
-                            if (modal) modal.remove();
-                            renderStep2(panel, container);
-                            showToast('Sibling linked successfully', 'success');
-                        });
-                    });
-                }, 300);
-
-                searchInput.addEventListener('input', (e) => {
-                    performSearch(e.target.value);
-                });
-
-                searchInput.focus();
+        const dob = document.getElementById('es-dob')?.value;
+        if (dob) {
+            const age = (new Date() - new Date(dob)) / (365.25*24*3600*1000);
+            if (age < 3 || age > 25) {
+                showToast('Date of birth seems incorrect — check the year.', 'warning'); return false;
             }
-        });
+        }
+        return true;
     }
-
-    // Unlink family button
-    const unlinkBtn = panel.querySelector('#enroll-unlink-family');
-    if (unlinkBtn) {
-        unlinkBtn.addEventListener('click', () => {
-            enrollState.data.linkedFamily = null;
-            renderStep2(panel, container);
-            showToast('Family unlinked', 'info');
-        });
-    }
-
-    // Back button
-    panel.querySelector('#enroll-step2-back').addEventListener('click', () => {
-        goToStep(container, 1);
-    });
-
-    // Next button
-    panel.querySelector('#enroll-step2-next').addEventListener('click', () => {
-        const guardianName = panel.querySelector('#enroll-guardian-name').value.trim();
-        const guardianPhone = panel.querySelector('#enroll-guardian-phone').value.trim();
-        const guardianEmail = panel.querySelector('#enroll-guardian-email').value.trim();
-        const guardianAddress = panel.querySelector('#enroll-guardian-address').value.trim();
-
-        if (!guardianName) {
-            showToast('Guardian name is required', 'warning');
-            return;
-        }
-        if (!guardianPhone) {
-            showToast('Guardian phone is required', 'warning');
-            return;
-        }
-        if (guardianEmail && !guardianEmail.includes('@')) {
-            showToast('Please enter a valid email address', 'warning');
-            return;
-        }
-
-        enrollState.data.guardianName = guardianName;
-        enrollState.data.guardianPhone = guardianPhone;
-        enrollState.data.guardianEmail = guardianEmail;
-        enrollState.data.guardianAddress = guardianAddress;
-
-        goToStep(container, 3);
-    });
+    return true; // Step 3 (location) and 4 (fees) are optional
 }
 
-/* ─── Step 3: Fee Assignment ──────────────────────────────────────── */
+/* ══ SIBLING SEARCH ════════════════════════════════════════════════ */
+window.esSiblingSearch = (q) => {
+    const res = document.getElementById('es-sibling-results');
+    if (!res || !q || q.length < 2) { if(res) res.style.display='none'; return; }
+    const lower = q.toLowerCase();
+    const matches = (state.students||[]).filter(s=>
+        s.status!=='Archived' && !s.is_deleted &&
+        `${s.first_name} ${s.last_name} ${s.code||''  }`.toLowerCase().includes(lower)
+    ).slice(0,8);
+    if (!matches.length) {
+        res.innerHTML='<div style="padding:8px 12px;font-size:13px;color:var(--text-muted);">No results</div>';
+        res.style.display='block'; return;
+    }
+    res.innerHTML = matches.map(s=>`
+    <div style="padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);"
+         onclick="esChooseSibling(${s.id},'${esc(s.first_name+' '+s.last_name)}',${s.family_id||'null'})">
+      <strong>${esc(s.first_name)} ${esc(s.last_name)}</strong>
+      <span style="color:var(--text-muted);margin-left:8px;">${esc(s.code||''  )}</span>
+      ${s.family_id?'<span style="color:var(--color-success);margin-left:6px;font-size:11px;">Family linked</span>':''}
+    </div>`).join('');
+    res.style.display='block';
+};
 
-function renderStep3(panel, container) {
-    const d = enrollState.data;
-    const level = getLevelForClass(d.classId);
-    const fees = getDefaultFeesForLevel(level);
+window.esChooseSibling = (id, name, familyId) => {
+    if (familyId) {
+        _esLinkedFamily = { id: familyId, siblingId: id };
+        document.getElementById('es-sibling-results').style.display='none';
+        document.getElementById('es-sibling-search').value = name;
+        document.getElementById('es-sibling-chosen').textContent = `Linked to family of ${name}`;
+    } else {
+        showToast('This student has no family record yet.', 'info');
+    }
+};
 
-    // Initialize fee selections
-    fees.forEach(f => {
-        if (!d.feeSelections[f.id]) {
-            d.feeSelections[f.id] = { checked: true, amountPaid: 0 };
+/* ══ SUBMIT ════════════════════════════════════════════════════════ */
+window.esSubmit = async () => {
+    const btn = document.getElementById('es-submit-btn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving…'; }
+
+    const now = new Date().toISOString();
+    const today = now.split('T')[0];
+    const year  = getActiveYear();
+
+    try {
+        // ── READ FORM DATA ────────────────────────────────────────────
+        const g = id => cleanInput(document.getElementById(id)?.value);
+
+        const father = {
+            first_name    : g('es-father-first'),
+            last_name     : g('es-father-last'),
+            phone         : g('es-father-phone')||null,
+            national_id   : g('es-father-nid')||null,
+            email         : g('es-father-email')||null,
+            occupation    : g('es-father-occupation')||null,
+            employer      : g('es-father-employer')||null,
+            guardian_type : 'father',
+            is_primary    : true,
+            is_active     : true,
+        };
+        const mother = {
+            first_name    : g('es-mother-first'),
+            last_name     : g('es-mother-last'),
+            phone         : g('es-mother-phone')||null,
+            national_id   : g('es-mother-nid')||null,
+            email         : g('es-mother-email')||null,
+            occupation    : g('es-mother-occupation')||null,
+            employer      : g('es-mother-employer')||null,
+            guardian_type : 'mother',
+            is_primary    : false,
+            is_active     : true,
+        };
+
+        const insuranceRaw = document.getElementById('es-insurance')?.value;
+        const insurance = insuranceRaw === '__other__' ? g('es-insurance-other') : insuranceRaw;
+        const classId  = parseInt(document.getElementById('es-class')?.value||'0');
+        const prevMarks = parseFloat(document.getElementById('es-prev-marks')?.value||'0')||null;
+
+        // ── 1. CREATE FAMILY (or link existing) ───────────────────────
+        let familyId = _esLinkedFamily?.id || null;
+        if (!familyId && father.first_name) {
+            const primaryName = `${father.first_name} ${father.last_name}`.trim();
+            const primaryPhone = father.phone || mother.phone;
+            const familyResult = await insert('families', {
+                family_code    : `FAM-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
+                guardian_name  : primaryName || null,
+                guardian_phone : primaryPhone || null,
+                guardian_email : father.email || mother.email || null,
+                address        : [_esAddress.sector, _esAddress.district, _esAddress.province].filter(Boolean).join(', ')|null,
+                created_at     : now,
+                updated_at     : now,
+            });
+            familyId = familyResult?.id || null;
         }
-    });
 
-    function recalcTotal() {
-        const total = fees.reduce((sum, f) => {
-            const sel = d.feeSelections[f.id];
-            return sum + (sel.checked ? (sel.amountPaid || 0) : 0);
-        }, 0);
-        const totalEl = panel.querySelector('#fee-running-total');
-        if (totalEl) totalEl.textContent = fmtCurrency(total);
-        return total;
-    }
-
-    function renderFees() {
-        const list = panel.querySelector('#fee-select-list');
-        if (!list) return;
-
-        list.innerHTML = fees.map(f => {
-            const sel = d.feeSelections[f.id];
-            const isChecked = sel?.checked !== false;
-            return `
-                <div class="payment-category-item ${isChecked ? 'payment-category-item--checked' : ''}" data-fee-id="${f.id}">
-                    <label class="payment-category-item__checkbox-wrap">
-                        <input type="checkbox" class="payment-category-item__checkbox" data-fee-check="${f.id}" ${isChecked ? 'checked' : ''} />
-                        <span class="payment-category-item__custom-checkbox"></span>
-                    </label>
-                    <div class="payment-category-item__info">
-                        <div class="payment-category-item__name">${esc(f.name)}</div>
-                        <div class="payment-category-item__total">Total: <strong>${fmtCurrency(f.amount)}</strong></div>
-                    </div>
-                    <div class="payment-category-item__amount-wrap ${isChecked ? '' : 'payment-category-item__amount-wrap--disabled'}">
-                        <span class="payment-category-item__currency">RWF</span>
-                        <input type="text" class="payment-category-item__amount-input" data-fee-amount="${f.id}" placeholder="0" value="${sel?.amountPaid || ''}" ${isChecked ? '' : 'disabled'} />
-                    </div>
-                    <button class="btn btn-xs btn-outline payment-category-item__max-btn" data-fee-max="${f.id}">Full</button>
-                </div>
-            `;
-        }).join('');
-        recalcTotal();
-
-        // Event listeners
-        list.querySelectorAll('[data-fee-check]').forEach(cb => {
-            cb.addEventListener('change', () => {
-                const feeId = cb.dataset.feeCheck;
-                const checked = cb.checked;
-                d.feeSelections[feeId].checked = checked;
-
-                const row = list.querySelector(`[data-fee-id="${feeId}"]`);
-                const amountInput = row.querySelector('[data-fee-amount]');
-                const amountWrap = row.querySelector('.payment-category-item__amount-wrap');
-
-                row.classList.toggle('payment-category-item--checked', checked);
-                amountWrap.classList.toggle('payment-category-item__amount-wrap--disabled', !checked);
-                amountInput.disabled = !checked;
-
-                if (!checked) {
-                    d.feeSelections[feeId].amountPaid = 0;
-                    amountInput.value = '';
-                }
-
-                recalcTotal();
+        // ── 2. INSERT FATHER GUARDIAN ─────────────────────────────────
+        let fatherId = null;
+        if (father.first_name) {
+            const fRes = await insert('guardians', {
+                ...father,
+                family_id  : familyId,
+                province   : _esAddress.province||null,
+                district   : _esAddress.district||null,
+                sector     : _esAddress.sector||null,
+                cell       : _esAddress.cell||null,
+                village    : _esAddress.village||null,
+                created_at : now,
+                updated_at : now,
             });
-        });
+            fatherId = fRes?.id||null;
+        }
 
-        list.querySelectorAll('[data-fee-amount]').forEach(input => {
-            // Format as currency on blur
-            input.addEventListener('blur', () => {
-                const raw = input.value.replace(/,/g, '');
-                const num = parseInt(raw) || 0;
-                const feeId = input.dataset.feeAmount;
-                d.feeSelections[feeId].amountPaid = num;
-                if (num > 0) {
-                    input.value = num.toLocaleString();
-                } else {
-                    input.value = '';
-                }
-                recalcTotal();
+        // ── 3. INSERT MOTHER GUARDIAN ─────────────────────────────────
+        let motherId = null;
+        if (mother.first_name) {
+            const mRes = await insert('guardians', {
+                ...mother,
+                family_id  : familyId,
+                province   : _esAddress.province||null,
+                district   : _esAddress.district||null,
+                sector     : _esAddress.sector||null,
+                cell       : _esAddress.cell||null,
+                village    : _esAddress.village||null,
+                created_at : now,
+                updated_at : now,
             });
+            motherId = mRes?.id||null;
+        }
 
-            // Allow only numbers
-            input.addEventListener('input', () => {
-                input.value = input.value.replace(/[^0-9]/g, '');
+        // ── 4. INSERT STUDENT ─────────────────────────────────────────
+        const studentCode = typeof generateStudentCode==='function'
+            ? generateStudentCode() : `STU-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`;
+
+        const studentPayload = {
+            student_code          : studentCode,
+            first_name            : g('es-first-name'),
+            last_name             : g('es-last-name'),
+            class_id              : classId||null,
+            gender                : document.getElementById('es-gender')?.value||null,
+            date_of_birth         : document.getElementById('es-dob')?.value||null,
+            birthplace            : g('es-birthplace')||null,
+            nationality           : g('es-nationality')||'Rwandan',
+            medical_insurance     : insurance||null,
+            sdms_code             : g('es-sdms-code')||null,
+            previous_school       : g('es-prev-school')||null,
+            previous_school_marks : prevMarks,
+            province              : _esAddress.province||null,
+            district              : _esAddress.district||null,
+            sector                : _esAddress.sector||null,
+            cell                  : _esAddress.cell||null,
+            village               : _esAddress.village||null,
+            address               : [_esAddress.village, _esAddress.cell, _esAddress.sector, _esAddress.district, _esAddress.province].filter(Boolean).join(', ')||null,
+            // Legacy flat guardian fields for backward compat
+            guardian_name         : father.first_name ? `${father.first_name} ${father.last_name}`.trim() : (mother.first_name ? `${mother.first_name} ${mother.last_name}`.trim() : null),
+            guardian_phone        : father.phone || mother.phone || null,
+            guardian_email        : father.email || mother.email || null,
+            family_id             : familyId,
+            enrollment_date       : today,
+            academic_year_id      : year?.id||null,
+            status                : 'Active',
+            is_deleted            : false,
+            notes                 : g('es-notes')||null,
+            created_at            : now,
+            updated_at            : now,
+        };
+
+        const studentResult = await insert('students', studentPayload);
+        if (!studentResult) throw new Error('Failed to create student record');
+        const studentId = studentResult.id;
+
+        // ── 5. LINK GUARDIANS VIA student_guardians ───────────────────
+        if (fatherId) {
+            await insert('student_guardians', {
+                student_id          : studentId,
+                guardian_id         : fatherId,
+                relationship        : 'father',
+                is_emergency_contact: true,
+                created_at          : now,
+            }).catch(()=>{});
+        }
+        if (motherId) {
+            await insert('student_guardians', {
+                student_id          : studentId,
+                guardian_id         : motherId,
+                relationship        : 'mother',
+                is_emergency_contact: !fatherId,
+                created_at          : now,
+            }).catch(()=>{});
+        }
+
+        // ── 6. CLASS ENROLLMENT (historical roster) ───────────────────
+        const currentTerm = getActiveTerm();
+        if (classId && year?.id) {
+            await insert('class_enrollments', {
+                student_id       : studentId,
+                class_id         : classId,
+                academic_year_id : year.id,
+                term_id          : currentTerm?.id||null,
+                enrollment_date  : today,
+                is_active        : true,
+                status           : 'active',
+                enrolled_by      : state.currentUser?.id||null,
+                notes            : 'Enrolled via enrollment form',
+                created_at       : now,
+                updated_at       : now,
+            }).catch(()=>{});
+
+            await insert('student_class_history', {
+                student_id       : studentId,
+                class_id         : classId,
+                academic_year_id : year.id,
+                term_id          : currentTerm?.id||null,
+                start_date       : today,
+                end_date         : null,
+                status           : 'active',
+                reason           : 'new_enrollment',
+                recorded_by      : state.currentUser?.id||null,
+                created_at       : now,
+            }).catch(()=>{});
+        }
+
+        // ── 7. FEE ASSIGNMENT ─────────────────────────────────────────
+        const feeCats = (state.feeCategories||[]).filter(c=>c.is_active!==false);
+        let totalPaidToday = 0;
+        const assignedFees = [];
+
+        for (const fc of feeCats) {
+            const cb = document.getElementById(`es-fee-${fc.id}`);
+            if (!cb?.checked) continue;
+            const enteredAmt = parseFloat(document.getElementById(`es-fee-amt-${fc.id}`)?.value||'0')||0;
+            const fullAmt    = Number(fc.default_amount||0);
+            const discount   = enteredAmt < fullAmt ? Math.max(0, fullAmt - enteredAmt) : 0;
+            const netAmt     = fullAmt - discount;
+            const isPaid     = enteredAmt >= netAmt && netAmt > 0;
+            if (isPaid) totalPaidToday += enteredAmt;
+
+            const feeResult = await insert('student_fees', {
+                student_id        : studentId,
+                fee_category_id   : fc.id,
+                fee_name          : fc.name,
+                amount            : fullAmt,
+                waived_amount     : discount,
+                paid_amount       : isPaid ? enteredAmt : 0,
+                is_paid           : isPaid,
+                is_waived         : false,
+                requires_approval : !isPaid,
+                is_approved       : isPaid,
+                source            : 'enrollment',
+                academic_year_id  : year?.id||null,
+                term_id           : currentTerm?.id||null,
+                due_date          : currentTerm?.end_date||null,
+                notes             : `Assigned at enrollment — ${fc.name}`,
+                created_at        : now,
+                updated_at        : now,
             });
-
-            // Select all on focus
-            input.addEventListener('focus', () => {
-                input.select();
-            });
-        });
-
-        list.querySelectorAll('[data-fee-max]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const feeId = btn.dataset.feeMax;
-                const fee = fees.find(f => f.id === feeId);
-                if (!fee) return;
-
-                const amountInput = list.querySelector(`[data-fee-amount="${feeId}"]`);
-                const checkbox = list.querySelector(`[data-fee-check="${feeId}"]`);
-
-                // Ensure checked
-                if (!checkbox.checked) {
-                    checkbox.checked = true;
-                    checkbox.dispatchEvent(new Event('change'));
-                }
-
-                d.feeSelections[feeId].amountPaid = fee.amount;
-                amountInput.value = fee.amount.toLocaleString();
-                recalcTotal();
-            });
-        });
-    }
-
-    panel.innerHTML = `
-        <div class="enroll-form-section">
-            <h3 class="enroll-form-section__title">Fee Assignment</h3>
-            <p class="enroll-form-section__subtitle">Select fees to apply and enter any amount being paid today</p>
-        </div>
-
-        <div class="payment-category-select" id="fee-select-list"></div>
-
-        <div class="payment-total-bar">
-            <span class="payment-total-bar__label">Total being paid today</span>
-            <span class="payment-total-bar__value" id="fee-running-total">0 RWF</span>
-        </div>
-
-        <div class="enroll-actions">
-            <button class="btn btn-outline" id="enroll-step3-back">
-                <i class="fa-solid fa-arrow-left"></i> Back
-            </button>
-            <button class="btn btn-primary" id="enroll-step3-next">
-                Continue <i class="fa-solid fa-arrow-right"></i>
-            </button>
-        </div>
-    `;
-
-    renderFees();
-
-    panel.querySelector('#enroll-step3-back').addEventListener('click', () => {
-        goToStep(container, 2);
-    });
-
-    panel.querySelector('#enroll-step3-next').addEventListener('click', () => {
-        goToStep(container, 4);
-    });
-}
-
-/* ─── Step 4: Review & Confirm ────────────────────────────────────── */
-
-function renderStep4(panel, container) {
-    const d = enrollState.data;
-    const level = getLevelForClass(d.classId);
-    const fees = getDefaultFeesForLevel(level);
-
-    const totalAssigned = fees.reduce((sum, f) => {
-        const sel = d.feeSelections[f.id];
-        return sum + (sel?.checked ? f.amount : 0);
-    }, 0);
-
-    const totalPaidToday = fees.reduce((sum, f) => {
-        const sel = d.feeSelections[f.id];
-        return sum + (sel?.checked ? (sel.amountPaid || 0) : 0);
-    }, 0);
-
-    const remaining = totalAssigned - totalPaidToday;
-    const studentCode = generateStudentCode();
-
-    const feeRows = fees.map(f => {
-        const sel = d.feeSelections[f.id];
-        if (!sel?.checked) return '';
-        const paid = sel.amountPaid || 0;
-        const due = f.amount - paid;
-        return `
-            <tr>
-                <td>${esc(f.name)}</td>
-                <td style="text-align:right;">${fmtCurrency(f.amount)}</td>
-                <td style="text-align:right;color:var(--success);">${fmtCurrency(paid)}</td>
-                <td style="text-align:right;${due > 0 ? 'color:var(--danger);' : ''}">${fmtCurrency(due)}</td>
-            </tr>
-        `;
-    }).filter(Boolean).join('');
-
-    panel.innerHTML = `
-        <div class="enroll-form-section">
-            <h3 class="enroll-form-section__title">Review &amp; Confirm</h3>
-            <p class="enroll-form-section__subtitle">Verify all information before enrolling</p>
-        </div>
-
-        <div class="enroll-review-grid">
-            <div class="enroll-review-group">
-                <div class="enroll-review-group__title">Student Information</div>
-                <div class="enroll-review-item">
-                    <span class="enroll-review-item__label">Student Code</span>
-                    <span class="enroll-review-item__value">${esc(studentCode)}</span>
-                </div>
-                <div class="enroll-review-item">
-                    <span class="enroll-review-item__label">Full Name</span>
-                    <span class="enroll-review-item__value">${esc(d.firstName)} ${esc(d.lastName)}</span>
-                </div>
-                <div class="enroll-review-item">
-                    <span class="enroll-review-item__label">Date of Birth</span>
-                    <span class="enroll-review-item__value">${d.dob}</span>
-                </div>
-                <div class="enroll-review-item">
-                    <span class="enroll-review-item__label">Gender</span>
-                    <span class="enroll-review-item__value">${d.gender === 'Male' ? 'Male' : 'Female'}</span>
-                </div>
-                <div class="enroll-review-item">
-                    <span class="enroll-review-item__label">Class</span>
-                    <span class="enroll-review-item__value">${esc(d.classId)}</span>
-                </div>
-            </div>
-
-            <div class="enroll-review-group">
-                <div class="enroll-review-group__title">Guardian Information</div>
-                <div class="enroll-review-item">
-                    <span class="enroll-review-item__label">Guardian Name</span>
-                    <span class="enroll-review-item__value">${esc(d.guardianName)}</span>
-                </div>
-                <div class="enroll-review-item">
-                    <span class="enroll-review-item__label">Phone</span>
-                    <span class="enroll-review-item__value">${esc(d.guardianPhone)}</span>
-                </div>
-                <div class="enroll-review-item">
-                    <span class="enroll-review-item__label">Email</span>
-                    <span class="enroll-review-item__value">${esc(d.guardianEmail) || '—'}</span>
-                </div>
-                <div class="enroll-review-item">
-                    <span class="enroll-review-item__label">Family</span>
-                    <span class="enroll-review-item__value">${d.linkedFamily ? esc(d.linkedFamily.name) : 'New Family'}</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="enroll-review-fees">
-            <div class="enroll-review-fees__title">Fee Summary</div>
-            <div class="table-wrapper">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Fee Category</th>
-                            <th style="text-align:right;">Total</th>
-                            <th style="text-align:right;">Paid Today</th>
-                            <th style="text-align:right;">Remaining</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${feeRows || '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">No fees selected</td></tr>'}
-                    </tbody>
-                    <tfoot>
-                        <tr style="font-weight:700;background:var(--bg-tertiary);">
-                            <td>TOTALS</td>
-                            <td style="text-align:right;">${fmtCurrency(totalAssigned)}</td>
-                            <td style="text-align:right;color:var(--success);">${fmtCurrency(totalPaidToday)}</td>
-                            <td style="text-align:right;${remaining > 0 ? 'color:var(--danger);' : ''}">${fmtCurrency(remaining)}</td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-        </div>
-
-        <div class="enroll-actions">
-            <button class="btn btn-outline" id="enroll-step4-back">
-                <i class="fa-solid fa-arrow-left"></i> Back
-            </button>
-            <button class="btn btn-success" id="enroll-step4-confirm">
-                <i class="fa-solid fa-check"></i> Enroll Student
-            </button>
-        </div>
-    `;
-
-    panel.querySelector('#enroll-step4-back').addEventListener('click', () => {
-        goToStep(container, 3);
-    });
-
-    panel.querySelector('#enroll-step4-confirm').addEventListener('click', async () => {
-        const btn = panel.querySelector('#enroll-step4-confirm');
-        window.Loaders.button.start(btn, 'Enrolling...');
-
-        try {
-            // 1. Create student record
-            const studentPayload = {
-                first_name: d.firstName,
-                last_name: d.lastName,
-                date_of_birth: d.dob,
-                gender: d.gender,
-                class_id: d.classId,
-                student_code: studentCode,
-                guardian_name: d.guardianName,
-                guardian_phone: d.guardianPhone,
-                guardian_email: d.guardianEmail || null,
-                address: d.guardianAddress || null,
-                status: 'Active',
-                is_deleted: false,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-            };
-
-            // If linked family exists, use it
-            if (d.linkedFamily && !d.linkedFamily.id.startsWith('NEW-')) {
-                studentPayload.family_id = d.linkedFamily.id;
-            }
-
-            const studentResult = await insert('students', studentPayload);
-            if (!studentResult) throw new Error('Failed to create student record');
-            const studentId = studentResult.id;
-
-            // 2. Create family if needed
-            let familyId = d.linkedFamily?.id;
-            if (d.linkedFamily && d.linkedFamily.id.startsWith('NEW-')) {
-                const familyPayload = {
-                    family_code: `FAM-${new Date().getFullYear()}-${String(studentId).padStart(4, '0')}`,
-                    guardian_name: d.guardianName,
-                    guardian_phone: d.guardianPhone,
-                    guardian_email: d.guardianEmail || null,
-                    address: d.guardianAddress || null,
-                    created_at: new Date().toISOString()
-                };
-                const familyResult = await insert('families', familyPayload);
-                if (familyResult) {
-                    familyId = familyResult.id;
-                    await update('students', studentId, { family_id: familyId });
-                }
-            }
-
-            // 3. Create fee assignments
-            const feeCategoryIds = [];
-            for (const fee of fees) {
-                const sel = d.feeSelections[fee.id];
-                if (!sel?.checked) continue;
-
-                // Check if fee is a real category ID or a fallback
-                const isRealCategory = !fee.id.startsWith('fallback-');
-                let categoryId = isRealCategory ? fee.id : null;
-
-                // If fallback, try to find matching category or create one
-                if (!isRealCategory) {
-                    const existing = (state.feeCategories || []).find(c => c.name === fee.name);
-                    if (existing) {
-                        categoryId = existing.id;
-                    } else {
-                        // Create it
-                        const newCat = await insert('fee_categories', {
-                            name: fee.name,
-                            level: level,
-                            default_amount: fee.amount,
-                            is_active: true,
-                            created_at: new Date().toISOString()
-                        });
-                        if (newCat) categoryId = newCat.id;
-                    }
-                }
-
-                if (!categoryId) continue;
-
-                // Discount logic:
-                // If the entered amount < fee.amount → the difference is a waiver (discount).
-                // The fee is still created for the full fee.amount but waived_amount is set.
-                const enteredAmount   = sel.amountPaid || 0;
-                const isFullAmount    = enteredAmount >= fee.amount;
-                const discountAmount  = isFullAmount ? 0 : Math.max(0, fee.amount - enteredAmount);
-                const effectiveAmount = fee.amount - discountAmount; // net amount student owes
-                const isPaid          = enteredAmount >= effectiveAmount && effectiveAmount > 0;
-
-                // Fees from enrollment always require approval (unless already fully paid today)
-                const needsApproval = !isPaid;
-
-                const feePayload = {
-                    student_id       : studentId,
-                    fee_category_id  : categoryId,
-                    fee_name         : fee.name,
-                    term_id          : state.currentTerm?.id || null,
-                    academic_year_id : state.currentAcadYear?.id || null,
-                    amount           : fee.amount,
-                    paid_amount      : enteredAmount > 0 ? enteredAmount : 0,
-                    waived_amount    : discountAmount,
-                    is_paid          : isPaid,
-                    is_waived        : false,
-                    due_date         : state.currentTerm?.end_date || null,
-                    requires_approval: needsApproval,
-                    is_approved      : isPaid ? true : false,  // auto-approve if paid in full
-                    source           : 'enrollment',
-                    created_at       : new Date().toISOString(),
-                    updated_at       : new Date().toISOString()
-                };
-
-                const feeResult = await insert('student_fees', feePayload);
-
-                // Log auto-approval if paid in full
-                if (isPaid && feeResult?.id) {
+            if (feeResult) {
+                assignedFees.push({...feeResult, enteredAmt, isPaid});
+                if (isPaid) {
                     await insert('fee_approval_log', {
                         student_fee_id : feeResult.id,
                         student_id     : studentId,
                         action         : 'auto_approved',
-                        acted_at       : new Date().toISOString(),
+                        acted_by       : state.currentUser?.id||null,
+                        acted_at       : now,
                         note           : 'Auto-approved: paid in full at enrollment.',
-                    }).catch(() => {});
+                    }).catch(()=>{});
                 }
-                feeCategoryIds.push(categoryId);
             }
-
-            // 4. Record payment if any amount was paid today
-            if (totalPaidToday > 0) {
-                const receiptNumber = await generateReceiptNumber();
-
-                const paymentPayload = {
-                    student_id       : studentId,
-                    amount           : totalPaidToday,
-                    payment_date     : new Date().toISOString().split('T')[0],
-                    payment_method   : d.paymentMethod || 'Cash',
-                    receipt_number   : receiptNumber,
-                    notes            : `Initial enrollment payment — ${d.firstName} ${d.lastName}`,
-                    recorded_by      : state.currentUser?.id || null,
-                    recorded_by_name : state.currentUser?.name || null,
-                    academic_year_id : state.currentAcadYear?.id || null,
-                    term_id          : state.currentTerm?.id || null,
-                    created_at       : new Date().toISOString(),
-                    updated_at       : new Date().toISOString(),
-                };
-
-                await insert('payments', paymentPayload);
-            }
-
-            // 5. Record class enrollment for historical tracking
-            if (studentId && d.classId && state.currentAcadYear?.id) {
-                await insert('class_enrollments', {
-                    student_id       : studentId,
-                    class_id         : d.classId,
-                    academic_year_id : state.currentAcadYear.id,
-                    term_id          : state.currentTerm?.id || null,
-                    enrollment_date  : new Date().toISOString().split('T')[0],
-                    is_active        : true,
-                    status           : 'active',
-                    enrolled_by      : state.currentUser?.id || null,
-                    notes            : `Enrolled via enrollment form — ${d.firstName} ${d.lastName}`,
-                    created_at       : new Date().toISOString(),
-                    updated_at       : new Date().toISOString(),
-                }).catch(() => {});
-
-                await insert('student_class_history', {
-                    student_id       : studentId,
-                    class_id         : d.classId,
-                    academic_year_id : state.currentAcadYear.id,
-                    term_id          : state.currentTerm?.id || null,
-                    start_date       : new Date().toISOString().split('T')[0],
-                    end_date         : null,
-                    status           : 'active',
-                    reason           : 'new_enrollment',
-                    recorded_by      : state.currentUser?.id || null,
-                    created_at       : new Date().toISOString(),
-                }).catch(() => {});
-            }
-
-            // 6. Add payment academic_year + term if paid today
-            // (already included in paymentPayload above via state.currentAcadYear)
-
-            // 7. Update state and navigate
-            await loadInitialData();
-            showToast('Student enrolled successfully!', 'success', `${d.firstName} ${d.lastName} (${studentCode})`);
-            navigateTo('student-list');
-
-        } catch (error) {
-            console.error('[EnrollStudent] Error:', error);
-            showToast('Enrollment failed', 'error', error.message || 'Please try again.');
-        } finally {
-            window.Loaders.button.stop(btn);
         }
-    });
-}
 
-/* ─── Export ───────────────────────────────────────────────────────── */
+        // ── 8. INITIAL PAYMENT ────────────────────────────────────────
+        if (totalPaidToday > 0) {
+            const receiptNumber = `RCT-${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}-${Date.now().toString().slice(-4)}`;
+            const payMethod  = document.getElementById('es-pay-method')?.value||'Cash';
+            const payRef     = g('es-pay-ref')||null;
 
-function render(container) {
-    renderEnrollStudent(container);
-}
+            const payResult = await insert('payments', {
+                student_id       : studentId,
+                amount           : totalPaidToday,
+                payment_date     : today,
+                payment_method   : payMethod,
+                receipt_number   : receiptNumber,
+                reference        : payRef,
+                notes            : `Initial enrollment payment — ${studentPayload.first_name} ${studentPayload.last_name}`,
+                recorded_by      : state.currentUser?.id||null,
+                recorded_by_name : state.currentUser?.name||null,
+                academic_year_id : year?.id||null,
+                term_id          : currentTerm?.id||null,
+                created_at       : now,
+                updated_at       : now,
+            });
+
+            // Payment allocations — link to each paid fee
+            if (payResult?.id) {
+                for (const fee of assignedFees.filter(f=>f.isPaid)) {
+                    await insert('payment_allocations', {
+                        payment_id     : payResult.id,
+                        student_fee_id : fee.id,
+                        amount         : fee.enteredAmt,
+                        notes          : 'Enrollment payment allocation',
+                        created_at     : now,
+                    }).catch(()=>{});
+                }
+            }
+        }
+
+        // ── 9. LOG + NOTIFY ───────────────────────────────────────────
+        if (typeof logAction==='function') {
+            logAction('student_enrolled', 'students', studentId, {
+                name  : `${studentPayload.first_name} ${studentPayload.last_name}`,
+                class : classId,
+                year  : year?.year_name,
+                fees  : assignedFees.length,
+                paid  : totalPaidToday,
+            });
+        }
+
+        // ── 10. RELOAD AND NAVIGATE ───────────────────────────────────
+        await loadAllData({ silent: true });
+        showToast(
+            `${studentPayload.first_name} ${studentPayload.last_name} enrolled successfully!`,
+            'success'
+        );
+        navigateTo('student-list');
+
+    } catch(err) {
+        handleApiError(err, 'student enrollment');
+        if (btn) { btn.disabled=false; btn.innerHTML='<i class="fa-solid fa-user-plus"></i> Enroll Student'; }
+    }
+};
 
 window.renderEnrollStudent = renderEnrollStudent;
-window.EnrollStudent = { render };

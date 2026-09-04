@@ -92,14 +92,9 @@ function applyTheme(theme, shouldSave = true) {
 function initTheme(skipSystemPreference = false) {
     const savedTheme = getSavedTheme();
 
-    let theme = savedTheme;
-
-    if (!skipSystemPreference) {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (!savedTheme || savedTheme === THEMES.LIGHT) {
-            theme = prefersDark ? THEMES.DARK : THEMES.LIGHT;
-        }
-    }
+    // Default is always LIGHT — system dark preference is ignored.
+    // User can toggle in settings. We never auto-apply dark mode.
+    const theme = savedTheme || THEMES.LIGHT;
 
     applyTheme(theme, true);
     console.log(`[Theme] Initialized: ${theme}`);

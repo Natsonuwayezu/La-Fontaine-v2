@@ -278,7 +278,7 @@ async function doLogin(role, username, password) {
         };
     }
 
-    if (!role || !username || !password) {
+    if (!role || (!username && role !== 'admin') || !password) {
         return { success: false, error: 'Please fill in all fields.', user: null };
     }
 
@@ -293,7 +293,7 @@ async function doLogin(role, username, password) {
         // and the "state not loaded yet, query fresh" fallback both
         // moved server-side into the function itself.
         const rows = await callRPC('login_check', {
-            p_username: username,
+            p_username: role === 'admin' ? 'admin' : username,
             p_password: password,
             p_role: role,
         });
@@ -969,19 +969,34 @@ function openLoginCard() {
 function onRoleChange(role) {
     const usernameField = document.getElementById('username-field');
     const passwordField = document.getElementById('password-field');
-    const loginBtn = document.getElementById('login-btn');
+    const loginBtn     = document.getElementById('login-btn');
 
     if (role) {
-        if (usernameField) usernameField.style.display = 'block';
+        // Admin has no username — they authenticate with password only.
+        // The login_check() RPC matches admin by role + password against
+        // school_settings.admin_password. No username needed.
+        const isAdmin = role === 'admin';
+        if (usernameField) {
+            usernameField.style.display = isAdmin ? 'none' : 'block';
+            // Clear username field when switching to admin so it doesn't
+            // accidentally send a stale value to the RPC.
+            if (isAdmin) {
+                const inp = document.getElementById('login-username');
+                if (inp) inp.value = '';
+            }
+        }
         if (passwordField) passwordField.style.display = 'block';
         if (loginBtn) loginBtn.style.display = 'block';
         setTimeout(() => {
-            document.getElementById('login-username')?.focus();
+            const target = isAdmin
+                ? document.getElementById('login-password')
+                : document.getElementById('login-username');
+            target?.focus();
         }, 100);
     } else {
         if (usernameField) usernameField.style.display = 'none';
         if (passwordField) passwordField.style.display = 'none';
-        if (loginBtn) loginBtn.style.display = 'none';
+        if (loginBtn)      loginBtn.style.display = 'none';
     }
 }
 

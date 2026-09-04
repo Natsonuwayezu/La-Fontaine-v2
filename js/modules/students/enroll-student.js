@@ -59,8 +59,8 @@ function _esShell(container) {
       <!-- Steps bar -->
       <div style="display:flex;align-items:center;gap:0;margin-bottom:20px;" id="es-step-bar">
         ${[
-          {n:1,label:'Guardian Info',icon:'fa-person'},
-          {n:2,label:'Students',icon:'fa-children'},
+          {n:1,label:'Students',icon:'fa-children'},
+          {n:2,label:'Guardian Info',icon:'fa-person'},
           {n:3,label:'Location',icon:'fa-location-dot'},
           {n:4,label:'Fee Assignment',icon:'fa-tags'},
         ].map((s,i,arr) => `
@@ -97,8 +97,8 @@ function _esDraw() {
     const panel = document.getElementById('es-panel');
     if (!panel) return;
 
-    if (_esStep === 1) _esStep1(panel);
-    else if (_esStep === 2) _esStep2(panel);
+    if (_esStep === 1) _esStep2(panel);
+    else if (_esStep === 2) _esStep1(panel);
     else if (_esStep === 3) _esStep3(panel);
     else if (_esStep === 4) _esStep4(panel);
 }
@@ -175,7 +175,7 @@ function _esStep1(panel) {
 
     <div style="display:flex;justify-content:flex-end;">
       <button class="btn btn-primary" onclick="esNext()">
-        Next: Students <i class="fa-solid fa-arrow-right"></i></button>
+        Next: Guardian Info <i class="fa-solid fa-arrow-right"></i></button>
     </div>`;
 }
 
@@ -655,20 +655,20 @@ window.esPrev = () => {
 
 function _esValidateStep(step) {
     if (step === 1) {
-        const fFirst = document.getElementById('es-father-first')?.value?.trim();
-        const mFirst = document.getElementById('es-mother-first')?.value?.trim();
-        if (!fFirst && !mFirst) {
-            showToast('Enter at least father or mother first name.', 'warning'); return false;
-        }
-        return true;
-    }
-    if (step === 2) {
         window._esStudents.forEach((_, i) => esReadCard(i));
         for (let i = 0; i < window._esStudents.length; i++) {
             const s = window._esStudents[i];
             if (!s.firstName) { showToast(`Student ${i+1}: first name is required.`, 'warning'); return false; }
             if (!s.lastName)  { showToast(`Student ${i+1}: last name is required.`, 'warning'); return false; }
             if (!s.classId)   { showToast(`Student ${i+1}: class selection is required.`, 'warning'); return false; }
+        }
+        return true;
+    }
+    if (step === 2) {
+        const fFirst = document.getElementById('es-father-first')?.value?.trim();
+        const mFirst = document.getElementById('es-mother-first')?.value?.trim();
+        if (!fFirst && !mFirst) {
+            showToast('Enter at least father or mother first name.', 'warning'); return false;
         }
         return true;
     }

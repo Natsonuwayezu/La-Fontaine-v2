@@ -578,7 +578,7 @@ async function renderRecordPayment(container, params = {}) {
                 student_id: currentStudentId,
                 academic_year_id: yearId,
                 term_id: termId,
-                total_amount: total,
+                amount: total,
                 payment_date: date,
                 payment_method: method,
                 receipt_number: receiptNo,

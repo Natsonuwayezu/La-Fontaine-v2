@@ -104,6 +104,7 @@ function render() {
 
   mount.innerHTML = `
         <div class="sidebar-header">
+    <div class="sidebar-period-strip" id="sidebar-period-strip"></div>
             <div class="school-brand">
                 <div class="logo-box">
                     <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2">
@@ -585,10 +586,19 @@ function selectYear(year) {
 function sidebarSelectYear(yearId) {
   sidebarState.currentYearId = yearId;
   sidebarState.currentTermId = null;
+  state.selectedYearId = yearId;
+  state.selectedTermId = null;
   renderBadgeRow();
   renderNav(_getFilteredSections());
   emitPeriodChange();
   closeBadgeDropdowns();
+  if (typeof applyPeriodTheme === 'function') applyPeriodTheme();
+  // Reload data for selected year without logging out
+  if (typeof reloadForYear === 'function') {
+    reloadForYear(yearId).catch(() => {});
+  } else if (typeof loadAllData === 'function') {
+    loadAllData({ silent: true }).catch(() => {});
+  }
 }
 
 /**
@@ -606,11 +616,15 @@ function selectTerm(term) {
 function sidebarSelectTerm(termId) {
   sidebarState.currentTermId = termId;
   sidebarState.periodMode    = 'normal';
+  state.selectedTermId = termId;
   if (typeof deactivateHolidayMode === 'function') deactivateHolidayMode();
   renderBadgeRow();
   renderNav(_getFilteredSections());
   emitPeriodChange();
   closeBadgeDropdowns();
+  if (typeof applyPeriodTheme === 'function') applyPeriodTheme();
+  // Reload data for this term without logging out
+  if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
 }
 
 function sidebarSelectSession(sessionId) {
@@ -623,6 +637,7 @@ function sidebarSelectSession(sessionId) {
   renderNav(_getFilteredSections());
   emitPeriodChange();
   closeBadgeDropdowns();
+  if (typeof applyPeriodTheme === 'function') applyPeriodTheme();
   if (typeof TopbarPeriod !== 'undefined') TopbarPeriod.refresh();
 }
 

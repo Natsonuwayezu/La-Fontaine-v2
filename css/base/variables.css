@@ -389,3 +389,133 @@ body.role-teacher {
     --role-light: var(--teacher-light);
     --role-gradient: var(--teacher-gradient);
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   PERIOD THEME SYSTEM  v2
+   3 time-statuses × 2 modes = 6 combinations.
+   All driven by --period-color CSS custom property set by JS.
+   body.period-current / .period-past / .period-future
+   body.period-mode-term / .period-mode-holiday
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Default period color — overridden by JS on every period switch */
+:root {
+    --period-color: #16a34a;
+}
+
+/* ── Current period — green ─────────────────────────────────────── */
+body.period-current {
+    --role-primary:   #16a34a;
+    --role-secondary: #22c55e;
+    --role-tertiary:  #4ade80;
+    --role-light:     rgba(22, 163, 74, 0.10);
+    --role-dark:      #15803d;
+    --role-gradient:  linear-gradient(135deg, #16a34a, #22c55e);
+}
+
+/* ── Past period — slate ────────────────────────────────────────── */
+body.period-past {
+    --role-primary:   #475569;
+    --role-secondary: #64748b;
+    --role-tertiary:  #94a3b8;
+    --role-light:     rgba(71, 85, 105, 0.10);
+    --role-dark:      #334155;
+    --role-gradient:  linear-gradient(135deg, #475569, #64748b);
+}
+
+/* ── Future period — ocean blue ─────────────────────────────────── */
+body.period-future {
+    --role-primary:   #0369a1;
+    --role-secondary: #0ea5e9;
+    --role-tertiary:  #38bdf8;
+    --role-light:     rgba(3, 105, 161, 0.10);
+    --role-dark:      #075985;
+    --role-gradient:  linear-gradient(135deg, #0369a1, #0ea5e9);
+}
+
+/* ── Holiday mode overlays: amber tint on current, warm-slate on past ── */
+body.period-mode-holiday.period-current {
+    --role-primary:   #d97706;
+    --role-secondary: #f59e0b;
+    --role-tertiary:  #fbbf24;
+    --role-light:     rgba(217, 119, 6, 0.10);
+    --role-dark:      #b45309;
+    --role-gradient:  linear-gradient(135deg, #d97706, #f59e0b);
+}
+
+body.period-mode-holiday.period-past {
+    --role-primary:   #78716c;
+    --role-secondary: #a8a29e;
+    --role-tertiary:  #d6d3d1;
+    --role-light:     rgba(120, 113, 108, 0.10);
+    --role-dark:      #57534e;
+    --role-gradient:  linear-gradient(135deg, #78716c, #a8a29e);
+}
+
+body.period-mode-holiday.period-future {
+    --role-primary:   #0369a1;
+    --role-secondary: #0ea5e9;
+    --role-tertiary:  #38bdf8;
+    --role-light:     rgba(3, 105, 161, 0.10);
+    --role-dark:      #075985;
+    --role-gradient:  linear-gradient(135deg, #0369a1, #0ea5e9);
+}
+
+/* ── Sidebar: header gradient uses --role-gradient automatically ─── */
+.sidebar-header {
+    background: var(--role-gradient, linear-gradient(135deg, var(--role-primary), var(--role-secondary)));
+    transition: background 0.4s ease;
+}
+
+/* ── Period strip below sidebar header ──────────────────────────── */
+.sidebar-period-strip {
+    height: 4px;
+    width: 100%;
+    background: var(--period-color, var(--role-primary));
+    transition: background 0.4s ease;
+    flex-shrink: 0;
+}
+
+/* ── Period badge ───────────────────────────────────────────────── */
+.sidebar-period-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1.5px solid var(--period-color, var(--role-primary));
+    color: var(--period-color, var(--role-primary));
+    background: color-mix(in srgb, var(--period-color, var(--role-primary)) 12%, transparent);
+    transition: all 0.35s ease;
+    white-space: nowrap;
+}
+
+/* ── Stat cards: top accent line uses period color ──────────────── */
+.stat-card {
+    border-top: 3px solid var(--period-color, var(--role-primary));
+    transition: border-color 0.4s ease;
+}
+
+/* ── Active nav item uses period color ──────────────────────────── */
+.nav-item.active {
+    background: var(--role-light);
+    color: var(--role-primary);
+    border-left: 3px solid var(--role-primary);
+}
+
+/* ── Neon border picks up period color ──────────────────────────── */
+.neon-border::before {
+    background: conic-gradient(
+        from 0deg,
+        transparent 60%,
+        var(--period-color, var(--role-primary)),
+        transparent 80%
+    );
+}
+
+/* ── Smooth transition for all role vars ────────────────────────── */
+:root {
+    transition: --role-primary 0.4s ease, --role-secondary 0.4s ease;
+}

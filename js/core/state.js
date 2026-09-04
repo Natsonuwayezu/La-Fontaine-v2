@@ -882,3 +882,161 @@ function getHistoricalRoster(classId, termId = null, yearId = null) {
 
 
 window.getHistoricalRoster = getHistoricalRoster;
+/* ─────────────────────────────────────────────────────────────────
+   PERIOD THEME ENGINE  v2
+   ─────────────────────────────────────────────────────────────────
+   Hierarchy:
+     Academic Year
+     ├── Terms (Term 1 / Term 2 / Term 3)
+     └── Holiday Sessions (after T1 / after T2 / after T3 / other)
+
+   For BOTH branches the same 3 time-status colours apply:
+     current → green   body.period-current
+     past    → slate   body.period-past
+     future  → blue    body.period-future
+
+   Additionally, when the selected item is a holiday session:
+     body.period-mode-holiday is also added (drives the amber
+     sidebar mode banner and holiday.css amber accents).
+
+   Auto-switch: called every 10 min by boot.js so the theme
+   updates automatically when a term or session starts/ends.
+   ───────────────────────────────────────────────────────────────── */
+
+/**
+ * Determine current/past/future status for any period that has
+ * start_date and end_date.
+ * @returns {'current'|'past'|'future'}
+ */
+function _periodStatus(startDate, endDate) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const start = startDate ? new Date(startDate) : null;
+    const end   = endDate   ? new Date(endDate)   : null;
+    if (end && today > end)         return 'past';
+    if (start && today < start)     return 'future';
+    return 'current';
+}
+
+/**
+ * Determine the status of the selected academic year itself,
+ * independent of which term/session is selected.
+ * @returns {'current'|'past'|'future'}
+ */
+function _yearStatus(year) {
+    if (!year) return 'current';
+    // Compare year_name strings — format "YYYY-YYYY"
+    const allYears = (state.academicYears || [])
+        .map(y => y.year_name || '')
+        .filter(Boolean)
+        .sort();
+    const latest = allYears[allYears.length - 1] || '';
+    const earliest = allYears[0] || '';
+    const yn = year.year_name || '';
+    if (yn === latest && yn === earliest) return 'current';
+    // Use start_date / end_date if available, else use name comparison
+    if (year.start_date && year.end_date) return _periodStatus(year.start_date, year.end_date);
+    // Fallback: active flag
+    if (year.status === 'active') return 'current';
+    if (year.status === 'upcoming' || year.status === 'future') return 'future';
+    return 'past';
+}
+
+function applyPeriodTheme() {
+    const body = document.body;
+
+    // ── Remove all period classes ────────────────────────────────
+    body.classList.remove(
+        'period-current', 'period-past', 'period-future',
+        'period-mode-term', 'period-mode-holiday'
+    );
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const selYearId = state.selectedYearId || state.currentAcadYear?.id;
+    const selTermId = state.selectedTermId || state.currentTerm?.id;
+    const inHoliday = isHolidayMode();
+
+    const selYear = (state.academicYears || []).find(y => y.id === selYearId);
+
+    // ── Determine time-status ─────────────────────────────────────
+    let status = 'current';
+
+    if (inHoliday) {
+        // ── HOLIDAY BRANCH ─────────────────────────────────────────
+        body.classList.add('period-mode-holiday');
+        const session = getActiveHolidaySession()
+            || (state.holidaySessions || []).find(s => s.id === selTermId);
+        if (session) {
+            status = _periodStatus(session.start_date, session.end_date);
+        } else if (selYear) {
+            status = _yearStatus(selYear);
+        }
+    } else {
+        // ── TERM BRANCH ────────────────────────────────────────────
+        body.classList.add('period-mode-term');
+        const selTerm = (state.terms || []).find(t => t.id === selTermId);
+        if (selTerm && selTerm.start_date && selTerm.end_date) {
+            status = _periodStatus(selTerm.start_date, selTerm.end_date);
+        } else if (selYear) {
+            // No term selected — use the year's status
+            status = _yearStatus(selYear);
+        }
+    }
+
+    body.classList.add(`period-${status}`);
+    _applyPeriodStrip(status, inHoliday);
+}
+
+function _applyPeriodStrip(status, isHoliday) {
+    // Colour map: status × mode → colour
+    const colours = {
+        current: { term: '#16a34a', holiday: '#d97706' },  // green / amber
+        past:    { term: '#475569', holiday: '#78716c' },  // slate / warm-slate
+        future:  { term: '#0369a1', holiday: '#0369a1' },  // blue  / blue
+    };
+    const mode   = isHoliday ? 'holiday' : 'term';
+    const colour = colours[status]?.[mode] || colours.current.term;
+
+    // ── Update CSS --period-color custom property on root ─────────
+    document.documentElement.style.setProperty('--period-color', colour);
+
+    // ── Sidebar strip ─────────────────────────────────────────────
+    const strip = document.getElementById('sidebar-period-strip');
+    if (strip) strip.style.background = colour;
+
+    // ── Sidebar badge ─────────────────────────────────────────────
+    const badge = document.querySelector('.sidebar-period-badge');
+    if (badge) {
+        const icon = {
+            current: isHoliday
+                ? '<i class="fa-solid fa-sun"></i>'
+                : '<i class="fa-solid fa-circle-dot"></i>',
+            past   : '<i class="fa-solid fa-clock-rotate-left"></i>',
+            future : '<i class="fa-solid fa-forward"></i>',
+        }[status] || '';
+        const label = {
+            current: isHoliday ? 'Holiday (Now)' : 'Current',
+            past   : isHoliday ? 'Past Holiday'  : 'Past',
+            future : isHoliday ? 'Upcoming Holiday' : 'Upcoming',
+        }[status] || '';
+        badge.innerHTML = `${icon} ${label}`;
+        badge.style.color       = colour;
+        badge.style.borderColor = colour;
+        badge.style.background  = colour + '18';
+    }
+
+    // ── Neon border on login card (if visible) ─────────────────────
+    const neon = document.querySelector('.neon-border');
+    if (neon) neon.style.setProperty('--neon-color', colour);
+
+    // ── Cards accent line ─────────────────────────────────────────
+    document.querySelectorAll('.stat-card').forEach(c => {
+        c.style.borderTopColor = colour;
+    });
+}
+
+
+window.applyPeriodTheme = applyPeriodTheme;
+window._periodStatus    = _periodStatus;

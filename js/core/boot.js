@@ -313,6 +313,7 @@ async function _checkAndSwitchMode() {
             console.info('[Boot] Auto-activated holiday mode:', shouldBeActive.name);
         } else if (!shouldBeActive && currentlyHoliday) {
             if (typeof deactivateHolidayMode === 'function') deactivateHolidayMode();
+            if (typeof applyPeriodTheme === 'function') applyPeriodTheme();
             if (typeof loadAllData === 'function') await loadAllData({ silent: true });
             if (typeof Sidebar !== 'undefined' && Sidebar.refresh) Sidebar.refresh();
             _logAutoSwitch('holiday', 'normal', 'Session ended');
@@ -349,3 +350,4 @@ function _logAutoSwitch(fromMode, toMode, reason) {
 
 window.boot = boot;
 window.testAndSaveSetup = testAndSaveSetup;
+    if (typeof applyPeriodTheme === 'function') applyPeriodTheme();

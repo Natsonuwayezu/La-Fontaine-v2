@@ -121,7 +121,8 @@ const StudentArchive = (() => {
     } catch (err) {
       window.Toast?.error('Could not restore student', err?.message);
     }
-  }
+  
+    if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});}
 
   return { render };
 })();

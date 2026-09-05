@@ -33,7 +33,7 @@ const TimetablePage = (() => {
         container.innerHTML = `<div class="dashboard-page"><div class="loading-inline">Loading timetable…</div></div>`;
 
         await ensureStateLoaded();
-        if (!state.timetableSlots.length) state.timetableSlots = await getAll('timetable_slots');
+        if (!(state.timetableSlots||[]).length) state.timetableSlots = await getAll('timetable_slots');
 
         selectedClassId = selectedClassId || state.classes[0]?.id || null;
         selectedTeacherId = selectedTeacherId || state.teachers[0]?.id || null;
@@ -50,8 +50,8 @@ const TimetablePage = (() => {
                     ${activeTab !== 'staff' ? `
                         <select class="form-select" id="tt-scope-select">
                             ${activeTab === 'class'
-                                ? state.classes.map(c => `<option value="${c.id}" ${c.id === selectedClassId ? 'selected' : ''}>${esc(c.name)}</option>`).join('')
-                                : state.teachers.map(t => `<option value="${t.id}" ${t.id === selectedTeacherId ? 'selected' : ''}>${esc(t.first_name)} ${esc(t.last_name)}</option>`).join('')}
+                                ? (state.classes||[]).map(c => `<option value="${c.id}" ${c.id === selectedClassId ? 'selected' : ''}>${esc(c.name)}</option>`).join('')
+                                : (state.teachers||[]).map(t => `<option value="${t.id}" ${t.id === selectedTeacherId ? 'selected' : ''}>${esc(t.first_name)} ${esc(t.last_name)}</option>`).join('')}
                         </select>
                     ` : ''}
                     <button class="btn btn-primary" id="tt-add-slot-btn"><i class="fa-solid fa-plus"></i> Add Slot</button>
@@ -87,15 +87,15 @@ const TimetablePage = (() => {
             <form id="slot-form">
                 <div class="form-group"><label class="form-label">Class</label>
                     <select name="class_id" class="form-select" required>
-                        ${state.classes.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}
+                        ${(state.classes||[]).map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}
                     </select></div>
                 <div class="form-group"><label class="form-label">Subject</label>
                     <select name="subject_id" class="form-select" required>
-                        ${state.subjects.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('')}
+                        ${(state.subjects||[]).map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('')}
                     </select></div>
                 <div class="form-group"><label class="form-label">Teacher</label>
                     <select name="teacher_id" class="form-select" required>
-                        ${state.teachers.map(t => `<option value="${t.id}">${esc(t.first_name)} ${esc(t.last_name)}</option>`).join('')}
+                        ${(state.teachers||[]).map(t => `<option value="${t.id}">${esc(t.first_name)} ${esc(t.last_name)}</option>`).join('')}
                     </select></div>
                 <div class="form-group"><label class="form-label">Day</label>
                     <select name="day_of_week" class="form-select" required>
@@ -158,7 +158,9 @@ const TimetablePage = (() => {
 
         const row = await insert('timetable_slots', slot);
         await refreshTable('timetable_slots');
-        await logUpdateTimetable(slot.class_id, state.classes.find(c => c.id === slot.class_id)?.name);
+        await logUpdateTimetable(slot.class_id, (state.classes||[]).find(c => c.id === slot.class_id)?.name);
+        
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
         showToast('Slot added', 'success');
         window.closeModal();
         render(container);

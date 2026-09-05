@@ -84,6 +84,8 @@ async function setUserActive(id, isActive) {
 async function deleteUser(id) {
     const currentId = state.currentUser?.id;
     if (id === currentId) {
+        
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
         showToast('Cannot delete', 'error', "You can't delete your own account while logged in.");
         return { success: false };
     }

@@ -134,6 +134,7 @@ const Reminders = (() => {
         if (!r) return;
         try {
           await update('reminders', id, { is_done: cb.checked });
+    if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
           r.is_done = cb.checked;
           renderGroups(container);
           if (cb.checked) window.Toast?.success('Reminder completed', r.title);
@@ -155,6 +156,7 @@ const Reminders = (() => {
         if (!confirmed) return;
         try {
           await window.remove('reminders', id);
+    if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
           reminders = reminders.filter(x => x.id !== id);
           renderGroups(container);
         } catch (err) {
@@ -207,6 +209,7 @@ const Reminders = (() => {
       try {
         if (existing) {
           await update('reminders', existing.id, { title, due_date: dueDate });
+    if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
           existing.title = title;
           existing.due_date = dueDate;
           window.Toast?.success('Reminder updated');
@@ -217,6 +220,7 @@ const Reminders = (() => {
             linked_module: null, is_done: false,
             created_at: new Date().toISOString(),
           });
+    if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
           reminders.push(created);
           window.Toast?.success('Reminder added');
         }

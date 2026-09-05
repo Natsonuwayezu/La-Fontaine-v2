@@ -95,6 +95,14 @@ function buildRoster() {
 // ─── RENDER ────────────────────────────────────────────────────────
 
 function renderMarksEntry(container, params = {}) {
+    // Class teacher access control
+    if (params.classId && typeof canAccessClass === 'function' && !canAccessClass(params.classId)) {
+        container.innerHTML = `<div class="module-wrap"><div class="alert alert-danger" style="margin:24px;">
+            <i class="fa-solid fa-lock"></i>
+            <strong>Access denied</strong> — you can only view data for your assigned class.</div></div>`;
+        return;
+    }
+    
     if (!container) {
         console.warn('[MarksEntry] No container provided');
         return;
@@ -733,7 +741,8 @@ async function saveMarks() {
         if (saveBtn) saveBtn.disabled = false;
         if (saveAllBtn) saveAllBtn.disabled = false;
     }
-}
+
+    if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});}
 
 // ─── TOAST HELPER (defers to the real toast.js if present) ─────────
 

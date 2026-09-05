@@ -161,7 +161,8 @@ async function renderCarryForward(container, params = {}) {
         } finally {
             window.Loaders?.button?.stop(btn);
         }
-    }
+    
+    if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});}
 
     function bindEvents() {
         document.getElementById('cf-source-term')?.addEventListener('change', (e) => {

@@ -360,6 +360,7 @@ async function _ssSaveForStudent(ssStudentId, studentId, subjects) {
     }
 
     return count;
-}
+
+    if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});}
 
 window.renderSecondSitting = renderSecondSitting;

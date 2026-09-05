@@ -9,6 +9,14 @@ let _hmTab = 'entry', _hmSessionId = null, _hmClassId = null,
     _hmSubjectId = null, _hmAssessId = null;
 
 async function renderHolidaysMarks(container, params = {}) {
+    // Class teacher access control
+    if (params.classId && typeof canAccessClass === 'function' && !canAccessClass(params.classId)) {
+        container.innerHTML = `<div class="module-wrap"><div class="alert alert-danger" style="margin:24px;">
+            <i class="fa-solid fa-lock"></i>
+            <strong>Access denied</strong> — you can only view data for your assigned class.</div></div>`;
+        return;
+    }
+
     if (!container) return;
     await ensureStateLoaded();
     const sessions = state.holidaySessions || [];
@@ -203,7 +211,9 @@ window.hmSaveAll = async () => {
             saved++;
         }catch(e){errors++;}
     }
-    showToast(`${saved} mark${saved!==1?'s':''} saved.${errors?` ${errors} error(s).`:''}`,
+    
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
+        showToast(`${saved} mark${saved!==1?'s':''} saved.${errors?` ${errors} error(s).`:''}`,
         errors?'warning':'success');
     await loadDataForHolidaySession(_hmSessionId);
     _hmDraw();
@@ -232,6 +242,8 @@ window.hmSubmitAssess = async () => {
             session_class_id:_hmClassId,session_subject_id:_hmSubjectId,
             name,max_marks:max,date,is_locked:false,
             created_by:state.currentUser?.id||null,created_at:new Date().toISOString()});
+        
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
         showToast(`"${name}" created.`,'success'); closeModal();
         await loadDataForHolidaySession(_hmSessionId); _hmDraw();
     }catch(e){handleApiError(e,'create assessment');}

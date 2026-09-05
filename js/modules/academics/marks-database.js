@@ -123,6 +123,14 @@ function getFilteredRows() {
 // ─── RENDER ────────────────────────────────────────────────────────
 
 function renderMarksDatabase(container) {
+    // Class teacher access control
+    if (params.classId && typeof canAccessClass === 'function' && !canAccessClass(params.classId)) {
+        container.innerHTML = `<div class="module-wrap"><div class="alert alert-danger" style="margin:24px;">
+            <i class="fa-solid fa-lock"></i>
+            <strong>Access denied</strong> — you can only view data for your assigned class.</div></div>`;
+        return;
+    }
+    
     if (!container) {
         console.warn('[MarksDatabase] No container provided');
         return;

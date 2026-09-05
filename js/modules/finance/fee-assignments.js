@@ -322,6 +322,8 @@ window.removeAssignment = async function (feeId, feeName) {
 
     try {
         await remove('student_fees', feeId);
+        
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
         showToast('Fee assignment removed.', 'success');
         await refreshTable('student_fees');
         _faRenderTable();

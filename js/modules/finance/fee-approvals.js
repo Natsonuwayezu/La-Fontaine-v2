@@ -134,11 +134,11 @@ async function _faLoadAndRender() {
 
     // Show/hide approve-all button
     const btn = document.getElementById('fa-approve-all-btn');
-    if (btn) btn.style.display = state.pendingFeeApprovals.length > 0 ? 'inline-flex' : 'none';
+    if (btn) btn.style.display = (state.pendingFeeApprovals||[]).length > 0 ? 'inline-flex' : 'none';
 
     // Update count badge
     const count = document.getElementById('fa-pending-count');
-    if (count) count.textContent = `${state.pendingFeeApprovals.length} pending`;
+    if (count) count.textContent = `${(state.pendingFeeApprovals||[]).length} pending`;
 }
 
 async function _faAutoApprove(fee) {
@@ -171,7 +171,7 @@ function _faRenderKPIs(allPending, autoApprovedCount) {
 
     el.innerHTML = `
     <div class="stat-card">
-        <div class="stat-value c-warning">${state.pendingFeeApprovals.length}</div>
+        <div class="stat-value c-warning">${(state.pendingFeeApprovals||[]).length}</div>
         <div class="stat-label">Pending Approval</div>
         <div class="stat-sub">${fmtCurrency(totalAmt)} total</div>
     </div>
@@ -319,7 +319,9 @@ window.faApproveFee = async function(feeId, feeName) {
             acted_by      : state.currentUser?.id || null,
             acted_at      : now,
         });
-        state.pendingFeeApprovals = state.pendingFeeApprovals.filter(f => f.id !== feeId);
+        state.pendingFeeApprovals = (state.pendingFeeApprovals||[]).filter(f => f.id !== feeId);
+        
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
         showToast(`"${feeName}" approved.`, 'success');
         _faRenderTable();
         _updatePendingCount();
@@ -349,7 +351,9 @@ window.faRejectFee = async function(feeId, feeName, studentId) {
             note            : reason,
         });
         await remove('student_fees', feeId);
-        state.pendingFeeApprovals = state.pendingFeeApprovals.filter(f => f.id !== feeId);
+        state.pendingFeeApprovals = (state.pendingFeeApprovals||[]).filter(f => f.id !== feeId);
+        
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
         showToast(`"${feeName}" rejected and removed.`, 'success');
         _faRenderTable();
         _updatePendingCount();
@@ -392,7 +396,9 @@ window.faApproveAll = async function() {
     }
 
     state.pendingFeeApprovals = [];
-    showToast(`${approved} fee(s) approved.`, 'success');
+    
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
+        showToast(`${approved} fee(s) approved.`, 'success');
     await _faLoadAndRender();
 };
 
@@ -403,9 +409,9 @@ window.faChangePage   = (p) => { _faPage=p; _faRenderTable(); };
 
 function _updatePendingCount() {
     const el = document.getElementById('fa-pending-count');
-    if (el) el.textContent = `${state.pendingFeeApprovals.length} pending`;
+    if (el) el.textContent = `${(state.pendingFeeApprovals||[]).length} pending`;
     const btn = document.getElementById('fa-approve-all-btn');
-    if (btn) btn.style.display = state.pendingFeeApprovals.length > 0 ? 'inline-flex' : 'none';
+    if (btn) btn.style.display = (state.pendingFeeApprovals||[]).length > 0 ? 'inline-flex' : 'none';
 }
 
 window.renderFeeApprovals = renderFeeApprovals;

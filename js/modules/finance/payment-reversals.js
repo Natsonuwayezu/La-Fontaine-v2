@@ -217,7 +217,8 @@ async function renderPaymentReversals(container, params = {}) {
                 window.Loaders?.button?.stop(btn);
             }
         };
-    }
+    
+    if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});}
 
     function bindEvents() {
         document.getElementById('pr-search')?.addEventListener('input', debounce((e) => {

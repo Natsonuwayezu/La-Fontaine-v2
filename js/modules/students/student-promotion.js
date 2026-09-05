@@ -358,7 +358,8 @@ const StudentPromotion = (() => {
     container.querySelector('#promo-class-select').value = '';
     container.querySelector('#promo-body').innerHTML = '';
     container.querySelector('#promo-count').textContent = '';
-  }
+  
+    if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});}
 
   return { render };
 })();
@@ -366,4 +367,12 @@ const StudentPromotion = (() => {
 // ─── EXPOSE ─────────────────────────────────────────────────────────
 
 window.StudentPromotion = StudentPromotion;
-window.renderStudentPromotion = StudentPromotion.render;
+window.renderStudentPromotion = async (container, params = {}) => {
+    if (params.classId && typeof canAccessClass === 'function' && !canAccessClass(params.classId)) {
+        container.innerHTML = `<div class="module-wrap"><div class="alert alert-danger" style="margin:24px;">
+            <i class="fa-solid fa-lock"></i>
+            <strong>Access denied</strong> — you can only view data for your assigned class.</div></div>`;
+        return;
+    }
+    return StudentPromotion.render(container, params);
+};

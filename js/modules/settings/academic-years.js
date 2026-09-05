@@ -67,7 +67,9 @@ async function setActiveAcademicYear(id) {
     await update('academic_years', id, { is_active: true });
     await refreshTable('academic_years');
     await logAction('ACADEMIC_YEAR_ACTIVATED', 'academic_years', id);
-    showToast('Academic year activated', 'success');
+    
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
+        showToast('Academic year activated', 'success');
 }
 
 async function deleteAcademicYear(id) {

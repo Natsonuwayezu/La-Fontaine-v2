@@ -204,7 +204,9 @@ async function renderCreditBalances(container, params = {}) {
                 await logAction('CREDIT_ADJUSTED', 'student_credit_balance', existing?.id, {
                     student_id: studentId, direction: data.direction, amount, reason: data.reason
                 });
-                showToast('Credit balance updated', 'success');
+                
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
+        showToast('Credit balance updated', 'success');
                 window.closeModal();
                 state.creditBalances = await getAll('student_credit_balance').catch(() => []);
                 render();

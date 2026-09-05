@@ -687,7 +687,8 @@ async function renderRecordPayment(container, params = {}) {
             if (btn1) { btn1.disabled = false; btn1.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="assets/icons/sprite.svg#icon-save"/></svg> Record Payment`; }
             if (btn2) { btn2.disabled = false; btn2.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="assets/icons/sprite.svg#icon-printer"/></svg> Record & Print Receipt`; }
         }
-    }
+    
+    if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});}
 
     /* ── PRIVATE REFRESH HELPERS ─────────────────────────────────── */
     function _refreshFeeTable() {

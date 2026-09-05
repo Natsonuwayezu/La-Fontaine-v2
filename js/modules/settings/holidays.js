@@ -46,7 +46,8 @@ async function createHoliday(data) {
     await refreshTable('holidays');
     await logAction('HOLIDAY_CREATED', 'holidays', row?.id, { name: data.name });
     return { success: true, row };
-}
+
+    if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});}
 
 async function updateHoliday(id, data) {
     const { valid, errors } = validateHolidayForm(data);

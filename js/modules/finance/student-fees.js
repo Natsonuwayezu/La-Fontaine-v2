@@ -407,6 +407,8 @@ window.sfRemoveFee = async function (feeId, feeName) {
     if (!confirmed) return;
     try {
         await remove('student_fees', feeId);
+        
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
         showToast('Fee removed.', 'success');
         await refreshTable('student_fees');
         _sfRenderContent();

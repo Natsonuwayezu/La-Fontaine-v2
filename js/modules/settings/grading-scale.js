@@ -74,7 +74,8 @@ async function createGradeBand(data) {
     await refreshTable('grading_scale');
     await logAction('GRADE_BAND_CREATED', 'grading_scale', row?.id, { grade: data.grade });
     return { success: true, row };
-}
+
+    if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});}
 
 async function updateGradeBand(id, data) {
     const existing = await listGradingScale();

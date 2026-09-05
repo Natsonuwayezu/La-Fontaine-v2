@@ -234,7 +234,8 @@ async function renderFeeWaivers(container, params = {}) {
         } finally {
             window.Loaders?.button?.stop(btn);
         }
-    }
+    
+    if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});}
 
     async function refreshLocalFeesAndRender() {
         await loadStudentFees();

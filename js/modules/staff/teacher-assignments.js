@@ -93,7 +93,9 @@ const TeacherAssignments = (() => {
             if (!ok) return;
             await remove('teacher_assignments', existing.id);
             await logAction('TEACHER_ASSIGNMENT_REMOVED', 'teacher_assignments', existing.id);
-            showToast('Assignment removed', 'success');
+            
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
+        showToast('Assignment removed', 'success');
             render(container);
             return;
         }
@@ -117,7 +119,9 @@ const TeacherAssignments = (() => {
             const subjectId = new FormData(form).get('subject_id');
             const row = await insert('teacher_assignments', { teacher_id: teacherId, class_id: classId, subject_id: subjectId });
             await logAction('TEACHER_ASSIGNMENT_CREATED', 'teacher_assignments', row?.id, { teacher_id: teacherId, class_id: classId });
-            showToast('Teacher assigned', 'success');
+            
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
+        showToast('Teacher assigned', 'success');
             window.closeModal();
             render(container);
         };

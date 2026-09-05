@@ -71,10 +71,10 @@ const TimetableGenerator = (() => {
         `;
     }
 
-    function classNameOf(id) { return (state.classes.find(c => String(c.id) === String(id)) || {}).name || '—'; }
-    function subjectNameOf(id) { return (state.subjects.find(s => String(s.id) === String(id)) || {}).name || '—'; }
+    function classNameOf(id) { return ((state.classes||[]).find(c => String(c.id) === String(id)) || {}).name || '—'; }
+    function subjectNameOf(id) { return ((state.subjects||[]).find(s => String(s.id) === String(id)) || {}).name || '—'; }
     function teacherNameOf(id) {
-        const t = state.teachers.find(t => String(t.id) === String(id));
+        const t = (state.teachers||[]).find(t => String(t.id) === String(id));
         return t ? `${t.first_name} ${t.last_name}` : '—';
     }
 
@@ -86,11 +86,11 @@ const TimetableGenerator = (() => {
         return `
             <form id="gen-row-form">
                 <div class="form-group"><label class="form-label">Class</label>
-                    <select name="class_id" class="form-select" required>${state.classes.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></div>
+                    <select name="class_id" class="form-select" required>${(state.classes||[]).map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></div>
                 <div class="form-group"><label class="form-label">Subject</label>
-                    <select name="subject_id" class="form-select" required>${state.subjects.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select></div>
+                    <select name="subject_id" class="form-select" required>${(state.subjects||[]).map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select></div>
                 <div class="form-group"><label class="form-label">Teacher</label>
-                    <select name="teacher_id" class="form-select" required>${state.teachers.map(t => `<option value="${t.id}">${esc(t.first_name)} ${esc(t.last_name)}</option>`).join('')}</select></div>
+                    <select name="teacher_id" class="form-select" required>${(state.teachers||[]).map(t => `<option value="${t.id}">${esc(t.first_name)} ${esc(t.last_name)}</option>`).join('')}</select></div>
                 <div class="form-group"><label class="form-label">Day</label>
                     <select name="day_of_week" class="form-select" required>${DAYS_OF_WEEK.map(d => `<option value="${d.id}">${d.name}</option>`).join('')}</select></div>
                 <div class="form-group"><label class="form-label">Period</label>
@@ -129,7 +129,7 @@ const TimetableGenerator = (() => {
         const btn = container.querySelector('#gen-validate-btn');
         window.Loaders?.button?.start(btn, 'Checking...');
         try {
-            if (!state.timetableSlots.length) state.timetableSlots = await getAll('timetable_slots');
+            if (!(state.timetableSlots||[]).length) state.timetableSlots = await getAll('timetable_slots');
             const { valid, invalid } = await checkBatchConflicts(draftRows, state.timetableSlots);
 
             if (valid.length) {

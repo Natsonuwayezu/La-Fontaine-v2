@@ -359,6 +359,8 @@ window.hfSaveGlobalFee = async () => {
         // Update local state
         const sess = (state.holidaySessions||[]).find(s=>s.id===_hfSessionId);
         if (sess) sess.fee_config = JSON.stringify(config);
+        
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
         showToast(`Session fee set: ${fmtCurrency(amount)} (${amount===0?'Free':name})`, 'success');
     } catch(e) { handleApiError(e, 'save session fee'); }
 };
@@ -375,6 +377,8 @@ window.hfSaveClassFee = async classId => {
         const sess = (state.holidaySessions||[]).find(s=>s.id===_hfSessionId);
         if (sess) sess.fee_config = JSON.stringify(config);
         const cls = (state.sessionClasses||[]).find(c=>c.id===classId);
+        
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
         showToast(`${cls?.name||'Class'} fee: ${fmtCurrency(amount)}`, 'success');
     } catch(e) { handleApiError(e, 'save class fee'); }
 };

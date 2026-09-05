@@ -220,4 +220,12 @@ const AttendanceReports = (() => {
 // moduleIdToRenderFn) — this page was completely unreachable via navigation
 // despite being fully built.
 window.AttendanceReports = AttendanceReports;
-window.renderAttendanceReports = AttendanceReports.render;
+window.renderAttendanceReports = async (container, params = {}) => {
+    if (params && params.classId && typeof canAccessClass === 'function' && !canAccessClass(params.classId)) {
+        if (container) container.innerHTML = `<div class="module-wrap"><div class="alert alert-danger" style="margin:24px;">
+            <i class="fa-solid fa-lock"></i>
+            <strong>Access denied</strong></div></div>`;
+        return;
+    }
+    return AttendanceReports.render(container, params);
+};

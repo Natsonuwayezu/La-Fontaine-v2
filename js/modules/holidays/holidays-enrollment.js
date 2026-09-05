@@ -329,6 +329,8 @@ window.heUnenroll = async (enrollmentId, studentId) => {
         await remove('holiday_enrollments',enrollmentId);
         state.holidayEnrollments=(state.holidayEnrollments||[]).filter(e=>e.id!==enrollmentId);
         _heRenderTable();
+        
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
         showToast('Student unenrolled.','success');
     }catch(e){handleApiError(e,'unenroll student');}
 };
@@ -396,6 +398,8 @@ window.heAddClass = async () => {
     if(!name){showToast('Class name required.','warning');return;}
     try{
         await insert('session_classes',{holiday_session_id:_heSessionId,name,is_active:true,created_at:new Date().toISOString()});
+        
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
         showToast(`Class "${name}" created.`,'success');
         await loadDataForHolidaySession(_heSessionId);
         closeModal(); heManageClasses();
@@ -427,6 +431,8 @@ window.heSubmitSubject = async (classId, className) => {
     if(!name){showToast('Subject name required.','warning');return;}
     try{
         await insert('session_subjects',{session_class_id:classId,holiday_session_id:_heSessionId,name,max_marks:max,is_active:true});
+        
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
         showToast(`"${name}" added.`,'success');
         await loadDataForHolidaySession(_heSessionId);
         closeModal(); heAddSubjectToClass(classId,className);

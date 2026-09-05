@@ -28,17 +28,17 @@ const ClassManagement = (() => {
     let activeTab = 'classes';
 
     async function getClasses() {
-        if (!state.classes.length) {
+        if (!(state.classes||[]).length) {
             state.classes = (await getAll('classes')).sort((a, b) => (a.sort_order || 99) - (b.sort_order || 99));
         }
-        return state.classes.length ? state.classes : CLASS_LIST;
+        return (state.classes||[]).length ? state.classes : CLASS_LIST;
     }
 
     async function getSubjects() {
-        if (!state.subjects.length) {
+        if (!(state.subjects||[]).length) {
             state.subjects = (await getAll('subjects')).sort((a, b) => (a.sort_order || 99) - (b.sort_order || 99));
         }
-        return state.subjects.length ? state.subjects : [...NURSERY_SUBJECTS, ...PRIMARY_SUBJECTS];
+        return (state.subjects||[]).length ? state.subjects : [...NURSERY_SUBJECTS, ...PRIMARY_SUBJECTS];
     }
 
     async function render(container) {
@@ -191,7 +191,7 @@ const ClassManagement = (() => {
                 const row = await insert('classes', {
                     code: data.code.trim(), name: data.name.trim(), level: data.level,
                     class_teacher_id: data.class_teacher_id || null,
-                    sort_order: (state.classes.length || 0) + 1
+                    sort_order: ((state.classes||[]).length || 0) + 1
                 });
                 await refreshTable('classes');
                 await logAction('CLASS_CREATED', 'classes', row?.id, { name: data.name });
@@ -203,7 +203,7 @@ const ClassManagement = (() => {
 
         container.querySelectorAll('[data-edit-class]').forEach(btn => {
             btn.addEventListener('click', () => {
-                const cls = state.classes.find(c => String(c.id) === btn.dataset.editClass);
+                const cls = (state.classes||[]).find(c => String(c.id) === btn.dataset.editClass);
                 window.showModal(classForm(cls, state.teachers || []), {
                     title: 'Edit Class',
                     footer: `<button class="btn btn-outline" data-close>Cancel</button><button class="btn btn-primary" id="save-class-btn">Save</button>`
@@ -216,7 +216,9 @@ const ClassManagement = (() => {
                     });
                     await refreshTable('classes');
                     await logAction('CLASS_UPDATED', 'classes', cls.id, { name: data.name });
-                    showToast('Class updated', 'success');
+                    
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
+        showToast('Class updated', 'success');
                     window.closeModal();
                     render(container);
                 };
@@ -246,7 +248,7 @@ const ClassManagement = (() => {
                     code: data.code.trim(), name: data.name.trim(),
                     mg_max: Number(data.mg_max), ex_max: Number(data.ex_max),
                     appears_only_post_midterm: form.appears_only_post_midterm.checked,
-                    sort_order: (state.subjects.length || 0) + 1
+                    sort_order: ((state.subjects||[]).length || 0) + 1
                 });
                 await refreshTable('subjects');
                 await logAction('SUBJECT_CREATED', 'subjects', row?.id, { name: data.name });
@@ -258,7 +260,7 @@ const ClassManagement = (() => {
 
         container.querySelectorAll('[data-edit-subject]').forEach(btn => {
             btn.addEventListener('click', () => {
-                const subj = state.subjects.find(s => String(s.id) === btn.dataset.editSubject);
+                const subj = (state.subjects||[]).find(s => String(s.id) === btn.dataset.editSubject);
                 window.showModal(subjectForm(subj), {
                     title: 'Edit Subject',
                     footer: `<button class="btn btn-outline" data-close>Cancel</button><button class="btn btn-primary" id="save-subject-btn">Save</button>`

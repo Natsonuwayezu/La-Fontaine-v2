@@ -427,13 +427,17 @@ window.saveFeeCategoryModal = async function (catId) {
     try {
         if (catId) {
             await update('fee_categories', catId, { name, description: desc, sort_order: sort, updated_at: now });
-            showToast(`Category "${name}" updated.`, 'success');
+            
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
+        showToast(`Category "${name}" updated.`, 'success');
         } else {
             await insert('fee_categories', {
                 name, description: desc, sort_order: sort,
                 created_at: now, updated_at: now,
             });
-            showToast(`Category "${name}" created.`, 'success');
+            
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
+        showToast(`Category "${name}" created.`, 'success');
         }
         closeModal();
         await _loadFeeStructureData();
@@ -458,6 +462,8 @@ window.deleteFeeCategory = async function (catId, catName) {
 
     try {
         await remove('fee_categories', catId);
+        
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
         showToast(`Category "${catName}" deleted.`, 'success');
         await _loadFeeStructureData();
     } catch (err) {
@@ -669,11 +675,15 @@ window.saveFeeAmountModal = async function (feeId) {
     try {
         if (feeId) {
             await update('fee_amounts', feeId, data);
-            showToast(`Fee "${name}" updated.`, 'success');
+            
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
+        showToast(`Fee "${name}" updated.`, 'success');
         } else {
             data.created_at = now;
             const newFee = await insert('fee_amounts', data);
-            showToast(`Fee "${name}" created.`, 'success');
+            
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
+        showToast(`Fee "${name}" created.`, 'success');
 
             // Offer to bulk assign
             if (newFee?.id) {
@@ -755,6 +765,8 @@ window.confirmDeleteFeeAmount = async function (feeId, feeName) {
             `fee_amount_id=eq.${feeId}&is_paid=is.false`
         );
         await remove('fee_amounts', feeId);
+        
+        if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
         showToast(`Fee "${feeName}" deleted.`, 'success');
         await _loadFeeStructureData();
     } catch (err) {

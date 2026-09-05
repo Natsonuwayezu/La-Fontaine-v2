@@ -157,6 +157,7 @@ const Notifications = (() => {
         const id = parseInt(btn.dataset.dismiss, 10);
         try {
           await window.remove('notifications', id);
+    if (typeof loadAllData === 'function') loadAllData({ silent: true }).catch(() => {});
           state.notifications = getNotifications().filter(x => x.id !== id);
           renderList(container);
         } catch (err) {

@@ -37,3 +37,11 @@ async function getSubjectByCode(code) {
 window.listSubjects = listSubjects;
 window.getSubjectById = getSubjectById;
 window.getSubjectByCode = getSubjectByCode;
+
+// ── Router entry point ────────────────────────────────────────────
+async function renderSubjects(container, params = {}) {
+    if (!container) return;
+    await ensureStateLoaded();
+    await listSubjects(container, params);
+}
+window.renderSubjects = renderSubjects;

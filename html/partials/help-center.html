@@ -797,14 +797,14 @@
     <div class="help-container">
         <!-- Header -->
         <div class="help-header">
-            <div class="back-btn" onclick="alert('Go back to dashboard')">
+            <div class="back-btn" onclick="navigateTo('admin-dashboard')">
                 <i class="fa-solid fa-arrow-left"></i>
             </div>
             <div class="title-group">
                 <h1>Help &amp; Search</h1>
                 <div class="sub">Find anything across the system — modules, students, actions</div>
             </div>
-            <div class="close-btn" onclick="alert('Close help panel')">
+            <div class="close-btn" onclick="navigateTo('admin-dashboard')">
                 <i class="fa-solid fa-xmark"></i>
             </div>
         </div>
@@ -822,7 +822,7 @@
                     <div id="input-mask"></div>
                     <div id="pink-mask"></div>
                     <div class="filterBorder"></div>
-                    <div id="filter-icon" onclick="alert('Filter search results')">
+                    <div id="filter-icon" onclick="this.closest('.help-search')?.querySelector('input')?.focus()">
                         <svg preserveAspectRatio="none" height="27" width="27" viewBox="4.8 4.56 14.832 15.408"
                             fill="none">
                             <path
@@ -856,35 +856,35 @@
         <!-- Recently Accessed -->
         <div class="section-label">⚡ Recently Accessed</div>
         <div class="quick-grid">
-            <div class="quick-card" onclick="alert('Open Marks Entry')">
+            <div class="quick-card" onclick="navigateTo('marks-entry')">
                 <div class="qc-icon" style="background:rgba(59,130,246,0.12);color:#60a5fa;"><i
                         class="fa-solid fa-pencil"></i></div>
                 <div class="qc-title">Marks Entry</div>
                 <div class="qc-desc">Primary 4A · Mathematics</div>
                 <span class="qc-badge">now</span>
             </div>
-            <div class="quick-card" onclick="alert('Open Student Profile')">
+            <div class="quick-card" onclick="navigateTo('student-list')">
                 <div class="qc-icon" style="background:rgba(16,185,129,0.12);color:#34d399;"><i
                         class="fa-solid fa-user"></i></div>
                 <div class="qc-title">Student Profile</div>
                 <div class="qc-desc">MUGISHA Jean · P4A</div>
                 <span class="qc-badge">2m</span>
             </div>
-            <div class="quick-card" onclick="alert('Open Record Payment')">
+            <div class="quick-card" onclick="navigateTo('record-payment')">
                 <div class="qc-icon" style="background:rgba(245,158,11,0.12);color:#fbbf24;"><i
                         class="fa-solid fa-money-bill-wave"></i></div>
                 <div class="qc-title">Record Payment</div>
                 <div class="qc-desc">Fee for Term 3</div>
                 <span class="qc-badge">5m</span>
             </div>
-            <div class="quick-card" onclick="alert('Open Analytics')">
+            <div class="quick-card" onclick="navigateTo('analytics')">
                 <div class="qc-icon" style="background:rgba(139,92,246,0.12);color:#a78bfa;"><i
                         class="fa-solid fa-chart-line"></i></div>
                 <div class="qc-title">Analytics</div>
                 <div class="qc-desc">Term 3 Performance</div>
                 <span class="qc-badge">12m</span>
             </div>
-            <div class="quick-card" onclick="alert('Open Timetable')">
+            <div class="quick-card" onclick="navigateTo('class-timetable')">
                 <div class="qc-icon" style="background:rgba(236,72,153,0.12);color:#f472b6;"><i
                         class="fa-solid fa-calendar-days"></i></div>
                 <div class="qc-title">Timetable</div>

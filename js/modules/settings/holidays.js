@@ -113,3 +113,11 @@ window.createHoliday = createHoliday;
 window.updateHoliday = updateHoliday;
 window.deleteHoliday = deleteHoliday;
 window.importRwandaHolidays = importRwandaHolidays;
+
+// ── Router entry point ────────────────────────────────────────────
+async function renderHolidays(container, params = {}) {
+    if (!container) return;
+    await ensureStateLoaded();
+    await listHolidays(container, params);
+}
+window.renderHolidays = renderHolidays;

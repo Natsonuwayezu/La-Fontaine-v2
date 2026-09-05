@@ -188,7 +188,11 @@ const StudentProfile = (() => {
     window.Tabs?.init(container.querySelector('[data-tab-group]'));
 
     container.querySelector('#profile-report-btn').addEventListener('click', () => window.navigateTo('report-cards', { studentId: s.id }));
-    container.querySelector('#profile-edit-btn').addEventListener('click', () => window.Toast?.info('Edit student', 'Opening edit form...'));
+    const editBtn = container.querySelector('#profile-edit-btn');
+    if (editBtn) editBtn.addEventListener('click', () => {
+        if (typeof StudentDetails !== 'undefined') StudentDetails.openEdit(view.id);
+        else if (typeof openStudentEdit === 'function') openStudentEdit(view.id);
+    });
 
     wireFeesTab(container, s, raw);
 

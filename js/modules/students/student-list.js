@@ -50,11 +50,19 @@ const StudentList = (() => {
         const summary = computeStudentFeeSummary(fees, credit);
         return {
           id: s.id,
-          code: s.student_code || '',
+          code: s.student_code || s.code || '',
           name: `${s.first_name || ''} ${s.last_name || ''}`.trim() || 'Unnamed Student',
           classId: s.class_id,
           className: classMap.get(s.class_id) || '—',
           status: s.status || 'Active',
+          gender: s.gender || '—',
+          dob: s.date_of_birth || '—',
+          nationality: s.nationality || '—',
+          province: s.province || '—',
+          district: s.district || '—',
+          guardianName: s.guardian_name || '—',
+          guardianPhone: s.guardian_phone || '—',
+          enrollmentDate: s.enrollment_date || '—',
           feeStatus: !fees.length ? 'unknown' : summary.isFullyPaid ? 'paid' : summary.paid > 0 ? 'partial' : 'unpaid',
         };
       });
@@ -81,6 +89,11 @@ const StudentList = (() => {
             <input type="text" class="form-input" id="stu-search" placeholder="Search by name or student code..." />
           </div>
           <select class="form-select" id="stu-class-filter"><option value="">All classes</option></select>
+          <select class="form-select" id="stu-gender-filter">
+            <option value="">All genders</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
           <select class="form-select" id="stu-status-filter">
             <option value="active">Active</option>
             <option value="">All statuses</option>
@@ -115,6 +128,8 @@ const StudentList = (() => {
     container.querySelector('#stu-search').addEventListener('input', () => renderContent(container));
     container.querySelector('#stu-class-filter').addEventListener('change', () => renderContent(container));
     container.querySelector('#stu-status-filter').addEventListener('change', () => renderContent(container));
+    const genderEl = container.querySelector('#stu-gender-filter');
+    if (genderEl) genderEl.addEventListener('change', () => renderContent(container));
     container.querySelectorAll('.view-toggle__btn').forEach(btn => {
       btn.addEventListener('click', () => {
         currentView = btn.dataset.view;
@@ -153,6 +168,8 @@ const StudentList = (() => {
       if (search && !s.name.toLowerCase().includes(search) && !s.code.toLowerCase().includes(search)) return false;
       if (classFilter && String(s.classId) !== String(classFilter)) return false;
       if (statusFilter && (s.status || '').toLowerCase() !== statusFilter) return false;
+      const genderFilter = container.querySelector('#stu-gender-filter')?.value || '';
+      if (genderFilter && (s.gender || '').toLowerCase() !== genderFilter.toLowerCase()) return false;
       return true;
     });
   }
@@ -187,6 +204,7 @@ const StudentList = (() => {
             </div>`
         },
         { key: 'className', label: 'Class', sortable: true },
+        { key: 'gender', label: 'Gender', sortable: true },
         { key: 'status', label: 'Status', align: 'center', render: (s) => `<span class="student-status-badge ${escapeHTML((s.status || '').toLowerCase())}">${escapeHTML(s.status)}</span>` },
         { key: 'feeStatus', label: 'Fee Status', align: 'center', render: (s) => `<span class="fee-status-chip ${escapeHTML(s.feeStatus)}">${escapeHTML(s.feeStatus)}</span>` },
         {
@@ -216,6 +234,9 @@ const StudentList = (() => {
         <div class="student-card__avatar">${escapeHTML(initials(s.name))}</div>
         <div class="student-card__name">${escapeHTML(s.name)}</div>
         <div class="student-card__class">${escapeHTML(s.className)}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin:2px 0;">
+          ${s.gender !== '—' ? escapeHTML(s.gender) : ''}${s.gender !== '—' && s.district !== '—' ? ' · ' : ''}${s.district !== '—' ? escapeHTML(s.district) : ''}
+        </div>
         <div class="student-card__badges">
           <span class="student-status-badge ${escapeHTML((s.status || '').toLowerCase())}">${escapeHTML(s.status)}</span>
           <span class="fee-status-chip ${escapeHTML(s.feeStatus)}">${escapeHTML(s.feeStatus)}</span>

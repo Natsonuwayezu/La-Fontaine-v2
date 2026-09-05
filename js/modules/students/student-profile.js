@@ -83,20 +83,48 @@ const StudentProfile = (() => {
         .map(st => ({ id: st.id, name: `${st.first_name || ''} ${st.last_name || ''}`.trim(), className: classMap.get(st.class_id) || '—' }))
       : [];
 
-    return {
+    // ── Guardian info from guardians table (joined via student_guardians) ──
+      const guardianLinks = (state.studentGuardians || []).filter(g => g.student_id === s.id);
+      const guardianIds   = guardianLinks.map(g => g.guardian_id).filter(Boolean);
+      const allGuardians  = (state.guardians || []).filter(g => guardianIds.includes(g.id));
+      const father = allGuardians.find(g => g.guardian_type === 'father' || guardianLinks.find(l => l.guardian_id === g.id && l.relationship === 'father')) || null;
+      const mother = allGuardians.find(g => g.guardian_type === 'mother' || guardianLinks.find(l => l.guardian_id === g.id && l.relationship === 'mother')) || null;
+      // Fallback to flat fields if guardians table not yet populated
+      const primaryGuardian = father || mother || null;
+      const guardianName    = primaryGuardian ? `${primaryGuardian.first_name || ''} ${primaryGuardian.last_name || ''}`.trim() : (s.guardian_name || '—');
+      const guardianPhone   = primaryGuardian?.phone  || s.guardian_phone || '—';
+      const guardianEmail   = primaryGuardian?.email  || s.guardian_email || '—';
+
+      return {
       id: s.id,
-      code: s.student_code || '',
+      code: s.student_code || s.code || '',
       name: `${s.first_name || ''} ${s.last_name || ''}`.trim() || 'Unnamed Student',
       classId: s.class_id,
       className: classMap.get(s.class_id) || '—',
       status: s.status || 'Active',
-      gender: s.gender,
-      dob: s.date_of_birth,
-      enrolledDate: s.created_at ? s.created_at.slice(0, 10) : '—',
-      guardianName: s.guardian_name || '—',
-      guardianPhone: s.guardian_phone || '—',
-      guardianEmail: s.guardian_email || '—',
-      address: s.address || '—',
+      gender: s.gender || '—',
+      dob: s.date_of_birth || '—',
+      birthplace: s.birthplace || '—',
+      nationality: s.nationality || '—',
+      insurance: s.medical_insurance || '—',
+      sdmsCode: s.sdms_code || '—',
+      previousSchool: s.previous_school || '—',
+      previousMarks: s.previous_school_marks != null ? s.previous_school_marks + '%' : '—',
+      province: s.province || '—',
+      district: s.district || '—',
+      sector: s.sector || '—',
+      cell: s.cell || '—',
+      village: s.village || '—',
+      address: [s.village, s.cell, s.sector, s.district, s.province].filter(Boolean).join(', ') || s.address || '—',
+      enrollmentDate: s.enrollment_date || s.created_at?.slice(0, 10) || '—',
+      academicYearId: s.academic_year_id || null,
+      guardianName,
+      guardianPhone,
+      guardianEmail,
+      guardians: allGuardians,
+      father,
+      mother,
+      notes: s.notes || '',
       academics: { average, position, classSize: classStudents.length, subjects },
       fees: { unpaid: unpaidFees, all: myFees, history: myPayments, credit },
       family,
@@ -179,29 +207,84 @@ const StudentProfile = (() => {
 
   // ─── PANELS ──────────────────────────────────────────────────────
 
+  function _infoRow(k, v) {
+    return `<div class="profile-info-item"><span class="k">${k}</span><span class="v">${escapeHTML(String(v||'—'))}</span></div>`;
+  }
+
+  function _guardianCard(title, icon, g) {
+    if (!g) return '';
+    const name = `${g.first_name||''} ${g.last_name||''}`.trim() || '—';
+    return `<div class="dash-card" style="margin-bottom:10px;">
+      <div class="dash-card-header">
+        <span class="dash-card-title"><i class="fa-solid ${icon}"></i> ${title}</span>
+      </div>
+      <div class="dash-card-body">
+        <div class="profile-info-grid">
+          ${_infoRow('Name', name)}
+          ${_infoRow('Phone', g.phone)}
+          ${_infoRow('Email', g.email)}
+          ${_infoRow('National ID', g.national_id)}
+          ${_infoRow('Occupation', g.occupation)}
+          ${_infoRow('Employer', g.employer)}
+        </div>
+      </div>
+    </div>`;
+  }
+
   function overviewPanel(s) {
     return `
       <div class="two-col">
-        <div class="dash-card">
-          <div class="dash-card-header"><span class="dash-card-title">Personal Information</span></div>
-          <div class="dash-card-body">
-            <div class="profile-info-grid">
-              <div class="profile-info-item"><span class="k">Gender</span><span class="v">${s.gender === 'M' ? 'Male' : s.gender === 'F' ? 'Female' : '—'}</span></div>
-              <div class="profile-info-item"><span class="k">Date of Birth</span><span class="v">${s.dob ? esc(fmtDate(s.dob)) : '—'}</span></div>
-              <div class="profile-info-item"><span class="k">Enrolled</span><span class="v">${s.enrolledDate !== '—' ? esc(fmtDate(s.enrolledDate)) : '—'}</span></div>
-              <div class="profile-info-item"><span class="k">Address</span><span class="v">${escapeHTML(s.address)}</span></div>
+        <!-- LEFT: full personal info -->
+        <div>
+          <div class="dash-card" style="margin-bottom:10px;">
+            <div class="dash-card-header">
+              <span class="dash-card-title"><i class="fa-solid fa-child"></i> Personal Information</span>
+              <button class="btn btn-sm btn-ghost" onclick="StudentDetails.openEdit(${s.id})">
+                <i class="fa-solid fa-pen"></i> Edit</button>
+            </div>
+            <div class="dash-card-body">
+              <div class="profile-info-grid">
+                ${_infoRow('Student Code', s.code)}
+                ${_infoRow('Gender', s.gender)}
+                ${_infoRow('Date of Birth', s.dob !== '—' && typeof fmtDate === 'function' ? fmtDate(s.dob) : s.dob)}
+                ${_infoRow('Birthplace', s.birthplace)}
+                ${_infoRow('Nationality', s.nationality)}
+                ${_infoRow('Insurance', s.insurance)}
+                ${_infoRow('SDMS Code', s.sdmsCode)}
+                ${_infoRow('Previous School', s.previousSchool)}
+                ${_infoRow('Prev. School Marks', s.previousMarks)}
+                ${_infoRow('Enrollment Date', s.enrollmentDate)}
+                ${_infoRow('Status', s.status)}
+                ${_infoRow('Notes', s.notes)}
+              </div>
+            </div>
+          </div>
+
+          <div class="dash-card" style="margin-bottom:10px;">
+            <div class="dash-card-header">
+              <span class="dash-card-title"><i class="fa-solid fa-location-dot"></i> Home Location</span>
+            </div>
+            <div class="dash-card-body">
+              <div class="profile-info-grid">
+                ${_infoRow('Province', s.province)}
+                ${_infoRow('District', s.district)}
+                ${_infoRow('Sector', s.sector)}
+                ${_infoRow('Cell', s.cell)}
+                ${_infoRow('Village', s.village)}
+              </div>
             </div>
           </div>
         </div>
-        <div class="dash-card">
-          <div class="dash-card-header"><span class="dash-card-title">Guardian</span></div>
-          <div class="dash-card-body">
-            <div class="profile-info-grid">
-              <div class="profile-info-item"><span class="k">Name</span><span class="v">${escapeHTML(s.guardianName)}</span></div>
-              <div class="profile-info-item"><span class="k">Phone</span><span class="v">${escapeHTML(s.guardianPhone)}</span></div>
-              <div class="profile-info-item"><span class="k">Email</span><span class="v">${escapeHTML(s.guardianEmail)}</span></div>
-            </div>
-          </div>
+
+        <!-- RIGHT: guardians -->
+        <div>
+          ${_guardianCard('Father', 'fa-person', s.father)}
+          ${_guardianCard('Mother', 'fa-person-dress', s.mother)}
+          ${!s.father && !s.mother ? `<div class="dash-card"><div class="dash-card-body" style="color:var(--text-soft);text-align:center;padding:24px;">
+            <i class="fa-solid fa-person-circle-question" style="font-size:2rem;margin-bottom:8px;opacity:.4;"></i>
+            <div>No guardian records found.</div>
+            <div style="font-size:12px;margin-top:4px;">Guardian info will appear here after enrollment or editing.</div>
+          </div></div>` : ''}
         </div>
       </div>
     `;
@@ -298,7 +381,7 @@ const StudentProfile = (() => {
           <table class="data-table">
             <thead><tr><th>Date</th><th>Receipt</th><th>Method</th><th style="text-align:right;">Amount</th></tr></thead>
             <tbody>${s.fees.history.map(h => `
-              <tr><td>${esc(fmtDate(h.payment_date))}</td><td>${escapeHTML(h.receipt_number || '—')}</td><td>${escapeHTML(h.payment_method || '—')}</td><td style="text-align:right; color:var(--success); font-weight:600;">${fmtCurrency(h.total_amount)}</td></tr>
+              <tr><td>${esc(fmtDate(h.payment_date))}</td><td>${escapeHTML(h.receipt_number || '—')}</td><td>${escapeHTML(h.payment_method || '—')}</td><td style="text-align:right; color:var(--success); font-weight:600;">${fmtCurrency(h.amount)}</td></tr>
             `).join('')}</tbody>
           </table>` : `<div style="padding:24px;text-align:center;color:var(--text-soft);">No payments recorded yet.</div>`}
         </div>
@@ -307,19 +390,68 @@ const StudentProfile = (() => {
   }
 
   function familyPanel(s) {
-    if (!s.family.length) {
-      return `<div class="dash-card"><div class="dash-card-body" style="text-align:center;padding:32px;color:var(--text-soft);">No linked family members.</div></div>`;
-    }
-    return `
-      <div class="dash-card">
-        <div class="dash-card-header"><span class="dash-card-title">Linked Family Members</span></div>
+    // Guardian cards
+    function guardianCard(title, icon, g) {
+      if (!g) return '';
+      const name = `${g.first_name||''} ${g.last_name||''}`.trim()||'—';
+      return `<div class="dash-card" style="margin-bottom:10px;">
+        <div class="dash-card-header">
+          <span class="dash-card-title"><i class="fa-solid ${icon}"></i> ${title}</span>
+        </div>
         <div class="dash-card-body">
-          ${s.family.map(f => `
-            <div class="family-tree-node" style="margin-bottom:8px;cursor:pointer;" data-goto-student="${f.id}">
-              <div class="family-tree-node__avatar">${escapeHTML(initials(f.name))}</div>
-              <div><div class="family-tree-node__name">${escapeHTML(f.name)}</div><div class="family-tree-node__relation">${escapeHTML(f.className)}</div></div>
+          <div class="profile-info-grid">
+            <div class="profile-info-item"><span class="k">Name</span><span class="v">${escapeHTML(name)}</span></div>
+            <div class="profile-info-item"><span class="k">Phone</span><span class="v">${escapeHTML(g.phone||'—')}</span></div>
+            <div class="profile-info-item"><span class="k">Email</span><span class="v">${escapeHTML(g.email||'—')}</span></div>
+            <div class="profile-info-item"><span class="k">National ID</span><span class="v">${escapeHTML(g.national_id||'—')}</span></div>
+            <div class="profile-info-item"><span class="k">Occupation</span><span class="v">${escapeHTML(g.occupation||'—')}</span></div>
+            <div class="profile-info-item"><span class="k">Employer</span><span class="v">${escapeHTML(g.employer||'—')}</span></div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    return `
+      <div class="two-col">
+        <div>
+          <!-- Guardians -->
+          ${guardianCard('Father', 'fa-person', s.father)}
+          ${guardianCard('Mother', 'fa-person-dress', s.mother)}
+          ${!s.father && !s.mother ? `<div class="dash-card"><div class="dash-card-body"
+            style="text-align:center;padding:24px;color:var(--text-soft);">
+            No guardian records found.</div></div>` : ''}
+        </div>
+        <div>
+          <!-- Siblings -->
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <span class="dash-card-title">
+                <i class="fa-solid fa-people-group"></i> Siblings
+              </span>
             </div>
-          `).join('')}
+            <div class="dash-card-body">
+              ${s.family.length ? s.family.map(f => `
+                <div class="family-tree-node" style="margin-bottom:8px;cursor:pointer;display:flex;
+                     align-items:center;gap:10px;padding:8px;border-radius:6px;
+                     background:rgba(255,255,255,.03);border:1px solid var(--border);"
+                     data-goto-student="${f.id}">
+                  <div style="width:36px;height:36px;border-radius:50%;background:var(--role-light);
+                       display:flex;align-items:center;justify-content:center;
+                       font-weight:700;color:var(--role-primary);font-size:14px;flex-shrink:0;">
+                    ${escapeHTML(initials(f.name))}
+                  </div>
+                  <div>
+                    <div style="font-weight:600;font-size:13px;">${escapeHTML(f.name)}</div>
+                    <div style="font-size:11px;color:var(--text-muted);">${escapeHTML(f.className)}</div>
+                  </div>
+                  <i class="fa-solid fa-chevron-right" style="margin-left:auto;color:var(--text-muted);font-size:11px;"></i>
+                </div>`).join('') : `
+                <div style="text-align:center;padding:24px;color:var(--text-soft);">
+                  <i class="fa-solid fa-person-circle-question" style="font-size:2rem;opacity:.3;"></i>
+                  <div style="margin-top:8px;font-size:13px;">No siblings linked</div>
+                </div>`}
+            </div>
+          </div>
         </div>
       </div>
     `;

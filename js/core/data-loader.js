@@ -188,7 +188,8 @@ async function _loadPhase3() {
     const activeYearId = getActiveYearId();
     const userId = state.currentUser?.id;
 
-    const [students, holidays, notifications] = await Promise.all([
+    const [students, holidays, notifications, guardians, studentGuardians, classEnrollments] =
+        await Promise.all([
         // Students: exclude soft-deleted
         getAll('students', 'is_deleted=eq.false&order=last_name.asc,first_name.asc')
             .catch(() => []),
@@ -205,9 +206,22 @@ async function _loadPhase3() {
                 `recipient_id=eq.${userId}&order=created_at.desc&limit=100`)
                 .catch(() => [])
             : Promise.resolve([]),
+
+        // Guardians — all guardian records (father/mother info)
+        getAll('guardians', 'order=last_name.asc').catch(() => []),
+
+        // Student-guardian links — join table
+        getAll('student_guardians', 'order=student_id.asc').catch(() => []),
+
+        // Class enrollments for historical roster
+        activeYearId
+            ? getAll('class_enrollments',
+                `academic_year_id=eq.${activeYearId}&is_active=eq.true`)
+                .catch(() => [])
+            : getAll('class_enrollments', 'is_active=eq.true').catch(() => []),
     ]);
 
-    updateStateBatch({ students, holidays, notifications });
+    updateStateBatch({ students, holidays, notifications, guardians, studentGuardians, classEnrollments });
 
     // Cache students locally for offline use
     cacheStudentsLocally().catch(() => { });

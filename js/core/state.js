@@ -45,6 +45,11 @@ const state = {
     teachers: [],     // includes admin + accountants + teachers
     families: [],
     students: [],     // WHERE is_deleted = FALSE only
+    guardians: [],     // guardian records (father/mother info)
+    studentGuardians: [],     // student_guardians join table
+    classEnrollments: [],     // class_enrollments for historical roster
+    studentClassHistory: [],  // audit trail of class changes
+    promotionDecisions: [],   // student_promotion_decisions
     assessments: [],
     marks: [],
     feeCategories: [],

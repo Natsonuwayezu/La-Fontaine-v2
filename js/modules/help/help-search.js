@@ -170,7 +170,7 @@ function handleQuickAction(actionId) {
         },
         'insert-marks': () => navigateTo('marks-entry'),
         'record-payment': () => navigateTo('record-payment'),
-        'record-attendance': () => navigateTo('attendance'),
+        'record-attendance': () => navigateTo('attendance-entry'),
         'view-timetable': () => navigateTo('teacher-timetable'),
         'print-receipt': () => navigateTo('receipts'),
         'view-register': () => navigateTo('class-register'),

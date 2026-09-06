@@ -123,6 +123,7 @@ const NAV_SECTIONS = {
     bg: 'rgba(196, 90, 74, 0.12)',
     desc: 'Staff accounts, assignments, performance, master timetable.',
     items: [
+      { id: 'teachers', label: 'Teachers', icon: 'fa-person-chalkboard', desc: 'Teacher directory' },
       { id: 'user-management', label: 'User Management', icon: 'fa-users-gear', desc: 'Teacher/accountant accounts and roles' },
       { id: 'class-management', label: 'Class / Subjects', icon: 'fa-book', desc: 'Class names, levels, class teacher assignment' },
       { id: 'teacher-assignments', label: 'Teacher Assignments', icon: 'fa-person-chalkboard', desc: 'Visual matrix view' },
@@ -150,12 +151,20 @@ const NAV_SECTIONS = {
     bg: 'rgba(107, 95, 86, 0.10)',
     desc: 'School profile, academic years, grading rules, maintenance.',
     items: [
-      { id: 'school-settings', label: 'School Settings', icon: 'fa-school', desc: 'Name, logo, head teacher, contact details' },
-      { id: 'academic-calendar', label: 'Academic Calendar', icon: 'fa-calendar', desc: 'Years, terms, midterm dates' },
-      { id: 'grading-scale', label: 'Grading Settings', icon: 'fa-star-half-stroke', desc: 'Grade boundaries, colors, pass mark' },
-      { id: 'backup-restore', label: 'Backup & Restore', icon: 'fa-hard-drive', desc: 'Full DB backup, auto-schedule, restore' },
-      { id: 'system-logs', label: 'System Logs', icon: 'fa-list-check', desc: 'Audit trail of user actions' },
-      { id: 'system-health', label: 'System Health', icon: 'fa-heart-pulse', desc: 'App performance and connectivity' }
+      { id: 'school-settings',  label: 'School Settings',  icon: 'fa-school',           desc: 'Name, logo, head teacher, contact details' },
+      { id: 'academic-years',   label: 'Academic Years',    icon: 'fa-calendar-days',    desc: 'Manage academic years and term dates' },
+      { id: 'academic-calendar',label: 'Academic Calendar', icon: 'fa-calendar',         desc: 'Years, terms, midterm dates' },
+      { id: 'class-management', label: 'Classes',           icon: 'fa-chalkboard',       desc: 'Manage classes, sort order, class teachers' },
+      { id: 'subjects',         label: 'Subjects',          icon: 'fa-book',             desc: 'Subjects, is_core flag, sort order' },
+      { id: 'grading-scale',    label: 'Grading Scale',     icon: 'fa-star-half-stroke', desc: 'Grade boundaries, pass mark' },
+      { id: 'grading-settings', label: 'Grading Settings',  icon: 'fa-sliders',          desc: 'Advanced grading configuration' },
+      { id: 'holidays',         label: 'Holiday Sessions',  icon: 'fa-sun',              desc: 'Manage holiday sessions and date ranges' },
+      { id: 'fee-categories',   label: 'Fee Categories',    icon: 'fa-tags',             desc: 'Fee types, amounts, is_core flag' },
+      { id: 'users',            label: 'User Accounts',     icon: 'fa-users-gear',       desc: 'Teacher and accountant accounts, passwords, roles' },
+      { id: 'backup-restore',   label: 'Backup & Restore',  icon: 'fa-hard-drive',       desc: 'Full DB backup and restore' },
+      { id: 'system-logs',      label: 'System Logs',       icon: 'fa-list-check',       desc: 'Audit trail of every user action' },
+      { id: 'system-health',    label: 'System Health',     icon: 'fa-heart-pulse',      desc: 'App performance and connectivity' },
+      { id: 'api-settings',     label: 'API Settings',      icon: 'fa-plug',             desc: 'Supabase credentials, connection test' }
     ]
   },
   help: {

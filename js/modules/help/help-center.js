@@ -448,7 +448,7 @@ function handleAction(action) {
 
         case 'record-attendance':
             closeHelpCenter();
-            setTimeout(() => navigateTo('attendance'), 300);
+            setTimeout(() => navigateTo('attendance-entry'), 300);
             break;
 
         case 'view-timetable':

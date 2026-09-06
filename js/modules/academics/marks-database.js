@@ -259,8 +259,17 @@ function renderTableHead() {
     const cols = getVisibleAssessments();
     thead.innerHTML = `
         <tr>
-            <th style="position:sticky;left:0;z-index:2;background:var(--bg-card, #fcfaf8);text-align:left;padding:10px 12px;">Student</th>
-            ${cols.map(a => `<th style="text-align:center;padding:10px 12px;white-space:nowrap;">${esc(a.name)}<div style="font-weight:400;font-size:0.65rem;opacity:0.6;">/${esc(a.max_score)}</div></th>`).join('')}
+            <th style="position:sticky;left:0;z-index:2;background:var(--bg-card,#fcfaf8);text-align:left;padding:10px 12px;">Student</th>
+            ${cols.map(a => `
+            <th style="text-align:center;padding:8px 12px;white-space:nowrap;">
+              ${esc(a.name)}
+              <div style="font-weight:400;font-size:0.65rem;opacity:0.6;">/${esc(a.max_score)}</div>
+              <button class="btn btn-sm btn-ghost" title="Edit this assessment in Marks Entry"
+                style="font-size:10px;padding:2px 6px;margin-top:4px;"
+                onclick="mdbOpenInMarksEntry(${a.id},${a.class_id||'null'},${a.term_id||'null'})">
+                <i class="fa-solid fa-pen-to-square"></i> Edit
+              </button>
+            </th>`).join('')}
         </tr>
     `;
 }

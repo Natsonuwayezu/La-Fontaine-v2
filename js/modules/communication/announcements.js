@@ -87,7 +87,11 @@ const Announcements = (() => {
             <option value="published">Published</option>
             <option value="draft">Draft</option>
           </select>
-          <button class="btn btn-primary" id="ann-new-btn"><i class="fa-solid fa-plus"></i> New Announcement</button>
+          <button class="btn btn-ghost btn-sm" onclick="navigateTo('notification-center')">
+          <i class="fa-solid fa-bell"></i> Notifications</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('reminders')">
+          <i class="fa-solid fa-clock"></i> Reminders</button>
+        <button class="btn btn-primary" id="ann-new-btn"><i class="fa-solid fa-plus"></i> New Announcement</button>
         </div>
         <div class="report-type-grid" id="ann-grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));"></div>
       </div>

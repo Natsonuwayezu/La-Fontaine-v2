@@ -500,3 +500,4 @@ function destroyMarksDatabase() {
 
 window.renderMarksDatabase = renderMarksDatabase;
 window.destroyMarksDatabase = destroyMarksDatabase;
+window.mdbOpenInMarksEntry = mdbOpenInMarksEntry;

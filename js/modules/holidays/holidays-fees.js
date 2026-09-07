@@ -69,6 +69,10 @@ function _hfShell(container, sessions) {
             <i class="fa-solid fa-umbrella-beach"></i> ${esc(cur?.name||'—')}</span>
         </div>
         <div class="mod-topbar-right">
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('holidays-enrollment')">
+          <i class="fa-solid fa-user-plus"></i> Enrollment</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('fee-approvals')">
+          <i class="fa-solid fa-check-circle"></i> Approvals</button>
           <select class="select select-sm" onchange="hfPickSession(parseInt(this.value))">
             ${sessions.map(s=>`<option value="${s.id}"${s.id===_hfSessionId?' selected':''}>
               ${esc(s.name)}${s.status==='active'?' ●':''}</option>`).join('')}

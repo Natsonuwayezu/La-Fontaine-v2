@@ -46,6 +46,10 @@ function _hrkShell(container, sessions) {
             <i class="fa-solid fa-umbrella-beach"></i> ${esc(cur?.name || '—')}</span>
         </div>
         <div class="mod-topbar-right">
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('holidays-reports')">
+          <i class="fa-solid fa-file-lines"></i> Reports</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('holidays-marks')">
+          <i class="fa-solid fa-pen"></i> Marks</button>
           <select class="select select-sm" onchange="hrkPickSession(parseInt(this.value))">
             ${sessions.map(s => `<option value="${s.id}"${s.id === _hrkSessionId ? ' selected' : ''}>
               ${esc(s.name)}${s.status === 'active' ? ' ●' : ''}</option>`).join('')}

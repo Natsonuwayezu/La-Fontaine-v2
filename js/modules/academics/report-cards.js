@@ -56,6 +56,10 @@ function _rcShell(container) {
           </select>
           <button class="btn btn-secondary btn-sm" onclick="rcPrintAll()">
             <i class="fa-solid fa-layer-group"></i> Print All Class</button>
+          <button class="btn btn-ghost btn-sm" onclick="navigateTo('rankings')">
+            <i class="fa-solid fa-trophy"></i> Rankings</button>
+          <button class="btn btn-ghost btn-sm" onclick="navigateTo('second-sitting')">
+            <i class="fa-solid fa-clock-rotate-left"></i> 2nd Sitting</button>
           <button class="btn btn-primary btn-sm" onclick="rcPrint()">
             <i class="fa-solid fa-print"></i> Print</button>
         </div>

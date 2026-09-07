@@ -76,6 +76,12 @@ const StudentArchive = (() => {
   }
 
   function renderTable(container) {
+    // Cross-module navigation
+    const _ns = document.createElement('div');
+    _ns.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px;';
+    _ns.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="navigateTo('student-list')"><i class="fa-solid fa-users"></i> Active Students</button>         <button class="btn btn-ghost btn-sm" onclick="navigateTo('bulk-import')"><i class="fa-solid fa-file-import"></i> Bulk Import</button>`;
+    setTimeout(() => { if (container && container.firstChild) container.insertBefore(_ns, container.firstChild); }, 50);
+
     const data = filtered(container);
     container.querySelector('#arch-count').textContent = `${data.length} student${data.length === 1 ? '' : 's'}`;
     const wrap = container.querySelector('#arch-table-wrap');

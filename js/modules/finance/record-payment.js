@@ -204,6 +204,12 @@ async function renderRecordPayment(container, params = {}) {
                 </span>
             </div>
             <div class="mod-topbar-right">
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('balances')">
+          <i class="fa-solid fa-scale-balanced"></i> Balances</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('fee-approvals')">
+          <i class="fa-solid fa-check-circle"></i> Approvals</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('payment-history')">
+          <i class="fa-solid fa-clock-rotate-left"></i> History</button>
                 <button class="topbar-btn" onclick="navigateTo('payment-history')">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2">

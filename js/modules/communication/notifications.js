@@ -93,6 +93,12 @@ const Notifications = (() => {
   }
 
   function renderList(container) {
+    // Cross-module navigation
+    const _ns = document.createElement('div');
+    _ns.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px;';
+    _ns.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="navigateTo('announcements')"><i class="fa-solid fa-bullhorn"></i> Announcements</button>         <button class="btn btn-ghost btn-sm" onclick="navigateTo('reminders')"><i class="fa-solid fa-clock"></i> Reminders</button>`;
+    setTimeout(() => { if (container && container.firstChild) container.insertBefore(_ns, container.firstChild); }, 50);
+
     const list = filteredList(container);
     container.querySelector('#notif-count').textContent = `${list.length} notification${list.length === 1 ? '' : 's'}`;
 

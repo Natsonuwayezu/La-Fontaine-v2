@@ -178,7 +178,11 @@ const StudentPromotion = (() => {
         <div class="dash-card-body no-padding" id="promo-table-wrap"></div>
       </div>
       <div class="form-actions" style="margin-top:16px;">
-        <button class="btn btn-primary btn-lg" id="promo-execute-btn"><i class="fa-solid fa-arrow-up-right-dots"></i> Execute Promotion</button>
+                  <button class="btn btn-ghost btn-sm" onclick="navigateTo('second-sitting')">
+              <i class="fa-solid fa-clock-rotate-left"></i> 2nd Sitting</button>
+            <button class="btn btn-ghost btn-sm" onclick="navigateTo('report-cards')">
+              <i class="fa-solid fa-file-lines"></i> Report Cards</button>
+          <button class="btn btn-primary btn-lg" id="promo-execute-btn"><i class="fa-solid fa-arrow-up-right-dots"></i> Execute Promotion</button>
       </div>
     `;
 

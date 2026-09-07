@@ -44,6 +44,10 @@ async function renderFeeAssignments(container, params = {}) {
                 <span class="mod-meta">${esc(activeYear?.year_name || '—')}</span>
             </div>
             <div class="mod-topbar-right">
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('fee-approvals')">
+          <i class="fa-solid fa-check-circle"></i> Approvals Queue</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('record-payment')">
+          <i class="fa-solid fa-money-bill-wave"></i> Record Payment</button>
                 <button class="topbar-btn" onclick="openMissingAssignmentsModal()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2">

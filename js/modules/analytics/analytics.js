@@ -1,3 +1,5 @@
+
+    setTimeout(() => _anAddNavLinks(container), 100);
 /* ═══════════════════════════════════════════════════════════════════
    js/modules/analytics/analytics.js
    ═══════════════════════════════════════════════════════════════════
@@ -531,3 +533,19 @@
     window.renderAnalytics = renderAnalytics;
     window.destroyAnalytics = destroyAnalytics;
 })();
+
+/* ── Cross-module navigation ────────────────────────────────── */
+function _anAddNavLinks(container) {
+    if (!container || container.querySelector('.an-nav-links')) return;
+    const wrap = document.createElement('div');
+    wrap.className = 'an-nav-links';
+    wrap.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px 0;';
+    wrap.innerHTML =
+        '<button class="btn btn-ghost btn-sm" onclick="navigateTo(\'financial-reports\')">' +
+        '<i class="fa-solid fa-chart-line"></i> Finance Reports</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="navigateTo(\'marks-analysis\')">' +
+        '<i class="fa-solid fa-chart-bar"></i> Marks Analysis</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="navigateTo(\'attendance-analytics\')">' +
+        '<i class="fa-solid fa-calendar-check"></i> Attendance</button>';
+    container.insertBefore(wrap, container.firstChild);
+}

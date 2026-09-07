@@ -104,7 +104,11 @@ async function renderCarryForward(container, params = {}) {
                             `).join('') || '<tr><td colspan="2" style="text-align:center; padding:20px;">No outstanding balances in this term.</td></tr>'}
                         </tbody>
                     </table>
-                    <button class="btn btn-primary" id="cf-run-btn" ${(!targetTermId || !preview.length) ? 'disabled' : ''}>
+                    <button class="btn btn-ghost btn-sm" onclick="navigateTo('balances')">
+          <i class="fa-solid fa-scale-balanced"></i> Balances</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('student-fees')">
+          <i class="fa-solid fa-receipt"></i> Student Fees</button>
+        <button class="btn btn-primary" id="cf-run-btn" ${(!targetTermId || !preview.length) ? 'disabled' : ''}>
                         <i class="fa-solid fa-arrow-right-long"></i> Carry ${preview.length} Balance${preview.length === 1 ? '' : 's'} Forward
                     </button>
                 ` : ''}

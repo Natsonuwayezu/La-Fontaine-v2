@@ -69,7 +69,11 @@ const FamilyManagement = (() => {
             <input type="text" class="form-input" id="fam-search" placeholder="Search families or students..." />
           </div>
           <div class="reports-toolbar__spacer"></div>
-          <button class="btn btn-primary" id="fam-new-btn"><i class="fa-solid fa-house-chimney-user"></i> New Family Group</button>
+          <button class="btn btn-ghost btn-sm" onclick="navigateTo('student-list')">
+          <i class="fa-solid fa-users"></i> Student List</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('sibling-linking')">
+          <i class="fa-solid fa-link"></i> Link Siblings</button>
+        <button class="btn btn-primary" id="fam-new-btn"><i class="fa-solid fa-house-chimney-user"></i> New Family Group</button>
         </div>
         <div id="fam-list"></div>
       </div>

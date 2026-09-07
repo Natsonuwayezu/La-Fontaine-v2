@@ -33,6 +33,12 @@ async function renderPaymentHistory(container, params = {}) {
     container.innerHTML = `<div class="dashboard-page"><div class="loading-inline">Loading payment history…</div></div>`;
 
     await ensureStateLoaded();
+
+    // Cross-module navigation strip
+    const _navStrip = document.createElement('div');
+    _navStrip.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);';
+    _navStrip.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="navigateTo('record-payment')"><i class="fa-solid fa-money-bill-wave"></i> Record Payment</button>         <button class="btn btn-ghost btn-sm" onclick="navigateTo('payment-reversals')"><i class="fa-solid fa-rotate-left"></i> Reversals</button>`;
+    if (container) container.prepend(_navStrip);
     await loadPayments();
 
     const filters = {

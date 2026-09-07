@@ -47,6 +47,12 @@ function _hmShell(container, sessions) {
             <i class="fa-solid fa-umbrella-beach"></i> ${esc(cur?.name||'—')}</span>
         </div>
         <div class="mod-topbar-right">
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('holidays-enrollment')">
+          <i class="fa-solid fa-user-plus"></i> Enrollment</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('holidays-reports')">
+          <i class="fa-solid fa-file-lines"></i> Reports</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('holidays-rankings')">
+          <i class="fa-solid fa-trophy"></i> Rankings</button>
           <select class="select select-sm" onchange="hmPickSession(parseInt(this.value))">
             ${sessions.map(s=>`<option value="${s.id}"${s.id===_hmSessionId?' selected':''}>
               ${esc(s.name)}${s.status==='active'?' ●':''}</option>`).join('')}

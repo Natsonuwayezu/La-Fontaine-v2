@@ -412,9 +412,9 @@ async function logout(opts = {}) {
         }
     }
 
-    // Navigate to login
-    if (typeof navigateTo === 'function') {
-        navigateTo('login');
+    // Show login page - not a router route, handled by auth
+    if (typeof renderLoginPage === 'function') {
+        renderLoginPage();
     } else {
         location.reload();
     }

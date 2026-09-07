@@ -53,6 +53,12 @@ window.activeTeachersOnly = activeTeachersOnly;
 
 // Router bridge — teachers is a utility module, redirect to user-management
 function renderTeachers(container, params) {
+    // Cross-module navigation
+    const _ns = document.createElement('div');
+    _ns.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px;';
+    _ns.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="navigateTo('teacher-assignments')"><i class="fa-solid fa-chalkboard"></i> Assignments</button>         <button class="btn btn-ghost btn-sm" onclick="navigateTo('subjects')"><i class="fa-solid fa-book"></i> Subjects</button>`;
+    setTimeout(() => { if (container && container.firstChild) container.insertBefore(_ns, container.firstChild); }, 50);
+
     if (typeof renderUserManagement === 'function') return renderUserManagement(container, params);
     if (container) container.innerHTML = '<div class="section-card"><div class="empty-state"><div class="es-title">Loading staff management…</div></div></div>';
 }

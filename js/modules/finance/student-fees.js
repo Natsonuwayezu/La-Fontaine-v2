@@ -50,6 +50,10 @@ async function renderStudentFees(container, params = {}) {
                 <span class="mod-meta">${esc(activeYear?.year_name || '—')}</span>
             </div>
             <div class="mod-topbar-right">
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('fee-waivers')">
+          <i class="fa-solid fa-hand-holding-heart"></i> Waivers</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('payment-history')">
+          <i class="fa-solid fa-clock-rotate-left"></i> History</button>
                 <button class="topbar-btn" id="sf-btn-pay" style="display:none"
                         onclick="sfPayAll()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none"

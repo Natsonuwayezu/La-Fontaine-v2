@@ -122,6 +122,11 @@
 
         container.innerHTML =
             '<div class="rankings-page">' +
+            '<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">' +
+            '<button class="btn btn-ghost btn-sm" onclick="navigateTo(\'report-cards\')"><i class="fa-solid fa-file-lines"></i> Report Cards</button>' +
+            '<button class="btn btn-ghost btn-sm" onclick="navigateTo(\'class-register\')"><i class="fa-solid fa-table"></i> Register</button>' +
+            '<button class="btn btn-ghost btn-sm" onclick="navigateTo(\'marks-database\')"><i class="fa-solid fa-database"></i> Marks DB</button>' +
+            '</div>' +
                 '<div class="tabs tabs-pill" id="rk-tabs">' +
                     '<button class="tab-btn' + (state.tab === 'class' ? ' active' : '') + '" data-tab="class">Class Ranking</button>' +
                     '<button class="tab-btn' + (state.tab === 'subject' ? ' active' : '') + '" data-tab="subject">Subject Ranking</button>' +

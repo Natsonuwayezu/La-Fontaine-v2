@@ -69,6 +69,10 @@ function _ssShell(container, classes, term3) {
           <span class="badge badge-warning" style="margin-left:8px;">Term 3 Complete · Core Subjects</span>
         </div>
         <div class="mod-topbar-right" style="display:flex;gap:8px;">
+          <button class="btn btn-ghost btn-sm" onclick="navigateTo('student-promotion')">
+            <i class="fa-solid fa-graduation-cap"></i> Promotion</button>
+          <button class="btn btn-ghost btn-sm" onclick="navigateTo('report-cards')">
+            <i class="fa-solid fa-file-lines"></i> Report Cards</button>
           ${classes.length > 1 ? `
           <select class="select select-sm" onchange="ssPickClass(parseInt(this.value))">
             ${classes.map(c => `<option value="${c.id}"${c.id===_ssClassId?' selected':''}>

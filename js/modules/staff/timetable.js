@@ -54,7 +54,13 @@ const TimetablePage = (() => {
                                 : (state.teachers||[]).map(t => `<option value="${t.id}" ${t.id === selectedTeacherId ? 'selected' : ''}>${esc(t.first_name)} ${esc(t.last_name)}</option>`).join('')}
                         </select>
                     ` : ''}
-                    <button class="btn btn-primary" id="tt-add-slot-btn"><i class="fa-solid fa-plus"></i> Add Slot</button>
+                    <button class="btn btn-ghost btn-sm" onclick="navigateTo('class-timetable')">
+          <i class="fa-solid fa-calendar-days"></i> Class View</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('staff-timetable')">
+          <i class="fa-solid fa-users"></i> Staff View</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('timetable-conflicts')">
+          <i class="fa-solid fa-triangle-exclamation"></i> Conflicts</button>
+        <button class="btn btn-primary" id="tt-add-slot-btn"><i class="fa-solid fa-plus"></i> Add Slot</button>
                     <button class="btn btn-outline" id="tt-import-btn"><i class="fa-solid fa-file-import"></i> Bulk Import</button>
                 </div>
 

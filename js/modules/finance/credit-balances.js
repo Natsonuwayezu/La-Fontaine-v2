@@ -170,7 +170,11 @@ async function renderCreditBalances(container, params = {}) {
         window.showModal(adjustForm(studentId, existing), {
             title: `Adjust Credit — ${esc(studentName(studentId))}`,
             footer: `<button class="btn btn-outline" data-close>Cancel</button>
-                     <button class="btn btn-primary" id="cb-save-adjust-btn">Save</button>`
+                     <button class="btn btn-ghost btn-sm" onclick="navigateTo('balances')">
+          <i class="fa-solid fa-scale-balanced"></i> All Balances</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('record-payment')">
+          <i class="fa-solid fa-money-bill-wave"></i> Record Payment</button>
+        <button class="btn btn-primary" id="cb-save-adjust-btn">Save</button>`
         });
 
         document.getElementById('cb-save-adjust-btn').onclick = async () => {

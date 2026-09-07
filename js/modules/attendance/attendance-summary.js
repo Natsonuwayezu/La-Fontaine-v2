@@ -161,6 +161,16 @@ const AttendanceSummary = (() => {
 // despite being fully built.
 window.AttendanceSummary = AttendanceSummary;
 window.renderAttendanceSummary = async (container, params = {}) => {
+    // Nav strip
+    if (container) {
+        const _ns = document.createElement('div');
+        _ns.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);margin-bottom:8px;';
+        _ns.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="navigateTo('attendance-entry')"><i class="fa-solid fa-pen"></i> Enter Attendance</button>         <button class="btn btn-ghost btn-sm" onclick="navigateTo('attendance-reports')"><i class="fa-solid fa-chart-bar"></i> Reports</button>`;
+        if (!container.querySelector('button[onclick*="attendance"]')) {
+            container.prepend ? container.prepend(_ns) : container.insertBefore(_ns, container.firstChild);
+        }
+    }
+
     if (params && params.classId && typeof canAccessClass === 'function' && !canAccessClass(params.classId)) {
         if (container) container.innerHTML = `<div class="module-wrap"><div class="alert alert-danger" style="margin:24px;">
             <i class="fa-solid fa-lock"></i>

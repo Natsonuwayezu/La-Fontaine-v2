@@ -180,6 +180,10 @@ const AttendanceEntry = (() => {
     function renderTable(body, container) {
         body.innerHTML = `
       <div class="attendance-bulk-actions">
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('attendance-reports')">
+          <i class="fa-solid fa-chart-bar"></i> Reports</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('attendance-summary')">
+          <i class="fa-solid fa-list"></i> Summary</button>
         <button class="btn btn-primary" data-bulk="P">Mark All Present</button>
         <button class="btn btn-danger" data-bulk="A">Mark All Absent</button>
         <button class="btn btn-warning" data-bulk="L">Mark All Late</button>

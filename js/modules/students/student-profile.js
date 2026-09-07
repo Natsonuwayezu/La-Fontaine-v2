@@ -178,7 +178,15 @@ const StudentProfile = (() => {
         <div id="profile-panels">
           <div data-tab-panel="overview">${overviewPanel(s)}</div>
           <div data-tab-panel="academics">${academicsPanel(s)}</div>
-          <div data-tab-panel="fees">${feesPanel(s)}</div>
+          <div data-tab-panel="fees">
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm" onclick="navigateTo('record-payment',{studentId:view.id})">
+          <i class="fa-solid fa-money-bill-wave"></i> Record Payment</button>
+        <button class="btn btn-secondary btn-sm" onclick="navigateTo('fee-assignments',{studentId:view.id})">
+          <i class="fa-solid fa-tags"></i> Assign Fee</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('student-fees',{studentId:view.id})">
+          <i class="fa-solid fa-receipt"></i> Full Fee Ledger</button>
+      </div>${feesPanel(s)}</div>
           <div data-tab-panel="family">${familyPanel(s)}</div>
           <div data-tab-panel="documents">${documentsPanel(s)}</div>
         </div>

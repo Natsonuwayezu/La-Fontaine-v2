@@ -175,7 +175,11 @@ async function renderFeeWaivers(container, params = {}) {
                 </div>
 
                 <div style="display:flex; gap:10px;">
-                    <button class="btn btn-primary" id="fw-confirm-btn">Grant Waiver</button>
+                    <button class="btn btn-ghost btn-sm" onclick="navigateTo('student-fees')">
+          <i class="fa-solid fa-receipt"></i> Student Fees</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('fee-approvals')">
+          <i class="fa-solid fa-check-circle"></i> Approvals</button>
+        <button class="btn btn-primary" id="fw-confirm-btn">Grant Waiver</button>
                     <button class="btn btn-outline" id="fw-cancel-btn">Cancel</button>
                 </div>
             </div>

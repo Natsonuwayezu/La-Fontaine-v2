@@ -44,6 +44,10 @@ async function renderFeeApprovals(container, params = {}) {
                 <span class="mod-meta" id="fa-pending-count">Loading…</span>
             </div>
             <div class="mod-topbar-right">
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('record-payment')">
+          <i class="fa-solid fa-money-bill-wave"></i> Record Payment</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('fee-assignments')">
+          <i class="fa-solid fa-tags"></i> Assign Fees</button>
                 <button class="topbar-btn btn-fill" onclick="faApproveAll()"
                         id="fa-approve-all-btn" style="display:none;">
                     <i class="fa-solid fa-check-double"></i>

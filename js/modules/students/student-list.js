@@ -106,7 +106,14 @@ const StudentList = (() => {
             <button class="view-toggle__btn" data-view="grid" title="Grid view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
           </div>
           <span class="result-count" id="stu-result-count"></span>
-          <button class="btn btn-primary" id="stu-enroll-btn"><i class="fa-solid fa-user-plus"></i> Enroll Student</button>
+          <button class="btn btn-ghost btn-sm" onclick="navigateTo('bulk-import')">
+          <i class="fa-solid fa-file-import"></i> Bulk Import</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('student-archive')">
+          <i class="fa-solid fa-box-archive"></i> Archive</button>
+        <button class="btn btn-primary" onclick="navigateTo('enroll-student')" title="Enroll new student" style="margin-right:6px;">
+                <i class="fa-solid fa-user-plus"></i> Enroll Student
+              </button>
+              <button class="btn btn-primary" id="stu-enroll-btn"><i class="fa-solid fa-user-plus"></i> Enroll Student</button>
         </div>
 
         <div id="stu-bulk-bar" style="display:none; align-items:center; gap:10px; padding:10px 16px; background:rgba(6,182,212,0.08); border:1px solid rgba(6,182,212,0.25); border-radius:10px; margin-bottom:14px;">

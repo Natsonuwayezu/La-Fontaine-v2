@@ -61,6 +61,12 @@
     // ─── RENDER ──────────────────────────────────────────────────────
 
     function renderSystemHealth(container) {
+    // Cross-module navigation
+    const _ns = document.createElement('div');
+    _ns.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px;';
+    _ns.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="navigateTo('system-logs')"><i class="fa-solid fa-list-check"></i> System Logs</button>         <button class="btn btn-ghost btn-sm" onclick="navigateTo('analytics')"><i class="fa-solid fa-chart-bar"></i> Analytics</button>`;
+    setTimeout(() => { if (container && container.firstChild) container.insertBefore(_ns, container.firstChild); }, 50);
+
         if (!container) {
             console.warn('[SystemHealth] No container provided');
             return;

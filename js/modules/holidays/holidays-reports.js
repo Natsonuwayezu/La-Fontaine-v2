@@ -46,6 +46,10 @@ function _hrShell(container, sessions) {
             <i class="fa-solid fa-umbrella-beach"></i> ${esc(cur?.name || '—')}</span>
         </div>
         <div class="mod-topbar-right">
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('holidays-marks')">
+          <i class="fa-solid fa-pen"></i> Marks</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('holidays-rankings')">
+          <i class="fa-solid fa-trophy"></i> Rankings</button>
           <select class="select select-sm" onchange="hrPickSession(parseInt(this.value))">
             ${sessions.map(s => `<option value="${s.id}"${s.id === _hrSessionId ? ' selected' : ''}>
               ${esc(s.name)}${s.status === 'active' ? ' ●' : ''}</option>`).join('')}

@@ -111,7 +111,11 @@ const TeacherAssignments = (() => {
             </form>
         `, {
             title: 'Assign Teacher to Class',
-            footer: `<button class="btn btn-outline" data-close>Cancel</button><button class="btn btn-primary" id="save-assign-btn">Assign</button>`
+            footer: `<button class="btn btn-outline" data-close>Cancel</button><button class="btn btn-ghost btn-sm" onclick="navigateTo('teachers')">
+          <i class="fa-solid fa-person-chalkboard"></i> Teachers</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigateTo('class-timetable')">
+          <i class="fa-solid fa-calendar-days"></i> Timetable</button>
+        <button class="btn btn-primary" id="save-assign-btn">Assign</button>`
         });
 
         document.getElementById('save-assign-btn').onclick = async () => {

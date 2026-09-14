@@ -13,6 +13,72 @@
 'use strict';
 
 /* ─────────────────────────────────────────────────────────────────
+   WEBAUTHN HELPERS  (Phase 6)
+   Edge Function base URL is derived from SUPABASE_URL.
+   ───────────────────────────────────────────────────────────────── */
+
+function _waFunctionUrl(name) {
+    const base = (typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : window.SUPABASE_DEFAULT_URL || '');
+    return `${base}/functions/v1/${name}`;
+}
+
+/** POST to a WebAuthn Edge Function. Returns parsed JSON or throws. */
+async function _waPost(fnName, body) {
+    const res = await fetch(_waFunctionUrl(fnName), {
+        method : 'POST',
+        headers: { 'Content-Type': 'application/json',
+                   'apikey'       : (typeof SUPABASE_KEY !== 'undefined' ? SUPABASE_KEY : '') },
+        body   : JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `${fnName} failed (${res.status})`);
+    return data;
+}
+
+/** Convert a base64url string → Uint8Array (for challenge / user.id) */
+function _b64ToUint8(b64url) {
+    const b64 = b64url.replace(/-/g,'+').replace(/_/g,'/');
+    return Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+}
+
+/** Convert an ArrayBuffer → base64url string (for sending back to server) */
+function _bufToB64(buf) {
+    return btoa(String.fromCharCode(...new Uint8Array(buf)))
+        .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+/** Encode a PublicKeyCredential (create response) for the server */
+function _encodeRegistrationCredential(cred) {
+    const resp = cred.response;
+    return {
+        id    : cred.id,
+        rawId : _bufToB64(cred.rawId),
+        type  : cred.type,
+        response: {
+            clientDataJSON     : _bufToB64(resp.clientDataJSON),
+            attestationObject  : _bufToB64(resp.attestationObject),
+            transports         : resp.getTransports ? resp.getTransports() : [],
+        },
+    };
+}
+
+/** Encode a PublicKeyCredential (get response) for the server */
+function _encodeAuthenticationCredential(cred) {
+    const resp = cred.response;
+    return {
+        id    : cred.id,
+        rawId : _bufToB64(cred.rawId),
+        type  : cred.type,
+        response: {
+            clientDataJSON     : _bufToB64(resp.clientDataJSON),
+            authenticatorData  : _bufToB64(resp.authenticatorData),
+            signature          : _bufToB64(resp.signature),
+            userHandle         : resp.userHandle ? _bufToB64(resp.userHandle) : null,
+        },
+    };
+}
+
+/* ─────────────────────────────────────────────────────────────────
    SESSION STORAGE SCHEMA
    Stored in localStorage as JSON under APP_CONFIG.sessionKey:
    {
@@ -505,68 +571,54 @@ function isBiometricEnabled() {
  */
 async function tryBiometricLogin() {
     if (!isBiometricAvailable()) {
-        if (typeof showToast === 'function') {
-            showToast('Biometric authentication is not supported on this device.', 'warning');
-        }
-        return false;
-    }
-
-    if (!isBiometricEnabled()) {
-        if (typeof showToast === 'function') {
-            showToast('Biometric login is not set up. Log in with password first.', 'info');
-        }
+        showToast('Biometric authentication is not supported on this device.', 'warning');
         return false;
     }
 
     try {
-        // For a school's local network app, we use a simple presence
-        // confirmation (touching the fingerprint sensor) rather than
-        // full server-side challenge/response.
-        const credential = await navigator.credentials.get({
-            publicKey: {
-                challenge: new Uint8Array(32),    // in production: server-issued challenge
-                rpId: window.location.hostname,
-                userVerification: 'preferred',
-                timeout: 30000,
-            },
+        // Use stored userId hint to narrow credential list (UX only — not proof of identity)
+        const hintUserId = localStorage.getItem('lf_webauthn_registered_user_id');
+        const body = hintUserId ? { userId: parseInt(hintUserId) } : {};
+
+        // 1. Get authentication challenge from server
+        const requestOptions = await _waPost('webauthn-login-challenge', body);
+
+        // 2. Decode binary fields for the browser API
+        requestOptions.challenge = _b64ToUint8(requestOptions.challenge);
+        if (requestOptions.allowCredentials) {
+            requestOptions.allowCredentials = requestOptions.allowCredentials.map(c => ({
+                ...c, id: _b64ToUint8(c.id),
+            }));
+        }
+
+        // 3. Trigger device biometric/PIN prompt
+        const credential = await navigator.credentials.get({ publicKey: requestOptions });
+        if (!credential) {
+            showToast('Biometric login was cancelled.', 'info');
+            return false;
+        }
+
+        // 4. Send response to server for real signature verification
+        const result = await _waPost('webauthn-login-verify', {
+            response: _encodeAuthenticationCredential(credential),
         });
 
-        if (credential) {
-            // Biometric succeeded — restore last session automatically
-            const session = _readSession();
-            if (!session) {
-                if (typeof showToast === 'function') {
-                    showToast('No saved session found. Please log in with password.', 'info');
-                }
-                return false;
-            }
-
-            updateState('currentUser', {
-                id: session.userId,
-                role: session.role,
-                first_name: session.firstName,
-                last_name: session.lastName,
-                username: session.username,
-                email: session.email,
-                name: `${session.firstName} ${session.lastName}`.trim(),
-            });
-
-            await loadAllData({ silent: true });
-            await loadUserNotifications().catch(() => { });
-            _startIdleWatcher();
-            startSyncPolling();
-
-            const homeModule = DEFAULT_MODULE[session.role] || 'admin-dashboard';
-            navigateTo(homeModule);
-
-            return true;
+        if (!result.verified || !result.user) {
+            showToast(result.error || 'Biometric verification failed.', 'danger');
+            return false;
         }
-        return false;
+
+        // 5. Update hint to confirmed user, complete login normally
+        localStorage.setItem('lf_webauthn_registered_user_id', String(result.user.id));
+        await _completeLogin(result.user);
+        return true;
 
     } catch (err) {
-        // User cancelled or sensor failed — fall back to password
-        if (err.name !== 'NotAllowedError') {
-            console.warn('[Auth] Biometric login failed:', err.message);
+        if (err.name === 'NotAllowedError') {
+            showToast('Biometric login was cancelled.', 'info');
+        } else {
+            console.error('[Auth] tryBiometricLogin:', err);
+            showToast('Biometric login failed: ' + err.message, 'danger');
         }
         return false;
     }
@@ -578,23 +630,65 @@ async function tryBiometricLogin() {
  */
 async function enableBiometricLogin() {
     if (!isBiometricAvailable()) {
-        if (typeof showToast === 'function') {
-            showToast('Biometric authentication is not supported on this device.', 'error');
-        }
+        showToast('Biometric authentication is not supported on this device.', 'warning');
+        return false;
+    }
+
+    const userId = state.currentUser?.id;
+    if (!userId) {
+        showToast('You must be logged in to enable biometric login.', 'warning');
         return false;
     }
 
     try {
-        // In production: register a WebAuthn credential with the server.
-        // For this app: just mark biometric as enabled in localStorage.
-        localStorage.setItem('lf_biometric_enabled', 'true');
+        showToast('Starting biometric registration…', 'info');
 
-        if (typeof showToast === 'function') {
-            showToast('Biometric login enabled. You can now use your fingerprint/face.', 'success');
+        // 1. Get challenge from server
+        const creationOptions = await _waPost('webauthn-register-challenge', { userId });
+
+        // 2. Decode binary fields for the browser API
+        creationOptions.challenge = _b64ToUint8(creationOptions.challenge);
+        creationOptions.user.id   = _b64ToUint8(creationOptions.user.id);
+        if (creationOptions.excludeCredentials) {
+            creationOptions.excludeCredentials = creationOptions.excludeCredentials.map(c => ({
+                ...c, id: _b64ToUint8(c.id),
+            }));
         }
+
+        // 3. Trigger device biometric/PIN prompt
+        const credential = await navigator.credentials.create({ publicKey: creationOptions });
+        if (!credential) {
+            showToast('Biometric registration was cancelled.', 'info');
+            return false;
+        }
+
+        // 4. Encode and send to server for verification + storage
+        const deviceLabel = navigator.userAgent.includes('Mobile') ? 'Mobile Device' : 'Desktop';
+        const result = await _waPost('webauthn-register-verify', {
+            userId,
+            response    : _encodeRegistrationCredential(credential),
+            deviceLabel,
+        });
+
+        if (!result.verified) {
+            showToast('Biometric registration failed: ' + (result.error || 'Unknown error'), 'danger');
+            return false;
+        }
+
+        // 5. Store userId hint locally for fast UX on next login
+        localStorage.setItem('lf_biometric_enabled', 'true');
+        localStorage.setItem('lf_webauthn_registered_user_id', String(userId));
+
+        showToast('Biometric login enabled! You can now unlock with fingerprint or face.', 'success');
         return true;
+
     } catch (err) {
-        console.warn('[Auth] Enable biometric failed:', err.message);
+        if (err.name === 'NotAllowedError') {
+            showToast('Biometric setup was cancelled or denied.', 'info');
+        } else {
+            console.error('[Auth] enableBiometricLogin:', err);
+            showToast('Biometric setup failed: ' + err.message, 'danger');
+        }
         return false;
     }
 }
@@ -602,11 +696,29 @@ async function enableBiometricLogin() {
 /**
  * Disable biometric login.
  */
-function disableBiometricLogin() {
+async function disableBiometricLogin() {
+    // Clear local hint immediately so login page hides the biometric button
     localStorage.removeItem('lf_biometric_enabled');
-    if (typeof showToast === 'function') {
-        showToast('Biometric login has been disabled.', 'info');
+    localStorage.removeItem('lf_webauthn_registered_user_id');
+
+    // Best-effort: mark credential inactive in DB (requires being logged in)
+    const userId = state.currentUser?.id;
+    if (userId && typeof update === 'function') {
+        try {
+            // Mark all credentials for this user inactive via the DB
+            // (full server-side delete requires an Edge Function — future work)
+            const creds = await getAll('webauthn_credentials',
+                `user_id=eq.${userId}&is_active=eq.true`).catch(() => []);
+            for (const c of (creds || [])) {
+                await update('webauthn_credentials', c.id, {
+                    is_active  : false,
+                    updated_at : new Date().toISOString(),
+                }).catch(() => {});
+            }
+        } catch (e) { console.warn('[Auth] disableBiometricLogin DB cleanup:', e); }
     }
+
+    showToast('Biometric login disabled.', 'success');
 }
 
 /* ─────────────────────────────────────────────────────────────────

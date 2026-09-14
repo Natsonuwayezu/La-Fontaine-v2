@@ -6,8 +6,8 @@
    picker rather than duplicating that search UI), and configure the
    automatic family discount percentage.
 
-   Reads/writes the real `families` table (id, code, parent_name,
-   sibling_discount_pct) and links students via their real family_id
+   Reads/writes the real `families` table (id, family_code, guardian_name, guardian_phone,
+   total_children, active_children) and links students via their real family_id
    column, using generateFamilyCode() and the shared
    computeStudentFeeSummary() formula for each member's real balance
    — the same functions record-payment.js/student-fees.js already use.
@@ -49,9 +49,9 @@ const FamilyManagement = (() => {
         });
       return {
         id: f.id,
-        code: f.code,
-        name: f.parent_name || f.code || `Family #${f.id}`,
-        discountPct: Number(f.sibling_discount_pct || 0),
+        code: f.family_code || f.code,
+        name: f.guardian_name || f.family_code || `Family #${f.id}`,
+        discountPct: 0, // discounts via discount_rules table
         members,
       };
     });
@@ -146,7 +146,7 @@ const FamilyManagement = (() => {
           subtitle: 'Search by name',
           onSelect: async (student) => {
             if (family.members.some(m => m.id === student.id)) {
-              window.Toast?.warning('Already linked', `${student.name} is already in this family.`);
+              showToast( `${student.name} is already in this family.`);
               return;
             }
             try {
@@ -156,7 +156,7 @@ const FamilyManagement = (() => {
               renderList(container);
               window.Toast?.success('Student linked', `${student.name} added to ${family.name}.`);
             } catch (err) {
-              window.Toast?.error('Could not link student', err?.message);
+              showToast('Could not link student: '+(err?.message||''), 'danger');
             }
           }
         });
@@ -186,16 +186,21 @@ const FamilyManagement = (() => {
           // A discount requires 2+ linked members — if this drops below
           // that, clear it in the database too, not just the UI.
           const remaining = family.members.length - 1;
-          if (remaining < 2 && family.discountPct > 0) {
-            await update('families', familyId, { sibling_discount_pct: 0 });
-            const rawFamily = (state.families || []).find(f => f.id === familyId);
-            if (rawFamily) rawFamily.sibling_discount_pct = 0;
+          // Update active_children count
+          const rawFamily = (state.families || []).find(f => f.id === familyId);
+          if (rawFamily) {
+              const newCount = Math.max(0, (rawFamily.active_children || 1) - 1);
+              await update('families', familyId, {
+                  active_children: newCount,
+                  updated_at: new Date().toISOString(),
+              });
+              rawFamily.active_children = newCount;
           }
 
           renderList(container);
-          window.Toast?.success('Removed from family');
+          showToast('Removed from family', 'success');
         } catch (err) {
-          window.Toast?.error('Could not remove student', err?.message);
+          showToast('Could not remove student: '+(err?.message||''), 'danger');
         }
       });
     });
@@ -210,9 +215,13 @@ const FamilyManagement = (() => {
           const raw = (state.students || []).find(s => s.id === student.id);
           const code = await generateFamilyCode();
           const created = await insert('families', {
-            code,
-            parent_name: raw?.guardian_name || `${student.name.split(' ')[0]} Family`,
-            sibling_discount_pct: 0,
+            family_code    : code,
+            guardian_name  : raw?.guardian_name || `${student.name.split(' ')[0]} Family`,
+            guardian_phone : raw?.guardian_phone || null,
+            total_children : 1,
+            active_children: 1,
+            created_at     : new Date().toISOString(),
+            updated_at     : new Date().toISOString(),
           });
           state.families = [...(state.families || []), created];
 
@@ -220,9 +229,9 @@ const FamilyManagement = (() => {
           if (raw) raw.family_id = created.id;
 
           renderList(container);
-          window.Toast?.success('Family created', `${created.parent_name} created with ${student.name}. Link another student to enable the family discount.`);
+          showToast( `${created.parent_name} created with ${student.name}. Link another student to enable the family discount.`);
         } catch (err) {
-          window.Toast?.error('Could not create family', err?.message);
+          showToast('Could not create family: '+(err?.message||''), 'danger');
         }
       }
     });
@@ -263,15 +272,24 @@ const FamilyManagement = (() => {
       const pct = family.members.length >= 2 ? Math.max(0, Math.min(100, raw)) : 0;
 
       try {
-        await update('families', family.id, { sibling_discount_pct: pct });
-        const rawFamily = (state.families || []).find(f => f.id === family.id);
-        if (rawFamily) rawFamily.sibling_discount_pct = pct;
-
+        // Discounts are stored in discount_rules table
+        await insert('discount_rules', {
+            family_id  : family.id,
+            discount_pct: pct,
+            reason     : 'sibling_discount',
+            is_active  : pct > 0,
+            created_at : new Date().toISOString(),
+            updated_at : new Date().toISOString(),
+        }).catch(async () => {
+            // If already exists, update it
+            const existing = (state.discountRules||[]).find(r=>r.family_id===family.id);
+            if (existing) await update('discount_rules', existing.id, { discount_pct: pct, is_active: pct>0, updated_at: new Date().toISOString() });
+        });
         window.closeModal(modalId);
         window.Toast?.success('Discount updated', `${family.name} now has a ${pct}% family discount.`);
         renderList(container);
       } catch (err) {
-        window.Toast?.error('Could not update discount', err?.message);
+        showToast('Could not update discount: '+(err?.message||''), 'danger');
       }
     });
   }

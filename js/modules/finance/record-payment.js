@@ -678,6 +678,17 @@ async function renderRecordPayment(container, params = {}) {
                 'success',
                 5000
             );
+            // QR receipt snapshot for verification
+            if (typeof createReceiptSnapshot === 'function' && payResult?.id) {
+                createReceiptSnapshot(payResult.id, {
+                    studentId   : studentId,
+                    studentName : student ? `${student.first_name} ${student.last_name}` : '—',
+                    amount      : total,
+                    receiptNo   : receiptNo,
+                    date        : today,
+                    method      : document.getElementById('rp-method')?.value || 'Cash',
+                }).catch(() => {});
+            }
 
             // Print receipt if requested
             if (printAfter && student) {

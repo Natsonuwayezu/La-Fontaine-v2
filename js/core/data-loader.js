@@ -188,7 +188,7 @@ async function _loadPhase3() {
     const activeYearId = getActiveYearId();
     const userId = state.currentUser?.id;
 
-    const [students, holidays, notifications, guardians, studentGuardians, classEnrollments] =
+    const [students, holidays, notifications, guardians, studentGuardians, classEnrollments, conductScores, discountRules] =
         await Promise.all([
         // Students: exclude soft-deleted
         getAll('students', 'is_deleted=eq.false&order=last_name.asc,first_name.asc')
@@ -219,9 +219,19 @@ async function _loadPhase3() {
                 `academic_year_id=eq.${activeYearId}&is_active=eq.true`)
                 .catch(() => [])
             : getAll('class_enrollments', 'is_active=eq.true').catch(() => []),
+
+        // Conduct scores per student per term
+        activeYearId
+            ? getAll('conduct_scores',
+                `academic_year_id=eq.${activeYearId}&order=student_id.asc`)
+                .catch(() => [])
+            : Promise.resolve([]),
+
+        // Discount rules for family discounts
+        getAll('discount_rules', 'is_active=eq.true').catch(() => []),
     ]);
 
-    updateStateBatch({ students, holidays, notifications, guardians, studentGuardians, classEnrollments });
+    updateStateBatch({ students, holidays, notifications, guardians, studentGuardians, classEnrollments, conductScores, discountRules });
 
     // Cache students locally for offline use
     cacheStudentsLocally().catch(() => { });

@@ -71,6 +71,7 @@ const MODULE_FILE_MAP = {
     'fee-structure': 'js/modules/finance/fee-structure.js',
     'fee-assignments': 'js/modules/finance/fee-assignments.js',
     'fee-term-status': 'js/modules/finance/fee-term-status.js',
+    'fee-categories' : 'js/modules/finance/fee-categories.js',
     'record-payment': 'js/modules/finance/record-payment.js',
     'payment-history': 'js/modules/finance/payment-history.js',
     'receipts': 'js/modules/finance/receipts.js',

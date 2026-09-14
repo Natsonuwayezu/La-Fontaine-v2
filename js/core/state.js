@@ -48,6 +48,8 @@ const state = {
     guardians: [],     // guardian records (father/mother info)
     studentGuardians: [],     // student_guardians join table
     classEnrollments: [],     // class_enrollments for historical roster
+    conductScores: [],         // conduct_scores per student per term
+    discountRules: [],         // discount_rules table
     studentClassHistory: [],  // audit trail of class changes
     promotionDecisions: [],   // student_promotion_decisions
     assessments: [],

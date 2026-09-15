@@ -25,10 +25,12 @@ function _waFunctionUrl(name) {
 /** POST to a WebAuthn Edge Function. Returns parsed JSON or throws. */
 async function _waPost(fnName, body) {
     const res = await fetch(_waFunctionUrl(fnName), {
-        method : 'POST',
-        headers: { 'Content-Type': 'application/json',
-                   'apikey'       : (typeof SUPABASE_KEY !== 'undefined' ? SUPABASE_KEY : '') },
-        body   : JSON.stringify(body),
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'apikey': (typeof SUPABASE_KEY !== 'undefined' ? SUPABASE_KEY : '')
+        },
+        body: JSON.stringify(body),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || `${fnName} failed (${res.status})`);
@@ -37,27 +39,27 @@ async function _waPost(fnName, body) {
 
 /** Convert a base64url string → Uint8Array (for challenge / user.id) */
 function _b64ToUint8(b64url) {
-    const b64 = b64url.replace(/-/g,'+').replace(/_/g,'/');
+    const b64 = b64url.replace(/-/g, '+').replace(/_/g, '/');
     return Uint8Array.from(atob(b64), c => c.charCodeAt(0));
 }
 
 /** Convert an ArrayBuffer → base64url string (for sending back to server) */
 function _bufToB64(buf) {
     return btoa(String.fromCharCode(...new Uint8Array(buf)))
-        .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+        .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 /** Encode a PublicKeyCredential (create response) for the server */
 function _encodeRegistrationCredential(cred) {
     const resp = cred.response;
     return {
-        id    : cred.id,
-        rawId : _bufToB64(cred.rawId),
-        type  : cred.type,
+        id: cred.id,
+        rawId: _bufToB64(cred.rawId),
+        type: cred.type,
         response: {
-            clientDataJSON     : _bufToB64(resp.clientDataJSON),
-            attestationObject  : _bufToB64(resp.attestationObject),
-            transports         : resp.getTransports ? resp.getTransports() : [],
+            clientDataJSON: _bufToB64(resp.clientDataJSON),
+            attestationObject: _bufToB64(resp.attestationObject),
+            transports: resp.getTransports ? resp.getTransports() : [],
         },
     };
 }
@@ -66,14 +68,14 @@ function _encodeRegistrationCredential(cred) {
 function _encodeAuthenticationCredential(cred) {
     const resp = cred.response;
     return {
-        id    : cred.id,
-        rawId : _bufToB64(cred.rawId),
-        type  : cred.type,
+        id: cred.id,
+        rawId: _bufToB64(cred.rawId),
+        type: cred.type,
         response: {
-            clientDataJSON     : _bufToB64(resp.clientDataJSON),
-            authenticatorData  : _bufToB64(resp.authenticatorData),
-            signature          : _bufToB64(resp.signature),
-            userHandle         : resp.userHandle ? _bufToB64(resp.userHandle) : null,
+            clientDataJSON: _bufToB64(resp.clientDataJSON),
+            authenticatorData: _bufToB64(resp.authenticatorData),
+            signature: _bufToB64(resp.signature),
+            userHandle: resp.userHandle ? _bufToB64(resp.userHandle) : null,
         },
     };
 }
@@ -648,7 +650,7 @@ async function enableBiometricLogin() {
 
         // 2. Decode binary fields for the browser API
         creationOptions.challenge = _b64ToUint8(creationOptions.challenge);
-        creationOptions.user.id   = _b64ToUint8(creationOptions.user.id);
+        creationOptions.user.id = _b64ToUint8(creationOptions.user.id);
         if (creationOptions.excludeCredentials) {
             creationOptions.excludeCredentials = creationOptions.excludeCredentials.map(c => ({
                 ...c, id: _b64ToUint8(c.id),
@@ -666,7 +668,7 @@ async function enableBiometricLogin() {
         const deviceLabel = navigator.userAgent.includes('Mobile') ? 'Mobile Device' : 'Desktop';
         const result = await _waPost('webauthn-register-verify', {
             userId,
-            response    : _encodeRegistrationCredential(credential),
+            response: _encodeRegistrationCredential(credential),
             deviceLabel,
         });
 
@@ -711,9 +713,9 @@ async function disableBiometricLogin() {
                 `user_id=eq.${userId}&is_active=eq.true`).catch(() => []);
             for (const c of (creds || [])) {
                 await update('webauthn_credentials', c.id, {
-                    is_active  : false,
-                    updated_at : new Date().toISOString(),
-                }).catch(() => {});
+                    is_active: false,
+                    updated_at: new Date().toISOString(),
+                }).catch(() => { });
             }
         } catch (e) { console.warn('[Auth] disableBiometricLogin DB cleanup:', e); }
     }
@@ -931,7 +933,8 @@ function renderLoginPage() {
 
     const app = document.getElementById('app');
     if (!app) return;
-    app.style.display = ''; // show app (was hidden on load to prevent flash)
+    app.removeAttribute('hidden');   // ← remove the HTML `hidden` attribute
+    app.style.display = '';          // ← also clear inline display (belt and braces)
 
     const schoolName = state.schoolSettings?.school_name || SCHOOL_DEFAULTS.school_name;
     const schoolMotto = state.schoolSettings?.school_motto || SCHOOL_DEFAULTS.school_motto;
@@ -1081,7 +1084,7 @@ function openLoginCard() {
 function onRoleChange(role) {
     const usernameField = document.getElementById('username-field');
     const passwordField = document.getElementById('password-field');
-    const loginBtn     = document.getElementById('login-btn');
+    const loginBtn = document.getElementById('login-btn');
 
     if (role) {
         // Admin has no username — they authenticate with password only.
@@ -1108,7 +1111,7 @@ function onRoleChange(role) {
     } else {
         if (usernameField) usernameField.style.display = 'none';
         if (passwordField) passwordField.style.display = 'none';
-        if (loginBtn)      loginBtn.style.display = 'none';
+        if (loginBtn) loginBtn.style.display = 'none';
     }
 }
 
@@ -1146,7 +1149,8 @@ async function submitLogin() {
 
     if (alertEl) { alertEl.style.display = 'none'; alertEl.textContent = ''; }
 
-    if (!role || !username || !password) {
+    const needsUsername = role !== 'admin';
+    if (!role || (needsUsername && !username) || !password) {
         if (alertEl) {
             alertEl.textContent = 'Please fill in all fields.';
             alertEl.style.display = 'block';

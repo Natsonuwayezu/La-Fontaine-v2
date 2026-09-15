@@ -48,7 +48,7 @@ CREATE POLICY IF NOT EXISTS "Auth users can read rwanda_locations"
     ON rwanda_locations FOR SELECT
     USING (auth.role() = 'authenticated');
 
--- Only admins can write (location data should not be modified by teachers)
+-- Only admins can write (location data should not be modified by teachers)a
 CREATE POLICY IF NOT EXISTS "Admins can manage rwanda_locations"
     ON rwanda_locations FOR ALL
     USING (auth.role() = 'authenticated');

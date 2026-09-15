@@ -23,7 +23,7 @@
  */
 async function boot() {
     console.info(`[Boot] ${APP_NAME} v${APP_VERSION} starting…`);
-    if (typeof syncServerTime === 'function') await syncServerTime().catch(() => {});
+    if (typeof syncServerTime === 'function') await syncServerTime().catch(() => { });
 
     // ── Step 1: Apply saved theme immediately (before any render) ──
     _applyInitialTheme();
@@ -77,9 +77,11 @@ async function boot() {
     // Shell renders sidebar + topbar + #app placeholder.
     // Do this before session check so the layout is ready.
     if (typeof renderShell === 'function') {
-        await renderShell().catch(err => {
+        try {
+            await renderShell();
+        } catch (err) {
             console.error('[Boot] Shell render failed:', err.message);
-        });
+        }
     }
     _setBootProgress(70);
     // Show app div (hidden on load to prevent flash before auth)
@@ -351,4 +353,4 @@ function _logAutoSwitch(fromMode, toMode, reason) {
 
 window.boot = boot;
 window.testAndSaveSetup = testAndSaveSetup;
-    if (typeof applyPeriodTheme === 'function') applyPeriodTheme();
+if (typeof applyPeriodTheme === 'function') applyPeriodTheme();

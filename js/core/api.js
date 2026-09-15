@@ -74,6 +74,23 @@ function resolveTable(table, op = 'read') {
  * @returns {Promise<Array|Object>} - Parsed JSON or empty array for 204
  * @throws {Error} on non-2xx response or network failure
  */
+
+/* ─────────────────────────────────────────────────────────────────
+   SHARED HEADERS
+   Every Supabase REST request needs the apikey + Authorization.
+   ───────────────────────────────────────────────────────────────── */
+
+function apiHeaders(extra = {}) {
+    const key = (typeof getSupabaseKey === 'function')
+        ? getSupabaseKey()
+        : (window.SUPABASE_KEY || '');
+    return {
+        'apikey': key,
+        'Authorization': `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        ...extra,
+    };
+}
 async function apiFetch(path, method = 'GET', body = null, extraHeaders = {}) {
     if (!SUPABASE_URL || !SUPABASE_KEY) {
         throw new Error('Supabase credentials are not set. Go to Settings → API Settings.');

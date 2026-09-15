@@ -220,10 +220,64 @@ function toISODate(displayStr) {
  * Return today's date as 'YYYY-MM-DD' (local time, no UTC shift).
  * Preferred over new Date().toISOString().split('T')[0] which uses UTC.
  */
+// Server-time offset (ms). Set by syncServerTime() on boot.
+// Positive = server is ahead of device, negative = behind.
+window._serverTimeOffset = 0;
+
+/**
+ * Return a Date adjusted by the server-time offset.
+ * All date/time throughout the app should use this instead of new Date().
+ */
+function serverNow() {
+    return new Date(Date.now() + (window._serverTimeOffset || 0));
+}
+
+/**
+ * Return today's date as 'YYYY-MM-DD' using server-corrected time.
+ * Preferred over new Date().toISOString().slice(0,10) which uses UTC
+ * and also uses uncorrected device time.
+ */
 function todayISO() {
-    const d = new Date();
+    const d = serverNow();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
+
+/**
+ * Fetch the Postgres server time and compute offset vs device clock.
+ * Called once on boot. Silently falls back to device time on failure.
+ */
+async function syncServerTime() {
+    try {
+        // Use Supabase REST to get server timestamp via a tiny RPC or
+        // by reading a known table column that has DEFAULT NOW().
+        // Cheapest approach: call the time() postgres function via RPC.
+        const res = await fetch(
+            `${window.SUPABASE_URL}/rest/v1/rpc/get_server_time`,
+            {
+                method : 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey'      : window.SUPABASE_KEY || '',
+                    'Authorization': `Bearer ${window.SUPABASE_KEY || ''}`,
+                },
+                body: '{}',
+            }
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const serverTimeStr = await res.json(); // returns ISO string
+        const serverMs  = new Date(serverTimeStr).getTime();
+        const deviceMs  = Date.now();
+        window._serverTimeOffset = serverMs - deviceMs;
+        console.info(`[Time] Server offset: ${window._serverTimeOffset > 0 ? '+' : ''}${Math.round(window._serverTimeOffset/1000)}s`);
+    } catch (err) {
+        // Silently fall back to device time
+        window._serverTimeOffset = 0;
+        console.warn('[Time] Server time sync failed, using device time:', err.message);
+    }
+}
+
+window.syncServerTime = syncServerTime;
+window.serverNow      = serverNow;
 
 /** Return current time as 'HH:MM' local. */
 function nowTime() {

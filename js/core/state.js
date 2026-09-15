@@ -916,7 +916,7 @@ window.getHistoricalRoster = getHistoricalRoster;
  * @returns {'current'|'past'|'future'}
  */
 function _periodStatus(startDate, endDate) {
-    const today = new Date();
+    const today = typeof serverNow === 'function' ? serverNow() : new Date();
     today.setHours(0, 0, 0, 0);
     const start = startDate ? new Date(startDate) : null;
     const end   = endDate   ? new Date(endDate)   : null;

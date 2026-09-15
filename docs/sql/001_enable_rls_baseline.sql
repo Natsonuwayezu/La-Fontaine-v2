@@ -689,3 +689,20 @@ CREATE POLICY session_fees_update ON session_fees FOR UPDATE TO anon USING (true
 -- those, rather than guessing at policies for tables I can't verify are
 -- even in use.
 -- ==================================================================================
+-- ═══════════════════════════════════════════════════════════════════
+-- Add to 001_enable_rls_baseline.sql or run separately.
+-- Returns the Postgres server's current timestamp as an ISO string.
+-- Used by the browser to compute clock offset and correct todayISO().
+-- ═══════════════════════════════════════════════════════════════════
+
+CREATE OR REPLACE FUNCTION get_server_time()
+RETURNS TIMESTAMPTZ
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+AS $$
+    SELECT NOW();
+$$;
+
+-- Allow anon to call this (it just returns NOW(), no data exposed)
+GRANT EXECUTE ON FUNCTION get_server_time() TO anon, authenticated;

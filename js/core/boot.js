@@ -23,6 +23,7 @@
  */
 async function boot() {
     console.info(`[Boot] ${APP_NAME} v${APP_VERSION} starting…`);
+    if (typeof syncServerTime === 'function') await syncServerTime().catch(() => {});
 
     // ── Step 1: Apply saved theme immediately (before any render) ──
     _applyInitialTheme();
@@ -295,7 +296,7 @@ function _setupAutoHolidaySwitch() {
 
 async function _checkAndSwitchMode() {
     try {
-        const today = new Date().toISOString().split('T')[0];
+        const today = typeof todayISO === 'function' ? todayISO() : new Date().toISOString().split('T')[0];
         const sessions = state.holidaySessions || [];
         const shouldBeActive = sessions.find(s =>
             s.status === 'active' &&

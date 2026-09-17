@@ -224,25 +224,25 @@ const Topbar = (() => {
 
     switch (action) {
       case 'profile':
-        window.Modals?.open('profile');
+        _topbarOpenProfile();
         break;
       case 'change-password':
-        window.Modals?.open('change-password');
+        _topbarChangePassword();
         break;
       case 'biometrics':
-        window.Modals?.open('biometrics-setup');
+        _topbarBiometricsSetup();
         break;
       case 'theme':
         toggleTheme();
         break;
       case 'settings':
-        window.Router?.navigate('school-settings');
+        navigateTo('school-settings');
         break;
       case 'help':
-        window.Router?.navigate('help');
+        navigateTo('help-center');
         break;
       case 'logout':
-        window.Modals?.open('confirm-logout');
+        _topbarConfirmLogout();
         break;
       default:
         console.warn('[Topbar] Unknown action:', action);
@@ -538,6 +538,84 @@ const Topbar = (() => {
   }
 
   /* ═══════════════════════════════════════════════════════════════
+     TOPBAR ACTION HANDLERS (Profile, Password, Biometrics, Logout)
+     ═══════════════════════════════════════════════════════════════ */
+
+  function _topbarOpenProfile() {
+      const u = state.currentUser;
+      if (!u) return;
+      showModal(`
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+        <div style="width:52px;height:52px;border-radius:50%;background:var(--role-primary);
+             display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;">
+          ${esc((u.first_name?.[0]||'')+(u.last_name?.[0]||''))}</div>
+        <div>
+          <div style="font-weight:700;font-size:16px;">${esc((u.first_name||'')+' '+(u.last_name||''))}</div>
+          <div style="color:var(--text-muted);font-size:13px;">${esc(u.role)} · ${esc(u.username||u.email||'')}</div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label class="field-label">Username</label>
+          <div class="input" style="opacity:.7;">${esc(u.username||'—')}</div></div>
+        <div class="field"><label class="field-label">Role</label>
+          <div class="input" style="opacity:.7;">${esc(u.role||'—')}</div></div>
+        <div class="field"><label class="field-label">Email</label>
+          <div class="input" style="opacity:.7;">${esc(u.email||'—')}</div></div>
+      </div>`, {
+          title: 'My Profile', size: 'sm',
+          footer: `<button class="btn btn-ghost" onclick="closeModal()">Close</button>
+            <button class="btn btn-secondary" onclick="closeModal();_topbarChangePassword()">
+              <i class="fa-solid fa-key"></i> Change Password</button>`,
+      });
+  }
+
+  function _topbarBiometricsSetup() {
+      const available = typeof isBiometricAvailable==='function' && isBiometricAvailable();
+      const enabled   = typeof isBiometricEnabled==='function'   && isBiometricEnabled();
+      showModal(`
+      <div style="text-align:center;padding:8px 0 16px;">
+        <i class="fa-solid fa-fingerprint" style="font-size:3rem;color:var(--role-primary);margin-bottom:12px;display:block;"></i>
+        ${!available
+          ? '<div class="alert alert-warning"><i class="fa-solid fa-triangle-exclamation"></i> Biometric authentication is not supported on this device or browser. Use a modern mobile browser with fingerprint or Face ID.</div>'
+          : enabled
+          ? '<div class="alert alert-success" style="margin-bottom:12px;"><i class="fa-solid fa-check-circle"></i> Biometric login is <strong>enabled</strong> on this device.</div><p style="font-size:13px;color:var(--text-muted);">Tap Disable to remove biometric login from this device.</p>'
+          : '<div class="alert alert-info" style="margin-bottom:12px;"><i class="fa-solid fa-circle-info"></i> Enable biometric login to sign in with your fingerprint or Face ID.</div><p style="font-size:13px;color:var(--text-muted);">Your device will ask you to scan your fingerprint or face.</p>'}
+      </div>`, {
+          title: 'Biometrics Setup', size: 'sm',
+          footer: !available
+              ? `<button class="btn btn-ghost" onclick="closeModal()">Close</button>`
+              : enabled
+              ? `<button class="btn btn-ghost" onclick="closeModal()">Close</button>
+                 <button class="btn btn-danger" onclick="closeModal();window.topbarDisableBio()">
+                   <i class="fa-solid fa-fingerprint"></i> Disable</button>`
+              : `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+                 <button class="btn btn-primary" onclick="closeModal();window.topbarEnableBio()">
+                   <i class="fa-solid fa-fingerprint"></i> Enable Biometrics</button>`,
+      });
+  }
+
+  function _topbarChangePassword() {
+      showModal(`
+      <div class="form-group"><label class="field-label">Current Password</label>
+        <input type="password" id="cp-current" class="input" placeholder="Current password"></div>
+      <div class="form-group"><label class="field-label">New Password</label>
+        <input type="password" id="cp-new" class="input" placeholder="Min 8 characters"></div>
+      <div class="form-group"><label class="field-label">Confirm New Password</label>
+        <input type="password" id="cp-confirm" class="input" placeholder="Repeat new password"></div>`, {
+          title: 'Change Password', size: 'sm',
+          footer: `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="window.topbarSavePw()">
+              <i class="fa-solid fa-key"></i> Update Password</button>`,
+      });
+  }
+
+  function _topbarConfirmLogout() {
+      confirmDialog('Are you sure you want to sign out?','Sign Out',
+          {confirmText:'Sign Out',confirmClass:'btn-danger'})
+      .then(ok => { if(ok && typeof doLogout==='function') doLogout(); });
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
      PUBLIC API
      ═══════════════════════════════════════════════════════════════ */
 
@@ -569,3 +647,38 @@ if (document.readyState === 'loading') {
 window.Topbar = Topbar;
 // Same reasoning as ui/sidebar.js's window.renderSidebar alias.
 window.renderTopbar = Topbar.render;
+
+// ── Window-exposed topbar helpers ───────────────────────────────
+// topbarAction removed — modal footers call specific window.topbar* helpers directly
+window.topbarEnableBio = async () => {
+    if (typeof enableBiometricLogin === 'function') await enableBiometricLogin();
+    else showToast('Biometric not available on this device.','warning');
+};
+window.topbarDisableBio = async () => {
+    const ok = await confirmDialog(
+        'Remove biometric login from this device? Your password login still works.',
+        'Disable Biometrics', {confirmText:'Disable',confirmClass:'btn-danger'});
+    if (ok && typeof disableBiometricLogin === 'function') await disableBiometricLogin();
+};
+window.topbarSavePw = async () => {
+    const current = document.getElementById('cp-current')?.value;
+    const newPw   = document.getElementById('cp-new')?.value;
+    const confirm = document.getElementById('cp-confirm')?.value;
+    if (!current||!newPw||!confirm){ showToast('All fields required.','warning'); return; }
+    if (newPw.length < 8){ showToast('New password must be at least 8 characters.','warning'); return; }
+    if (newPw !== confirm){ showToast('Passwords do not match.','warning'); return; }
+    try {
+        const rows = await callRPC('login_check', {
+            p_username: state.currentUser?.username || 'admin',
+            p_password: current,
+            p_role    : state.currentUser?.role,
+        });
+        if (!rows?.length){ showToast('Current password is incorrect.','danger'); return; }
+        await update('teachers', state.currentUser.id, {
+            password  : newPw,
+            updated_at: new Date().toISOString(),
+        });
+        closeModal();
+        showToast('Password updated successfully.','success');
+    } catch(err){ handleApiError(err,'change password'); }
+};

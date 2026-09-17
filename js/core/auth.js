@@ -411,8 +411,14 @@ async function _completeLogin(user) {
     // Log the login
     await logLogin(user.id, user.role);
 
-    // Load all data
-    await loadAllData();
+    // Load all data — wrap in catch so a data-load failure doesn't
+    // show "Login failed" when the login itself succeeded
+    try {
+        await loadAllData();
+    } catch (dataErr) {
+        console.warn('[Auth] loadAllData failed after login:', dataErr.message);
+        // Continue — user is logged in even if data doesn't load yet
+    }
 
     // Load user notifications
     await loadUserNotifications().catch(() => { });
@@ -523,20 +529,22 @@ async function checkSession() {
     try {
         // Load all data (same as after login)
         await loadAllData({ silent: true });
-        await loadUserNotifications().catch(() => { });
+    } catch (err) {
+        // Data load failed but session is valid — continue anyway
+        // (user sees dashboard with empty state; background sync will retry)
+        console.warn('[Auth] Data load failed on session restore:', err.message);
+    }
 
+    try {
+        await loadUserNotifications().catch(() => { });
         _startIdleWatcher();
         startSyncPolling();
         runDailyOverdueCheck().catch(() => { });
-
-        return true;
-
     } catch (err) {
-        console.error('[Auth] Session restore failed — forcing re-login:', err.message);
-        _clearSession();
-        resetState();
-        return false;
+        console.warn('[Auth] Background services failed to start:', err.message);
     }
+
+    return true;
 }
 
 /* ─────────────────────────────────────────────────────────────────

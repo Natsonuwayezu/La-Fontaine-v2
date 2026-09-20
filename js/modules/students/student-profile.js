@@ -612,7 +612,8 @@ const StudentProfile = (() => {
         state.payments = [...(state.payments || []), paymentRow];
 
         window.Toast?.success('Payment recorded', `${fmtCurrency(total)} recorded for ${s.name}.`);
-        render(container, { studentId: s.id });
+        render(container, {
+ studentId: s.id });
         window.Tabs?.activate(container.querySelector('[data-tab-group]'), 'fees');
       } catch (err) {
         window.Toast?.error('Could not record payment', err?.message);

@@ -118,6 +118,8 @@ const TimetableGenerator = (() => {
         });
 
         container.addEventListener('click', (e) => {
+    if (container) container.innerHTML = `<div class="module-wrap"><div class="mod-topbar"><div class="skeleton skeleton-line w-30" style="height:26px;border-radius:8px;width:180px;"></div><div style="margin-left:auto;display:flex;gap:8px;"><div class="skeleton" style="height:32px;width:90px;border-radius:8px;"></div><div class="skeleton" style="height:32px;width:90px;border-radius:8px;"></div></div></div><div class="skeleton-card"><div class="skeleton skeleton-line w-70" style="margin-bottom:10px;"></div><div class="skeleton skeleton-line w-50"></div><div class="skeleton skeleton-line w-80"></div><div class="skeleton skeleton-line w-40" style="margin-top:8px;"></div></div><div class="skeleton-card"><div class="skeleton skeleton-line w-60"></div><div class="skeleton skeleton-line w-80"></div><div class="skeleton skeleton-line w-50"></div></div><div class="skeleton-card"><div class="skeleton skeleton-line w-80"></div><div class="skeleton skeleton-line w-60"></div></div></div>`;
+
             const rm = e.target.closest('[data-remove-row]');
             if (rm) { draftRows.splice(Number(rm.dataset.removeRow), 1); render(container); }
         });

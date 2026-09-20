@@ -6,7 +6,21 @@
    ═══════════════════════════════════════════════════════════════════ */
 'use strict';
 
-async function renderFeeCategories(container, params = {}) {
+async function renderFeeCategories(container, params = {
+    if (container) {
+        container.innerHTML = `<div class="module-wrap">
+          <div class="mod-topbar">
+            <div class="skeleton skeleton-line w-30" style="height:26px;border-radius:8px;width:180px;"></div>
+            <div style="margin-left:auto;display:flex;gap:8px;">
+              <div class="skeleton" style="height:32px;width:80px;border-radius:8px;"></div>
+            </div>
+          </div>
+          <div class="skeleton-card"><div class="skeleton skeleton-line w-70"></div><div class="skeleton skeleton-line w-50"></div><div class="skeleton skeleton-line w-80"></div></div>
+          <div class="skeleton-card"><div class="skeleton skeleton-line w-60"></div><div class="skeleton skeleton-line w-80"></div><div class="skeleton skeleton-line w-40"></div></div>
+          <div class="skeleton-card"><div class="skeleton skeleton-line w-80"></div><div class="skeleton skeleton-line w-50"></div></div>
+        </div>`;
+    }
+}) {
     if (!container) return;
     await ensureStateLoaded();
     _fcShell(container);

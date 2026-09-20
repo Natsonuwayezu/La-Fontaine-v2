@@ -399,6 +399,34 @@ async function navigateTo(moduleId, params = {}) {
         if (!moduleContainer) {
             throw new Error('#moduleContent element not found in the page — cannot render any module.');
         }
+        // Show skeleton immediately before any module renders
+        if (moduleContainer) {
+            moduleContainer.innerHTML = `<div class="module-wrap">
+              <div class="mod-topbar">
+                <div class="skeleton skeleton-line w-30" style="height:26px;border-radius:8px;width:200px;"></div>
+                <div style="margin-left:auto;display:flex;gap:8px;">
+                  <div class="skeleton" style="height:32px;width:90px;border-radius:8px;"></div>
+                  <div class="skeleton" style="height:32px;width:120px;border-radius:8px;"></div>
+                </div>
+              </div>
+              <div class="skeleton-card">
+                <div class="skeleton skeleton-line w-70" style="margin-bottom:12px;"></div>
+                <div class="skeleton skeleton-line w-50"></div>
+                <div class="skeleton skeleton-line w-80"></div>
+                <div class="skeleton skeleton-line w-40" style="margin-top:10px;"></div>
+              </div>
+              <div class="skeleton-card">
+                <div class="skeleton skeleton-line w-60"></div>
+                <div class="skeleton skeleton-line w-80"></div>
+                <div class="skeleton skeleton-line w-50"></div>
+              </div>
+              <div class="skeleton-card">
+                <div class="skeleton skeleton-line w-80"></div>
+                <div class="skeleton skeleton-line w-60"></div>
+                <div class="skeleton skeleton-line w-70" style="width:35%;"></div>
+              </div>
+            </div>`;
+        }
         await safeRenderModule(moduleId, () => renderFn(moduleContainer, params));
 
         // Apply role/holiday visibility overrides after render

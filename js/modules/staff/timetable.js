@@ -32,7 +32,9 @@ const TimetablePage = (() => {
         if (!container) return;
         container.innerHTML = `<div class="dashboard-page"><div class="loading-inline">Loading timetable…</div></div>`;
 
-        await ensureStateLoaded();
+        // Skeleton while loading
+    if (container) container.innerHTML = `<div class="module-wrap"><div class="mod-topbar"><div class="skeleton skeleton-line w-30" style="height:26px;border-radius:8px;width:200px;"></div></div><div class="skeleton-card"><div class="skeleton skeleton-line w-70"></div><div class="skeleton skeleton-line w-50"></div><div class="skeleton skeleton-line w-80"></div></div><div class="skeleton-card"><div class="skeleton skeleton-line w-60"></div><div class="skeleton skeleton-line w-80"></div></div></div>`;
+    await ensureStateLoaded();
         if (!(state.timetableSlots||[]).length) state.timetableSlots = await getAll('timetable_slots');
 
         selectedClassId = selectedClassId || state.classes[0]?.id || null;

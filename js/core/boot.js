@@ -23,120 +23,263 @@
  */
 async function boot() {
     console.info(`[Boot] ${APP_NAME} v${APP_VERSION} starting…`);
-    if (typeof syncServerTime === 'function') await syncServerTime().catch(() => { });
 
-    // ── Step 1: Apply saved theme immediately (before any render) ──
+    // ── STEP 1: Apply theme immediately (no flash) ─────────────────
     _applyInitialTheme();
-    _setBootProgress(10);
 
-    // ── Step 2: Register Service Worker ───────────────────────────
-    // Non-blocking — do not await, let it register in background
-    if (typeof registerServiceWorker === 'function') {
-        registerServiceWorker().catch(err => {
-            console.warn('[Boot] SW registration failed:', err.message);
-        });
-    } else {
-        console.warn('[Boot] registerServiceWorker not available — skipping SW registration.');
-        // If you need it, you can define a dummy function:
-        // window.registerServiceWorker = () => Promise.resolve();
-    }
+    // ── STEP 2: Show login page immediately ────────────────────────
+    // Login page is static HTML in index.html — already visible.
+    // Just make sure boot-loader and app are hidden.
+    const loginPage  = document.getElementById('login-page');
+    const bootLoader = document.getElementById('boot-loader');
+    const appEl      = document.getElementById('app');
+    if (loginPage)  loginPage.style.display  = 'flex';
+    if (bootLoader) bootLoader.style.display  = 'none';
+    if (appEl)      appEl.style.display       = 'none';
 
-    // ── Step 3: Init offline listeners ────────────────────────────
-    initOfflineListeners();
+    // ── STEP 3: Non-blocking background tasks (don't await) ────────
+    syncServerTime().catch(() => {});
+    if (typeof registerServiceWorker === 'function')
+        registerServiceWorker().catch(() => {});
+    if (typeof initOfflineListeners === 'function')
+        initOfflineListeners();
+    if (typeof openOfflineDB === 'function')
+        openOfflineDB().catch(() => {});
 
-    // ── Step 4: Open IndexedDB ─────────────────────────────────────
-    await openOfflineDB().catch(err => {
-        console.warn('[Boot] IndexedDB unavailable:', err.message);
-    });
-    _setBootProgress(30);
-
-    // ── Step 5: Check for Supabase credentials ────────────────────
+    // ── STEP 4: Check credentials ──────────────────────────────────
     if (!hasSupabaseCredentials()) {
-        console.warn('[Boot] No Supabase credentials — showing API settings.');
-        _hideBootLoader(); // _showApiSetupScreen replaces body.innerHTML entirely
+        _hideBootLoader();
         _showApiSetupScreen();
         return;
     }
 
-    // ── Step 6: Test DB connection (non-blocking toast on fail) ───
-    const connTest = await testSupabaseConnection();
-    _setBootProgress(50);
-    if (!connTest.ok) {
-        console.warn('[Boot] Supabase connection test failed:', connTest.error);
-        // Show a warning but continue — user might be offline and have a session
-        if (typeof showToast === 'function') {
-            showToast(
-                `Database connection issue: ${connTest.error}`,
-                'warning',
-                8000
-            );
-        }
+    // ── STEP 5: Check for Google OAuth redirect ────────────────────
+    const handledGoogle = await handleGoogleRedirect().catch(() => false);
+    if (handledGoogle && state.currentUser) {
+        // Google login succeeded — go to app
+        await _postLoginBoot();
+        return;
     }
 
-    // ── Step 7: Render the app shell ──────────────────────────────
-    // Shell renders sidebar + topbar + #app placeholder.
-    // Do this before session check so the layout is ready.
-    if (typeof renderShell === 'function') {
-        try {
-            await renderShell();
-        } catch (err) {
-            console.error('[Boot] Shell render failed:', err.message);
-        }
-    }
-    _setBootProgress(70);
-    // Show app div (hidden on load to prevent flash before auth)
-    const _appEl = document.getElementById('app');
-    if (_appEl) _appEl.style.display = '';
-
-    // ── Step 8: Check for existing session ────────────────────────
-    // A returning Google OAuth redirect (Phase 5) takes priority —
-    // it carries its own one-time ?code= param that must be consumed
-    // before anything else touches the URL or the session state.
-    const handledGoogleRedirect = await handleGoogleRedirect().catch(err => {
-        console.error('[Boot] Google redirect handling failed:', err.message);
-        return false;
-    });
-
-    const sessionRestored = handledGoogleRedirect
-        ? !!state.currentUser
-        : await checkSession();
-
-    if (sessionRestored) {
-        // User is already logged in — navigate to correct module
-        console.info('[Boot] Session restored. Navigating to app.');
-        _setBootProgress(85);
-
-        // Check if URL has a deep-link hash
-        const hashModule = _moduleIdFromUrlHash();
-        if (hashModule && canNavigateTo(hashModule)) {
-            await navigateTo(hashModule);
-        } else {
-            // Navigate to role home
-            const homeModule = DEFAULT_MODULE[state.currentUser?.role] || 'admin-dashboard';
-            await navigateTo(homeModule);
-        }
-
-        // Start background sync polling
-        if (typeof startSyncPolling === 'function') startSyncPolling();
-
-        // Update offline badge
-        if (typeof updateOfflineBadge === 'function') updateOfflineBadge().catch(() => { });
-
-        // Dashboard is actually rendered now — safe to reveal it.
-        _setBootProgress(100);
-        _hideBootLoader();
-
-    } else {
-        // No session — show login page
-        console.info('[Boot] No session found. Showing login.');
-        if (typeof hideSidebar === 'function') hideSidebar();
-        if (typeof renderLoginPage === 'function') renderLoginPage();
-        _setBootProgress(100);
-        _hideBootLoader();
+    // ── STEP 6: Check existing session ────────────────────────────
+    const sessionValid = await _checkSessionQuick();
+    if (sessionValid) {
+        // Returning user with valid session — skip login page
+        if (loginPage) loginPage.style.display = 'none';
+        await _postLoginBoot();
+        return;
     }
 
-    console.info('[Boot] Boot sequence complete.');
+    // ── STEP 7: No session — login page is already showing ─────────
+    // Initialize login page particles and biometric button
+    _initLoginPage();
+    console.info('[Boot] Login page ready');
 }
+
+/**
+ * Check if a saved session is valid WITHOUT loading all data.
+ * Fast — just reads localStorage.
+ */
+async function _checkSessionQuick() {
+    try {
+        const session = typeof _readSession === 'function' ? _readSession() : null;
+        if (!session || !session.user || !session.user.id) return false;
+        const now = Date.now();
+        if (session.expiresAt && now > session.expiresAt) {
+            if (typeof _clearSession === 'function') _clearSession();
+            return false;
+        }
+        // Restore user into state without loading all data yet
+        state.currentUser = session.user;
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+/**
+ * Called after login (password/Google/biometric) or valid session restore.
+ * Shows boot-loader, loads critical data, renders shell, hides boot-loader.
+ */
+async function _postLoginBoot() {
+    const loginPage  = document.getElementById('login-page');
+    const bootLoader = document.getElementById('boot-loader');
+    const appEl      = document.getElementById('app');
+
+    // Hide login, show boot loader
+    if (loginPage)  loginPage.style.display  = 'none';
+    if (bootLoader) { bootLoader.style.display = 'flex'; }
+    if (appEl)      appEl.style.display       = 'none';
+
+    _setBootProgress(10);
+    _setBootMsg('Loading school data…');
+
+    try {
+        // ── Critical data (must have before rendering shell) ────────
+        // Phase 1: school settings + academic year + terms + classes
+        await _loadCriticalData();
+        _setBootProgress(45);
+        _setBootMsg('Building interface…');
+
+        // ── Render shell (sidebar + topbar) ────────────────────────
+        if (typeof renderShell === 'function') {
+            await renderShell().catch(err =>
+                console.error('[Boot] Shell render failed:', err.message));
+        }
+        _setBootProgress(65);
+
+        // ── Apply period theme now that we have year/term data ──────
+        if (typeof applyPeriodTheme === 'function') applyPeriodTheme();
+
+        // ── Show app ────────────────────────────────────────────────
+        if (bootLoader) bootLoader.style.display = 'none';
+        if (appEl)      appEl.style.display       = '';
+
+        _setBootProgress(80);
+        _setBootMsg('Loading students…');
+
+        // ── Navigate to home module ──────────────────────────────────
+        const role   = state.currentUser?.role || 'admin';
+        const home   = DEFAULT_MODULE[role] || 'admin-dashboard';
+        if (typeof navigateTo === 'function') navigateTo(home);
+
+        // ── Load remaining data in background ────────────────────────
+        // Students, marks, fees etc. load AFTER the dashboard shows.
+        // Modules use skeleton screens while this completes.
+        _loadBackgroundData().then(() => {
+            _setBootProgress(100);
+            if (typeof applyPeriodTheme === 'function') applyPeriodTheme();
+            if (typeof _setupAutoHolidaySwitch === 'function') _setupAutoHolidaySwitch();
+            if (typeof startSyncPolling === 'function') startSyncPolling();
+            if (typeof runDailyOverdueCheck === 'function') runDailyOverdueCheck().catch(()=>{});
+            if (typeof loadUserNotifications === 'function') loadUserNotifications().catch(()=>{});
+            console.info('[Boot] All data loaded');
+        }).catch(err => console.warn('[Boot] Background load error:', err.message));
+
+    } catch (err) {
+        console.error('[Boot] Post-login boot failed:', err);
+        if (bootLoader) bootLoader.style.display = 'none';
+        if (appEl)      appEl.style.display       = '';
+        showToast('Some data failed to load. Please refresh.', 'warning');
+    }
+}
+
+/**
+ * Load ONLY the data needed to render the shell and dashboard:
+ * school settings, academic years, terms, classes.
+ * Fast — 4 parallel requests.
+ */
+async function _loadCriticalData() {
+    const [settings, years, terms, classes] = await Promise.all([
+        typeof getSchoolSettings === 'function'
+            ? getSchoolSettings().catch(() => ({}))
+            : Promise.resolve({}),
+        getAll('academic_years', 'order=year_name.desc').catch(() => []),
+        getAll('terms', 'order=term_number.asc').catch(() => []),
+        getAll('classes', 'is_active=eq.true&order=sort_order.asc').catch(() => []),
+    ]);
+    if (typeof updateStateBatch === 'function') {
+        updateStateBatch({
+            schoolSettings  : settings,
+            academicYears   : years  || [],
+            terms           : terms  || [],
+            classes         : classes || [],
+        });
+    } else {
+        state.schoolSettings = settings;
+        state.academicYears  = years  || [];
+        state.terms          = terms  || [];
+        state.classes        = classes || [];
+    }
+    // Auto-select active year + term
+    if (typeof _autoSelectPeriod === 'function') _autoSelectPeriod();
+}
+
+/**
+ * Load everything else after the dashboard is visible.
+ * Students, marks, fees, teachers, assessments, etc.
+ */
+async function _loadBackgroundData() {
+    if (typeof loadAllData === 'function') {
+        await loadAllData({ silent: true });
+    }
+}
+
+/**
+ * Initialise login page: particles animation + biometric button visibility.
+ */
+function _initLoginPage() {
+    // Particles
+    const container = document.getElementById('particles-bg');
+    if (container && !container.children.length) {
+        for (let k = 0; k < 15; k++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            const size = 20 + Math.random() * 60;
+            p.style.cssText = [
+                `width:${size}px`,
+                `height:${size}px`,
+                `left:${Math.random()*100}%`,
+                `top:${Math.random()*100}%`,
+                `animation-duration:${12 + Math.random()*18}s`,
+                `animation-delay:${-Math.random()*20}s`,
+            ].join(';');
+            container.appendChild(p);
+        }
+    }
+
+    // Show biometric button if available and registered
+    const bioWrap = document.getElementById('biometric-wrap');
+    if (bioWrap) {
+        const avail   = typeof isBiometricAvailable === 'function' && isBiometricAvailable();
+        const enabled = typeof isBiometricEnabled   === 'function' && isBiometricEnabled();
+        bioWrap.style.display = (avail && enabled) ? 'block' : 'none';
+    }
+
+    // Show Google button
+    const gBtn = document.getElementById('google-btn');
+    if (gBtn) gBtn.style.display = 'flex';
+
+    // Show lockout banner if applicable
+    if (typeof _checkLockout === 'function') {
+        const lockout = _checkLockout();
+        const banner  = document.getElementById('lockout-banner');
+        const msgEl   = document.getElementById('lockout-msg');
+        if (banner && lockout.locked) {
+            banner.style.display = 'flex';
+            if (msgEl) msgEl.textContent = `Too many failed attempts. Try again in ${lockout.minutesLeft} minute(s).`;
+        }
+    }
+}
+
+/** Called from auth.js renderLoginPage() — now just a no-op since HTML is static */
+window.renderLoginPage = function() {
+    const loginPage = document.getElementById('login-page');
+    const appEl     = document.getElementById('app');
+    const bootEl    = document.getElementById('boot-loader');
+    if (loginPage) loginPage.style.display = 'flex';
+    if (appEl)     appEl.style.display      = 'none';
+    if (bootEl)    bootEl.style.display     = 'none';
+    _initLoginPage();
+};
+
+/** Called from auth.js _completeLogin() after login succeeds */
+window.showPostLoginLoader = function() {
+    _postLoginBoot();
+};
+
+/** openLoginCard — called by the fold cover onclick */
+window.openLoginCard = function() {
+    const wrap = document.getElementById('card-wrap');
+    if (wrap) {
+        wrap.classList.add('open');
+        // Focus first field after animation
+        setTimeout(() => {
+            const role = document.getElementById('login-role');
+            if (role) role.focus();
+        }, 900);
+    }
+};
 
 /* ─────────────────────────────────────────────────────────────────
    BOOT LOADER CONTROL

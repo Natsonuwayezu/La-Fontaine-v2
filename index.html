@@ -78,9 +78,106 @@
     <link rel="stylesheet" href="css/print/print.css" media="print" />
 </head>
 
-<body>
+<body data-theme="light">
 
-    <div class="boot-loader" id="boot-loader">
+    <!-- ===== LOGIN PAGE (shown immediately — no JS needed to display) ===== -->
+    <div id="login-page">
+        <div class="particles-bg" id="particles-bg"></div>
+        <div class="login-scene">
+            <div class="card-wrap" id="card-wrap">
+                <div class="neon-border"></div>
+                <div class="login-card">
+                    <!-- Fold cover: click to open -->
+                    <div class="fold-cover" id="fold-cover" onclick="openLoginCard()">
+                        <div class="cover-title">
+                            <span class="cover-emoji">🏫</span>
+                            ECOLE LA FONTAINE
+                        </div>
+                    </div>
+                    <!-- Login form (revealed after fold opens) -->
+                    <div class="login-content" id="login-content">
+                        <div class="logo-box">
+                            <i class="fa-solid fa-school" style="font-size:32px;color:#fff;"></i>
+                        </div>
+                        <div class="school-name">ECOLE LA FONTAINE</div>
+                        <div class="login-subtitle">School Management System</div>
+
+                        <div class="login-form">
+                            <!-- Lockout warning -->
+                            <div id="lockout-banner" style="display:none;" class="login-alert login-alert--warn">
+                                <i class="fa-solid fa-lock"></i>
+                                <span id="lockout-msg">Too many attempts. Try again later.</span>
+                            </div>
+
+                            <!-- Role selector -->
+                            <div class="login-field">
+                                <select id="login-role" onchange="onRoleChange(this.value)">
+                                    <option value="">— Select role —</option>
+                                    <option value="admin">👨‍💼 Administrator</option>
+                                    <option value="accountant">💰 Accountant</option>
+                                    <option value="teacher">👩‍🏫 Teacher</option>
+                                </select>
+                            </div>
+
+                            <!-- Username (hidden for admin) -->
+                            <div class="login-field" id="username-field" style="display:none;">
+                                <input type="text" id="login-username"
+                                       placeholder="Username"
+                                       autocomplete="username" />
+                            </div>
+
+                            <!-- Password -->
+                            <div class="login-field pw-wrap" id="password-field" style="display:none;">
+                                <input type="password" id="login-password"
+                                       placeholder="Password"
+                                       autocomplete="current-password"
+                                       onkeydown="if(event.key==='Enter')submitLogin()" />
+                                <button class="pw-toggle" type="button"
+                                        onclick="this.previousElementSibling.type=this.previousElementSibling.type==='password'?'text':'password'"
+                                        title="Show/hide password">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
+
+                            <!-- Error alert -->
+                            <div class="login-alert" id="login-alert" style="display:none;"></div>
+
+                            <!-- Sign in button -->
+                            <button class="login-btn" id="login-btn"
+                                    onclick="submitLogin()"
+                                    style="display:none;">
+                                Sign In →
+                            </button>
+
+                            <!-- Google sign in -->
+                            <button class="login-btn login-btn--google" id="google-btn"
+                                    onclick="signInWithGoogle()"
+                                    style="display:none;">
+                                <svg width="18" height="18" viewBox="0 0 18 18" style="margin-right:8px;">
+                                    <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
+                                    <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+                                    <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+                                    <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/>
+                                </svg>
+                                Continue with Google
+                            </button>
+
+                            <!-- Biometric -->
+                            <div id="biometric-wrap" style="display:none;margin-top:8px;">
+                                <button class="login-btn login-btn--bio" onclick="tryBiometricLogin()">
+                                    <i class="fa-solid fa-fingerprint"></i>
+                                    Sign in with Biometrics
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== BOOT LOADER (shown only while loading after login) ===== -->
+    <div id="boot-loader" style="display:none;">
         <div class="boot-loader__frame">
             <svg class="boot-loader__emblem" viewBox="0 0 200 200">
                 <circle class="emblem-ring-outer" cx="100" cy="100" r="90" />
@@ -92,8 +189,7 @@
             </svg>
         </div>
         <div class="boot-loader__label">
-            <span>Loading</span>
-            <span class="spinner-dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+            <span id="boot-loader-msg">Loading…</span>
         </div>
         <div class="boot-loader__progress">
             <div class="progress-fill" id="boot-loader-progress" style="width:0%;"></div>

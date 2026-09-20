@@ -420,22 +420,18 @@ async function _completeLogin(user) {
         // Continue — user is logged in even if data doesn't load yet
     }
 
-    // Load user notifications
-    await loadUserNotifications().catch(() => { });
-
-    // Start idle watcher and background sync
+    // Login succeeded — hand off to progressive boot loader.
+    // showPostLoginLoader() hides login page, shows boot-loader briefly,
+    // loads critical data, renders shell, navigates to dashboard,
+    // then loads students/marks/fees in background.
     _startIdleWatcher();
-    startSyncPolling();
-
-    // Run daily overdue check (silent — one per day)
-    runDailyOverdueCheck().catch(() => { });
-
-    // Register SW if not already done
-    await registerServiceWorker().catch(() => { });
-
-    // Navigate to role-appropriate dashboard
-    const homeModule = DEFAULT_MODULE[user.role] || 'admin-dashboard';
-    navigateTo(homeModule);
+    if (typeof showPostLoginLoader === 'function') {
+        showPostLoginLoader();
+    } else {
+        // Fallback if called before boot.js ready
+        try { await loadAllData({ silent: true }); } catch(e) {}
+        navigateTo(DEFAULT_MODULE[user.role] || 'admin-dashboard');
+    }
 
     return { success: true, error: null, user: state.currentUser };
 }
@@ -936,146 +932,71 @@ async function adminResetPassword(userId, newPassword) {
  * Called by router.js when no session is found at boot.
  */
 function renderLoginPage() {
+    // Login page is static HTML in index.html — just show it and init
+    const loginPage  = document.getElementById('login-page');
+    const appEl      = document.getElementById('app');
+    const bootLoader = document.getElementById('boot-loader');
+    if (loginPage)  loginPage.style.display  = 'flex';
+    if (appEl)      appEl.style.display       = 'none';
+    if (bootLoader) bootLoader.style.display  = 'none';
+
+    // Open the fold card
+    if (typeof openLoginCard === 'function') openLoginCard();
+
+    // Show lockout banner if needed
     const lockout = checkLoginLockout();
-    const biometricEnabled = isBiometricAvailable() && isBiometricEnabled();
-
-    const app = document.getElementById('app');
-    if (!app) return;
-    app.removeAttribute('hidden');   // ← remove the HTML `hidden` attribute
-    app.style.display = '';          // ← also clear inline display (belt and braces)
-
-    const schoolName = state.schoolSettings?.school_name || SCHOOL_DEFAULTS.school_name;
-    const schoolMotto = state.schoolSettings?.school_motto || SCHOOL_DEFAULTS.school_motto;
-
-    app.innerHTML = `
-    <div id="login-page">
-        <div class="particles-bg" id="particles-bg"></div>
-
-        <div class="login-scene">
-            <div class="card-wrap" id="login-card-wrap">
-
-                <!-- Fold cover — click to open -->
-                <div class="fold-cover" id="fold-cover" onclick="openLoginCard()">
-                    <div class="cover-title">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="1.5">
-                            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-                            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-                        </svg>
-                        ${esc(schoolName)}
-                    </div>
-                </div>
-
-                <!-- Login card -->
-                <div class="login-card">
-                    <div class="login-content">
-                        <!-- Logo -->
-                        <div class="logo-box">
-                            ${getSchoolLogoHtml(state.schoolSettings?.school_logo || '', '100%')}
-                        </div>
-
-                        <div class="school-name">${esc(schoolName)}</div>
-                        <div class="login-subtitle">${esc(schoolMotto)}</div>
-
-                        <!-- Alert -->
-                        <div class="login-alert" id="login-alert" role="alert">
-                            ${lockout.locked
-            ? `Account locked. Try again in ${lockout.minutesLeft} minute(s).`
-            : ''}
-                        </div>
-
-                        <!-- Form -->
-                        <div class="login-form">
-                            <!-- Role selector -->
-                            <div class="login-field">
-                                <select id="login-role" ${lockout.locked ? 'disabled' : ''}
-                                        onchange="onRoleChange(this.value)">
-                                    <option value="">Select your role…</option>
-                                    <option value="admin">Administrator</option>
-                                    <option value="teacher">Teacher</option>
-                                    <option value="accountant">Accountant</option>
-                                </select>
-                            </div>
-
-                            <!-- Username (hidden until role selected) -->
-                            <div class="login-field" id="username-field" style="display:none">
-                                <input type="text" id="login-username"
-                                       placeholder="Username"
-                                       autocomplete="username"
-                                       ${lockout.locked ? 'disabled' : ''}
-                                       onkeydown="if(event.key==='Enter') document.getElementById('login-password')?.focus()">
-                            </div>
-
-                            <!-- Password -->
-                            <div class="login-field pw-wrap" id="password-field" style="display:none">
-                                <input type="password" id="login-password"
-                                       placeholder="Password"
-                                       autocomplete="current-password"
-                                       ${lockout.locked ? 'disabled' : ''}
-                                       onkeydown="if(event.key==='Enter') submitLogin()">
-                                <button class="pw-toggle" onclick="togglePasswordVisibility()"
-                                        type="button" aria-label="Toggle password visibility">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                         stroke="currentColor" stroke-width="2" id="pw-eye-icon">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                        <circle cx="12" cy="12" r="3"/>
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <!-- Login button -->
-                            <button class="login-btn" id="login-btn"
-                                    onclick="submitLogin()"
-                                    style="display:none"
-                                    ${lockout.locked ? 'disabled' : ''}>
-                                Sign In
-                            </button>
-
-                            <!-- Biometric button -->
-                            <div id="biometric-btn-wrap" style="display:${biometricEnabled ? 'block' : 'none'}">
-                                <button class="login-btn" onclick="tryBiometricLogin()">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                                         stroke="currentColor" stroke-width="1.5">
-                                        <path d="M12 1a3 3 0 100 6 3 3 0 000-6z"/>
-                                        <path d="M6 8a6 6 0 0112 0"/>
-                                        <path d="M3 15a9 9 0 0118 0"/>
-                                        <path d="M1 20a11 11 0 0122 0"/>
-                                    </svg>
-                                    Sign in with Biometric
-                                </button>
-                            </div>
-
-                            <!-- Google Sign-In -->
-                            <div class="login-divider"><span>or</span></div>
-                            <button class="login-btn login-btn--google" id="google-signin-btn"
-                                    onclick="signInWithGoogle()" ${lockout.locked ? 'disabled' : ''}>
-                                <svg width="18" height="18" viewBox="0 0 48 48">
-                                    <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.5 5.4 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.4-.4-3.5z"/>
-                                    <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.5 5.4 29.6 3 24 3c-7.7 0-14.4 4.4-17.7 10.7z"/>
-                                    <path fill="#4CAF50" d="M24 45c5.5 0 10.4-1.9 14.3-5.1l-6.6-5.6C29.6 36 26.9 37 24 37c-5.2 0-9.6-3.3-11.2-7.9l-6.6 5.1C9.5 40.5 16.2 45 24 45z"/>
-                                    <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.6 5.6C41.7 36.6 45 30.9 45 24c0-1.4-.1-2.4-.4-3.5z"/>
-                                </svg>
-                                Sign in with Google
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>`;
-
-    // Show alert if locked
-    if (lockout.locked) {
-        const alertEl = document.getElementById('login-alert');
-        if (alertEl) alertEl.style.display = 'block';
+    const banner  = document.getElementById('lockout-banner');
+    const msgEl   = document.getElementById('lockout-msg');
+    const roleEl  = document.getElementById('login-role');
+    if (banner) {
+        if (lockout.locked) {
+            banner.style.display = 'flex';
+            if (msgEl) msgEl.textContent =
+                `Too many failed attempts. Try again in ${lockout.minutesLeft} minute(s).`;
+            if (roleEl) roleEl.disabled = true;
+        } else {
+            banner.style.display = 'none';
+            if (roleEl) roleEl.disabled = false;
+        }
     }
 
-    // Spawn particles
-    _spawnParticles();
+    // Show/hide biometric button
+    const bioWrap = document.getElementById('biometric-wrap');
+    if (bioWrap) {
+        bioWrap.style.display =
+            (isBiometricAvailable() && isBiometricEnabled()) ? 'block' : 'none';
+    }
 
-    // Open card with slight delay for entrance effect
-    setTimeout(() => openLoginCard(), 100);
+    // Particles
+    const container = document.getElementById('particles-bg');
+    if (container && !container.children.length) {
+        for (let k = 0; k < 15; k++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            const size = 20 + Math.random() * 60;
+            p.style.cssText = [
+                `width:${size}px`,
+                `height:${size}px`,
+                `left:${Math.random()*100}%`,
+                `top:${Math.random()*100}%`,
+                `animation-duration:${12+Math.random()*18}s`,
+                `animation-delay:${-Math.random()*20}s`,
+            ].join(';');
+            container.appendChild(p);
+        }
+    }
+
+    // Clear form fields
+    const pwd  = document.getElementById('login-password');
+    const user = document.getElementById('login-username');
+    const role = document.getElementById('login-role');
+    if (pwd)  pwd.value  = '';
+    if (user) user.value = '';
+    if (role) { role.value = ''; onRoleChange(''); }
+
+    // Clear alert
+    const alert = document.getElementById('login-alert');
+    if (alert) { alert.style.display = 'none'; alert.textContent = ''; }
 }
 
 /**

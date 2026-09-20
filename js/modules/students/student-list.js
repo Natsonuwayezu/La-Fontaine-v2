@@ -131,7 +131,7 @@ const StudentList = (() => {
     populateClassFilter(container);
     ensureSearchWorker(getRoster());
 
-    container.querySelector('#stu-enroll-btn').addEventListener('click', () => window.Router?.navigate('enroll-student'));
+    container.querySelector('#stu-enroll-btn').addEventListener('click', () => navigateTo('enroll-student'));
     container.querySelector('#stu-search').addEventListener('input', () => renderContent(container));
     container.querySelector('#stu-class-filter').addEventListener('change', () => renderContent(container));
     container.querySelector('#stu-status-filter').addEventListener('change', () => renderContent(container));
@@ -221,13 +221,13 @@ const StudentList = (() => {
         }
       ],
       data,
-      onRowClick: (row) => window.Router?.navigate('student-details', { studentId: row.id }),
+      onRowClick: (row) => navigateTo('student-profile', {studentId: row.id}),
       onSelectionChange: (selected) => updateBulkBar(container, selected),
-      emptyState: { title: 'No students found', message: 'Try adjusting your search or filters.', actionLabel: 'Enroll Student', onAction: () => window.Router?.navigate('enroll-student') }
+      emptyState: { title: 'No students found', message: 'Try adjusting your search or filters.', actionLabel: 'Enroll Student', onAction: () => navigateTo('enroll-student') }
     });
 
     content.querySelectorAll('[data-view-student]').forEach(btn => {
-      btn.addEventListener('click', (e) => { e.stopPropagation(); window.Router?.navigate('student-details', { studentId: btn.dataset.viewStudent }); });
+      btn.addEventListener('click', (e) => { e.stopPropagation(); navigateTo('student-profile', {studentId: btn.dataset.viewStudent}); });
     });
   }
 
@@ -252,7 +252,7 @@ const StudentList = (() => {
     `).join('')}</div>`;
 
     content.querySelectorAll('[data-goto]').forEach(card => {
-      card.addEventListener('click', () => window.Router?.navigate('student-details', { studentId: card.dataset.goto }));
+      card.addEventListener('click', () => navigateTo('student-profile', {studentId: card.dataset.goto}));
     });
   }
 

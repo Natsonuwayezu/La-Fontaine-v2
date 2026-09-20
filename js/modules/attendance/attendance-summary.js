@@ -146,7 +146,7 @@ const AttendanceSummary = (() => {
                 { key: 'rate', label: 'Rate', sortable: true, align: 'center', render: (r) => `<span class="attendance-days-badge ${r.rate < AT_RISK_THRESHOLD ? 'danger' : (r.rate < 90 ? 'warning' : 'good')}">${r.rate}%</span>` }
             ],
             data: rows,
-            onRowClick: (row) => window.Router?.navigate('student-profile', { studentId: row.id }),
+            onRowClick: (row) => navigateTo('student-profile', {studentId: row.id}),
             emptyState: { title: 'No data yet', message: 'No attendance recorded in this range.' }
         });
     }

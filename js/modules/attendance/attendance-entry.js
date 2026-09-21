@@ -251,7 +251,17 @@ const AttendanceEntry = (() => {
         try {
             const userId = window.state?.currentUser?.id || null;
             await Promise.all(roster.map(s => {
-                const payload = { student_id: s.id, class_id: currentClassId, date: currentDate, status: s.status, notes: s.notes || null, recorded_by: userId };
+                const payload = {
+                        student_id      : s.id,
+                        class_id        : currentClassId,
+                        date            : currentDate,
+                        status          : s.status,
+                        notes           : s.notes || null,
+                        recorded_by     : userId,
+                        academic_year_id: getActiveYear()?.id || null,
+                        term_id         : getActiveTerm()?.id || null,
+                        updated_at      : new Date().toISOString(),
+                    };
                 if (s.attendanceId) {
                     return window.update ? window.update('attendance', s.attendanceId, payload) : Promise.resolve();
                 }

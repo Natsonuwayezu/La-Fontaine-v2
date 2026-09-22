@@ -250,6 +250,11 @@ function _initLoginPage() {
             if (msgEl) msgEl.textContent = `Too many failed attempts. Try again in ${lockout.minutesLeft} minute(s).`;
         }
     }
+
+    // Auto-open the login card after a short delay (no click needed)
+    setTimeout(() => {
+        if (typeof openLoginCard === 'function') openLoginCard();
+    }, 400);
 }
 
 /** Called from auth.js renderLoginPage() — now just a no-op since HTML is static */

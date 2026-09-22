@@ -1,16 +1,16 @@
 -- ═══════════════════════════════════════════════════════════════════
 -- 015_fix_login_check.sql
--- 
--- FIXES:
--- 1. login_check() now handles BOTH plaintext AND hashed passwords
---    so login works before AND after 003_hash_passwords.sql is run.
--- 2. Adds portal.ecoleslafontaine.com to Supabase CORS (done in
---    Dashboard — see instructions below).
--- 3. Re-grants EXECUTE so anon role can call it.
--- 4. Hashes any remaining plaintext passwords automatically.
---
--- RUN THIS NOW — it is the fix for the login failure.
+-- RUN THIS FIRST — clears lockout then fixes password comparison
 -- ═══════════════════════════════════════════════════════════════════
+
+-- STEP 0: Clear ALL login lockouts immediately
+-- (Supabase has no CORS issue — the lockout is from our own code)
+DELETE FROM login_attempts WHERE success = FALSE;
+
+-- Clear for specific accounts if you want to be precise:
+-- DELETE FROM login_attempts WHERE username = 'admin' AND role = 'admin';
+-- DELETE FROM login_attempts WHERE username = 'Boniface' AND role = 'teacher';
+-- DELETE FROM login_attempts WHERE username = 'Laurence' AND role = 'accountant';
 
 -- Step 1: Make sure pgcrypto is enabled
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
@@ -64,10 +64,10 @@ BEGIN
       AND login_attempts.success     = FALSE
       AND login_attempts.attempted_at > NOW() - INTERVAL '15 minutes';
 
-    IF recent_failures >= 5 THEN
+    IF recent_failures >= 10 THEN
         INSERT INTO login_attempts (username, role, success)
         VALUES (p_username, p_role, FALSE);
-        RETURN; -- empty result = locked out
+        RETURN; -- empty result = locked out (10 failures in 15 min)
     END IF;
 
     -- ── Admin login ───────────────────────────────────────────────

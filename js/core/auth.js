@@ -381,8 +381,21 @@ async function doLogin(role, username, password) {
         return await _completeLogin(user);
 
     } catch (err) {
-        handleApiError(err, 'login');
-        return { success: false, error: 'Login failed. Check your connection.', user: null };
+        console.error('[Auth] doLogin error:', err.message);
+        // Show the real error to help diagnose issues
+        let errorMsg = 'Login failed. Check your connection and try again.';
+        if (err.message && err.message.includes('OFFLINE')) {
+            errorMsg = 'No internet connection. Please check your network.';
+        } else if (err.message && (err.message.includes('404') || err.message.includes('not found'))) {
+            errorMsg = 'Login service not found. Please contact admin. (Error: login_check RPC missing)';
+        } else if (err.message && err.message.includes('403')) {
+            errorMsg = 'Access denied. Contact admin. (Error: missing database permissions)';
+        } else if (err.message && err.message.includes('42883')) {
+            errorMsg = 'Login function missing in database. Run docs/sql/015_fix_login_check.sql';
+        } else if (err.message) {
+            errorMsg = `Login error: ${err.message}`;
+        }
+        return { success: false, error: errorMsg, user: null };
     }
 }
 
@@ -397,28 +410,21 @@ async function _completeLogin(user) {
     // Save session
     _saveSession(user);
 
-    // Set current user in state
+    // Set current user in state (include class_id for teacher access control)
     updateState('currentUser', {
-        id: user.id,
-        role: user.role,
+        id        : user.id,
+        role      : user.role,
         first_name: user.first_name || '',
-        last_name: user.last_name || '',
-        username: user.username || '',
-        email: user.email || '',
-        name: `${user.first_name || ''} ${user.last_name || ''}`.trim(),
+        last_name : user.last_name  || '',
+        username  : user.username   || '',
+        email     : user.email      || '',
+        phone     : user.phone      || '',
+        class_id  : user.class_id   || null,
+        name      : `${user.first_name || ''} ${user.last_name || ''}`.trim(),
     });
 
-    // Log the login
-    await logLogin(user.id, user.role);
-
-    // Load all data — wrap in catch so a data-load failure doesn't
-    // show "Login failed" when the login itself succeeded
-    try {
-        await loadAllData();
-    } catch (dataErr) {
-        console.warn('[Auth] loadAllData failed after login:', dataErr.message);
-        // Continue — user is logged in even if data doesn't load yet
-    }
+    // Log the login (non-blocking)
+    logLogin(user.id, user.role).catch(() => {});
 
     // Login succeeded — hand off to progressive boot loader.
     // showPostLoginLoader() hides login page, shows boot-loader briefly,

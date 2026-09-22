@@ -295,6 +295,11 @@ function _setBootProgress(pct) {
     if (fill) fill.style.width = pct + '%';
 }
 
+function _setBootMsg(msg) {
+    const el = document.getElementById('boot-loader-msg');
+    if (el) el.textContent = msg || 'Loading…';
+}
+
 function _hideBootLoader() {
     const el = document.getElementById('boot-loader');
     if (el) el.classList.add('is-hidden');

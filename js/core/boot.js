@@ -1,509 +1,283 @@
-/* ═══════════════════════════════════════════════════════════════════
-   js/core/boot.js
-   ═══════════════════════════════════════════════════════════════════
-   Purpose : Application entry point. Called by js/main.js on
-             DOMContentLoaded. Orchestrates the full startup sequence:
-               1. Verify Supabase credentials exist
-               2. Test DB connection
-               3. Restore session or show login
-               4. Render the app shell (sidebar + topbar)
-               5. Navigate to the correct first module
-   Load order: LAST of all core files, just before window-exposure.js.
-   ═══════════════════════════════════════════════════════════════════ */
-
 'use strict';
+/* ═══════════════════════════════════════════════════════════════
+   boot.js — Entry point. Mirrors old single-file flow exactly.
+   1. Show login page immediately — nothing else loads first.
+   2. On login success → show boot loader → load data → show app.
+   ═══════════════════════════════════════════════════════════════ */
 
-/* ─────────────────────────────────────────────────────────────────
-   BOOT SEQUENCE
-   ───────────────────────────────────────────────────────────────── */
-
-/**
- * Main boot function. Called once by main.js on DOMContentLoaded.
- * Everything else in the app is triggered from here.
- */
 async function boot() {
-    console.info(`[Boot] ${APP_NAME} v${APP_VERSION} starting…`);
+    console.log('[Boot] ECOLE LA FONTAINE starting...');
 
-    // ── STEP 1: Apply theme immediately (no flash) ─────────────────
-    _applyInitialTheme();
+    // Apply saved theme
+    const savedTheme = localStorage.getItem('lf_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
 
-    // ── STEP 2: Show login page immediately ────────────────────────
-    // Login page is static HTML in index.html — already visible.
-    // Just make sure boot-loader and app are hidden.
-    const loginPage  = document.getElementById('login-page');
-    const bootLoader = document.getElementById('boot-loader');
-    const appEl      = document.getElementById('app');
-    if (loginPage)  loginPage.style.display  = 'flex';
-    if (bootLoader) bootLoader.style.display  = 'none';
-    if (appEl)      appEl.style.display       = 'none';
+    // Show login page immediately
+    showLoginPage();
 
-    // ── STEP 3: Non-blocking background tasks (don't await) ────────
-    syncServerTime().catch(() => {});
-    if (typeof registerServiceWorker === 'function')
-        registerServiceWorker().catch(() => {});
-    if (typeof initOfflineListeners === 'function')
-        initOfflineListeners();
-    if (typeof openOfflineDB === 'function')
-        openOfflineDB().catch(() => {});
-
-    // ── STEP 4: Check credentials ──────────────────────────────────
-    if (!hasSupabaseCredentials()) {
-        _hideBootLoader();
-        _showApiSetupScreen();
+    // Check for existing valid session
+    const saved = typeof loadSession === 'function' ? loadSession() : null;
+    if (saved && saved.id !== undefined) {
+        console.log('[Boot] Restoring session for:', saved.name);
+        state.currentUser = saved;
+        await bootApp(saved);
         return;
     }
 
-    // ── STEP 5: Check for Google OAuth redirect ────────────────────
-    const handledGoogle = await handleGoogleRedirect().catch(() => false);
-    if (handledGoogle && state.currentUser) {
-        // Google login succeeded — go to app
-        await _postLoginBoot();
-        return;
-    }
-
-    // ── STEP 6: Check existing session ────────────────────────────
-    const sessionValid = await _checkSessionQuick();
-    if (sessionValid) {
-        // Returning user with valid session — skip login page
-        if (loginPage) loginPage.style.display = 'none';
-        await _postLoginBoot();
-        return;
-    }
-
-    // ── STEP 7: No session — login page is already showing ─────────
-    // Initialize login page particles and biometric button
-    _initLoginPage();
-    console.info('[Boot] Login page ready');
-}
-
-/**
- * Check if a saved session is valid WITHOUT loading all data.
- * Fast — just reads localStorage.
- */
-async function _checkSessionQuick() {
-    try {
-        const session = typeof _readSession === 'function' ? _readSession() : null;
-        if (!session || !session.user || !session.user.id) return false;
-        const now = Date.now();
-        if (session.expiresAt && now > session.expiresAt) {
-            if (typeof _clearSession === 'function') _clearSession();
-            return false;
-        }
-        // Restore user into state without loading all data yet
-        state.currentUser = session.user;
-        return true;
-    } catch (e) {
-        return false;
-    }
-}
-
-/**
- * Called after login (password/Google/biometric) or valid session restore.
- * Shows boot-loader, loads critical data, renders shell, hides boot-loader.
- */
-async function _postLoginBoot() {
-    const loginPage  = document.getElementById('login-page');
-    const bootLoader = document.getElementById('boot-loader');
-    const appEl      = document.getElementById('app');
-
-    // Hide login, show boot loader
-    if (loginPage)  loginPage.style.display  = 'none';
-    if (bootLoader) { bootLoader.style.display = 'flex'; }
-    if (appEl)      appEl.style.display       = 'none';
-
-    _setBootProgress(10);
-    _setBootMsg('Loading school data…');
-
-    try {
-        // ── Critical data (must have before rendering shell) ────────
-        // Phase 1: school settings + academic year + terms + classes
-        await _loadCriticalData();
-        _setBootProgress(45);
-        _setBootMsg('Building interface…');
-
-        // ── Render shell (sidebar + topbar) ────────────────────────
-        if (typeof renderShell === 'function') {
-            await renderShell().catch(err =>
-                console.error('[Boot] Shell render failed:', err.message));
-        }
-        _setBootProgress(65);
-
-        // ── Apply period theme now that we have year/term data ──────
-        if (typeof applyPeriodTheme === 'function') applyPeriodTheme();
-
-        // ── Show app ────────────────────────────────────────────────
-        if (bootLoader) bootLoader.style.display = 'none';
-        if (appEl)      appEl.style.display       = '';
-
-        _setBootProgress(80);
-        _setBootMsg('Loading students…');
-
-        // ── Navigate to home module ──────────────────────────────────
-        const role   = state.currentUser?.role || 'admin';
-        const home   = DEFAULT_MODULE[role] || 'admin-dashboard';
-        if (typeof navigateTo === 'function') navigateTo(home);
-
-        // ── Load remaining data in background ────────────────────────
-        // Students, marks, fees etc. load AFTER the dashboard shows.
-        // Modules use skeleton screens while this completes.
-        _loadBackgroundData().then(() => {
-            _setBootProgress(100);
-            if (typeof applyPeriodTheme === 'function') applyPeriodTheme();
-            if (typeof _setupAutoHolidaySwitch === 'function') _setupAutoHolidaySwitch();
-            if (typeof startSyncPolling === 'function') startSyncPolling();
-            if (typeof runDailyOverdueCheck === 'function') runDailyOverdueCheck().catch(()=>{});
-            if (typeof loadUserNotifications === 'function') loadUserNotifications().catch(()=>{});
-            console.info('[Boot] All data loaded');
-        }).catch(err => console.warn('[Boot] Background load error:', err.message));
-
-    } catch (err) {
-        console.error('[Boot] Post-login boot failed:', err);
-        if (bootLoader) bootLoader.style.display = 'none';
-        if (appEl)      appEl.style.display       = '';
-        showToast('Some data failed to load. Please refresh.', 'warning');
-    }
-}
-
-/**
- * Load ONLY the data needed to render the shell and dashboard:
- * school settings, academic years, terms, classes.
- * Fast — 4 parallel requests.
- */
-async function _loadCriticalData() {
-    const [settings, years, terms, classes] = await Promise.all([
-        typeof getSchoolSettings === 'function'
-            ? getSchoolSettings().catch(() => ({}))
-            : Promise.resolve({}),
-        getAll('academic_years', 'order=year_name.desc').catch(() => []),
-        getAll('terms', 'order=term_number.asc').catch(() => []),
-        getAll('classes', 'is_active=eq.true&order=sort_order.asc').catch(() => []),
-    ]);
-    if (typeof updateStateBatch === 'function') {
-        updateStateBatch({
-            schoolSettings  : settings,
-            academicYears   : years  || [],
-            terms           : terms  || [],
-            classes         : classes || [],
-        });
-    } else {
-        state.schoolSettings = settings;
-        state.academicYears  = years  || [];
-        state.terms          = terms  || [];
-        state.classes        = classes || [];
-    }
-    // Auto-select active year + term
-    if (typeof _autoSelectPeriod === 'function') _autoSelectPeriod();
-}
-
-/**
- * Load everything else after the dashboard is visible.
- * Students, marks, fees, teachers, assessments, etc.
- */
-async function _loadBackgroundData() {
-    if (typeof loadAllData === 'function') {
-        await loadAllData({ silent: true });
-    }
-}
-
-/**
- * Initialise login page: particles animation + biometric button visibility.
- */
-function _initLoginPage() {
-    // Particles
-    const container = document.getElementById('particles-bg');
-    if (container && !container.children.length) {
-        for (let k = 0; k < 15; k++) {
-            const p = document.createElement('div');
-            p.className = 'particle';
-            const size = 20 + Math.random() * 60;
-            p.style.cssText = [
-                `width:${size}px`,
-                `height:${size}px`,
-                `left:${Math.random()*100}%`,
-                `top:${Math.random()*100}%`,
-                `animation-duration:${12 + Math.random()*18}s`,
-                `animation-delay:${-Math.random()*20}s`,
-            ].join(';');
-            container.appendChild(p);
-        }
-    }
-
-    // Show biometric button if available and registered
-    const bioWrap = document.getElementById('biometric-wrap');
-    if (bioWrap) {
-        const avail   = typeof isBiometricAvailable === 'function' && isBiometricAvailable();
-        const enabled = typeof isBiometricEnabled   === 'function' && isBiometricEnabled();
-        bioWrap.style.display = (avail && enabled) ? 'block' : 'none';
-    }
-
-    // Show Google button
-    const gBtn = document.getElementById('google-btn');
-    if (gBtn) gBtn.style.display = 'flex';
-
-    // Show lockout banner if applicable
-    if (typeof _checkLockout === 'function') {
-        const lockout = _checkLockout();
-        const banner  = document.getElementById('lockout-banner');
-        const msgEl   = document.getElementById('lockout-msg');
-        if (banner && lockout.locked) {
-            banner.style.display = 'flex';
-            if (msgEl) msgEl.textContent = `Too many failed attempts. Try again in ${lockout.minutesLeft} minute(s).`;
-        }
-    }
-
-    // Auto-open the login card after a short delay (no click needed)
+    // No session — open the card after short delay
     setTimeout(() => {
         if (typeof openLoginCard === 'function') openLoginCard();
-    }, 400);
+    }, 300);
 }
 
-/** Called from auth.js renderLoginPage() — now just a no-op since HTML is static */
-window.renderLoginPage = function() {
+// ── bootApp — called after login succeeds ────────────────────
+async function bootApp(user) {
     const loginPage = document.getElementById('login-page');
-    const appEl     = document.getElementById('app');
     const bootEl    = document.getElementById('boot-loader');
-    if (loginPage) loginPage.style.display = 'flex';
-    if (appEl)     appEl.style.display      = 'none';
-    if (bootEl)    bootEl.style.display     = 'none';
-    _initLoginPage();
-};
+    const appEl     = document.getElementById('app-shell');
 
-/** Called from auth.js _completeLogin() after login succeeds */
-window.showPostLoginLoader = function() {
-    _postLoginBoot();
-};
+    if (loginPage) loginPage.style.display = 'none';
+    if (bootEl)    bootEl.style.display    = 'flex';
+    if (appEl)     appEl.style.display     = 'none';
 
-/** openLoginCard — called by the fold cover onclick */
-window.openLoginCard = function() {
-    const wrap = document.getElementById('card-wrap');
-    if (wrap) {
-        wrap.classList.add('open');
-        // Focus first field after animation
-        setTimeout(() => {
-            const role = document.getElementById('login-role');
-            if (role) role.focus();
-        }, 900);
+    _setBootMsg('Loading school settings...');
+    _setBootProgress(10);
+
+    try {
+        // Phase 1: school settings + years + terms + classes (fast, parallel)
+        const [settings, years, terms, classes, subjects, teachers] = await Promise.all([
+            typeof getSchoolSettings === 'function'
+                ? getSchoolSettings().catch(() => ({}))
+                : Promise.resolve({}),
+            getAll('academic_years').catch(() => []),
+            getAll('terms').catch(() => []),
+            getAll('classes', { is_active: true }).catch(() => []),
+            getAll('subjects').catch(() => []),
+            getAll('teachers', { is_active: true }).catch(() => []),
+        ]);
+
+        if (typeof updateStateBatch === 'function') {
+            updateStateBatch({ schoolSettings: settings, academicYears: years,
+                               terms, classes, subjects, teachers });
+        } else {
+            state.schoolSettings = settings;
+            state.academicYears  = years;
+            state.terms          = terms;
+            state.classes        = classes;
+            state.subjects       = subjects;
+            state.teachers       = teachers;
+        }
+
+        _setBootProgress(40);
+        _setBootMsg('Loading students and fees...');
+
+        // Phase 2: students and finance data
+        const [students, studentFees, payments, feeCategories,
+               assessments, marks, attendance] = await Promise.all([
+            getAll('students', { is_deleted: false }).catch(() => []),
+            getAll('student_fees').catch(() => []),
+            getAll('payments').catch(() => []),
+            getAll('fee_categories').catch(() => []),
+            getAll('assessments').catch(() => []),
+            getAll('marks').catch(() => []),
+            getAll('attendance').catch(() => []),
+        ]);
+
+        if (typeof updateStateBatch === 'function') {
+            updateStateBatch({ students, studentFees, payments, feeCategories,
+                               assessments, marks, attendance });
+        } else {
+            state.students      = students;
+            state.studentFees   = studentFees;
+            state.payments      = payments;
+            state.feeCategories = feeCategories;
+            state.assessments   = assessments;
+            state.marks         = marks;
+            state.attendance    = attendance;
+        }
+
+        _setBootProgress(80);
+        _setBootMsg('Building interface...');
+
+        // Apply role theme + build UI
+        _applyRoleTheme(user.role);
+        _buildSidebar(user.role);
+        _updateTopbar(user);
+        _updateProgressBar();
+
+        _setBootProgress(100);
+
+        // Show app
+        if (bootEl) bootEl.style.display = 'none';
+        if (appEl)  appEl.style.display  = '';
+
+        // Navigate to home
+        const home = { admin:'admin-dashboard', accountant:'accountant-dashboard',
+                       teacher:'teacher-dashboard' }[user.role] || 'admin-dashboard';
+        if (typeof navigateTo === 'function') navigateTo(home);
+
+        console.log('[Boot] Ready.', user.role, '-', user.name);
+
+    } catch (err) {
+        console.error('[Boot] Error:', err.message);
+        if (bootEl) bootEl.style.display = 'none';
+        if (appEl)  appEl.style.display  = '';
+        if (typeof showToast === 'function')
+            showToast('Some data failed to load. Refresh to retry.', 'warning');
+        _applyRoleTheme(user.role);
+        _buildSidebar(user.role);
+        _updateTopbar(user);
+        const home = { admin:'admin-dashboard', accountant:'accountant-dashboard',
+                       teacher:'teacher-dashboard' }[user.role] || 'admin-dashboard';
+        if (typeof navigateTo === 'function') navigateTo(home);
     }
-};
+}
 
-/* ─────────────────────────────────────────────────────────────────
-   BOOT LOADER CONTROL
-   The #boot-loader element (index.html) is the first thing painted,
-   before any JS runs — these just update its progress and hide it
-   once there's something real underneath to reveal, rather than
-   revealing blank/unstyled content while login or the dashboard is
-   still loading.
-   ───────────────────────────────────────────────────────────────── */
+// ── Helpers ───────────────────────────────────────────────────
+function _setBootMsg(msg) {
+    const el = document.getElementById('boot-msg');
+    if (el) el.textContent = msg;
+}
 
 function _setBootProgress(pct) {
-    const fill = document.getElementById('boot-loader-progress');
-    if (fill) fill.style.width = pct + '%';
+    const el = document.getElementById('boot-progress');
+    if (el) el.style.width = pct + '%';
 }
 
-function _setBootMsg(msg) {
-    const el = document.getElementById('boot-loader-msg');
-    if (el) el.textContent = msg || 'Loading…';
+function _applyRoleTheme(role) {
+    document.body.className = document.body.className
+        .replace(/\btheme-\w+/g, '').trim();
+    document.body.classList.add('theme-' + role);
 }
 
-function _hideBootLoader() {
-    const el = document.getElementById('boot-loader');
-    if (el) el.classList.add('is-hidden');
-}
+function _buildSidebar(role) {
+    const nav = document.getElementById('sidebar-nav');
+    if (!nav) return;
+    const config = typeof getNavConfig === 'function'
+        ? getNavConfig(role)
+        : [{ section: 'Dashboard', items: [{ id: role + '-dashboard', icon: '📊', label: 'Dashboard' }] }];
 
-/* ─────────────────────────────────────────────────────────────────
-   INITIAL THEME APPLICATION
-   ───────────────────────────────────────────────────────────────── */
+    nav.innerHTML = config.map(section => `
+        <div class="nav-section">
+            <div class="nav-section-title" onclick="this.closest('.nav-section').classList.toggle('collapsed')">
+                ${section.section}
+                <span class="nav-section-arrow">▾</span>
+            </div>
+            <div class="nav-section-items">
+                ${(section.items || []).map(item => `
+                    <div class="nav-item" data-module="${item.id}"
+                         onclick="navigateTo('${item.id}')">
+                        <span class="nav-icon">${item.icon}</span>
+                        <span>${item.label}</span>
+                    </div>`).join('')}
+            </div>
+        </div>`).join('');
 
-/**
- * Apply the saved theme (dark/light) as early as possible to prevent
- * flash of wrong theme on load.
- */
-function _applyInitialTheme() {
-    const savedTheme = localStorage.getItem('lf_theme');
-    if (savedTheme === 'dark' || savedTheme === 'light') {
-        document.documentElement.setAttribute('data-theme', savedTheme);
-    } else {
-        // Detect system preference
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+    // Update sidebar footer
+    const u = state.currentUser || {};
+    const av = document.getElementById('sidebar-avatar');
+    const nm = document.getElementById('sidebar-username');
+    const rl = document.getElementById('sidebar-userrole');
+    if (av) av.textContent = (u.name || 'U')[0].toUpperCase();
+    if (nm) nm.textContent = u.name || u.username || 'User';
+    if (rl) rl.textContent = u.role || '';
+
+    const s   = state.schoolSettings || {};
+    const sub = document.getElementById('sidebar-school-subtitle');
+    if (sub) sub.textContent = s.school_motto || 'School Portal';
+    const logo = document.getElementById('sidebar-logo');
+    if (logo && s.school_logo) {
+        logo.innerHTML = `<img src="${s.school_logo}" alt="logo">`;
     }
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   INITIAL HASH NAVIGATION
-   ───────────────────────────────────────────────────────────────── */
-
-/**
- * Read a moduleId from the URL hash (e.g. /#marks-entry).
- * Returns null if hash is not a valid moduleId.
- */
-function _moduleIdFromUrlHash() {
-    const hash = window.location.hash.replace('#', '').trim();
-    return (hash && MODULE_FILE_MAP[hash]) ? hash : null;
+function _updateTopbar(user) {
+    const name    = user.name || user.username || 'User';
+    const initial = name[0].toUpperCase();
+    const fields  = {
+        'topbar-avatar'   : initial,
+        'topbar-username' : name,
+        'dd-avatar'       : initial,
+        'dd-name'         : name,
+        'dd-role'         : user.role,
+        'sidebar-avatar'  : initial,
+        'sidebar-username': name,
+        'sidebar-userrole': user.role,
+    };
+    for (const [id, val] of Object.entries(fields)) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+    }
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   API SETUP SCREEN
-   Shown when no Supabase credentials are stored.
-   ───────────────────────────────────────────────────────────────── */
+function _updateProgressBar() {
+    const today   = new Date();
+    today.setHours(0, 0, 0, 0);
+    const activeYear = (state.academicYears || []).find(y => y.is_current)
+                    || (state.academicYears || [])[0];
+    if (!activeYear) return;
 
-/**
- * Render a first-time setup screen asking the user to enter their
- * Supabase project URL and anon key.
- * This replaces the full app shell — no sidebar/topbar needed.
- */
-function _showApiSetupScreen() {
-    const body = document.body;
-    body.innerHTML = `
-        <div class="api-setup-screen">
-            <div class="api-setup-card">
-                <div class="api-setup-logo">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
-                         stroke="var(--primary,#c44536)" stroke-width="1.5">
-                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-                        <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-                    </svg>
-                </div>
-                <h1 class="api-setup-title">École La Fontaine</h1>
-                <p class="api-setup-subtitle">First-time setup — connect to your database</p>
+    const yearTerms = (state.terms || []).filter(t => t.academic_year_id === activeYear.id);
+    const active = yearTerms.find(t =>
+        new Date(t.start_date) <= today && today <= new Date(t.end_date)
+    ) || yearTerms[0];
 
-                <div class="form-group">
-                    <label>Supabase Project URL</label>
-                    <input type="url" id="setup-sb-url"
-                           placeholder="https://xxxxx.supabase.co"
-                           value="${esc(localStorage.getItem(APP_CONFIG.sbUrlKey) || '')}">
-                </div>
-
-                <div class="form-group">
-                    <label>Supabase Anon Key</label>
-                    <input type="password" id="setup-sb-key"
-                           placeholder="eyJhbGciOi…"
-                           value="${esc(localStorage.getItem(APP_CONFIG.sbKeyKey) || '')}">
-                </div>
-
-                <div class="api-setup-alert" id="setup-alert" style="display:none"></div>
-
-                <button class="login-btn" id="setup-btn" onclick="testAndSaveSetup()">
-                    Connect and Continue
-                </button>
-
-                <p class="api-setup-help">
-                    Find these in your Supabase project under
-                    <strong>Settings → API</strong>.
-                </p>
-            </div>
-        </div>`;
-}
-
-/**
- * Test the entered credentials and save if valid.
- * Called by the setup screen's button.
- */
-async function testAndSaveSetup() {
-    const url = document.getElementById('setup-sb-url')?.value?.trim();
-    const key = document.getElementById('setup-sb-key')?.value?.trim();
-    const alert = document.getElementById('setup-alert');
-    const btn = document.getElementById('setup-btn');
-
-    if (!url || !key) {
-        if (alert) { alert.textContent = 'Please enter both the URL and key.'; alert.style.display = 'block'; }
+    if (!active) {
+        const yr = document.getElementById('prog-acad-year');
+        if (yr) yr.textContent = activeYear.year_name || '';
         return;
     }
 
-    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-sm"></span> Testing…'; }
+    const start     = new Date(active.start_date);
+    const end       = new Date(active.end_date);
+    const total     = Math.max(1, Math.round((end - start) / 86400000));
+    const elapsed   = Math.min(total, Math.max(0, Math.round((today - start) / 86400000)));
+    const remaining = Math.max(0, Math.round((end - today) / 86400000));
+    const pct       = Math.min(100, Math.round((elapsed / total) * 100));
 
-    try {
-        // Temporarily set credentials to test
-        saveSupabaseCredentials(url, key);
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    const setW = (id, val) => { const el = document.getElementById(id); if (el) el.style.width = val; };
 
-        const result = await testSupabaseConnection();
+    set('prog-term-name', active.term_label || 'Term ' + active.term_number);
+    set('prog-text',      pct + '% complete');
+    set('prog-days',      remaining > 0 ? remaining + ' days remaining' : 'Term ended');
+    set('prog-acad-year', activeYear.year_name || '');
+    setW('prog-fill', pct + '%');
 
-        if (result.ok) {
-            // Reload the app fully now that credentials are set
-            location.reload();
-        } else {
-            if (alert) {
-                alert.textContent = result.error || 'Connection failed. Check your URL and key.';
-                alert.style.display = 'block';
-            }
-            if (btn) { btn.disabled = false; btn.textContent = 'Connect and Continue'; }
-        }
-    } catch (err) {
-        if (alert) { alert.textContent = err.message; alert.style.display = 'block'; }
-        if (btn) { btn.disabled = false; btn.textContent = 'Connect and Continue'; }
+    const badge = document.getElementById('period-badge');
+    if (badge) badge.textContent = '📖 ' + (activeYear.year_name || '');
+}
+
+// ── UI helpers ────────────────────────────────────────────────
+window.toggleUserDropdown = function() {
+    document.getElementById('user-dropdown')?.classList.toggle('open');
+};
+
+window.toggleSidebar = function() {
+    document.getElementById('sidebar')?.classList.toggle('mobile-open');
+    document.getElementById('sidebar-overlay')?.classList.toggle('show');
+};
+
+document.addEventListener('click', e => {
+    if (!e.target.closest('.user-menu') && !e.target.closest('#user-dropdown')) {
+        document.getElementById('user-dropdown')?.classList.remove('open');
     }
-}
+});
 
-/* ─────────────────────────────────────────────────────────────────
-   EXPOSE
-   ───────────────────────────────────────────────────────────────── */
-
-
-/* ─────────────────────────────────────────────────────────────────
-   AUTO HOLIDAY MODE SWITCH
-   Runs on boot + every 10 minutes. Checks if today falls within an
-   active holiday_session → activates holiday mode automatically.
-   ───────────────────────────────────────────────────────────────── */
-function _setupAutoHolidaySwitch() {
-    _checkAndSwitchMode();
-    setInterval(_checkAndSwitchMode, 10 * 60 * 1000);
-}
-
-async function _checkAndSwitchMode() {
-    try {
-        const today = typeof todayISO === 'function' ? todayISO() : new Date().toISOString().split('T')[0];
-        const sessions = state.holidaySessions || [];
-        const shouldBeActive = sessions.find(s =>
-            s.status === 'active' &&
-            s.auto_activate !== false &&
-            s.start_date <= today &&
-            (!s.end_date || s.end_date >= today)
-        );
-        const currentlyHoliday = typeof isHolidayMode === 'function' && isHolidayMode();
-        if (shouldBeActive && !currentlyHoliday) {
-            if (typeof activateHolidayMode === 'function') activateHolidayMode(shouldBeActive);
-            if (typeof loadDataForHolidaySession === 'function')
-                await loadDataForHolidaySession(shouldBeActive.id);
-            if (typeof Sidebar !== 'undefined' && Sidebar.refresh) Sidebar.refresh();
-            _logAutoSwitch('normal', 'holiday', shouldBeActive.name);
-            console.info('[Boot] Auto-activated holiday mode:', shouldBeActive.name);
-        } else if (!shouldBeActive && currentlyHoliday) {
-            if (typeof deactivateHolidayMode === 'function') deactivateHolidayMode();
-            if (typeof applyPeriodTheme === 'function') applyPeriodTheme();
-            if (typeof loadAllData === 'function') await loadAllData({ silent: true });
-            if (typeof Sidebar !== 'undefined' && Sidebar.refresh) Sidebar.refresh();
-            _logAutoSwitch('holiday', 'normal', 'Session ended');
-            console.info('[Boot] Auto-deactivated holiday mode — session ended.');
-        }
-    } catch (err) {
-        console.warn('[Boot] Auto-switch check failed:', err.message);
-    }
-}
-
-function _logAutoSwitch(fromMode, toMode, reason) {
-    const now = new Date().toISOString();
-    if (typeof insert !== 'function') return;
-    insert('system_logs', {
-        action_type: 'auto_mode_switch',
-        description: `SYSTEM: ${fromMode} → ${toMode}: ${reason}`,
-        actor_id: null,
-        actor_name: 'SYSTEM',
-        created_at: now,
-        metadata: JSON.stringify({ fromMode, toMode, reason }),
-    }).catch(() => { });
-    const admins = (state.users || []).filter(u => u.role === 'admin');
-    admins.forEach(admin => {
-        insert('notifications', {
-            user_id: admin.id,
-            title: `Mode switched: ${fromMode} → ${toMode}`,
-            body: reason,
-            type: 'mode_switch',
-            is_read: false,
-            created_at: now,
-        }).catch(() => { });
+// ── Active nav item highlighting ──────────────────────────────
+function _setActiveNav(moduleId) {
+    document.querySelectorAll('.nav-item').forEach(el => {
+        el.classList.toggle('active', el.dataset.module === moduleId);
     });
+    const item = document.querySelector(`.nav-item[data-module="${moduleId}"]`);
+    if (item) {
+        item.closest('.nav-section')?.classList.remove('collapsed');
+        item.scrollIntoView({ block: 'nearest' });
+    }
 }
 
-window.boot = boot;
-window.testAndSaveSetup = testAndSaveSetup;
-if (typeof applyPeriodTheme === 'function') applyPeriodTheme();
+window.boot            = boot;
+window.bootApp         = bootApp;
+window._setActiveNav   = _setActiveNav;
+window._updateProgressBar = _updateProgressBar;
+window._buildSidebar   = _buildSidebar;

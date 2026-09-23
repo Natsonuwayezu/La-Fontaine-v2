@@ -1,1162 +1,232 @@
-/* ═══════════════════════════════════════════════════════════════════
-   js/core/auth.js
-   ═══════════════════════════════════════════════════════════════════
-   Purpose : Authentication — login, logout, session persistence,
-             idle timeout (40 min), biometric login, failed-login
-             lockout (4 attempts), and role-based post-login routing.
-             All session data is stored in localStorage under
-             APP_CONFIG.sessionKey.
-   References: backend.txt Part 3.1-3.4, Part 13
-   Load order: AFTER data-loader.js, logger.js, router.js.
-   ═══════════════════════════════════════════════════════════════════ */
-
 'use strict';
+/* ═══════════════════════════════════════════════════════════════
+   auth.js — Simple login exactly like old single-file version.
+   Plain password comparison. No bcrypt. No lockout table.
+   ═══════════════════════════════════════════════════════════════ */
 
-/* ─────────────────────────────────────────────────────────────────
-   WEBAUTHN HELPERS  (Phase 6)
-   Edge Function base URL is derived from SUPABASE_URL.
-   ───────────────────────────────────────────────────────────────── */
+const SESSION_KEY = 'elf_session';
+const SESSION_TTL = 8 * 60 * 60 * 1000; // 8 hours
 
-function _waFunctionUrl(name) {
-    const base = (typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : window.SUPABASE_DEFAULT_URL || '');
-    return `${base}/functions/v1/${name}`;
+// ── Session ───────────────────────────────────────────────────
+function saveSession(user) {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+        ...user,
+        _expires: Date.now() + SESSION_TTL,
+    }));
 }
 
-/** POST to a WebAuthn Edge Function. Returns parsed JSON or throws. */
-async function _waPost(fnName, body) {
-    const res = await fetch(_waFunctionUrl(fnName), {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'apikey': (typeof SUPABASE_KEY !== 'undefined' ? SUPABASE_KEY : '')
-        },
-        body: JSON.stringify(body),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || `${fnName} failed (${res.status})`);
-    return data;
-}
-
-/** Convert a base64url string → Uint8Array (for challenge / user.id) */
-function _b64ToUint8(b64url) {
-    const b64 = b64url.replace(/-/g, '+').replace(/_/g, '/');
-    return Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-}
-
-/** Convert an ArrayBuffer → base64url string (for sending back to server) */
-function _bufToB64(buf) {
-    return btoa(String.fromCharCode(...new Uint8Array(buf)))
-        .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-
-/** Encode a PublicKeyCredential (create response) for the server */
-function _encodeRegistrationCredential(cred) {
-    const resp = cred.response;
-    return {
-        id: cred.id,
-        rawId: _bufToB64(cred.rawId),
-        type: cred.type,
-        response: {
-            clientDataJSON: _bufToB64(resp.clientDataJSON),
-            attestationObject: _bufToB64(resp.attestationObject),
-            transports: resp.getTransports ? resp.getTransports() : [],
-        },
-    };
-}
-
-/** Encode a PublicKeyCredential (get response) for the server */
-function _encodeAuthenticationCredential(cred) {
-    const resp = cred.response;
-    return {
-        id: cred.id,
-        rawId: _bufToB64(cred.rawId),
-        type: cred.type,
-        response: {
-            clientDataJSON: _bufToB64(resp.clientDataJSON),
-            authenticatorData: _bufToB64(resp.authenticatorData),
-            signature: _bufToB64(resp.signature),
-            userHandle: resp.userHandle ? _bufToB64(resp.userHandle) : null,
-        },
-    };
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   SESSION STORAGE SCHEMA
-   Stored in localStorage as JSON under APP_CONFIG.sessionKey:
-   {
-     userId     : number,
-     role       : string,
-     firstName  : string,
-     lastName   : string,
-     username   : string,
-     email      : string,
-     loginTime  : ISO string,
-     lastActive : ISO string,
-   }
-   ───────────────────────────────────────────────────────────────── */
-
-/* ─────────────────────────────────────────────────────────────────
-   IDLE TIMER
-   ───────────────────────────────────────────────────────────────── */
-
-let _idleTimer = null;
-let _idleWarnTimer = null;
-let _idleWarnShown = false;
-
-/**
- * Reset the idle countdown.
- * Called on every user interaction (click, keypress, scroll).
- */
-function _resetIdleTimer() {
-    clearTimeout(_idleTimer);
-    clearTimeout(_idleWarnTimer);
-    _idleWarnShown = false;
-
-    // Show warning at 35 minutes
-    _idleWarnTimer = setTimeout(() => {
-        if (!_idleWarnShown && state.currentUser) {
-            _idleWarnShown = true;
-            _showIdleWarning();
-        }
-    }, APP_CONFIG.idleWarningAt);
-
-    // Force logout at 40 minutes
-    _idleTimer = setTimeout(() => {
-        if (state.currentUser) {
-            console.info('[Auth] Session timed out due to inactivity.');
-            logout({ reason: 'idle_timeout', silent: false });
-        }
-    }, APP_CONFIG.sessionDuration);
-
-    // Update lastActive in session
-    _touchSession();
-}
-
-/**
- * Attach idle event listeners.
- * Called once after login.
- */
-function _startIdleWatcher() {
-    const EVENTS = ['click', 'keydown', 'scroll', 'mousemove', 'touchstart', 'touchmove'];
-    EVENTS.forEach(ev => {
-        document.addEventListener(ev, _resetIdleTimer, { passive: true });
-    });
-    _resetIdleTimer(); // Start counting immediately
-}
-
-/**
- * Remove idle event listeners.
- * Called on logout.
- */
-function _stopIdleWatcher() {
-    clearTimeout(_idleTimer);
-    clearTimeout(_idleWarnTimer);
-    const EVENTS = ['click', 'keydown', 'scroll', 'mousemove', 'touchstart', 'touchmove'];
-    EVENTS.forEach(ev => {
-        document.removeEventListener(ev, _resetIdleTimer);
-    });
-}
-
-/**
- * Show a warning toast/modal before auto-logout.
- */
-function _showIdleWarning() {
-    if (typeof showToast === 'function') {
-        showToast(
-            'You have been inactive for 35 minutes. You will be logged out in 5 minutes.',
-            'warning',
-            10000
-        );
-    }
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   SESSION PERSISTENCE
-   ───────────────────────────────────────────────────────────────── */
-
-/**
- * Save the current user session to localStorage.
- * @param {Object} user - teacher row from DB
- */
-function _saveSession(user) {
-    const session = {
-        userId: user.id,
-        role: user.role,
-        firstName: user.first_name || '',
-        lastName: user.last_name || '',
-        username: user.username || '',
-        email: user.email || '',
-        loginTime: new Date().toISOString(),
-        lastActive: new Date().toISOString(),
-    };
-    localStorage.setItem(APP_CONFIG.sessionKey, JSON.stringify(session));
-}
-
-/**
- * Update lastActive timestamp in session.
- * Called by _resetIdleTimer() on every interaction.
- */
-let _lastTouchTime = 0;
-function _touchSession() {
-    const now = Date.now();
-    if (now - _lastTouchTime < 5000) return; // Throttle: max once per 5s
-    _lastTouchTime = now;
+function loadSession() {
     try {
-        const raw = localStorage.getItem(APP_CONFIG.sessionKey);
-        if (!raw) return;
-        const session = JSON.parse(raw);
-        session.lastActive = new Date().toISOString();
-        localStorage.setItem(APP_CONFIG.sessionKey, JSON.stringify(session));
-    } catch { /* silent */ }
-}
-
-/**
- * Read and validate the stored session.
- * Returns the session object if valid and not expired, else null.
- */
-function _readSession() {
-    try {
-        const raw = localStorage.getItem(APP_CONFIG.sessionKey);
+        const raw = localStorage.getItem(SESSION_KEY);
         if (!raw) return null;
-
-        const session = JSON.parse(raw);
-        if (!session.userId || !session.role) return null;
-
-        // Check if session has expired based on lastActive
-        const lastActive = new Date(session.lastActive).getTime();
-        const elapsed = Date.now() - lastActive;
-
-        if (isNaN(elapsed) || elapsed > APP_CONFIG.sessionDuration) {
-            localStorage.removeItem(APP_CONFIG.sessionKey);
-            return null;
-        }
-
-        return session;
-    } catch {
-        return null;
-    }
+        const data = JSON.parse(raw);
+        if (Date.now() > data._expires) { clearSession(); return null; }
+        return data;
+    } catch { return null; }
 }
 
-/**
- * Clear the session from localStorage.
- */
-function _clearSession() {
-    localStorage.removeItem(APP_CONFIG.sessionKey);
+function clearSession() {
+    localStorage.removeItem(SESSION_KEY);
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   FAILED LOGIN LOCKOUT  (Part 13)
-   ───────────────────────────────────────────────────────────────── */
-
-const LOCKOUT_KEY = 'lf_login_attempts';
-const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes lockout
-
-/**
- * Return { count, lockedUntil } from localStorage.
- */
-function _getLockoutStatus() {
-    try {
-        const raw = localStorage.getItem(LOCKOUT_KEY);
-        if (!raw) return { count: 0, lockedUntil: null };
-        return JSON.parse(raw);
-    } catch {
-        return { count: 0, lockedUntil: null };
-    }
-}
-
-/**
- * Record a failed login attempt and lock if threshold reached.
- */
-function _recordFailedAttempt() {
-    const status = _getLockoutStatus();
-    status.count++;
-
-    if (status.count >= APP_CONFIG.maxLoginAttempts) {
-        status.lockedUntil = new Date(Date.now() + LOCKOUT_DURATION).toISOString();
-    }
-
-    localStorage.setItem(LOCKOUT_KEY, JSON.stringify(status));
-    return status;
-}
-
-/**
- * Clear failed attempt counter on successful login.
- */
-function _clearFailedAttempts() {
-    localStorage.removeItem(LOCKOUT_KEY);
-}
-
-/**
- * Check if login is currently locked.
- * Returns { locked: boolean, minutesLeft: number }
- */
-function checkLoginLockout() {
-    const status = _getLockoutStatus();
-    if (!status.lockedUntil) return { locked: false, minutesLeft: 0 };
-
-    const remaining = new Date(status.lockedUntil).getTime() - Date.now();
-    if (remaining <= 0) {
-        // Lockout expired — clear it
-        localStorage.removeItem(LOCKOUT_KEY);
-        return { locked: false, minutesLeft: 0 };
-    }
-
-    return {
-        locked: true,
-        minutesLeft: Math.ceil(remaining / 60000),
-    };
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   LOGIN  (Part 3.1)
-   ───────────────────────────────────────────────────────────────── */
-
-/**
- * Attempt to log in with a role, username, and password.
- * Returns { success: boolean, error: string|null, user: Object|null }.
- *
- * Authentication flow (Phase 2 of the auth hardening roadmap — see
- * TODO.md):
- *   1. Check lockout status (still client-side/localStorage — Phase 4
- *      moves this server-side too, since this alone is bypassable)
- *   2. Call login_check(username, password, role) — a Postgres
- *      function (docs/sql/001_enable_rls_baseline.sql) that does the
- *      actual lookup + password comparison entirely server-side and
- *      returns a safe row with no password column, ever
- *   3. Check is_active flag
- *   4. Save session, load data, navigate to dashboard
- *
- * NOTE: passwords are still stored as plain text in the database
- * itself (school_settings.admin_password, teachers.password) — this
- * function no longer fetches that value to the browser at all, but
- * the column contents still need real hashing (Phase 3, not done yet).
- *
- * @param {string} role     - 'admin' | 'teacher' | 'accountant'
- * @param {string} username
- * @param {string} password
- */
-async function doLogin(role, username, password) {
-    // 1. Lockout check
-    const lockout = checkLoginLockout();
-    if (lockout.locked) {
-        return {
-            success: false,
-            error: `Too many failed attempts. Try again in ${lockout.minutesLeft} minute(s).`,
-            user: null,
-        };
-    }
-
-    if (!role || (!username && role !== 'admin') || !password) {
-        return { success: false, error: 'Please fill in all fields.', user: null };
-    }
-
-    try {
-        // 2. Real login check — runs entirely server-side via the
-        // login_check() Postgres function (docs/sql/001_enable_rls_baseline.sql).
-        // The password value is never fetched to this browser at all,
-        // win or lose — a real change from the previous flow, which
-        // fetched the full teachers row (password column included) and
-        // compared it here in the client. The admin dual-password-source
-        // check (school_settings.admin_password OR teachers.password)
-        // and the "state not loaded yet, query fresh" fallback both
-        // moved server-side into the function itself.
-        const rows = await callRPC('login_check', {
-            p_username: role === 'admin' ? 'admin' : username,
-            p_password: password,
-            p_role: role,
-        });
-
-        if (!rows || rows.length === 0) {
-            _recordFailedAttempt();
-            return { success: false, error: 'Invalid username or password.', user: null };
-        }
-
-        const user = rows[0];
-
-        // 3. Active check
-        if (user.is_active === false) {
-            return { success: false, error: 'Your account has been deactivated. Contact admin.', user: null };
-        }
-
-        return await _completeLogin(user);
-
-    } catch (err) {
-        console.error('[Auth] doLogin error:', err.message);
-        // Show the real error to help diagnose issues
-        let errorMsg = 'Login failed. Check your connection and try again.';
-        if (err.message && err.message.includes('OFFLINE')) {
-            errorMsg = 'No internet connection. Please check your network.';
-        } else if (err.message && (err.message.includes('404') || err.message.includes('not found'))) {
-            errorMsg = 'Login service not found. Please contact admin. (Error: login_check RPC missing)';
-        } else if (err.message && err.message.includes('403')) {
-            errorMsg = 'Access denied. Contact admin. (Error: missing database permissions)';
-        } else if (err.message && err.message.includes('42883')) {
-            errorMsg = 'Login function missing in database. Run docs/sql/015_fix_login_check.sql';
-        } else if (err.message) {
-            errorMsg = `Login error: ${err.message}`;
-        }
-        return { success: false, error: errorMsg, user: null };
-    }
-}
-
-/**
- * Complete the login flow after credential verification.
- * @param {Object} user - teacher row
- */
-async function _completeLogin(user) {
-    // Clear failed attempts on success
-    _clearFailedAttempts();
-
-    // Save session
-    _saveSession(user);
-
-    // Set current user in state (include class_id for teacher access control)
-    updateState('currentUser', {
-        id        : user.id,
-        role      : user.role,
-        first_name: user.first_name || '',
-        last_name : user.last_name  || '',
-        username  : user.username   || '',
-        email     : user.email      || '',
-        phone     : user.phone      || '',
-        class_id  : user.class_id   || null,
-        name      : `${user.first_name || ''} ${user.last_name || ''}`.trim(),
-    });
-
-    // Log the login (non-blocking)
-    logLogin(user.id, user.role).catch(() => {});
-
-    // Login succeeded — hand off to progressive boot loader.
-    // showPostLoginLoader() hides login page, shows boot-loader briefly,
-    // loads critical data, renders shell, navigates to dashboard,
-    // then loads students/marks/fees in background.
-    _startIdleWatcher();
-    if (typeof showPostLoginLoader === 'function') {
-        showPostLoginLoader();
-    } else {
-        // Fallback if called before boot.js ready
-        try { await loadAllData({ silent: true }); } catch(e) {}
-        navigateTo(DEFAULT_MODULE[user.role] || 'admin-dashboard');
-    }
-
-    return { success: true, error: null, user: state.currentUser };
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   LOGOUT  (Part 3.4)
-   ───────────────────────────────────────────────────────────────── */
-
-/**
- * Log out the current user.
- * Clears session, resets state, stops timers, shows login screen.
- *
- * @param {Object} [opts]
- * @param {string}  [opts.reason]  - 'manual' | 'idle_timeout' | 'forced'
- * @param {boolean} [opts.silent]  - if true, skip toasts
- */
-async function logout(opts = {}) {
-    const { reason = 'manual', silent = false } = opts;
-
-    const userId = state.currentUser?.id;
-
-    if (userId) {
-        await logLogout(userId).catch(() => { });
-    }
-
-    // Stop timers and polling
-    _stopIdleWatcher();
-    stopSyncPolling();
-
-    // Clear session from storage
-    _clearSession();
-
-    // Clear biometric credential reference
-    localStorage.removeItem('lf_biometric_enabled');
-
-    // Reset all state
-    resetState();
-
-    // Clear caches
-    clearAllCaches();
-
-    // Show appropriate message
-    if (!silent && typeof showToast === 'function') {
-        if (reason === 'idle_timeout') {
-            showToast('You were logged out due to inactivity.', 'info', 5000);
-        } else {
-            showToast('You have been logged out.', 'info', 3000);
-        }
-    }
-
-    // Show login page - not a router route, handled by auth
-    if (typeof renderLoginPage === 'function') {
-        renderLoginPage();
-    } else {
-        location.reload();
-    }
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   SESSION CHECK  (Part 3.3)
-   ───────────────────────────────────────────────────────────────── */
-
-/**
- * Check if a valid session exists in localStorage.
- * If found, restore the user session and return to the app.
- * Called by boot.js on every page load.
- *
- * @returns {Promise<boolean>} true if session restored, false if user must log in
- */
-async function checkSession() {
-    const session = _readSession();
-
-    if (!session) {
-        console.info('[Auth] No valid session found.');
-        return false;
-    }
-
-    // Restore current user into state
-    updateState('currentUser', {
-        id: session.userId,
-        role: session.role,
-        first_name: session.firstName,
-        last_name: session.lastName,
-        username: session.username,
-        email: session.email,
-        name: `${session.firstName} ${session.lastName}`.trim(),
-    });
-
-    console.info(`[Auth] Session restored for: ${session.username} (${session.role})`);
-
-    try {
-        // Load all data (same as after login)
-        await loadAllData({ silent: true });
-    } catch (err) {
-        // Data load failed but session is valid — continue anyway
-        // (user sees dashboard with empty state; background sync will retry)
-        console.warn('[Auth] Data load failed on session restore:', err.message);
-    }
-
-    try {
-        await loadUserNotifications().catch(() => { });
-        _startIdleWatcher();
-        startSyncPolling();
-        runDailyOverdueCheck().catch(() => { });
-    } catch (err) {
-        console.warn('[Auth] Background services failed to start:', err.message);
-    }
-
-    return true;
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   BIOMETRIC LOGIN  (Part 3.5)
-   Uses the WebAuthn API (navigator.credentials) where supported.
-   Falls back gracefully on unsupported browsers.
-   ───────────────────────────────────────────────────────────────── */
-
-/**
- * Check if biometric/WebAuthn is available on this device.
- */
-function isBiometricAvailable() {
-    return typeof window.PublicKeyCredential !== 'undefined' &&
-        typeof navigator.credentials?.get === 'function';
-}
-
-/**
- * Check if biometric login is enabled for the current user.
- */
-function isBiometricEnabled() {
-    return localStorage.getItem('lf_biometric_enabled') === 'true';
-}
-
-/**
- * Trigger biometric authentication (fingerprint/face ID).
- * This is a simplified implementation — in production you would
- * need a full WebAuthn registration flow.
- *
- * For this school system, biometric is used as a second-factor
- * quick-unlock after the initial password login, not as a
- * standalone authentication method.
- *
- * @returns {Promise<boolean>} true if biometric succeeded
- */
-async function tryBiometricLogin() {
-    if (!isBiometricAvailable()) {
-        showToast('Biometric authentication is not supported on this device.', 'warning');
-        return false;
-    }
-
-    try {
-        // Use stored userId hint to narrow credential list (UX only — not proof of identity)
-        const hintUserId = localStorage.getItem('lf_webauthn_registered_user_id');
-        const body = hintUserId ? { userId: parseInt(hintUserId) } : {};
-
-        // 1. Get authentication challenge from server
-        const requestOptions = await _waPost('webauthn-login-challenge', body);
-
-        // 2. Decode binary fields for the browser API
-        requestOptions.challenge = _b64ToUint8(requestOptions.challenge);
-        if (requestOptions.allowCredentials) {
-            requestOptions.allowCredentials = requestOptions.allowCredentials.map(c => ({
-                ...c, id: _b64ToUint8(c.id),
-            }));
-        }
-
-        // 3. Trigger device biometric/PIN prompt
-        const credential = await navigator.credentials.get({ publicKey: requestOptions });
-        if (!credential) {
-            showToast('Biometric login was cancelled.', 'info');
-            return false;
-        }
-
-        // 4. Send response to server for real signature verification
-        const result = await _waPost('webauthn-login-verify', {
-            response: _encodeAuthenticationCredential(credential),
-        });
-
-        if (!result.verified || !result.user) {
-            showToast(result.error || 'Biometric verification failed.', 'danger');
-            return false;
-        }
-
-        // 5. Update hint to confirmed user, complete login normally
-        localStorage.setItem('lf_webauthn_registered_user_id', String(result.user.id));
-        await _completeLogin(result.user);
-        return true;
-
-    } catch (err) {
-        if (err.name === 'NotAllowedError') {
-            showToast('Biometric login was cancelled.', 'info');
-        } else {
-            console.error('[Auth] tryBiometricLogin:', err);
-            showToast('Biometric login failed: ' + err.message, 'danger');
-        }
-        return false;
-    }
-}
-
-/**
- * Enable biometric login for the current session.
- * Called from Settings → My Profile → Enable Fingerprint.
- */
-async function enableBiometricLogin() {
-    if (!isBiometricAvailable()) {
-        showToast('Biometric authentication is not supported on this device.', 'warning');
-        return false;
-    }
-
-    const userId = state.currentUser?.id;
-    if (!userId) {
-        showToast('You must be logged in to enable biometric login.', 'warning');
-        return false;
-    }
-
-    try {
-        showToast('Starting biometric registration…', 'info');
-
-        // 1. Get challenge from server
-        const creationOptions = await _waPost('webauthn-register-challenge', { userId });
-
-        // 2. Decode binary fields for the browser API
-        creationOptions.challenge = _b64ToUint8(creationOptions.challenge);
-        creationOptions.user.id = _b64ToUint8(creationOptions.user.id);
-        if (creationOptions.excludeCredentials) {
-            creationOptions.excludeCredentials = creationOptions.excludeCredentials.map(c => ({
-                ...c, id: _b64ToUint8(c.id),
-            }));
-        }
-
-        // 3. Trigger device biometric/PIN prompt
-        const credential = await navigator.credentials.create({ publicKey: creationOptions });
-        if (!credential) {
-            showToast('Biometric registration was cancelled.', 'info');
-            return false;
-        }
-
-        // 4. Encode and send to server for verification + storage
-        const deviceLabel = navigator.userAgent.includes('Mobile') ? 'Mobile Device' : 'Desktop';
-        const result = await _waPost('webauthn-register-verify', {
-            userId,
-            response: _encodeRegistrationCredential(credential),
-            deviceLabel,
-        });
-
-        if (!result.verified) {
-            showToast('Biometric registration failed: ' + (result.error || 'Unknown error'), 'danger');
-            return false;
-        }
-
-        // 5. Store userId hint locally for fast UX on next login
-        localStorage.setItem('lf_biometric_enabled', 'true');
-        localStorage.setItem('lf_webauthn_registered_user_id', String(userId));
-
-        showToast('Biometric login enabled! You can now unlock with fingerprint or face.', 'success');
-        return true;
-
-    } catch (err) {
-        if (err.name === 'NotAllowedError') {
-            showToast('Biometric setup was cancelled or denied.', 'info');
-        } else {
-            console.error('[Auth] enableBiometricLogin:', err);
-            showToast('Biometric setup failed: ' + err.message, 'danger');
-        }
-        return false;
-    }
-}
-
-/**
- * Disable biometric login.
- */
-async function disableBiometricLogin() {
-    // Clear local hint immediately so login page hides the biometric button
-    localStorage.removeItem('lf_biometric_enabled');
-    localStorage.removeItem('lf_webauthn_registered_user_id');
-
-    // Best-effort: mark credential inactive in DB (requires being logged in)
-    const userId = state.currentUser?.id;
-    if (userId && typeof update === 'function') {
-        try {
-            // Mark all credentials for this user inactive via the DB
-            // (full server-side delete requires an Edge Function — future work)
-            const creds = await getAll('webauthn_credentials',
-                `user_id=eq.${userId}&is_active=eq.true`).catch(() => []);
-            for (const c of (creds || [])) {
-                await update('webauthn_credentials', c.id, {
-                    is_active: false,
-                    updated_at: new Date().toISOString(),
-                }).catch(() => { });
-            }
-        } catch (e) { console.warn('[Auth] disableBiometricLogin DB cleanup:', e); }
-    }
-
-    showToast('Biometric login disabled.', 'success');
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   GOOGLE SIGN-IN (Phase 5 of the auth hardening roadmap — TODO.md)
-   ───────────────────────────────────────────────────────────────── */
-
-/**
- * Kick off the Google OAuth redirect. Requires the Google provider to
- * be enabled in the Supabase dashboard (Authentication → Providers)
- * with a real Client ID/Secret from Google Cloud Console — this call
- * will fail with a clear Supabase error until that's configured.
- */
-async function signInWithGoogle() {
-    const client = getSupabaseClient();
-    if (!client) {
-        if (typeof showToast === 'function') {
-            showToast('Cannot reach the authentication service. Check your connection.', 'error');
-        }
-        return;
-    }
-
-    const { error } = await client.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-            // Return to the same page (index.html at the site root);
-            // handleGoogleRedirect() below picks up from there.
-            redirectTo: window.location.origin + window.location.pathname,
-        },
-    });
-
-    if (error) {
-        console.error('[Auth] Google sign-in failed to start:', error.message);
-        if (typeof showToast === 'function') {
-            showToast(`Could not start Google sign-in: ${error.message}`, 'error');
-        }
-    }
-    // On success, the browser navigates away to Google immediately —
-    // nothing else to do here, control resumes in handleGoogleRedirect()
-    // after the round trip back.
-}
-
-/**
- * Called once, early in boot.js, before the normal session check.
- * Detects whether this page load is the return leg of a Google OAuth
- * redirect (a `?code=...` param Supabase's signInWithOAuth appends),
- * and if so, exchanges it for a session, looks up whether the
- * signed-in Google email matches a real teacher, and completes the
- * app's own login flow the same way a password login does.
- *
- * Returns true if it handled a redirect (whether that led to a
- * successful login or not) so boot.js knows not to also run the
- * normal "no session, show login page" path on top of it.
- */
-async function handleGoogleRedirect() {
-    const params = new URLSearchParams(window.location.search);
-    if (!params.has('code')) return false;
-
-    const client = getSupabaseClient();
-    if (!client) return false;
-
-    let session = null;
-    try {
-        const { data, error } = await client.auth.exchangeCodeForSession(window.location.href);
-        if (error) throw error;
-        session = data?.session || null;
-    } catch (err) {
-        console.error('[Auth] Google redirect exchange failed:', err.message);
-    }
-
-    // Clean the ?code=... out of the URL either way — leaving it
-    // there risks trying to re-exchange an already-used code on the
-    // next refresh, which always fails.
-    window.history.replaceState({}, document.title, window.location.pathname);
-
-    const email = session?.user?.email || null;
-
-    // The app doesn't use Supabase Auth sessions for anything else —
-    // it manages its own custom session (see _saveSession above).
-    // Sign out of the Supabase Auth session once we've read the email
-    // from it, so it doesn't linger as a second, unused session.
-    await client.auth.signOut().catch(() => { });
-
-    if (!email) {
-        if (typeof showToast === 'function') {
-            showToast('Google sign-in did not complete. Please try again.', 'error');
-        }
-        return true;
-    }
-
-    try {
-        const rows = await callRPC('oauth_login_check', { p_email: email });
-
-        if (!rows || rows.length === 0) {
-            if (typeof showToast === 'function') {
-                showToast(`No account found for ${email}. Contact your administrator to be added.`, 'error', 8000);
-            }
-            return true;
-        }
-
-        const user = rows[0];
-        if (user.is_active === false) {
-            if (typeof showToast === 'function') {
-                showToast('Your account has been deactivated. Contact admin.', 'error');
-            }
-            return true;
-        }
-
-        await _completeLogin(user);
-        return true;
-
-    } catch (err) {
-        handleApiError(err, 'Google login');
-        return true;
-    }
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   PASSWORD CHANGE
-   ───────────────────────────────────────────────────────────────── */
-
-/**
- * Change the password for a teacher account.
- * Admin can change any user's password. Teachers can only change
- * their own.
- *
- * @param {number} userId      - teacher.id
- * @param {string} oldPassword - current password (required for non-admin)
- * @param {string} newPassword - new password
- * @returns {Promise<{ success: boolean, error: string|null }>}
- */
-async function changePassword(userId, oldPassword, newPassword) {
-    const strength = validatePasswordStrength(newPassword, 'New password');
-    if (!strength.valid) {
-        return { success: false, error: strength.error };
-    }
-
-    try {
-        // teachers_public (docs/sql/001_enable_rls_baseline.sql) never
-        // includes the password column — this fetch is safe and RLS
-        // allows it, unlike fetching from `teachers` directly.
-        const user = await getById('teachers_public', userId);
-        if (!user) {
-            return { success: false, error: 'User not found.' };
-        }
-
-        // Non-admin must verify old password — done via the same
-        // real, server-side login_check() doLogin() uses, so the
-        // current password value is never fetched to this browser
-        // either. (Previously this compared user.password directly,
-        // which the RLS baseline's column-level REVOKE now makes
-        // permanently undefined — that old comparison would always
-        // fail for a non-admin, locking out self-service password
-        // changes entirely until this fix.)
-        if (!iAmAdmin()) {
-            const verifyRows = await callRPC('login_check', {
-                p_username: user.username,
-                p_password: oldPassword,
-                p_role: user.role,
-            });
-            if (!verifyRows || verifyRows.length === 0) {
-                return { success: false, error: 'Current password is incorrect.' };
-            }
-        }
-
-        await update('teachers', userId, {
-            password: newPassword,
-            updated_at: new Date().toISOString(),
-        });
-
-        await logAction('CHANGE_PASSWORD', 'teachers', userId, {
-            changed_by: state.currentUser?.id,
-        });
-
-        // Refresh teachers in state
-        await refreshTable('teachers');
-
-        return { success: true, error: null };
-
-    } catch (err) {
-        handleApiError(err, 'change password');
-        return { success: false, error: err.message };
-    }
-}
-
-/**
- * Admin resets a user's password to a new value without needing
- * the old password.
- *
- * @param {number} userId
- * @param {string} newPassword
- */
-async function adminResetPassword(userId, newPassword) {
-    if (!iAmAdmin()) {
-        return { success: false, error: 'Only administrators can reset passwords.' };
-    }
-    return changePassword(userId, null, newPassword);
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   LOGIN FORM RENDERING HELPER
-   ───────────────────────────────────────────────────────────────── */
-
-/**
- * Render the login page into #app.
- * Called by router.js when no session is found at boot.
- */
-function renderLoginPage() {
-    // Login page is static HTML in index.html — just show it and init
-    const loginPage  = document.getElementById('login-page');
-    const appEl      = document.getElementById('app');
-    const bootLoader = document.getElementById('boot-loader');
-    if (loginPage)  loginPage.style.display  = 'flex';
-    if (appEl)      appEl.style.display       = 'none';
-    if (bootLoader) bootLoader.style.display  = 'none';
-
-    // Open the fold card
-    if (typeof openLoginCard === 'function') openLoginCard();
-
-    // Show lockout banner if needed
-    const lockout = checkLoginLockout();
-    const banner  = document.getElementById('lockout-banner');
-    const msgEl   = document.getElementById('lockout-msg');
-    const roleEl  = document.getElementById('login-role');
-    if (banner) {
-        if (lockout.locked) {
-            banner.style.display = 'flex';
-            if (msgEl) msgEl.textContent =
-                `Too many failed attempts. Try again in ${lockout.minutesLeft} minute(s).`;
-            if (roleEl) roleEl.disabled = true;
-        } else {
-            banner.style.display = 'none';
-            if (roleEl) roleEl.disabled = false;
-        }
-    }
-
-    // Show/hide biometric button
-    const bioWrap = document.getElementById('biometric-wrap');
-    if (bioWrap) {
-        bioWrap.style.display =
-            (isBiometricAvailable() && isBiometricEnabled()) ? 'block' : 'none';
-    }
-
-    // Particles
-    const container = document.getElementById('particles-bg');
-    if (container && !container.children.length) {
-        for (let k = 0; k < 15; k++) {
-            const p = document.createElement('div');
-            p.className = 'particle';
-            const size = 20 + Math.random() * 60;
-            p.style.cssText = [
-                `width:${size}px`,
-                `height:${size}px`,
-                `left:${Math.random()*100}%`,
-                `top:${Math.random()*100}%`,
-                `animation-duration:${12+Math.random()*18}s`,
-                `animation-delay:${-Math.random()*20}s`,
-            ].join(';');
-            container.appendChild(p);
-        }
-    }
-
-    // Clear form fields
-    const pwd  = document.getElementById('login-password');
-    const user = document.getElementById('login-username');
-    const role = document.getElementById('login-role');
-    if (pwd)  pwd.value  = '';
-    if (user) user.value = '';
-    if (role) { role.value = ''; onRoleChange(''); }
+// ── Login ─────────────────────────────────────────────────────
+async function doLogin() {
+    const role    = document.getElementById('login-role')?.value;
+    const usernameEl = document.getElementById('login-username');
+    const username   = usernameEl?.value?.trim() || '';
+    const password   = document.getElementById('login-password')?.value || '';
+    const alertEl    = document.getElementById('login-alert');
+    const btn        = document.getElementById('login-btn');
 
     // Clear alert
-    const alert = document.getElementById('login-alert');
-    if (alert) { alert.style.display = 'none'; alert.textContent = ''; }
-}
+    if (alertEl) { alertEl.textContent = ''; alertEl.style.display = 'none'; }
 
-/**
- * Open the login card (fold animation).
- */
-function openLoginCard() {
-    const wrap = document.getElementById('login-card-wrap');
-    if (wrap) wrap.classList.add('open');
-}
-
-/**
- * Show username/password fields when a role is selected.
- */
-function onRoleChange(role) {
-    const usernameField = document.getElementById('username-field');
-    const passwordField = document.getElementById('password-field');
-    const loginBtn = document.getElementById('login-btn');
-
-    if (role) {
-        // Admin has no username — they authenticate with password only.
-        // The login_check() RPC matches admin by role + password against
-        // school_settings.admin_password. No username needed.
-        const isAdmin = role === 'admin';
-        if (usernameField) {
-            usernameField.style.display = isAdmin ? 'none' : 'block';
-            // Clear username field when switching to admin so it doesn't
-            // accidentally send a stale value to the RPC.
-            if (isAdmin) {
-                const inp = document.getElementById('login-username');
-                if (inp) inp.value = '';
-            }
-        }
-        if (passwordField) passwordField.style.display = 'block';
-        if (loginBtn) loginBtn.style.display = 'block';
-        setTimeout(() => {
-            const target = isAdmin
-                ? document.getElementById('login-password')
-                : document.getElementById('login-username');
-            target?.focus();
-        }, 100);
-    } else {
-        if (usernameField) usernameField.style.display = 'none';
-        if (passwordField) passwordField.style.display = 'none';
-        if (loginBtn) loginBtn.style.display = 'none';
+    // Validate
+    if (!password) {
+        showLoginError('Please enter your password.');
+        return;
     }
-}
-
-/**
- * Toggle password field visibility.
- */
-function togglePasswordVisibility() {
-    const input = document.getElementById('login-password');
-    const icon = document.getElementById('pw-eye-icon');
-    if (!input) return;
-    if (input.type === 'password') {
-        input.type = 'text';
-        if (icon) icon.innerHTML = `
-            <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>
-            <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/>
-            <line x1="1" y1="1" x2="23" y2="23"/>`;
-    } else {
-        input.type = 'password';
-        if (icon) icon.innerHTML = `
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-            <circle cx="12" cy="12" r="3"/>`;
-    }
-}
-
-/**
- * Handle the login form submit.
- * Called by the Sign In button's onclick.
- */
-async function submitLogin() {
-    const role = document.getElementById('login-role')?.value?.trim();
-    const username = document.getElementById('login-username')?.value?.trim();
-    const password = document.getElementById('login-password')?.value;
-    const alertEl = document.getElementById('login-alert');
-    const btn = document.getElementById('login-btn');
-
-    if (alertEl) { alertEl.style.display = 'none'; alertEl.textContent = ''; }
-
-    const needsUsername = role !== 'admin';
-    if (!role || (needsUsername && !username) || !password) {
-        if (alertEl) {
-            alertEl.textContent = 'Please fill in all fields.';
-            alertEl.style.display = 'block';
-        }
+    if (role !== 'admin' && !username) {
+        showLoginError('Please enter your username.');
         return;
     }
 
     // Loading state
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = `<span class="spinner-sm"></span> Signing in…`;
-    }
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-sm"></span> Signing in...'; }
 
-    const result = await doLogin(role, username, password);
+    try {
+        let user = null;
 
-    if (!result.success) {
-        if (alertEl) {
-            alertEl.textContent = result.error || 'Login failed.';
-            alertEl.style.display = 'block';
+        if (role === 'admin') {
+            // Compare against school_settings.admin_password (plaintext)
+            const rows = await getAll('school_settings');
+            const settings = {};
+            (rows || []).forEach(r => { settings[r.key] = r.value; });
+            const adminPw = settings['admin_password'] || settings['admin_pass'] || '';
+
+            if (!adminPw) {
+                showLoginError('Admin password not configured. Run setup SQL first.');
+                return;
+            }
+            if (password !== adminPw) {
+                showLoginError('Invalid password.');
+                return;
+            }
+            // Get admin teacher record
+            const allTeachers = await getAll('teachers');
+            const adminTeacher = (allTeachers || []).find(t => t.role === 'admin');
+            user = {
+                id        : adminTeacher?.id || 0,
+                role      : 'admin',
+                name      : adminTeacher
+                    ? `${adminTeacher.first_name || ''} ${adminTeacher.last_name || ''}`.trim() || 'Administrator'
+                    : 'Administrator',
+                username  : 'admin',
+                email     : adminTeacher?.email || '',
+                class_id  : null,
+            };
+
+        } else {
+            // Teacher or Accountant — compare plaintext password
+            const allTeachers = await getAll('teachers');
+            const found = (allTeachers || []).find(t =>
+                (t.username || '').toLowerCase() === username.toLowerCase() &&
+                t.role === role &&
+                t.is_active !== false
+            );
+
+            if (!found) {
+                showLoginError('Username not found or account inactive.');
+                return;
+            }
+            if (found.password !== password) {
+                showLoginError('Invalid password.');
+                return;
+            }
+            user = {
+                id       : found.id,
+                role     : found.role,
+                name     : `${found.first_name || ''} ${found.last_name || ''}`.trim() || found.username,
+                username : found.username,
+                email    : found.email    || '',
+                phone    : found.phone    || '',
+                class_id : found.class_id || null,
+            };
         }
-        if (btn) {
-            btn.disabled = false;
-            btn.textContent = 'Sign In';
-        }
+
+        // Login success
+        state.currentUser = user;
+        saveSession(user);
+
+        // Log activity (non-blocking)
+        if (typeof logActivity === 'function')
+            logActivity(user.id, user.role, 'User logged in').catch(() => {});
+
+        // Hand off to boot sequence
+        await bootApp(user);
+
+    } catch (err) {
+        console.error('[Auth] doLogin error:', err.message);
+        showLoginError('Login error: ' + err.message);
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = 'Sign In →'; }
     }
-    // On success, doLogin calls navigateTo() which replaces the login page
 }
 
-/**
- * Spawn floating particle divs for the login page background animation.
- */
-function _spawnParticles() {
-    const container = document.getElementById('particles-bg');
-    if (!container) return;
+function showLoginError(msg) {
+    const el = document.getElementById('login-alert');
+    if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
 
-    for (let i = 0; i < 12; i++) {
-        const p = document.createElement('div');
-        p.className = 'particle';
-        const size = 8 + Math.random() * 20;
-        const left = Math.random() * 100;
-        const delay = Math.random() * 10;
-        const dur = 12 + Math.random() * 10;
+// ── Logout ────────────────────────────────────────────────────
+function doLogout() {
+    clearSession();
+    state.currentUser = null;
+    // Clear state arrays
+    if (typeof resetState === 'function') resetState();
+    else {
+        const s = window.state || {};
+        for (const k of Object.keys(s)) {
+            if (Array.isArray(s[k])) s[k] = [];
+        }
+    }
+    showLoginPage();
+}
 
-        p.style.cssText = `
-            width:${size}px; height:${size}px;
-            left:${left}%;
-            animation-delay:${delay}s;
-            animation-duration:${dur}s;`;
-        container.appendChild(p);
+// ── Show login page ───────────────────────────────────────────
+function showLoginPage() {
+    const lp  = document.getElementById('login-page');
+    const app = document.getElementById('app-shell');
+    const bl  = document.getElementById('boot-loader');
+    if (lp)  lp.style.display  = 'flex';
+    if (app) app.style.display  = 'none';
+    if (bl)  bl.style.display   = 'none';
+
+    // Reset form
+    const role = document.getElementById('login-role');
+    const pwd  = document.getElementById('login-password');
+    const usr  = document.getElementById('login-username');
+    const alt  = document.getElementById('login-alert');
+    if (role) { role.value = 'admin'; onRoleChange(); }
+    if (pwd)  pwd.value = '';
+    if (usr)  usr.value = '';
+    if (alt)  { alt.textContent = ''; alt.style.display = 'none'; }
+}
+
+// ── Open card ─────────────────────────────────────────────────
+function openLoginCard() {
+    const wrap = document.getElementById('card-wrap');
+    if (wrap) {
+        wrap.classList.add('open');
+        // Particles
+        const bg = document.getElementById('particles-bg');
+        if (bg && !bg.children.length) {
+            for (let k = 0; k < 18; k++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                const size = 20 + Math.random() * 80;
+                p.style.cssText = [
+                    `width:${size}px`,
+                    `height:${size}px`,
+                    `left:${Math.random()*100}%`,
+                    `top:${Math.random()*100}%`,
+                    `animation-duration:${10+Math.random()*20}s`,
+                    `animation-delay:${-Math.random()*20}s`,
+                ].join(';');
+                bg.appendChild(p);
+            }
+        }
+        // Focus password if admin selected
+        setTimeout(() => {
+            const role = document.getElementById('login-role')?.value;
+            if (role === 'admin') {
+                document.getElementById('login-password')?.focus();
+            } else {
+                document.getElementById('login-username')?.focus();
+            }
+        }, 900);
     }
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   EXPOSE
-   ───────────────────────────────────────────────────────────────── */
+// ── Role change ───────────────────────────────────────────────
+function onRoleChange() {
+    const role = document.getElementById('login-role')?.value;
+    const uf   = document.getElementById('username-field');
+    if (uf) uf.style.display = (role === 'admin') ? 'none' : 'block';
+}
 
-window.doLogin = doLogin;
-window.logout = logout;
-window.checkSession = checkSession;
-window.renderLoginPage = renderLoginPage;
+function toggleLoginPw() {
+    const el = document.getElementById('login-password');
+    if (el) el.type = el.type === 'password' ? 'text' : 'password';
+}
+
+// ── Expose ────────────────────────────────────────────────────
+window.doLogin       = doLogin;
+window.doLogout      = doLogout;
+window.showLoginPage = showLoginPage;
 window.openLoginCard = openLoginCard;
-window.onRoleChange = onRoleChange;
-window.submitLogin = submitLogin;
-window.togglePasswordVisibility = togglePasswordVisibility;
-window.checkLoginLockout = checkLoginLockout;
-window.isBiometricAvailable = isBiometricAvailable;
-window.isBiometricEnabled = isBiometricEnabled;
-window.tryBiometricLogin = tryBiometricLogin;
-window.signInWithGoogle = signInWithGoogle;
-window.handleGoogleRedirect = handleGoogleRedirect;
-window.enableBiometricLogin = enableBiometricLogin;
-window.disableBiometricLogin = disableBiometricLogin;
-window.changePassword = changePassword;
-window.adminResetPassword = adminResetPassword;
+window.onRoleChange  = onRoleChange;
+window.toggleLoginPw = toggleLoginPw;
+window.loadSession   = loadSession;
+window.saveSession   = saveSession;
+window.clearSession  = clearSession;

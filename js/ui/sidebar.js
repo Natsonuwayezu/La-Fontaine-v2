@@ -825,11 +825,7 @@ const Sidebar = {
 
 // ─── AUTO-INIT ──────────────────────────────────────────────────────
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => Sidebar.init());
-} else {
-  Sidebar.init();
-}
+// Auto-init removed — boot.js calls _buildSidebar() after login
 
 // ─── EXPOSE ─────────────────────────────────────────────────────────
 

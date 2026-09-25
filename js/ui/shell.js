@@ -158,11 +158,7 @@ const Shell = (() => {
 
   // ── Auto-initialize ──────────────────────────────────────────────
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+  // Auto-init removed — boot.js controls initialization
 
   /* ═══════════════════════════════════════════════════════════════
      PUBLIC API

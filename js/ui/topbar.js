@@ -634,11 +634,7 @@ const Topbar = (() => {
 })();
 
 // ─── AUTO-INIT ──────────────────────────────────────────────────────
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', Topbar.init);
-} else {
-  Topbar.init();
-}
+// Auto-init removed — boot.js calls _buildSidebar() after login
 
 
 // Period switching is handled by sidebar.js
